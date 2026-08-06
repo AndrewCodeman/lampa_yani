@@ -62,6 +62,14 @@
                 });
             });
 
+            Lampa.Menu.addButton('icon-calendar', 'Schedule', function () {
+                Lampa.Activity.push({
+                    url: 'yani/schedule',
+                    title: 'Schedule',
+                    component: 'yani_schedule'
+                });
+            });
+
             Lampa.Component.add('yani_catalog', function (object) {
                 var comp = new Lampa.InteractionCategory(object);
                 comp.create = function () {
@@ -85,6 +93,25 @@
                         var query = data.title || data.name;
                         if (query && Lampa.Search && Lampa.Search.open) Lampa.Search.open(query);
                     };
+                };
+                return comp;
+            });
+
+            Lampa.Component.add('yani_schedule', function (object) {
+                var comp = new Lampa.InteractionCategory(object);
+                comp.create = function () {
+                    var self = this;
+                    this.activity.loader(true);
+                    LampaYaniApi.schedule({}).then(function (payload) {
+                        var results = LampaYaniApi.normalize(payload).map(toCard);
+                        self.build({results: results, title: 'Schedule'});
+                        self.activity.loader(false);
+                        self.activity.toggle();
+                    }).catch(function (error) {
+                        console.error('[Lampa Yani]', error);
+                        self.activity.loader(false);
+                        Lampa.Noty.show('Не удалось загрузить расписание Yani');
+                    });
                 };
                 return comp;
             });

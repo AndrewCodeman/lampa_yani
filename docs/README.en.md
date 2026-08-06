@@ -7,6 +7,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 - anime catalog;
 - genre catalog;
 - title search;
+- ongoing schedule;
 - posters, titles, year, rating and description;
 - opening the selected anime in Lampa search;
 - modular structure for future development.

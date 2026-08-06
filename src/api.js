@@ -39,6 +39,9 @@
         },
         genres: function () {
             return request('/anime/genres');
+        },
+        schedule: function (params) {
+            return request('/anime/schedule?' + new URLSearchParams(params || {}));
         }
     };
 }(window));
