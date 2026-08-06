@@ -40,6 +40,28 @@
                 });
             });
 
+            Lampa.Menu.addButton('yani_search', 'Search', function () {
+                if (!Lampa.Input || !Lampa.Input.show) {
+                    return Lampa.Noty.show('Поиск недоступен в этой версии Lampa');
+                }
+
+                Lampa.Input.show({
+                    title: 'Search Anime',
+                    value: '',
+                    onBack: function () { Lampa.Controller.toggle('menu'); },
+                    onEnter: function (query) {
+                        query = (query || '').trim();
+                        if (!query) return;
+                        Lampa.Activity.push({
+                            url: 'yani/search/' + encodeURIComponent(query),
+                            title: query,
+                            component: 'yani_catalog',
+                            params: {q: query, limit: 30}
+                        });
+                    }
+                });
+            });
+
             Lampa.Component.add('yani_catalog', function (object) {
                 var comp = new Lampa.InteractionCategory(object);
                 comp.create = function () {
