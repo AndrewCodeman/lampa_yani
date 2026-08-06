@@ -13,7 +13,7 @@ function pluginYummyAnime() {
     }
 
     var style = document.createElement('style');
-    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.2em;\n    padding: 2em;\n}\n\n.yani-home__item {\n    min-height: 8em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n}\n\n.yani-home__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-home__icon {\n    font-size: 2.4em;\n}\n\n.yani-home__title {\n    font-size: 1.35em;\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); }\n}\n\n.yani-detail {\n    display: flex;\n    gap: 2.5em;\n    padding: 2em;\n}\n\n.yani-detail__poster {\n    width: 16em;\n    max-height: 24em;\n    object-fit: cover;\n    border-radius: 0.8em;\n}\n\n.yani-detail__info { max-width: 48em; }\n.yani-detail__title { font-size: 2.2em; font-weight: 600; }\n.yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }\n.yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }\n.yani-detail__button { display: inline-block; padding: 0.8em 1.2em; border-radius: 0.5em; background: rgba(255,255,255,.15); }\n.yani-detail__button.focus { background: #fff; color: #111; }\n";
+    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.2em;\n    padding: 2em;\n}\n\n.yani-home__item {\n    min-height: 8em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n}\n\n.yani-home__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-home__icon {\n    font-size: 2.4em;\n}\n\n.yani-home__title {\n    font-size: 1.35em;\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); }\n}\n\n.yani-detail {\n    display: flex;\n    gap: 2.5em;\n    padding: 2em;\n}\n\n.yani-detail__poster {\n    width: 16em;\n    max-height: 24em;\n    object-fit: cover;\n    border-radius: 0.8em;\n}\n\n.yani-detail__info { max-width: 48em; }\n.yani-detail__title { font-size: 2.2em; font-weight: 600; }\n.yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }\n.yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }\n.yani-detail__button { display: inline-block; padding: 0.8em 1.2em; border-radius: 0.5em; background: rgba(255,255,255,.15); }\n.yani-detail__button.focus { background: #fff; color: #111; }\n\n.yani-schedule__content {\n    padding: 1.2em 2em 3em;\n}\n\n.yani-schedule__day {\n    margin-bottom: 2em;\n}\n\n.yani-schedule__day-title {\n    margin-bottom: 0.7em;\n    font-size: 1.55em;\n    font-weight: 600;\n    text-transform: capitalize;\n}\n\n.yani-schedule__item {\n    display: flex;\n    align-items: center;\n    min-height: 6.2em;\n    margin-bottom: 0.65em;\n    padding: 0.65em 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-schedule__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-schedule__poster {\n    width: 4em;\n    height: 5.5em;\n    margin-right: 1em;\n    border-radius: 0.35em;\n    object-fit: cover;\n    background: rgba(255, 255, 255, 0.08);\n}\n\n.yani-schedule__info {\n    flex: 1;\n    min-width: 0;\n}\n\n.yani-schedule__title {\n    overflow: hidden;\n    font-size: 1.15em;\n    font-weight: 500;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n.yani-schedule__episode {\n    margin-top: 0.4em;\n    opacity: 0.75;\n}\n\n.yani-schedule__release {\n    min-width: 8em;\n    margin-left: 1em;\n    text-align: right;\n}\n\n.yani-schedule__time {\n    font-size: 1.25em;\n    font-weight: 600;\n}\n\n.yani-schedule__timezone,\n.yani-schedule__empty {\n    opacity: 0.55;\n}\n\n.yani-schedule__empty {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.06);\n}\n\n.yani-detail__schedule {\n    margin-bottom: 1.2em;\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n@media (max-width: 700px) {\n    .yani-schedule__content { padding: 1em; }\n    .yani-schedule__release { min-width: 5em; }\n    .yani-schedule__timezone { display: none; }\n}\n";
     document.head.appendChild(style);
 
 (function (window) {
@@ -285,24 +285,7 @@ function pluginYummyAnime() {
                 return comp;
             });
 
-            Lampa.Component.add('yani_schedule', function (object) {
-                var comp = new Lampa.InteractionCategory(object);
-                comp.create = function () {
-                    var self = this;
-                    this.activity.loader(true);
-                    LampaYaniApi.schedule({}).then(function (payload) {
-                        var results = LampaYaniApi.normalize(payload).map(toCard);
-                        self.build({results: results, title: 'Schedule'});
-                        self.activity.loader(false);
-                        self.activity.toggle();
-                    }).catch(function (error) {
-                        console.error('[Lampa Yani]', error);
-                        self.activity.loader(false);
-                        Lampa.Noty.show('Не удалось загрузить расписание Yani');
-                    });
-                };
-                return comp;
-            });
+            Lampa.Component.add('yani_schedule', Schedule);
 
             Lampa.Component.add('yani_detail', Detail);
 
@@ -368,6 +351,148 @@ function pluginYummyAnime() {
         this.destroy = function () { scroll.destroy(); html.remove(); };
     }
 
+    function Schedule(object) {
+        var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        var html = $('<div class="yani-schedule"></div>');
+        var content = $('<div class="yani-schedule__content"></div>');
+        var last;
+
+        this.create = function () {
+            var self = this;
+            this.activity.loader(true);
+
+            LampaYaniApi.schedule({}).then(function (payload) {
+                var items = LampaYaniApi.normalize(payload);
+                renderSchedule(items);
+                scroll.append(content);
+                html.append(scroll.render(true));
+                self.activity.loader(false);
+                self.activity.toggle();
+            }).catch(function (error) {
+                console.error('[YummyAnime]', error);
+                self.activity.loader(false);
+                Lampa.Noty.show('Не удалось загрузить расписание YummyAnime');
+            });
+        };
+
+        function renderSchedule(items) {
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (var dayOffset = 0; dayOffset < 7; dayOffset++) {
+                var day = new Date(today.getTime());
+                day.setDate(today.getDate() + dayOffset);
+                var nextDay = new Date(day.getTime());
+                nextDay.setDate(day.getDate() + 1);
+
+                var releases = items.filter(function (item) {
+                    var timestamp = item.episodes && Number(item.episodes.next_date);
+                    if (!timestamp) return false;
+                    var releaseDate = new Date(timestamp * 1000);
+                    return releaseDate >= day && releaseDate < nextDay;
+                }).sort(function (a, b) {
+                    return Number(a.episodes.next_date) - Number(b.episodes.next_date);
+                });
+
+                var section = $('<section class="yani-schedule__day"></section>');
+                section.append($('<div class="yani-schedule__day-title"></div>').text(formatScheduleDay(day, dayOffset)));
+
+                if (!releases.length) {
+                    section.append('<div class="yani-schedule__empty">Нет запланированных выпусков</div>');
+                } else {
+                    releases.forEach(function (item) {
+                        section.append(createScheduleItem(item));
+                    });
+                }
+
+                content.append(section);
+            }
+        }
+
+        function createScheduleItem(item) {
+            var card = toCard(item);
+            var episodes = item.episodes || {};
+            var releaseDate = new Date(Number(episodes.next_date) * 1000);
+            var row = $('<div class="yani-schedule__item selector"></div>');
+            var poster = $('<img class="yani-schedule__poster" alt="">').attr('src', card.poster || '');
+            var info = $('<div class="yani-schedule__info"></div>');
+            var release = $('<div class="yani-schedule__release"></div>');
+
+            info.append($('<div class="yani-schedule__title"></div>').text(card.title));
+            info.append($('<div class="yani-schedule__episode"></div>').text(formatEpisode(episodes)));
+            release.append($('<div class="yani-schedule__time"></div>').text(formatScheduleTime(releaseDate)));
+            release.append('<div class="yani-schedule__timezone">местное время</div>');
+            row.append(poster, info, release);
+
+            row.on('hover:focus', function (event) {
+                last = event.target;
+                scroll.update($(event.target), true);
+            });
+            row.on('hover:enter', function () {
+                card.yani_schedule = formatEpisode(episodes) + ', ' + formatScheduleDateTime(releaseDate);
+                Lampa.Activity.push({
+                    url: 'yani/detail/' + card.yani_id,
+                    title: card.title,
+                    component: 'yani_detail',
+                    card: card
+                });
+            });
+
+            return row;
+        }
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () {
+                    Lampa.Controller.collectionSet(scroll.render());
+                    Lampa.Controller.collectionFocus(last || false, scroll.render());
+                },
+                left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
+                right: function () { Navigator.move('right'); },
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
+                down: function () { Navigator.move('down'); },
+                back: this.back
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? html[0] : html; };
+        this.destroy = function () { scroll.destroy(); html.remove(); };
+    }
+
+    function formatScheduleDay(date, offset) {
+        var prefix = offset === 0 ? 'Сегодня, ' : offset === 1 ? 'Завтра, ' : '';
+        try {
+            return prefix + date.toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'});
+        } catch (error) {
+            return prefix + date.toLocaleDateString();
+        }
+    }
+
+    function formatScheduleTime(date) {
+        try {
+            return date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+        } catch (error) {
+            return ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2);
+        }
+    }
+
+    function formatScheduleDateTime(date) {
+        try {
+            return date.toLocaleString('ru-RU', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'});
+        } catch (error) {
+            return date.toLocaleString();
+        }
+    }
+
+    function formatEpisode(episodes) {
+        var aired = Number(episodes.aired || 0);
+        var count = Number(episodes.count || 0);
+        if (count === 1 && aired === 0) return 'Релиз';
+        var next = aired + 1;
+        return count > 1 ? 'Серия ' + next + ' из ' + count : 'Серия ' + next;
+    }
+
     function Detail(object) {
         var data = object.card || {};
         var html = $('<div class="yani-detail"></div>');
@@ -378,6 +503,7 @@ function pluginYummyAnime() {
             var info = $('<div class="yani-detail__info"></div>');
             info.append($('<div class="yani-detail__title"></div>').text(data.title || 'YummyAnime'));
             info.append($('<div class="yani-detail__meta"></div>').text((data.release_date || '') + '  ★ ' + Number(data.vote_average || 0).toFixed(1) + '  (' + (data.vote_count || 0) + ')'));
+            if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             button = $('<div class="yani-detail__button selector">Открыть в поиске Lampa</div>');
             button.on('hover:enter', function () {

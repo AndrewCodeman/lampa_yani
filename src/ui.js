@@ -97,24 +97,7 @@
                 return comp;
             });
 
-            Lampa.Component.add('yani_schedule', function (object) {
-                var comp = new Lampa.InteractionCategory(object);
-                comp.create = function () {
-                    var self = this;
-                    this.activity.loader(true);
-                    LampaYaniApi.schedule({}).then(function (payload) {
-                        var results = LampaYaniApi.normalize(payload).map(toCard);
-                        self.build({results: results, title: 'Schedule'});
-                        self.activity.loader(false);
-                        self.activity.toggle();
-                    }).catch(function (error) {
-                        console.error('[Lampa Yani]', error);
-                        self.activity.loader(false);
-                        Lampa.Noty.show('Не удалось загрузить расписание Yani');
-                    });
-                };
-                return comp;
-            });
+            Lampa.Component.add('yani_schedule', Schedule);
 
             Lampa.Component.add('yani_detail', Detail);
 
@@ -180,6 +163,148 @@
         this.destroy = function () { scroll.destroy(); html.remove(); };
     }
 
+    function Schedule(object) {
+        var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        var html = $('<div class="yani-schedule"></div>');
+        var content = $('<div class="yani-schedule__content"></div>');
+        var last;
+
+        this.create = function () {
+            var self = this;
+            this.activity.loader(true);
+
+            LampaYaniApi.schedule({}).then(function (payload) {
+                var items = LampaYaniApi.normalize(payload);
+                renderSchedule(items);
+                scroll.append(content);
+                html.append(scroll.render(true));
+                self.activity.loader(false);
+                self.activity.toggle();
+            }).catch(function (error) {
+                console.error('[YummyAnime]', error);
+                self.activity.loader(false);
+                Lampa.Noty.show('Не удалось загрузить расписание YummyAnime');
+            });
+        };
+
+        function renderSchedule(items) {
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (var dayOffset = 0; dayOffset < 7; dayOffset++) {
+                var day = new Date(today.getTime());
+                day.setDate(today.getDate() + dayOffset);
+                var nextDay = new Date(day.getTime());
+                nextDay.setDate(day.getDate() + 1);
+
+                var releases = items.filter(function (item) {
+                    var timestamp = item.episodes && Number(item.episodes.next_date);
+                    if (!timestamp) return false;
+                    var releaseDate = new Date(timestamp * 1000);
+                    return releaseDate >= day && releaseDate < nextDay;
+                }).sort(function (a, b) {
+                    return Number(a.episodes.next_date) - Number(b.episodes.next_date);
+                });
+
+                var section = $('<section class="yani-schedule__day"></section>');
+                section.append($('<div class="yani-schedule__day-title"></div>').text(formatScheduleDay(day, dayOffset)));
+
+                if (!releases.length) {
+                    section.append('<div class="yani-schedule__empty">Нет запланированных выпусков</div>');
+                } else {
+                    releases.forEach(function (item) {
+                        section.append(createScheduleItem(item));
+                    });
+                }
+
+                content.append(section);
+            }
+        }
+
+        function createScheduleItem(item) {
+            var card = toCard(item);
+            var episodes = item.episodes || {};
+            var releaseDate = new Date(Number(episodes.next_date) * 1000);
+            var row = $('<div class="yani-schedule__item selector"></div>');
+            var poster = $('<img class="yani-schedule__poster" alt="">').attr('src', card.poster || '');
+            var info = $('<div class="yani-schedule__info"></div>');
+            var release = $('<div class="yani-schedule__release"></div>');
+
+            info.append($('<div class="yani-schedule__title"></div>').text(card.title));
+            info.append($('<div class="yani-schedule__episode"></div>').text(formatEpisode(episodes)));
+            release.append($('<div class="yani-schedule__time"></div>').text(formatScheduleTime(releaseDate)));
+            release.append('<div class="yani-schedule__timezone">местное время</div>');
+            row.append(poster, info, release);
+
+            row.on('hover:focus', function (event) {
+                last = event.target;
+                scroll.update($(event.target), true);
+            });
+            row.on('hover:enter', function () {
+                card.yani_schedule = formatEpisode(episodes) + ', ' + formatScheduleDateTime(releaseDate);
+                Lampa.Activity.push({
+                    url: 'yani/detail/' + card.yani_id,
+                    title: card.title,
+                    component: 'yani_detail',
+                    card: card
+                });
+            });
+
+            return row;
+        }
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () {
+                    Lampa.Controller.collectionSet(scroll.render());
+                    Lampa.Controller.collectionFocus(last || false, scroll.render());
+                },
+                left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
+                right: function () { Navigator.move('right'); },
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
+                down: function () { Navigator.move('down'); },
+                back: this.back
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? html[0] : html; };
+        this.destroy = function () { scroll.destroy(); html.remove(); };
+    }
+
+    function formatScheduleDay(date, offset) {
+        var prefix = offset === 0 ? 'Сегодня, ' : offset === 1 ? 'Завтра, ' : '';
+        try {
+            return prefix + date.toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'});
+        } catch (error) {
+            return prefix + date.toLocaleDateString();
+        }
+    }
+
+    function formatScheduleTime(date) {
+        try {
+            return date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+        } catch (error) {
+            return ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2);
+        }
+    }
+
+    function formatScheduleDateTime(date) {
+        try {
+            return date.toLocaleString('ru-RU', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'});
+        } catch (error) {
+            return date.toLocaleString();
+        }
+    }
+
+    function formatEpisode(episodes) {
+        var aired = Number(episodes.aired || 0);
+        var count = Number(episodes.count || 0);
+        if (count === 1 && aired === 0) return 'Релиз';
+        var next = aired + 1;
+        return count > 1 ? 'Серия ' + next + ' из ' + count : 'Серия ' + next;
+    }
+
     function Detail(object) {
         var data = object.card || {};
         var html = $('<div class="yani-detail"></div>');
@@ -190,6 +315,7 @@
             var info = $('<div class="yani-detail__info"></div>');
             info.append($('<div class="yani-detail__title"></div>').text(data.title || 'YummyAnime'));
             info.append($('<div class="yani-detail__meta"></div>').text((data.release_date || '') + '  ★ ' + Number(data.vote_average || 0).toFixed(1) + '  (' + (data.vote_count || 0) + ')'));
+            if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             button = $('<div class="yani-detail__button selector">Открыть в поиске Lampa</div>');
             button.on('hover:enter', function () {

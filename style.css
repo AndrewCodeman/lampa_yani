@@ -63,3 +63,94 @@
 .yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }
 .yani-detail__button { display: inline-block; padding: 0.8em 1.2em; border-radius: 0.5em; background: rgba(255,255,255,.15); }
 .yani-detail__button.focus { background: #fff; color: #111; }
+
+.yani-schedule__content {
+    padding: 1.2em 2em 3em;
+}
+
+.yani-schedule__day {
+    margin-bottom: 2em;
+}
+
+.yani-schedule__day-title {
+    margin-bottom: 0.7em;
+    font-size: 1.55em;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.yani-schedule__item {
+    display: flex;
+    align-items: center;
+    min-height: 6.2em;
+    margin-bottom: 0.65em;
+    padding: 0.65em 1em;
+    border-radius: 0.65em;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.yani-schedule__item.focus {
+    background: #fff;
+    color: #111;
+}
+
+.yani-schedule__poster {
+    width: 4em;
+    height: 5.5em;
+    margin-right: 1em;
+    border-radius: 0.35em;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.yani-schedule__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.yani-schedule__title {
+    overflow: hidden;
+    font-size: 1.15em;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.yani-schedule__episode {
+    margin-top: 0.4em;
+    opacity: 0.75;
+}
+
+.yani-schedule__release {
+    min-width: 8em;
+    margin-left: 1em;
+    text-align: right;
+}
+
+.yani-schedule__time {
+    font-size: 1.25em;
+    font-weight: 600;
+}
+
+.yani-schedule__timezone,
+.yani-schedule__empty {
+    opacity: 0.55;
+}
+
+.yani-schedule__empty {
+    padding: 1em;
+    border-radius: 0.65em;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.yani-detail__schedule {
+    margin-bottom: 1.2em;
+    font-size: 1.15em;
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .yani-schedule__content { padding: 1em; }
+    .yani-schedule__release { min-width: 5em; }
+    .yani-schedule__timezone { display: none; }
+}
