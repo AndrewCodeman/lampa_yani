@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.0 — 2026-08-06
+
+- added a Continue Watching catalog for the 20 most recently opened anime;
+- history cards use standard Lampa detail pages when a safe match exists;
+- standard cards now retain their exact YummyAnime mapping without a second API search.
+
 ## 0.9.0 — 2026-08-06
 
 - YummyAnime catalog and schedule entries now open standard Lampa detail cards;
