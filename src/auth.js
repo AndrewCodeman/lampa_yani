@@ -28,7 +28,7 @@
         save: function (data) {
             var token = tokenFrom(data);
             if (!token) throw new Error('Login response did not contain a token');
-            memory = {token: token, refreshed_at: data.refreshed_at || Date.now(), login: data.login || ''};
+            memory = {token: token, refreshed_at: data.refreshed_at || Date.now(), login: data.login || '', display_name: data.display_name || data.login || ''};
             Lampa.Storage.set(key, JSON.stringify(memory));
             return memory;
         },
@@ -47,7 +47,7 @@
             }).then(function (payload) {
                 var current = LampaYaniAuth.get();
                 var data = payload.response || payload;
-                LampaYaniAuth.save({token: tokenFrom(data), refreshed_at: Date.now(), login: current.login});
+                LampaYaniAuth.save({token: tokenFrom(data), refreshed_at: Date.now(), login: current.login, display_name: current.display_name});
                 return LampaYaniAuth.get();
             });
         },

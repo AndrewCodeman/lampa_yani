@@ -552,6 +552,12 @@
             if (!passwordValue) return Lampa.Noty.show(t('password_required'));
             Lampa.Loading && Lampa.Loading.start && Lampa.Loading.start();
             LampaYaniAuth.login(loginValue, passwordValue).then(function () {
+                return LampaYaniApi.profile().then(function (payload) {
+                    var profile = payload && payload.response ? payload.response : payload;
+                    var current = LampaYaniAuth.get();
+                    LampaYaniAuth.save({token: current.token, login: current.login, display_name: profile && (profile.nickname || profile.name) || current.login});
+                }).catch(function () {});
+            }).then(function () {
                 passwordValue = '';
                 Lampa.Noty.show(t('login_ok'));
                 render();
@@ -1745,7 +1751,7 @@
             param: {name: 'yani_about', type: 'trigger', default: false},
             field: {
                 name: t('version_name') + ' ' + LampaYaniConfig.version,
-                description: t('website_description') + ': ' + yummyWebsiteUrl()
+                description: t('unofficial_extension') + ' · ' + t('website_description') + ': ' + yummyWebsiteUrl()
             },
             onChange: openYummyWebsite
         });
@@ -1782,42 +1788,48 @@
             }
         });
 
-        Lampa.SettingsApi.addParam({
-            component: 'yani',
-            param: {name: 'yani_account_login', type: 'trigger', default: false},
-            field: {name: t('login_name'), description: t('login_description')},
-            onChange: openSettingsLogin
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'yani',
-            param: {name: 'yani_account_refresh', type: 'trigger', default: false},
-            field: {name: t('refresh_name'), description: t('refresh_description')},
-            onChange: function () {
-                if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_first'));
-                LampaYaniAuth.refresh().then(function () {
-                    Lampa.Noty.show(t('token_refreshed'));
-                }).catch(function (error) {
-                    console.error('[YummyAnime]', error);
-                    Lampa.Noty.show(t('token_refresh_error'));
-                });
-            }
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'yani',
-            param: {name: 'yani_account_logout', type: 'trigger', default: false},
-            field: {name: t('logout_name'), description: t('logout_description')},
-            onChange: function () {
-                if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('not_logged'));
-                LampaYaniAuth.logout().then(function () {
-                    Lampa.Noty.show(t('logged_out'));
-                }).catch(function (error) {
-                    console.error('[YummyAnime]', error);
-                    Lampa.Noty.show(t('token_removed'));
-                });
-            }
-        });
+        var authorized = Boolean(LampaYaniAuth.token());
+        if (authorized) {
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_state', type: 'trigger', default: false},
+                field: {name: t('authorized') + ': ' + authDisplayName(), description: t('auth_manage_description')},
+                onChange: openSettingsLogin
+            });
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_refresh', type: 'trigger', default: false},
+                field: {name: t('refresh_name'), description: t('refresh_description')},
+                onChange: function () {
+                    LampaYaniAuth.refresh().then(function () {
+                        Lampa.Noty.show(t('token_refreshed'));
+                    }).catch(function (error) {
+                        console.error('[YummyAnime]', error);
+                        Lampa.Noty.show(t('token_refresh_error'));
+                    });
+                }
+            });
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_logout', type: 'trigger', default: false},
+                field: {name: t('logout_name'), description: t('logout_description')},
+                onChange: function () {
+                    LampaYaniAuth.logout().then(function () {
+                        Lampa.Noty.show(t('logged_out'));
+                    }).catch(function (error) {
+                        console.error('[YummyAnime]', error);
+                        Lampa.Noty.show(t('token_removed'));
+                    });
+                }
+            });
+        } else {
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_login', type: 'trigger', default: false},
+                field: {name: t('login_name'), description: t('login_description')},
+                onChange: openSettingsLogin
+            });
+        }
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
@@ -1853,6 +1865,11 @@
             title: 'YummyAnime · ' + t('auth_title'),
             component: 'yani_auth'
         });
+    }
+
+    function authDisplayName() {
+        var account = LampaYaniAuth.get();
+        return account.display_name || account.login || t('user');
     }
 
     function showYummyInput(params, callback) {
