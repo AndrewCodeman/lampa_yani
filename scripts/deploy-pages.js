@@ -123,6 +123,7 @@ async function main() {
         }
 
         if (['deployment_failed', 'deployment_perms_error', 'deployment_content_failed', 'deployment_cancelled', 'deployment_lost'].includes(latestStatus)) {
+            console.error(`Pages deployment response: ${JSON.stringify(current)}`);
             throw new Error(`Pages deployment failed with status: ${latestStatus}`);
         }
     }

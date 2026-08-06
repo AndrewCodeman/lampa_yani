@@ -40,11 +40,18 @@ jobs:
         with:
           enablement: true
 
+      - name: Prepare Pages site
+        shell: bash
+        run: |
+          mkdir -p _pages
+          cp -R dist assets status _pages/
+          cp index.js style.css LICENSE README.md _pages/
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages-${{ github.run_attempt }}
-          path: .
+          path: _pages
 
       - name: Deploy
         id: deployment
