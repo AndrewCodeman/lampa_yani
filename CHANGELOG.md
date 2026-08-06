@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.0 — 2026-08-06
+
+- added YummyAnime actions to standard Lampa detail cards;
+- comments are now available without account authorization and use the actual `response.comments` payload;
+- added comment authors, dates, likes and reply counts;
+- consolidated watch, details, comments, favorites, lists and ratings into one reusable action menu.
+
 ## 0.10.0 — 2026-08-06
 
 - added a Continue Watching catalog for the 20 most recently opened anime;

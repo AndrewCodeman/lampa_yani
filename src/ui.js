@@ -219,23 +219,48 @@
             if (element.yani_id) openStandardLampaCard(element);
         };
         card.onMenu = function () {
-            if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
-            if (!element.yani_id) return;
-            Lampa.Select.show({
-                title: t('actions'),
-                items: [{title: t('favorite'), action: 'favorite'}, {title: t('watching'), action: 'watching'}, {title: t('planned'), action: 'planned'}, {title: t('completed'), action: 'completed'}, {title: t('dropped'), action: 'dropped'}, {title: t('postponed'), action: 'postponed'}, {title: t('comments'), action: 'comments'}].concat([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
-                    return {title: value + '/10', value: value};
-                })),
-                onSelect: function (item) {
-                    if (item.action === 'comments') return commentsMenu(element.yani_id);
-                    var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(element.yani_id) : item.action ? LampaYaniApi.addToList(element.yani_id, item.action) : LampaYaniApi.rate(element.yani_id, item.value);
-                    action.then(function () { Lampa.Noty.show(t('saved')); }).catch(function (error) {
-                        console.error('[YummyAnime]', error);
-                        Lampa.Noty.show(t('save_error'));
-                    });
-                }
-            });
+            if (element.yani_id) showYummyActions(element);
         };
+    }
+
+    function showYummyActions(card) {
+        if (!card || !card.yani_id) return;
+        var items = [
+            {title: t('watch'), action: 'watch'},
+            {title: t('yummy_details'), action: 'details'},
+            {title: t('comments'), action: 'comments'}
+        ];
+        if (LampaYaniAuth.token()) {
+            items = items.concat([
+                {title: t('favorite'), action: 'favorite'},
+                {title: t('watching'), action: 'watching'},
+                {title: t('planned'), action: 'planned'},
+                {title: t('completed'), action: 'completed'},
+                {title: t('dropped'), action: 'dropped'},
+                {title: t('postponed'), action: 'postponed'}
+            ], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
+                return {title: value + '/10', value: value};
+            }));
+        } else {
+            items.push({title: t('login_name'), action: 'login'});
+        }
+
+        Lampa.Select.show({
+            title: t('actions'),
+            items: items,
+            onSelect: function (item) {
+                if (item.action === 'watch') return openVideos(card);
+                if (item.action === 'details') return openYummyDetail(card, false);
+                if (item.action === 'comments') return commentsMenu(card.yani_id);
+                if (item.action === 'login') return openSettingsLogin();
+                if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
+                var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(card.yani_id) : item.action ? LampaYaniApi.addToList(card.yani_id, item.action) : LampaYaniApi.rate(card.yani_id, item.value);
+                action.then(function () { Lampa.Noty.show(t('saved')); }).catch(function (error) {
+                    console.error('[YummyAnime]', error);
+                    Lampa.Noty.show(t('save_error'));
+                });
+            }
+        });
     }
 
     function Account(object) {
@@ -1380,13 +1405,30 @@
     }
 
     function commentsMenu(id) {
+        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
         LampaYaniApi.comments(id).then(function (payload) {
-            var comments = LampaYaniApi.normalize(payload);
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            var comments = LampaYaniApi.normalizeComments(payload);
+            if (!comments.length) return Lampa.Noty.show(t('comments_empty'));
             var items = comments.map(function (comment) {
-                return {title: comment.text || comment.body || 'Comment'};
+                var author = comment.name || (comment.author && comment.author.name) || t('user');
+                var text = comment.text || comment.body || '';
+                var date = Number(comment.time) > 0 ? new Date(Number(comment.time) * 1000).toLocaleDateString(locale()) : '';
+                var stats = [];
+                if (Number(comment.likes) > 0) stats.push('♥ ' + comment.likes);
+                if (Number(comment.children_count) > 0) stats.push('↳ ' + comment.children_count + ' ' + t('replies'));
+                return {
+                    title: author + (date ? ' · ' + date : '') + ': ' + text,
+                    subtitle: stats.join(' · '),
+                    comment: comment
+                };
             });
             Lampa.Select.show({title: t('comments_title'), items: items});
-        }).catch(function () { Lampa.Noty.show(t('comments_error')); });
+        }).catch(function (error) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            console.error('[YummyAnime Comments]', error);
+            Lampa.Noty.show(t('comments_error'));
+        });
     }
 
     function installFullRating() {
@@ -1410,19 +1452,25 @@
                     var block = $('<div class="full-start__rate ' + className + '"><div>' + formatRating(rating.value) + '</div><div>' + rating.title + '</div></div>');
                     line.append(block);
                 });
-                addYummyFullButton(render, movie);
+                addYummyFullButton(render, movie, anime);
             }).catch(function () {});
         });
     }
 
-    function addYummyFullButton(render, movie) {
-        if ($('.view--yummyanime', render).length) return;
+    function addYummyFullButton(render, movie, anime) {
         var container = $('.full-start-new__buttons', render);
         if (!container.length) container = $('.full-start__buttons', render);
         if (!container.length) return;
 
-        var button = $('<div class="full-start__button selector view--online view--yummyanime"><span class="view--yummyanime__icon">YA</span><span>YummyAnime</span></div>');
-        button.on('hover:enter', function () { openYummyForMovie(movie); });
-        container.prepend(button);
+        if (!$('.view--yummyanime', render).length) {
+            var button = $('<div class="full-start__button selector view--online view--yummyanime"><span class="view--yummyanime__icon">YA</span><span>YummyAnime</span></div>');
+            button.on('hover:enter', function () { openVideos(anime); });
+            container.prepend(button);
+        }
+        if (!$('.view--yummyanime-actions', render).length) {
+            var actions = $('<div class="full-start__button selector view--yummyanime-actions"><span>YummyAnime · ' + t('actions_short') + '</span></div>');
+            actions.on('hover:enter', function () { showYummyActions(anime); });
+            container.append(actions);
+        }
     }
 }(window));

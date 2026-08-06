@@ -88,6 +88,10 @@
     order: -1;
 }
 
+.full-start__button.view--yummyanime-actions {
+    border: 0.12em solid #ef6470;
+}
+
 .view--yummyanime__icon {
     display: inline-flex;
     align-items: center;

@@ -114,6 +114,11 @@
         comments: function (id) {
             return request('/comments/anime/' + encodeURIComponent(id) + '?limit=20&sort=new&skip=0');
         },
+        normalizeComments: function (payload) {
+            var response = payload && payload.response ? payload.response : payload;
+            if (Array.isArray(response)) return response;
+            return response && (response.comments || response.items || response.data) || [];
+        },
         profile: function () {
             return request('/profile', {auth: true, cache: false});
         },
