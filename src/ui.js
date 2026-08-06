@@ -154,12 +154,13 @@
                         if (!data.yani_id) return;
                         Lampa.Select.show({
                             title: 'Оценка Yani',
-                            items: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
+                            items: [{title: 'Add to Favorites', action: 'favorite'}, {title: 'Watching', action: 'watching'}, {title: 'Completed', action: 'completed'}, {title: 'Planned', action: 'planned'}].concat([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
                                 return {title: value + '/10', value: value};
-                            }),
+                            })),
                             onSelect: function (item) {
-                                LampaYaniApi.rate(data.yani_id, item.value).then(function () {
-                                    Lampa.Noty.show('Оценка сохранена');
+                                var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(data.yani_id) : item.action ? LampaYaniApi.addToList(data.yani_id, item.action) : LampaYaniApi.rate(data.yani_id, item.value);
+                                action.then(function () {
+                                    Lampa.Noty.show('Изменения сохранены в YummyAnime');
                                 }).catch(function (error) {
                                     console.error('[Lampa Yani]', error);
                                     Lampa.Noty.show('Не удалось сохранить оценку');

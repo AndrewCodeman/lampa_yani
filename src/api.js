@@ -64,6 +64,19 @@
         removeRate: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/rate', {method: 'DELETE'});
         },
+        addFavorite: function (id) {
+            return request('/anime/' + encodeURIComponent(id) + '/list/fav', {method: 'PUT'});
+        },
+        removeFavorite: function (id) {
+            return request('/anime/' + encodeURIComponent(id) + '/list/fav', {method: 'DELETE'});
+        },
+        addToList: function (id, list) {
+            return request('/anime/' + encodeURIComponent(id) + '/list', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({list: list})
+            });
+        },
         health: function () {
             return request('/anime?limit=1', {publicOnly: true});
         }
