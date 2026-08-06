@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0 — 2026-08-06
+
+- added a preferred-player setting;
+- remembered the last selected player and placed it first in the source list;
+- kept every available player and dubbing visible for manual selection.
+
 ## 0.6.0 — 2026-08-06
 
 - registered YummyAnime with Lampa Online when that module is available;

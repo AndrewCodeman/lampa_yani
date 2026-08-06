@@ -769,13 +769,26 @@
             var voices = Object.keys(groups).map(function (key) {
                 var group = groups[key];
                 return {title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : ''), group: group};
-            }).sort(function (a, b) { return a.title.localeCompare(b.title); });
+            });
+            var preferredPlayer = getPreferredPlayer();
+            voices.sort(function (a, b) {
+                var preferredA = playerMatchesPreference(a.group, preferredPlayer) ? 1 : 0;
+                var preferredB = playerMatchesPreference(b.group, preferredPlayer) ? 1 : 0;
+                return preferredB - preferredA || a.title.localeCompare(b.title);
+            });
+            if (voices.length && playerMatchesPreference(voices[0].group, preferredPlayer)) voices[0].title = '★ ' + voices[0].title;
 
-            if (voices.length === 1) return chooseEpisode(card, voices[0].group);
+            if (voices.length === 1) {
+                rememberPlayer(voices[0].group);
+                return chooseEpisode(card, voices[0].group);
+            }
             Lampa.Select.show({
                 title: t('choose_voice'),
                 items: voices,
-                onSelect: function (item) { chooseEpisode(card, item.group); }
+                onSelect: function (item) {
+                    rememberPlayer(item.group);
+                    chooseEpisode(card, item.group);
+                }
             });
         }).catch(function (error) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
@@ -902,6 +915,28 @@
     function normalizeVideoUrl(url) {
         if (!url) return '';
         return url.indexOf('//') === 0 ? 'https:' + url : url;
+    }
+
+    function playerKey(group) {
+        return String(group && (group.player || group.title) || '').toLowerCase();
+    }
+
+    function getPreferredPlayer() {
+        if (!Lampa.Storage) return '';
+        var preference = Lampa.Storage.get('yani_player_preference', 'last');
+        if (preference === 'ask') return '';
+        if (preference === 'last') return Lampa.Storage.get('yani_last_player', '');
+        return preference;
+    }
+
+    function playerMatchesPreference(group, preference) {
+        if (!preference) return false;
+        var value = playerKey(group);
+        return value.indexOf(String(preference).toLowerCase()) >= 0;
+    }
+
+    function rememberPlayer(group) {
+        if (Lampa.Storage) Lampa.Storage.set('yani_last_player', playerKey(group));
     }
 
     function IframePlayer(object) {
@@ -1073,6 +1108,17 @@
                 LampaYaniI18n.setLanguage(value);
                 Lampa.Noty.show(t('language_changed'));
             }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {
+                name: 'yani_player_preference',
+                type: 'select',
+                values: {last: t('player_last'), ask: t('player_ask'), kodik: 'Kodik', alloha: 'Alloha', cvh: 'CVH', sibnet: 'Sibnet', aksor: 'Aksor'},
+                default: 'last'
+            },
+            field: {name: t('player_preference'), description: t('player_preference_description')}
         });
 
         Lampa.SettingsApi.addParam({
