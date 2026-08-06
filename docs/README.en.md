@@ -57,6 +57,6 @@ MIT License. See [LICENSE](../LICENSE).
 - Bearer token refresh through `/profile/token`;
 - comments: viewing, posting and replies.
 
-Lampa settings include a `YummyAnime` section with an API availability check.
+Lampa settings include a `YummyAnime Settings` section with a YummyAnime resource and API availability check.
 
 The detailed view uses Yani data, while trailers and recommendations are loaded through `/anime/{id}/trailers` and `/anime/{id}/recommendations`.

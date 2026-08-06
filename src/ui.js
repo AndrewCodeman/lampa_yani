@@ -214,7 +214,7 @@
         Lampa.Settings.addComponent({
             component: 'yani',
             icon: '<div class="icon-yani"></div>',
-            name: 'YummyAnime'
+            name: 'YummyAnime Settings'
         });
 
         Lampa.Settings.addParam({

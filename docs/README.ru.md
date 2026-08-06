@@ -57,6 +57,6 @@ MIT License. См. файл [LICENSE](../LICENSE).
 - обновление Bearer-токена через `/profile/token`;
 - комментарии: просмотр, добавление и ответы.
 
-В настройках Lampa появится раздел `YummyAnime` с проверкой доступности API.
+В настройках Lampa появится раздел `YummyAnime Settings` с проверкой доступности ресурса и API.
 
 Подробная карточка использует данные Yani, а трейлеры и рекомендации подключаются через `/anime/{id}/trailers` и `/anime/{id}/recommendations`.
