@@ -5,6 +5,7 @@
 - initial YummyAnime Lampa extension;
 - anime catalog, search, genres and schedule;
 - seven-day schedule grouped by date with local release time and episode numbers;
+- all YummyAnime rating sources on catalog cards and anime details;
 - ratings, favorites and user lists;
 - YummyAnime account login and token refresh;
 - read-only comments;

@@ -61,6 +61,7 @@
                         });
                 };
                 comp.cardRender = function (page, element, card) {
+                    addCardRatings(element, card);
                     card.onEnter = function () {
                         if (!element.yani_id) return;
                         Lampa.Activity.push({
@@ -311,10 +312,37 @@
         var button;
 
         this.create = function () {
+            var self = this;
+            this.activity.loader(true);
+
+            if (data.yani_id) {
+                LampaYaniApi.detail(data.yani_id).then(function (payload) {
+                    var item = payload && payload.response ? payload.response : payload;
+                    var detailed = item ? toCard(item) : data;
+                    detailed.yani_schedule = data.yani_schedule;
+                    renderDetail(detailed);
+                    self.activity.loader(false);
+                    self.activity.toggle();
+                }).catch(function (error) {
+                    console.error('[YummyAnime]', error);
+                    renderDetail(data);
+                    self.activity.loader(false);
+                    self.activity.toggle();
+                });
+            } else {
+                renderDetail(data);
+                this.activity.loader(false);
+                this.activity.toggle();
+            }
+        };
+
+        function renderDetail(cardData) {
+            data = cardData;
             var poster = $('<img class="yani-detail__poster">').attr('src', data.img || data.poster || '');
             var info = $('<div class="yani-detail__info"></div>');
             info.append($('<div class="yani-detail__title"></div>').text(data.title || 'YummyAnime'));
-            info.append($('<div class="yani-detail__meta"></div>').text((data.release_date || '') + '  ★ ' + Number(data.vote_average || 0).toFixed(1) + '  (' + (data.vote_count || 0) + ')'));
+            if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
+            info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             button = $('<div class="yani-detail__button selector">Открыть в поиске Lampa</div>');
@@ -324,9 +352,7 @@
             });
             info.append(button);
             html.append(poster, info);
-            this.activity.loader(false);
-            this.activity.toggle();
-        };
+        }
 
         this.start = function () {
             Lampa.Controller.add('content', {
@@ -386,6 +412,7 @@
         if (poster.indexOf('//') === 0) poster = 'https:' + poster;
         var rating = typeof item.rating === 'object' ? item.rating.average : item.rating;
         var votes = typeof item.rating === 'object' ? item.rating.counters : item.rating_counters;
+        var ratings = extractRatings(item.rating);
         return {
             title: title,
             original_title: item.original_title || item.japanese || title,
@@ -395,10 +422,56 @@
             vote_average: rating || item.score || item.rating_score || 0,
             vote_count: votes || item.votes || item.vote_count || 0,
             yani_rating: rating || item.score || item.rating_score || 0,
+            yani_ratings: ratings,
             overview: item.description || item.synopsis || '',
             yani_id: item.anime_id || item.id,
             yani_url: item.anime_url || item.url
         };
+    }
+
+    function extractRatings(rating) {
+        rating = rating && typeof rating === 'object' ? rating : {average: rating};
+        return [
+            {key: 'yummy', short: 'YA', title: 'YummyAnime', value: Number(rating.average || 0)},
+            {key: 'kp', short: 'KP', title: 'Кинопоиск', value: Number(rating.kp_rating || 0)},
+            {key: 'shikimori', short: 'SH', title: 'Shikimori', value: Number(rating.shikimori_rating || 0)},
+            {key: 'anidub', short: 'AD', title: 'AniDUB', value: Number(rating.anidub_rating || 0)},
+            {key: 'mal', short: 'MAL', title: 'MyAnimeList', value: Number(rating.myanimelist_rating || 0)},
+            {key: 'worldart', short: 'WA', title: 'World-Art', value: Number(rating.worldart_rating || 0)}
+        ];
+    }
+
+    function formatRating(value) {
+        return Number(value) > 0 ? Number(value).toFixed(1) : '—';
+    }
+
+    function addCardRatings(element, card) {
+        var ratings = element.yani_ratings || [];
+        if (!ratings.length || !card || !card.render) return;
+        var render = $(card.render(true));
+        if ($('.yani-card-ratings', render).length) return;
+
+        $('.card__vote', render).hide();
+        var block = $('<div class="yani-card-ratings"></div>');
+        ratings.forEach(function (rating) {
+            var badge = $('<div class="yani-card-rating yani-card-rating--' + rating.key + '"></div>');
+            badge.append($('<span class="yani-card-rating__source"></span>').text(rating.short));
+            badge.append($('<span class="yani-card-rating__value"></span>').text(formatRating(rating.value)));
+            block.append(badge);
+        });
+        $('.card__view', render).append(block);
+    }
+
+    function createDetailRatings(ratings, votes) {
+        var block = $('<div class="yani-ratings"></div>');
+        ratings.forEach(function (rating) {
+            var item = $('<div class="yani-ratings__item"></div>');
+            item.append($('<div class="yani-ratings__value"></div>').text(formatRating(rating.value)));
+            item.append($('<div class="yani-ratings__source"></div>').text(rating.title));
+            if (rating.key === 'yummy' && votes) item.append($('<div class="yani-ratings__votes"></div>').text(votes + ' оценок'));
+            block.append(item);
+        });
+        return block;
     }
 
     function addSettings() {
@@ -448,12 +521,14 @@
             LampaYaniApi.search(title, {limit: 1}).then(function (payload) {
                 var anime = LampaYaniApi.normalize(payload)[0];
                 if (!anime || !anime.rating) return;
-                var rating = typeof anime.rating === 'object' ? anime.rating.average : anime.rating;
-                if (!rating) return;
                 var render = event.object.activity.render();
-                if ($('.rate--yummyanime', render).length) return;
-                var block = $('<div class="full-start__rate rate--yummyanime"><div>' + Number(rating).toFixed(1) + '</div><div>YummyAnime</div></div>');
-                $('.full-start-new__rate-line', render).prepend(block);
+                var line = $('.full-start-new__rate-line', render);
+                extractRatings(anime.rating).forEach(function (rating) {
+                    var className = 'rate--yummyanime-' + rating.key;
+                    if ($('.' + className, render).length) return;
+                    var block = $('<div class="full-start__rate ' + className + '"><div>' + formatRating(rating.value) + '</div><div>' + rating.title + '</div></div>');
+                    line.append(block);
+                });
             }).catch(function () {});
         });
     }

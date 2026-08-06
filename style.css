@@ -149,8 +149,68 @@
     font-weight: 600;
 }
 
+.yani-card-ratings {
+    position: absolute;
+    right: 0.35em;
+    bottom: 0.35em;
+    left: 0.35em;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.2em;
+    pointer-events: none;
+}
+
+.yani-card-rating {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.2em 0.3em;
+    border-radius: 0.25em;
+    background: rgba(0, 0, 0, 0.78);
+    color: #fff;
+    font-size: 0.62em;
+}
+
+.yani-card-rating__source {
+    margin-right: 0.25em;
+    opacity: 0.7;
+}
+
+.yani-card-rating__value {
+    font-weight: 600;
+}
+
+.yani-ratings {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(8em, 1fr));
+    gap: 0.6em;
+    margin: 1em 0 1.4em;
+}
+
+.yani-ratings__item {
+    padding: 0.65em 0.8em;
+    border-radius: 0.5em;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.yani-ratings__value {
+    font-size: 1.35em;
+    font-weight: 600;
+}
+
+.yani-ratings__source {
+    margin-top: 0.15em;
+    opacity: 0.78;
+}
+
+.yani-ratings__votes {
+    margin-top: 0.2em;
+    font-size: 0.75em;
+    opacity: 0.55;
+}
+
 @media (max-width: 700px) {
     .yani-schedule__content { padding: 1em; }
     .yani-schedule__release { min-width: 5em; }
     .yani-schedule__timezone { display: none; }
+    .yani-ratings { grid-template-columns: repeat(2, minmax(7em, 1fr)); }
 }

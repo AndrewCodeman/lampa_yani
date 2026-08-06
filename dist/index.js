@@ -13,7 +13,7 @@ function pluginYummyAnime() {
     }
 
     var style = document.createElement('style');
-    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.2em;\n    padding: 2em;\n}\n\n.yani-home__item {\n    min-height: 8em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n}\n\n.yani-home__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-home__icon {\n    font-size: 2.4em;\n}\n\n.yani-home__title {\n    font-size: 1.35em;\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); }\n}\n\n.yani-detail {\n    display: flex;\n    gap: 2.5em;\n    padding: 2em;\n}\n\n.yani-detail__poster {\n    width: 16em;\n    max-height: 24em;\n    object-fit: cover;\n    border-radius: 0.8em;\n}\n\n.yani-detail__info { max-width: 48em; }\n.yani-detail__title { font-size: 2.2em; font-weight: 600; }\n.yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }\n.yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }\n.yani-detail__button { display: inline-block; padding: 0.8em 1.2em; border-radius: 0.5em; background: rgba(255,255,255,.15); }\n.yani-detail__button.focus { background: #fff; color: #111; }\n\n.yani-schedule__content {\n    padding: 1.2em 2em 3em;\n}\n\n.yani-schedule__day {\n    margin-bottom: 2em;\n}\n\n.yani-schedule__day-title {\n    margin-bottom: 0.7em;\n    font-size: 1.55em;\n    font-weight: 600;\n    text-transform: capitalize;\n}\n\n.yani-schedule__item {\n    display: flex;\n    align-items: center;\n    min-height: 6.2em;\n    margin-bottom: 0.65em;\n    padding: 0.65em 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-schedule__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-schedule__poster {\n    width: 4em;\n    height: 5.5em;\n    margin-right: 1em;\n    border-radius: 0.35em;\n    object-fit: cover;\n    background: rgba(255, 255, 255, 0.08);\n}\n\n.yani-schedule__info {\n    flex: 1;\n    min-width: 0;\n}\n\n.yani-schedule__title {\n    overflow: hidden;\n    font-size: 1.15em;\n    font-weight: 500;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n.yani-schedule__episode {\n    margin-top: 0.4em;\n    opacity: 0.75;\n}\n\n.yani-schedule__release {\n    min-width: 8em;\n    margin-left: 1em;\n    text-align: right;\n}\n\n.yani-schedule__time {\n    font-size: 1.25em;\n    font-weight: 600;\n}\n\n.yani-schedule__timezone,\n.yani-schedule__empty {\n    opacity: 0.55;\n}\n\n.yani-schedule__empty {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.06);\n}\n\n.yani-detail__schedule {\n    margin-bottom: 1.2em;\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n@media (max-width: 700px) {\n    .yani-schedule__content { padding: 1em; }\n    .yani-schedule__release { min-width: 5em; }\n    .yani-schedule__timezone { display: none; }\n}\n";
+    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.2em;\n    padding: 2em;\n}\n\n.yani-home__item {\n    min-height: 8em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n}\n\n.yani-home__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-home__icon {\n    font-size: 2.4em;\n}\n\n.yani-home__title {\n    font-size: 1.35em;\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); }\n}\n\n.yani-detail {\n    display: flex;\n    gap: 2.5em;\n    padding: 2em;\n}\n\n.yani-detail__poster {\n    width: 16em;\n    max-height: 24em;\n    object-fit: cover;\n    border-radius: 0.8em;\n}\n\n.yani-detail__info { max-width: 48em; }\n.yani-detail__title { font-size: 2.2em; font-weight: 600; }\n.yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }\n.yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }\n.yani-detail__button { display: inline-block; padding: 0.8em 1.2em; border-radius: 0.5em; background: rgba(255,255,255,.15); }\n.yani-detail__button.focus { background: #fff; color: #111; }\n\n.yani-schedule__content {\n    padding: 1.2em 2em 3em;\n}\n\n.yani-schedule__day {\n    margin-bottom: 2em;\n}\n\n.yani-schedule__day-title {\n    margin-bottom: 0.7em;\n    font-size: 1.55em;\n    font-weight: 600;\n    text-transform: capitalize;\n}\n\n.yani-schedule__item {\n    display: flex;\n    align-items: center;\n    min-height: 6.2em;\n    margin-bottom: 0.65em;\n    padding: 0.65em 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-schedule__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-schedule__poster {\n    width: 4em;\n    height: 5.5em;\n    margin-right: 1em;\n    border-radius: 0.35em;\n    object-fit: cover;\n    background: rgba(255, 255, 255, 0.08);\n}\n\n.yani-schedule__info {\n    flex: 1;\n    min-width: 0;\n}\n\n.yani-schedule__title {\n    overflow: hidden;\n    font-size: 1.15em;\n    font-weight: 500;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n.yani-schedule__episode {\n    margin-top: 0.4em;\n    opacity: 0.75;\n}\n\n.yani-schedule__release {\n    min-width: 8em;\n    margin-left: 1em;\n    text-align: right;\n}\n\n.yani-schedule__time {\n    font-size: 1.25em;\n    font-weight: 600;\n}\n\n.yani-schedule__timezone,\n.yani-schedule__empty {\n    opacity: 0.55;\n}\n\n.yani-schedule__empty {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.06);\n}\n\n.yani-detail__schedule {\n    margin-bottom: 1.2em;\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-card-ratings {\n    position: absolute;\n    right: 0.35em;\n    bottom: 0.35em;\n    left: 0.35em;\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    gap: 0.2em;\n    pointer-events: none;\n}\n\n.yani-card-rating {\n    display: flex;\n    justify-content: space-between;\n    padding: 0.2em 0.3em;\n    border-radius: 0.25em;\n    background: rgba(0, 0, 0, 0.78);\n    color: #fff;\n    font-size: 0.62em;\n}\n\n.yani-card-rating__source {\n    margin-right: 0.25em;\n    opacity: 0.7;\n}\n\n.yani-card-rating__value {\n    font-weight: 600;\n}\n\n.yani-ratings {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(8em, 1fr));\n    gap: 0.6em;\n    margin: 1em 0 1.4em;\n}\n\n.yani-ratings__item {\n    padding: 0.65em 0.8em;\n    border-radius: 0.5em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-ratings__value {\n    font-size: 1.35em;\n    font-weight: 600;\n}\n\n.yani-ratings__source {\n    margin-top: 0.15em;\n    opacity: 0.78;\n}\n\n.yani-ratings__votes {\n    margin-top: 0.2em;\n    font-size: 0.75em;\n    opacity: 0.55;\n}\n\n@media (max-width: 700px) {\n    .yani-schedule__content { padding: 1em; }\n    .yani-schedule__release { min-width: 5em; }\n    .yani-schedule__timezone { display: none; }\n    .yani-ratings { grid-template-columns: repeat(2, minmax(7em, 1fr)); }\n}\n";
     document.head.appendChild(style);
 
 (function (window) {
@@ -249,6 +249,7 @@ function pluginYummyAnime() {
                         });
                 };
                 comp.cardRender = function (page, element, card) {
+                    addCardRatings(element, card);
                     card.onEnter = function () {
                         if (!element.yani_id) return;
                         Lampa.Activity.push({
@@ -499,10 +500,37 @@ function pluginYummyAnime() {
         var button;
 
         this.create = function () {
+            var self = this;
+            this.activity.loader(true);
+
+            if (data.yani_id) {
+                LampaYaniApi.detail(data.yani_id).then(function (payload) {
+                    var item = payload && payload.response ? payload.response : payload;
+                    var detailed = item ? toCard(item) : data;
+                    detailed.yani_schedule = data.yani_schedule;
+                    renderDetail(detailed);
+                    self.activity.loader(false);
+                    self.activity.toggle();
+                }).catch(function (error) {
+                    console.error('[YummyAnime]', error);
+                    renderDetail(data);
+                    self.activity.loader(false);
+                    self.activity.toggle();
+                });
+            } else {
+                renderDetail(data);
+                this.activity.loader(false);
+                this.activity.toggle();
+            }
+        };
+
+        function renderDetail(cardData) {
+            data = cardData;
             var poster = $('<img class="yani-detail__poster">').attr('src', data.img || data.poster || '');
             var info = $('<div class="yani-detail__info"></div>');
             info.append($('<div class="yani-detail__title"></div>').text(data.title || 'YummyAnime'));
-            info.append($('<div class="yani-detail__meta"></div>').text((data.release_date || '') + '  ★ ' + Number(data.vote_average || 0).toFixed(1) + '  (' + (data.vote_count || 0) + ')'));
+            if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
+            info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             button = $('<div class="yani-detail__button selector">Открыть в поиске Lampa</div>');
@@ -512,9 +540,7 @@ function pluginYummyAnime() {
             });
             info.append(button);
             html.append(poster, info);
-            this.activity.loader(false);
-            this.activity.toggle();
-        };
+        }
 
         this.start = function () {
             Lampa.Controller.add('content', {
@@ -574,6 +600,7 @@ function pluginYummyAnime() {
         if (poster.indexOf('//') === 0) poster = 'https:' + poster;
         var rating = typeof item.rating === 'object' ? item.rating.average : item.rating;
         var votes = typeof item.rating === 'object' ? item.rating.counters : item.rating_counters;
+        var ratings = extractRatings(item.rating);
         return {
             title: title,
             original_title: item.original_title || item.japanese || title,
@@ -583,10 +610,56 @@ function pluginYummyAnime() {
             vote_average: rating || item.score || item.rating_score || 0,
             vote_count: votes || item.votes || item.vote_count || 0,
             yani_rating: rating || item.score || item.rating_score || 0,
+            yani_ratings: ratings,
             overview: item.description || item.synopsis || '',
             yani_id: item.anime_id || item.id,
             yani_url: item.anime_url || item.url
         };
+    }
+
+    function extractRatings(rating) {
+        rating = rating && typeof rating === 'object' ? rating : {average: rating};
+        return [
+            {key: 'yummy', short: 'YA', title: 'YummyAnime', value: Number(rating.average || 0)},
+            {key: 'kp', short: 'KP', title: 'Кинопоиск', value: Number(rating.kp_rating || 0)},
+            {key: 'shikimori', short: 'SH', title: 'Shikimori', value: Number(rating.shikimori_rating || 0)},
+            {key: 'anidub', short: 'AD', title: 'AniDUB', value: Number(rating.anidub_rating || 0)},
+            {key: 'mal', short: 'MAL', title: 'MyAnimeList', value: Number(rating.myanimelist_rating || 0)},
+            {key: 'worldart', short: 'WA', title: 'World-Art', value: Number(rating.worldart_rating || 0)}
+        ];
+    }
+
+    function formatRating(value) {
+        return Number(value) > 0 ? Number(value).toFixed(1) : '—';
+    }
+
+    function addCardRatings(element, card) {
+        var ratings = element.yani_ratings || [];
+        if (!ratings.length || !card || !card.render) return;
+        var render = $(card.render(true));
+        if ($('.yani-card-ratings', render).length) return;
+
+        $('.card__vote', render).hide();
+        var block = $('<div class="yani-card-ratings"></div>');
+        ratings.forEach(function (rating) {
+            var badge = $('<div class="yani-card-rating yani-card-rating--' + rating.key + '"></div>');
+            badge.append($('<span class="yani-card-rating__source"></span>').text(rating.short));
+            badge.append($('<span class="yani-card-rating__value"></span>').text(formatRating(rating.value)));
+            block.append(badge);
+        });
+        $('.card__view', render).append(block);
+    }
+
+    function createDetailRatings(ratings, votes) {
+        var block = $('<div class="yani-ratings"></div>');
+        ratings.forEach(function (rating) {
+            var item = $('<div class="yani-ratings__item"></div>');
+            item.append($('<div class="yani-ratings__value"></div>').text(formatRating(rating.value)));
+            item.append($('<div class="yani-ratings__source"></div>').text(rating.title));
+            if (rating.key === 'yummy' && votes) item.append($('<div class="yani-ratings__votes"></div>').text(votes + ' оценок'));
+            block.append(item);
+        });
+        return block;
     }
 
     function addSettings() {
@@ -636,12 +709,14 @@ function pluginYummyAnime() {
             LampaYaniApi.search(title, {limit: 1}).then(function (payload) {
                 var anime = LampaYaniApi.normalize(payload)[0];
                 if (!anime || !anime.rating) return;
-                var rating = typeof anime.rating === 'object' ? anime.rating.average : anime.rating;
-                if (!rating) return;
                 var render = event.object.activity.render();
-                if ($('.rate--yummyanime', render).length) return;
-                var block = $('<div class="full-start__rate rate--yummyanime"><div>' + Number(rating).toFixed(1) + '</div><div>YummyAnime</div></div>');
-                $('.full-start-new__rate-line', render).prepend(block);
+                var line = $('.full-start-new__rate-line', render);
+                extractRatings(anime.rating).forEach(function (rating) {
+                    var className = 'rate--yummyanime-' + rating.key;
+                    if ($('.' + className, render).length) return;
+                    var block = $('<div class="full-start__rate ' + className + '"><div>' + formatRating(rating.value) + '</div><div>' + rating.title + '</div></div>');
+                    line.append(block);
+                });
             }).catch(function () {});
         });
     }
