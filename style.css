@@ -209,6 +209,28 @@
     pointer-events: none;
 }
 
+.yani-card-media {
+    position: absolute;
+    top: 0.35em;
+    left: 0.35em;
+    display: flex;
+    gap: 0.25em;
+    pointer-events: none;
+}
+
+.yani-card-media__badge {
+    padding: 0.22em 0.38em;
+    border-radius: 0.25em;
+    background: rgba(0, 0, 0, 0.82);
+    color: #fff;
+    font-size: 0.62em;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.yani-card-media__quality { background: #f1c40f; color: #171717; }
+.yani-card-media__voices { background: #3b9bd9; }
+
 .yani-card-rating {
     display: flex;
     align-items: center;

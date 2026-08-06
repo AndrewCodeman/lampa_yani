@@ -231,12 +231,43 @@
 
     function bindYummyCard(element, card) {
         addCardRatings(element, card);
+        addCardMediaBadges(element, card);
         card.onEnter = function () {
             if (element.yani_id) openStandardLampaCard(element);
         };
         card.onMenu = function () {
             if (element.yani_id) showYummyActions(element);
         };
+    }
+
+    function addCardMediaBadges(element, card) {
+        var requested = false;
+        var cardRender = card && card.render ? $(card.render(true)) : $(element);
+        renderCardMediaBadges(element, card, card.yani_media || mediaMeta(card));
+        if (!card.yani_id || (card.yani_media && card.yani_media.loaded)) return;
+
+        cardRender.on('hover:focus', function () {
+            if (requested) return;
+            requested = true;
+            LampaYaniApi.videos(card.yani_id).then(function (payload) {
+                var videos = payload && payload.response ? payload.response : payload;
+                card.yani_media = mediaMeta({videos: Array.isArray(videos) ? videos : []});
+                card.yani_media.loaded = true;
+                renderCardMediaBadges(element, card, card.yani_media);
+            }).catch(function () {});
+        });
+    }
+
+    function renderCardMediaBadges(element, card, meta) {
+        if (!meta || (!meta.quality && !meta.voices)) return;
+        var render = card && card.render ? $(card.render(true)) : $(element);
+        var view = $('.card__view', render).first();
+        if (!view.length) return;
+        var block = $('.yani-card-media', view);
+        if (!block.length) block = $('<div class="yani-card-media"></div>').appendTo(view);
+        block.empty();
+        if (meta.quality) block.append($('<span class="yani-card-media__badge yani-card-media__quality"></span>').text(meta.quality));
+        if (meta.voices) block.append($('<span class="yani-card-media__badge yani-card-media__voices"></span>').text(meta.voices + ' ' + t('voices_short')));
     }
 
     function showYummyActions(card) {
@@ -1239,6 +1270,7 @@
             vote_count: votes || item.votes || item.vote_count || 0,
             yani_rating: rating || item.score || item.rating_score || 0,
             yani_ratings: ratings,
+            yani_media: mediaMeta(item),
             overview: item.description || item.synopsis || '',
             yani_id: item.anime_id || item.id,
             yani_url: item.anime_url || item.url,
@@ -1274,6 +1306,28 @@
             {key: 'mal', short: 'MAL', title: 'MyAnimeList', value: Number(rating.myanimelist_rating || 0)},
             {key: 'worldart', short: 'WA', title: 'World-Art', value: Number(rating.worldart_rating || 0)}
         ];
+    }
+
+    function mediaMeta(item) {
+        item = item || {};
+        var videos = Array.isArray(item.videos) ? item.videos : [];
+        var voices = {};
+        var quality = 0;
+        videos.forEach(function (video) {
+            var data = video && video.data || {};
+            var voice = data.dubbing || data.translation || data.voice || data.player;
+            if (voice) voices[String(voice)] = true;
+            [video.quality, video.resolution, data.quality, data.resolution].forEach(function (value) {
+                var match = String(value || '').match(/(2160|1440|1080|720|576|480|360)\s*p?/i);
+                if (match) quality = Math.max(quality, Number(match[1]));
+                if (/4k/i.test(String(value || ''))) quality = Math.max(quality, 2160);
+            });
+        });
+        var translates = Array.isArray(item.translates) ? item.translates.length : 0;
+        return {
+            voices: Object.keys(voices).length || translates,
+            quality: quality >= 2160 ? '4K' : quality ? quality + 'p' : ''
+        };
     }
 
     function formatRating(value) {
