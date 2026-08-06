@@ -118,6 +118,8 @@
 
             Lampa.Component.add('yani_detail', Detail);
 
+            installFullRating();
+
             console.log('[Lampa Yani] Extension registered');
         }
     };
@@ -305,5 +307,28 @@
             });
             Lampa.Select.show({title: 'YummyAnime Comments', items: items});
         }).catch(function () { Lampa.Noty.show('Не удалось загрузить комментарии'); });
+    }
+
+    function installFullRating() {
+        if (window.yummyanime_full_rating_ready || !Lampa.Listener) return;
+        window.yummyanime_full_rating_ready = true;
+
+        Lampa.Listener.follow('full', function (event) {
+            if (event.type !== 'complite') return;
+            var movie = event.data && event.data.movie ? event.data.movie : event.object && event.object.card_data;
+            var title = movie && (movie.title || movie.name || movie.original_title || movie.original_name);
+            if (!title) return;
+
+            LampaYaniApi.search(title, {limit: 1}).then(function (payload) {
+                var anime = LampaYaniApi.normalize(payload)[0];
+                if (!anime || !anime.rating) return;
+                var rating = typeof anime.rating === 'object' ? anime.rating.average : anime.rating;
+                if (!rating) return;
+                var render = event.object.activity.render();
+                if ($('.rate--yummyanime', render).length) return;
+                var block = $('<div class="full-start__rate rate--yummyanime"><div>' + Number(rating).toFixed(1) + '</div><div>YummyAnime</div></div>');
+                $('.full-start-new__rate-line', render).prepend(block);
+            }).catch(function () {});
+        });
     }
 }(window));
