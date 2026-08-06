@@ -86,6 +86,18 @@
 .yani-detail__order-name { font-weight: 600; }
 .yani-detail__order-year, .yani-detail__order-relation { opacity: .7; }
 
+.yani-detail__extra { margin-top: 1.5em; }
+.yani-detail__extra-title { margin-bottom: .65em; font-size: 1.35em; font-weight: 600; }
+.yani-detail__recommendations-list { display: flex; gap: .65em; max-width: 100%; overflow-x: auto; padding: .25em .1em .7em; }
+.yani-detail__recommendation { flex: 0 0 8em; padding-bottom: .45em; border-radius: .45em; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.yani-detail__recommendation.focus { outline: .16em solid #ef6470; background: #fff; color: #111; }
+.yani-detail__recommendation-poster { display: block; width: 8em; height: 11em; object-fit: cover; }
+.yani-detail__recommendation-title { padding: .35em .45em 0; font-size: .82em; font-weight: 600; line-height: 1.2; }
+.yani-detail__recommendation-year { padding: .2em .45em 0; font-size: .75em; opacity: .65; }
+.yani-detail__trailers-list { display: grid; gap: .45em; }
+.yani-detail__trailer { padding: .7em .85em; border-radius: .45em; background: rgba(255, 255, 255, .08); }
+.yani-detail__trailer.focus { background: #fff; color: #111; outline: .16em solid #ef6470; }
+
 @media (max-width: 700px) {
     .yani-detail { gap: 1em; padding: 1em; }
     .yani-detail__poster { width: 10em; }

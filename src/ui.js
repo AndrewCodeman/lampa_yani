@@ -826,6 +826,8 @@
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
+            loadDetailRecommendations(data, info);
+            loadDetailTrailers(data, info);
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
@@ -1329,6 +1331,59 @@
         });
         section.append(list);
         return section;
+    }
+
+    function loadDetailRecommendations(data, container) {
+        var section = $('<div class="yani-detail__extra yani-detail__recommendations"><div class="yani-detail__extra-title"></div></div>');
+        $('.yani-detail__extra-title', section).text(t('recommendations'));
+        var list = $('<div class="yani-detail__recommendations-list"></div>');
+        section.append(list);
+        container.append(section);
+        LampaYaniApi.recommendations(data.yani_id).then(function (payload) {
+            var items = LampaYaniApi.normalize(payload).slice(0, 12);
+            if (!items.length) return section.remove();
+            items.forEach(function (item) {
+                var card = toCard(item);
+                var row = $('<div class="yani-detail__recommendation selector"></div>');
+                row.append($('<img class="yani-detail__recommendation-poster" alt="">').attr('src', card.poster || ''));
+                row.append($('<div class="yani-detail__recommendation-title"></div>').text(card.title));
+                if (card.release_date) row.append($('<div class="yani-detail__recommendation-year"></div>').text(card.release_date));
+                row.on('hover:enter', function () { openYummyDetail(card, true); });
+                list.append(row);
+            });
+        }).catch(function () { section.remove(); });
+    }
+
+    function loadDetailTrailers(data, container) {
+        var section = $('<div class="yani-detail__extra yani-detail__trailers"><div class="yani-detail__extra-title"></div></div>');
+        $('.yani-detail__extra-title', section).text(t('trailers'));
+        var list = $('<div class="yani-detail__trailers-list"></div>');
+        section.append(list);
+        container.append(section);
+        LampaYaniApi.trailers(data.yani_id).then(function (payload) {
+            var items = payload && payload.response ? payload.response : payload;
+            items = Array.isArray(items) ? items : [];
+            if (!items.length) return section.remove();
+            items.forEach(function (trailer, index) {
+                var title = trailer.title || trailer.name || ('Trailer ' + (index + 1));
+                var url = trailer.iframe_url || trailer.url || trailer.video_url || trailer.link;
+                var row = $('<div class="yani-detail__trailer selector"></div>').text('▶ ' + title);
+                if (url) row.on('hover:enter', function () { openTrailer(url, title); });
+                list.append(row);
+            });
+        }).catch(function () { section.remove(); });
+    }
+
+    function openTrailer(url, title) {
+        url = normalizeVideoUrl(url);
+        if (!url) return;
+        if (Lampa.Iframe && Lampa.Iframe.show) {
+            var enabledController = Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
+            var previousController = enabledController && enabledController.name;
+            Lampa.Iframe.show({url: url, onBack: function () { Lampa.Controller.toggle(previousController || 'content'); }});
+        } else {
+            Lampa.Activity.push({url: 'yani/trailer/' + encodeURIComponent(title), title: title, component: 'yani_player', iframe_url: url});
+        }
     }
 
     function copyParams(params) {
