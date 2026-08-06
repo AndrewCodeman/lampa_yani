@@ -119,6 +119,7 @@
 
             Lampa.Component.add('yani_detail', Detail);
             Lampa.Component.add('yani_account', Account);
+            Lampa.Component.add('yani_account_list', AccountList);
 
             Lampa.Component.add('yani_status', StatusDashboard);
             Lampa.Component.add('yani_player', IframePlayer);
@@ -399,13 +400,14 @@
 
             content.append($('<div class="yani-account__section-title"></div>').text(t('list_stats')));
             var listGrid = $('<div class="yani-account__lists"></div>');
-            stats.forEach(function (stat) {
-                var list = stat.list || {};
+            accountListDefinitions().forEach(function (definition) {
+                var stat = stats.filter(function (item) { return Number(item.list && item.list.id) === definition.id; })[0] || {};
                 var tile = $('<div class="yani-account__list selector"></div>');
-                tile.append($('<div class="yani-account__list-title"></div>').text(list.title || t('list')));
-                tile.append($('<div class="yani-account__list-count"></div>').text(String(counts[list.id] || 0) + ' ' + t('anime_count')));
+                tile.append($('<div class="yani-account__list-title"></div>').text(definition.title));
+                tile.append($('<div class="yani-account__list-count"></div>').text(String(counts[definition.id] || 0) + ' ' + t('anime_count')));
                 tile.append($('<div class="yani-account__list-time"></div>').text(t('total_time') + ': ' + formatWatchTime(stat.seconds)));
                 bindAccountFocus(tile);
+                tile.on('hover:enter', function () { openAccountList(definition, lists); });
                 listGrid.append(tile);
             });
             content.append(listGrid);
@@ -443,6 +445,40 @@
 
         this.render = function (js) { return js ? html[0] : html; };
         this.destroy = function () { scroll.destroy(); html.remove(); };
+    }
+
+    function accountListDefinitions() {
+        var favorites = LampaYaniI18n.getLanguage() === 'en' ? 'Favorites' : 'Любимые';
+        return [
+            {id: 0, key: 'watching', title: t('watching')},
+            {id: 1, key: 'planned', title: t('planned')},
+            {id: 2, key: 'completed', title: t('completed')},
+            {id: 3, key: 'dropped', title: t('dropped')},
+            {id: 4, key: 'favorites', title: favorites},
+            {id: 5, key: 'postponed', title: t('postponed')}
+        ];
+    }
+
+    function openAccountList(definition, items) {
+        var selected = (items || []).filter(function (item) {
+            var userList = item.user && item.user.list;
+            return definition.id === 4 ? Boolean(userList && userList.is_fav) : Boolean(userList && userList.list && Number(userList.list.id) === definition.id);
+        });
+        Lampa.Activity.push({
+            url: 'yani/account/list/' + definition.key,
+            title: 'YummyAnime · ' + definition.title,
+            component: 'yani_account_list',
+            items: selected
+        });
+    }
+
+    function AccountList(object) {
+        var comp = new Lampa.InteractionCategory(object);
+        comp.create = function () {
+            this.build({results: (object.items || []).map(toCard), total_pages: 1, title: object.title});
+        };
+        comp.cardRender = function (page, element, card) { bindYummyCard(element, card); };
+        return comp;
     }
 
     function formatAccountDate(timestamp) {
