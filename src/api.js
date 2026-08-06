@@ -10,7 +10,7 @@
         var cacheTtl = config.cacheTtl || 300000;
 
         if (config.applicationHeader) headers['X-Application'] = config.applicationHeader;
-        if (!options.publicOnly && LampaYaniAuth && LampaYaniAuth.token()) headers.Authorization = 'Bearer ' + LampaYaniAuth.token();
+        if (options.auth && LampaYaniAuth && LampaYaniAuth.token()) headers.Authorization = 'Bearer ' + LampaYaniAuth.token();
         headers.Accept = 'application/json';
         headers.Lang = (Lampa.Storage && Lampa.Storage.get('language')) || 'ru';
         if (options.token) headers.Authorization = 'Bearer ' + options.token;
@@ -77,22 +77,24 @@
         rate: function (id, value) {
             return request('/anime/' + encodeURIComponent(id) + '/rate', {
                 method: 'PUT',
+                auth: true,
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({rate: value})
             });
         },
         removeRate: function (id) {
-            return request('/anime/' + encodeURIComponent(id) + '/rate', {method: 'DELETE'});
+            return request('/anime/' + encodeURIComponent(id) + '/rate', {method: 'DELETE', auth: true});
         },
         addFavorite: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/list/fav', {
                 method: 'PUT',
+                auth: true,
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({date: Math.floor(Date.now() / 1000)})
             });
         },
         removeFavorite: function (id) {
-            return request('/anime/' + encodeURIComponent(id) + '/list/fav', {method: 'DELETE'});
+            return request('/anime/' + encodeURIComponent(id) + '/list/fav', {method: 'DELETE', auth: true});
         },
         addToList: function (id, list) {
             var listIds = {watching: 0, planned: 1, completed: 2, dropped: 3, postponed: 5};
@@ -100,6 +102,7 @@
             if (typeof listId !== 'number') return Promise.reject(new Error('Unknown YummyAnime list: ' + list));
             return request('/anime/' + encodeURIComponent(id) + '/list', {
                 method: 'PUT',
+                auth: true,
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({list: listId, date: Math.floor(Date.now() / 1000)})
             });
@@ -108,16 +111,16 @@
             return request('/comments/anime/' + encodeURIComponent(id) + '?limit=20&sort=new&skip=0');
         },
         profile: function () {
-            return request('/profile', {cache: false});
+            return request('/profile', {auth: true, cache: false});
         },
         userListStats: function (id) {
-            return request('/users/' + encodeURIComponent(id) + '/stats/lists', {cache: false});
+            return request('/users/' + encodeURIComponent(id) + '/stats/lists', {auth: true, cache: false});
         },
         userLists: function (id) {
-            return request('/users/' + encodeURIComponent(id) + '/lists', {cache: false});
+            return request('/users/' + encodeURIComponent(id) + '/lists', {auth: true, cache: false});
         },
         health: function () {
-            return request('/anime?limit=1', {publicOnly: true});
+            return request('/anime?limit=1');
         }
     };
 }(window));

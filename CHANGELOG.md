@@ -11,6 +11,7 @@
 - audited API routes and fixed JSON login plus numeric user-list IDs;
 - moved YummyAnime login, token refresh and logout to settings;
 - added read-only YummyAnime account profile and list statistics page;
+- isolated public catalog requests from stale or invalid account Bearer tokens;
 - ratings, favorites and user lists;
 - YummyAnime account login and token refresh;
 - read-only comments;
