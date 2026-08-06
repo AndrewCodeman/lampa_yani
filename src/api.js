@@ -8,6 +8,7 @@
         var headers = options.headers || {};
 
         if (config.applicationHeader) headers['X-Application'] = config.applicationHeader;
+        if (!options.publicOnly && LampaYaniAuth && LampaYaniAuth.token()) headers.Authorization = 'Bearer ' + LampaYaniAuth.token();
         headers.Accept = 'application/json';
         headers.Lang = (Lampa.Storage && Lampa.Storage.get('language')) || 'ru';
         if (options.token) headers.Authorization = 'Bearer ' + options.token;

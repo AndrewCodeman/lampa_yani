@@ -3,6 +3,7 @@
 
     var scripts = [
         'src/config.js',
+        'src/auth.js',
         'src/api.js',
         'src/catalog.js',
         'src/ui.js'

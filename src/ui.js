@@ -79,6 +79,24 @@
                 });
             });
 
+            Lampa.Menu.addButton('icon-user', 'Yani Account', function () {
+                var auth = LampaYaniAuth.get();
+                if (auth.token) {
+                    Lampa.Select.show({title: 'Yani Account', items: [{title: 'Log out'}], onSelect: function () {
+                        LampaYaniAuth.clear();
+                        Lampa.Noty.show('Вы вышли из Yani');
+                    }});
+                    return;
+                }
+                Lampa.Input.show({title: 'Yani Login', value: '', onEnter: function (login) {
+                    Lampa.Input.show({title: 'Yani Password', value: '', onEnter: function (password) {
+                        LampaYaniAuth.login(login, password).then(function () {
+                            Lampa.Noty.show('Вход в Yani выполнен');
+                        }).catch(function () { Lampa.Noty.show('Ошибка входа в Yani'); });
+                    }});
+                }});
+            });
+
             Lampa.Component.add('yani_catalog', function (object) {
                 var comp = new Lampa.InteractionCategory(object);
                 comp.create = function () {
