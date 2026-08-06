@@ -63,6 +63,9 @@
         },
         removeRate: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/rate', {method: 'DELETE'});
+        },
+        health: function () {
+            return request('/anime?limit=1', {publicOnly: true});
         }
     };
 }(window));

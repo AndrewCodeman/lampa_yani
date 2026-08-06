@@ -8,6 +8,8 @@
                 return;
             }
 
+            addSettings();
+
             Lampa.Menu.addButton('icon-yani', 'Anime', function () {
                 Lampa.Activity.push({
                     url: 'yani',
@@ -204,5 +206,29 @@
             overview: item.description || item.synopsis || '',
             yani_id: item.id
         };
+    }
+
+    function addSettings() {
+        if (!Lampa.Settings || !Lampa.Settings.addComponent) return;
+
+        Lampa.Settings.addComponent({
+            component: 'yani',
+            icon: '<div class="icon-yani"></div>',
+            name: 'YummyAnime'
+        });
+
+        Lampa.Settings.addParam({
+            component: 'yani',
+            param: {name: 'yani_api_check', type: 'trigger', default: false},
+            field: {name: 'Check Yani API', description: 'Проверить доступность API'},
+            onChange: function () {
+                LampaYaniApi.health().then(function () {
+                    Lampa.Noty.show('Yani API работает');
+                }).catch(function (error) {
+                    console.error('[Lampa Yani]', error);
+                    Lampa.Noty.show('Yani API недоступен или токен неверный');
+                });
+            }
+        });
     }
 }(window));
