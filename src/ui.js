@@ -60,29 +60,14 @@
                             Lampa.Noty.show('Не удалось загрузить каталог Yani');
                         });
                 };
-                comp.cardRender = function (data, element, card) {
+                comp.cardRender = function (page, element, card) {
                     card.onEnter = function () {
-                        if (!data.yani_id) return;
-                        Promise.all([
-                            LampaYaniApi.detail(data.yani_id),
-                            LampaYaniApi.trailers(data.yani_id).catch(function () { return {}; }),
-                            LampaYaniApi.recommendations(data.yani_id).catch(function () { return {}; })
-                        ]).then(function (parts) {
-                            var payload = parts[0];
-                            var detail = payload.response || payload;
-                            var cardData = toCard(detail.anime || detail);
-                            cardData.yani_id = data.yani_id;
-                            cardData.trailers = LampaYaniApi.normalize(parts[1]);
-                            cardData.recommendations = LampaYaniApi.normalize(parts[2]);
-                            Lampa.Activity.push({
-                                url: 'yani/detail/' + data.yani_id,
-                                title: cardData.title,
-                                component: 'full',
-                                card_data: cardData
-                            });
-                        }).catch(function () {
-                            var query = data.title || data.name;
-                            if (query && Lampa.Search && Lampa.Search.open) Lampa.Search.open(query);
+                        if (!element.yani_id) return;
+                        Lampa.Activity.push({
+                            url: 'yani/detail/' + element.yani_id,
+                            title: element.title,
+                            component: 'yani_detail',
+                            card: element
                         });
                     };
                     card.onMenu = function () {
@@ -90,15 +75,15 @@
                             Lampa.Noty.show('Сначала войдите в Yani Account');
                             return;
                         }
-                        if (!data.yani_id) return;
+                        if (!element.yani_id) return;
                         Lampa.Select.show({
                             title: 'Оценка Yani',
                             items: [{title: 'Add to Favorites', action: 'favorite'}, {title: 'Watching', action: 'watching'}, {title: 'Completed', action: 'completed'}, {title: 'Planned', action: 'planned'}, {title: 'Comments', action: 'comments'}].concat([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
                                 return {title: value + '/10', value: value};
                             })),
                             onSelect: function (item) {
-                                if (item.action === 'comments') return commentsMenu(data.yani_id);
-                                var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(data.yani_id) : item.action ? LampaYaniApi.addToList(data.yani_id, item.action) : LampaYaniApi.rate(data.yani_id, item.value);
+                                if (item.action === 'comments') return commentsMenu(element.yani_id);
+                                var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(element.yani_id) : item.action ? LampaYaniApi.addToList(element.yani_id, item.action) : LampaYaniApi.rate(element.yani_id, item.value);
                                 action.then(function () {
                                     Lampa.Noty.show('Изменения сохранены в YummyAnime');
                                 }).catch(function (error) {
@@ -130,6 +115,8 @@
                 };
                 return comp;
             });
+
+            Lampa.Component.add('yani_detail', Detail);
 
             console.log('[Lampa Yani] Extension registered');
         }
@@ -191,6 +178,42 @@
         this.destroy = function () { scroll.destroy(); html.remove(); };
     }
 
+    function Detail(object) {
+        var data = object.card || {};
+        var html = $('<div class="yani-detail"></div>');
+        var button;
+
+        this.create = function () {
+            var poster = $('<img class="yani-detail__poster">').attr('src', data.img || data.poster || '');
+            var info = $('<div class="yani-detail__info"></div>');
+            info.append($('<div class="yani-detail__title"></div>').text(data.title || 'YummyAnime'));
+            info.append($('<div class="yani-detail__meta"></div>').text((data.release_date || '') + '  ★ ' + Number(data.vote_average || 0).toFixed(1) + '  (' + (data.vote_count || 0) + ')'));
+            info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
+            button = $('<div class="yani-detail__button selector">Открыть в поиске Lampa</div>');
+            button.on('hover:enter', function () {
+                if (Lampa.Search && Lampa.Search.open) Lampa.Search.open(data.title || '');
+                else Lampa.Controller.toggle('search');
+            });
+            info.append(button);
+            html.append(poster, info);
+            this.activity.loader(false);
+            this.activity.toggle();
+        };
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () { Lampa.Controller.collectionSet(html); Lampa.Controller.collectionFocus(button, html); },
+                left: function () { Lampa.Controller.toggle('menu'); },
+                up: function () { Lampa.Controller.toggle('head'); },
+                back: this.back
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? html[0] : html; };
+        this.destroy = function () { html.remove(); };
+    }
+
     function openGenres() {
         LampaYaniApi.genres().then(function (payload) {
             var genres = LampaYaniApi.normalize(payload);
@@ -232,17 +255,21 @@
         var title = item.title || item.name || item.russian || item.original_title || 'Без названия';
         var poster = item.cover || item.image || item.poster_url || '';
         if (!poster && item.poster) poster = item.poster.fullsize || item.poster.medium || item.poster.original || '';
+        if (poster.indexOf('//') === 0) poster = 'https:' + poster;
+        var rating = typeof item.rating === 'object' ? item.rating.average : item.rating;
+        var votes = typeof item.rating === 'object' ? item.rating.counters : item.rating_counters;
         return {
             title: title,
             original_title: item.original_title || item.japanese || title,
             poster: poster,
             img: poster,
             release_date: String(item.year || item.release_year || ''),
-            vote_average: item.rating || item.score || item.rating_score || 0,
-            vote_count: item.rating_counters || item.votes || item.vote_count || 0,
-            yani_rating: item.rating || item.score || item.rating_score || 0,
+            vote_average: rating || item.score || item.rating_score || 0,
+            vote_count: votes || item.votes || item.vote_count || 0,
+            yani_rating: rating || item.score || item.rating_score || 0,
             overview: item.description || item.synopsis || '',
-            yani_id: item.id
+            yani_id: item.anime_id || item.id,
+            yani_url: item.anime_url || item.url
         };
     }
 

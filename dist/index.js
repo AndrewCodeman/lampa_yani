@@ -13,7 +13,7 @@ function pluginYummyAnime() {
     }
 
     var style = document.createElement('style');
-    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.2em;\n    padding: 2em;\n}\n\n.yani-home__item {\n    min-height: 8em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n}\n\n.yani-home__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-home__icon {\n    font-size: 2.4em;\n}\n\n.yani-home__title {\n    font-size: 1.35em;\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); }\n}\n";
+    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.2em;\n    padding: 2em;\n}\n\n.yani-home__item {\n    min-height: 8em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n}\n\n.yani-home__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-home__icon {\n    font-size: 2.4em;\n}\n\n.yani-home__title {\n    font-size: 1.35em;\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); }\n}\n\n.yani-detail {\n    display: flex;\n    gap: 2.5em;\n    padding: 2em;\n}\n\n.yani-detail__poster {\n    width: 16em;\n    max-height: 24em;\n    object-fit: cover;\n    border-radius: 0.8em;\n}\n\n.yani-detail__info { max-width: 48em; }\n.yani-detail__title { font-size: 2.2em; font-weight: 600; }\n.yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }\n.yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }\n.yani-detail__button { display: inline-block; padding: 0.8em 1.2em; border-radius: 0.5em; background: rgba(255,255,255,.15); }\n.yani-detail__button.focus { background: #fff; color: #111; }\n";
     document.head.appendChild(style);
 
 (function (window) {
@@ -248,29 +248,14 @@ function pluginYummyAnime() {
                             Lampa.Noty.show('Не удалось загрузить каталог Yani');
                         });
                 };
-                comp.cardRender = function (data, element, card) {
+                comp.cardRender = function (page, element, card) {
                     card.onEnter = function () {
-                        if (!data.yani_id) return;
-                        Promise.all([
-                            LampaYaniApi.detail(data.yani_id),
-                            LampaYaniApi.trailers(data.yani_id).catch(function () { return {}; }),
-                            LampaYaniApi.recommendations(data.yani_id).catch(function () { return {}; })
-                        ]).then(function (parts) {
-                            var payload = parts[0];
-                            var detail = payload.response || payload;
-                            var cardData = toCard(detail.anime || detail);
-                            cardData.yani_id = data.yani_id;
-                            cardData.trailers = LampaYaniApi.normalize(parts[1]);
-                            cardData.recommendations = LampaYaniApi.normalize(parts[2]);
-                            Lampa.Activity.push({
-                                url: 'yani/detail/' + data.yani_id,
-                                title: cardData.title,
-                                component: 'full',
-                                card_data: cardData
-                            });
-                        }).catch(function () {
-                            var query = data.title || data.name;
-                            if (query && Lampa.Search && Lampa.Search.open) Lampa.Search.open(query);
+                        if (!element.yani_id) return;
+                        Lampa.Activity.push({
+                            url: 'yani/detail/' + element.yani_id,
+                            title: element.title,
+                            component: 'yani_detail',
+                            card: element
                         });
                     };
                     card.onMenu = function () {
@@ -278,15 +263,15 @@ function pluginYummyAnime() {
                             Lampa.Noty.show('Сначала войдите в Yani Account');
                             return;
                         }
-                        if (!data.yani_id) return;
+                        if (!element.yani_id) return;
                         Lampa.Select.show({
                             title: 'Оценка Yani',
                             items: [{title: 'Add to Favorites', action: 'favorite'}, {title: 'Watching', action: 'watching'}, {title: 'Completed', action: 'completed'}, {title: 'Planned', action: 'planned'}, {title: 'Comments', action: 'comments'}].concat([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
                                 return {title: value + '/10', value: value};
                             })),
                             onSelect: function (item) {
-                                if (item.action === 'comments') return commentsMenu(data.yani_id);
-                                var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(data.yani_id) : item.action ? LampaYaniApi.addToList(data.yani_id, item.action) : LampaYaniApi.rate(data.yani_id, item.value);
+                                if (item.action === 'comments') return commentsMenu(element.yani_id);
+                                var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(element.yani_id) : item.action ? LampaYaniApi.addToList(element.yani_id, item.action) : LampaYaniApi.rate(element.yani_id, item.value);
                                 action.then(function () {
                                     Lampa.Noty.show('Изменения сохранены в YummyAnime');
                                 }).catch(function (error) {
@@ -318,6 +303,8 @@ function pluginYummyAnime() {
                 };
                 return comp;
             });
+
+            Lampa.Component.add('yani_detail', Detail);
 
             console.log('[Lampa Yani] Extension registered');
         }
@@ -379,6 +366,42 @@ function pluginYummyAnime() {
         this.destroy = function () { scroll.destroy(); html.remove(); };
     }
 
+    function Detail(object) {
+        var data = object.card || {};
+        var html = $('<div class="yani-detail"></div>');
+        var button;
+
+        this.create = function () {
+            var poster = $('<img class="yani-detail__poster">').attr('src', data.img || data.poster || '');
+            var info = $('<div class="yani-detail__info"></div>');
+            info.append($('<div class="yani-detail__title"></div>').text(data.title || 'YummyAnime'));
+            info.append($('<div class="yani-detail__meta"></div>').text((data.release_date || '') + '  ★ ' + Number(data.vote_average || 0).toFixed(1) + '  (' + (data.vote_count || 0) + ')'));
+            info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
+            button = $('<div class="yani-detail__button selector">Открыть в поиске Lampa</div>');
+            button.on('hover:enter', function () {
+                if (Lampa.Search && Lampa.Search.open) Lampa.Search.open(data.title || '');
+                else Lampa.Controller.toggle('search');
+            });
+            info.append(button);
+            html.append(poster, info);
+            this.activity.loader(false);
+            this.activity.toggle();
+        };
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () { Lampa.Controller.collectionSet(html); Lampa.Controller.collectionFocus(button, html); },
+                left: function () { Lampa.Controller.toggle('menu'); },
+                up: function () { Lampa.Controller.toggle('head'); },
+                back: this.back
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? html[0] : html; };
+        this.destroy = function () { html.remove(); };
+    }
+
     function openGenres() {
         LampaYaniApi.genres().then(function (payload) {
             var genres = LampaYaniApi.normalize(payload);
@@ -420,17 +443,21 @@ function pluginYummyAnime() {
         var title = item.title || item.name || item.russian || item.original_title || 'Без названия';
         var poster = item.cover || item.image || item.poster_url || '';
         if (!poster && item.poster) poster = item.poster.fullsize || item.poster.medium || item.poster.original || '';
+        if (poster.indexOf('//') === 0) poster = 'https:' + poster;
+        var rating = typeof item.rating === 'object' ? item.rating.average : item.rating;
+        var votes = typeof item.rating === 'object' ? item.rating.counters : item.rating_counters;
         return {
             title: title,
             original_title: item.original_title || item.japanese || title,
             poster: poster,
             img: poster,
             release_date: String(item.year || item.release_year || ''),
-            vote_average: item.rating || item.score || item.rating_score || 0,
-            vote_count: item.rating_counters || item.votes || item.vote_count || 0,
-            yani_rating: item.rating || item.score || item.rating_score || 0,
+            vote_average: rating || item.score || item.rating_score || 0,
+            vote_count: votes || item.votes || item.vote_count || 0,
+            yani_rating: rating || item.score || item.rating_score || 0,
             overview: item.description || item.synopsis || '',
-            yani_id: item.id
+            yani_id: item.anime_id || item.id,
+            yani_url: item.anime_url || item.url
         };
     }
 
