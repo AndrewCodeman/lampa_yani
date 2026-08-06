@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.8.0',
+            version: '0.9.0',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.8.0',
+        version: '0.9.0',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
@@ -39,7 +39,7 @@ function pluginYummyAnime() {
             login_required: 'Войдите в YummyAnime через настройки YummyAnime', actions: 'Действия YummyAnime', favorite: 'Добавить в любимые', watching: 'Смотрю', planned: 'В планах', completed: 'Просмотрено', dropped: 'Брошено', postponed: 'Отложено', comments: 'Комментарии', saved: 'Изменения сохранены в YummyAnime', save_error: 'Не удалось сохранить оценку',
             not_logged_in: 'Вход не выполнен', login_hint: 'Откройте Настройки → YummyAnime и выберите «Войти в YummyAnime».', account_load_error: 'Не удалось загрузить аккаунт YummyAnime', account_retry: 'Обновите токен или выполните вход заново в Настройки → YummyAnime.', banned: 'Аккаунт заблокирован', registration: 'Регистрация', last_visit: 'Последний визит', roles: 'Роли', user: 'Пользователь', messages: 'Сообщения', unread: 'непрочитанных', notifications: 'Уведомления', total_lists: 'Всего в списках', list_stats: 'Статистика списков', list: 'Список', anime_count: 'аниме', total_time: 'Общее время', days_short: 'д', hours_short: 'ч',
             period_3hour: '3 часа', period_day: 'День', period_week: 'Неделя', period_month: 'Месяц', all_up: 'Все системы работают', all_down: 'Сервисы недоступны', no_monitoring: 'Нет данных мониторинга', degraded: 'Возникли неполадки', checks: 'замеров', availability: 'Доступность', average_load: 'Средняя загрузка', errors: 'Ошибок', updated: 'Обновлено', up: 'Работает', unstable: 'Нестабильно', down: 'Недоступно', source: 'Источник', period: 'период', snapshot_notice: 'снимок обновляется каждые 5 минут', refresh_status: 'Обновить статус', refreshing_status: 'Обновляем статус YummyAnime', status_load_error: 'Не удалось загрузить статус YummyAnime', status_error_hint: 'Данные мониторинга временно недоступны. Это не означает, что сам плагин не работает.', milliseconds: 'мс', domain_old: 'Старый сайт', domain_old_mirror: 'Старый сайт (зеркало)', domain_new: 'Новый сайт', domain_new_mirror: 'Новый сайт (зеркало)', domain_api: 'YummyAnime API', domain_waf: 'Защита',
-            schedule_load_error: 'Не удалось загрузить расписание YummyAnime', no_releases: 'Нет запланированных выпусков', local_time: 'местное время', today: 'Сегодня', tomorrow: 'Завтра', release: 'Релиз', episode: 'Серия', of: 'из', watch: 'Смотреть', continue_episode: 'Продолжить с серии', choose_voice: 'Выберите озвучку и источник', choose_episode: 'Выберите серию', choose_anime: 'Выберите аниме YummyAnime', no_yummy_match: 'Аниме не найдено в YummyAnime', no_videos: 'Для этого аниме пока нет доступных серий', videos_load_error: 'Не удалось загрузить серии YummyAnime', player: 'Плеер', player_preference: 'Предпочтительный плеер', player_preference_description: 'Выбранный источник будет показан первым; остальные варианты останутся доступны', player_last: 'Последний выбранный', player_ask: 'Всегда по алфавиту', minutes_short: 'мин', views_short: 'просм.', thousand_short: ' тыс.', million_short: ' млн', clear_history: 'Очистить историю просмотра', clear_history_description: 'Удалить сохранённые последние серии YummyAnime на этом устройстве', history_cleared: 'История просмотра YummyAnime очищена', open_lampa_search: 'Открыть в поиске Lampa',
+            schedule_load_error: 'Не удалось загрузить расписание YummyAnime', no_releases: 'Нет запланированных выпусков', local_time: 'местное время', today: 'Сегодня', tomorrow: 'Завтра', release: 'Релиз', episode: 'Серия', of: 'из', watch: 'Смотреть', continue_episode: 'Продолжить с серии', choose_voice: 'Выберите озвучку и источник', choose_episode: 'Выберите серию', choose_anime: 'Выберите аниме YummyAnime', no_yummy_match: 'Аниме не найдено в YummyAnime', lampa_card_fallback: 'Карточка Lampa не найдена — открыты данные YummyAnime', no_videos: 'Для этого аниме пока нет доступных серий', videos_load_error: 'Не удалось загрузить серии YummyAnime', player: 'Плеер', player_preference: 'Предпочтительный плеер', player_preference_description: 'Выбранный источник будет показан первым; остальные варианты останутся доступны', player_last: 'Последний выбранный', player_ask: 'Всегда по алфавиту', minutes_short: 'мин', views_short: 'просм.', thousand_short: ' тыс.', million_short: ' млн', clear_history: 'Очистить историю просмотра', clear_history_description: 'Удалить сохранённые последние серии YummyAnime на этом устройстве', history_cleared: 'История просмотра YummyAnime очищена', open_lampa_search: 'Открыть в поиске Lampa',
             genres_empty: 'YummyAnime не вернул список жанров', genres_title: 'Жанры YummyAnime', genres_load_error: 'Не удалось загрузить жанры YummyAnime', search_title: 'Поиск YummyAnime', untitled: 'Без названия', ratings_count: 'оценок',
             language_name: 'Язык / Language', language_description: 'Язык интерфейса расширения YummyAnime', language_changed: 'Язык YummyAnime изменён. Откройте расширение заново.',
             login_name: 'Войти в YummyAnime', login_description: 'Вход по никнейму или email и паролю YummyAnime', refresh_name: 'Обновить токен YummyAnime', refresh_description: 'Обновить действующий Bearer-токен аккаунта', login_first: 'Сначала войдите в YummyAnime', token_refreshed: 'Токен YummyAnime обновлён', token_refresh_error: 'Не удалось обновить токен YummyAnime', logout_name: 'Выйти из YummyAnime', logout_description: 'Завершить сессию и удалить локальный токен', not_logged: 'Вход в YummyAnime не выполнен', logged_out: 'Вы вышли из YummyAnime', token_removed: 'Локальный токен YummyAnime удалён', api_check_name: 'Проверить YummyAnime API', api_check_description: 'Проверить доступность API и публичный токен приложения', api_ok: 'YummyAnime API работает', api_error: 'YummyAnime API недоступен или публичный токен неверный', email_prompt: 'Никнейм или Email', email_required: 'Введите никнейм или email YummyAnime', password_prompt: 'Пароль YummyAnime', password_required: 'Введите пароль YummyAnime', login_ok: 'Вход в YummyAnime выполнен', login_error: 'Ошибка входа в YummyAnime', input_unavailable: 'Ввод недоступен в этой версии Lampa', comments_title: 'Комментарии YummyAnime', comments_error: 'Не удалось загрузить комментарии', kinopoisk: 'Кинопоиск'
@@ -50,7 +50,7 @@ function pluginYummyAnime() {
             login_required: 'Sign in to YummyAnime in YummyAnime settings', actions: 'YummyAnime actions', favorite: 'Add to favorites', watching: 'Watching', planned: 'Planned', completed: 'Completed', dropped: 'Dropped', postponed: 'On hold', comments: 'Comments', saved: 'Changes saved to YummyAnime', save_error: 'Failed to save the rating',
             not_logged_in: 'Not signed in', login_hint: 'Open Settings → YummyAnime and select “Sign in to YummyAnime”.', account_load_error: 'Failed to load the YummyAnime account', account_retry: 'Refresh the token or sign in again under Settings → YummyAnime.', banned: 'Account is banned', registration: 'Registered', last_visit: 'Last visit', roles: 'Roles', user: 'User', messages: 'Messages', unread: 'unread', notifications: 'Notifications', total_lists: 'Total in lists', list_stats: 'List statistics', list: 'List', anime_count: 'anime', total_time: 'Total time', days_short: 'd', hours_short: 'h',
             period_3hour: '3 hours', period_day: 'Day', period_week: 'Week', period_month: 'Month', all_up: 'All systems operational', all_down: 'Services unavailable', no_monitoring: 'No monitoring data', degraded: 'Service disruption detected', checks: 'checks', availability: 'Availability', average_load: 'Average response', errors: 'Failures', updated: 'Updated', up: 'Operational', unstable: 'Degraded', down: 'Unavailable', source: 'Source', period: 'period', snapshot_notice: 'snapshot refreshes every 5 minutes', refresh_status: 'Refresh status', refreshing_status: 'Refreshing YummyAnime status', status_load_error: 'Failed to load YummyAnime status', status_error_hint: 'Monitoring data is temporarily unavailable. This does not mean that the plugin itself is not working.', milliseconds: 'ms', domain_old: 'Old website', domain_old_mirror: 'Old website (mirror)', domain_new: 'New website', domain_new_mirror: 'New website (mirror)', domain_api: 'YummyAnime API', domain_waf: 'Protection',
-            schedule_load_error: 'Failed to load the YummyAnime schedule', no_releases: 'No scheduled releases', local_time: 'local time', today: 'Today', tomorrow: 'Tomorrow', release: 'Release', episode: 'Episode', of: 'of', watch: 'Watch', continue_episode: 'Continue from episode', choose_voice: 'Choose dubbing and source', choose_episode: 'Choose episode', choose_anime: 'Choose YummyAnime title', no_yummy_match: 'Anime was not found on YummyAnime', no_videos: 'No episodes are currently available for this anime', videos_load_error: 'Failed to load YummyAnime episodes', player: 'Player', player_preference: 'Preferred player', player_preference_description: 'The selected source is listed first while all other variants remain available', player_last: 'Last selected', player_ask: 'Always alphabetical', minutes_short: 'min', views_short: 'views', thousand_short: 'K', million_short: 'M', clear_history: 'Clear playback history', clear_history_description: 'Remove saved last episodes for YummyAnime on this device', history_cleared: 'YummyAnime playback history cleared', open_lampa_search: 'Open in Lampa search',
+            schedule_load_error: 'Failed to load the YummyAnime schedule', no_releases: 'No scheduled releases', local_time: 'local time', today: 'Today', tomorrow: 'Tomorrow', release: 'Release', episode: 'Episode', of: 'of', watch: 'Watch', continue_episode: 'Continue from episode', choose_voice: 'Choose dubbing and source', choose_episode: 'Choose episode', choose_anime: 'Choose YummyAnime title', no_yummy_match: 'Anime was not found on YummyAnime', lampa_card_fallback: 'No Lampa card was found — YummyAnime details were opened', no_videos: 'No episodes are currently available for this anime', videos_load_error: 'Failed to load YummyAnime episodes', player: 'Player', player_preference: 'Preferred player', player_preference_description: 'The selected source is listed first while all other variants remain available', player_last: 'Last selected', player_ask: 'Always alphabetical', minutes_short: 'min', views_short: 'views', thousand_short: 'K', million_short: 'M', clear_history: 'Clear playback history', clear_history_description: 'Remove saved last episodes for YummyAnime on this device', history_cleared: 'YummyAnime playback history cleared', open_lampa_search: 'Open in Lampa search',
             genres_empty: 'YummyAnime returned no genres', genres_title: 'YummyAnime Genres', genres_load_error: 'Failed to load YummyAnime genres', search_title: 'YummyAnime Search', untitled: 'Untitled', ratings_count: 'ratings',
             language_name: 'Language / Язык', language_description: 'YummyAnime extension interface language', language_changed: 'YummyAnime language changed. Reopen the extension.',
             login_name: 'Sign in to YummyAnime', login_description: 'Sign in with your YummyAnime nickname or email and password', refresh_name: 'Refresh YummyAnime token', refresh_description: 'Refresh the current account Bearer token', login_first: 'Sign in to YummyAnime first', token_refreshed: 'YummyAnime token refreshed', token_refresh_error: 'Failed to refresh the YummyAnime token', logout_name: 'Sign out of YummyAnime', logout_description: 'End the session and remove the local token', not_logged: 'Not signed in to YummyAnime', logged_out: 'Signed out of YummyAnime', token_removed: 'Local YummyAnime token removed', api_check_name: 'Check YummyAnime API', api_check_description: 'Check the API and public application token', api_ok: 'YummyAnime API is operational', api_error: 'YummyAnime API is unavailable or the public token is invalid', email_prompt: 'Nickname or Email', email_required: 'Enter your YummyAnime nickname or email', password_prompt: 'YummyAnime password', password_required: 'Enter your YummyAnime password', login_ok: 'Signed in to YummyAnime', login_error: 'YummyAnime sign-in failed', input_unavailable: 'Input is unavailable in this Lampa version', comments_title: 'YummyAnime Comments', comments_error: 'Failed to load comments', kinopoisk: 'KinoPoisk'
@@ -392,12 +392,7 @@ function pluginYummyAnime() {
                     addCardRatings(element, card);
                     card.onEnter = function () {
                         if (!element.yani_id) return;
-                        Lampa.Activity.push({
-                            url: 'yani/detail/' + element.yani_id,
-                            title: element.title,
-                            component: 'yani_detail',
-                            card: element
-                        });
+                        openStandardLampaCard(element);
                     };
                     card.onMenu = function () {
                         if (!LampaYaniAuth.token()) {
@@ -916,12 +911,7 @@ function pluginYummyAnime() {
             });
             row.on('hover:enter', function () {
                 card.yani_schedule = formatEpisode(episodes) + ', ' + formatScheduleDateTime(releaseDate);
-                Lampa.Activity.push({
-                    url: 'yani/detail/' + card.yani_id,
-                    title: card.title,
-                    component: 'yani_detail',
-                    card: card
-                });
+                openStandardLampaCard(card);
             });
 
             return row;
@@ -1139,6 +1129,85 @@ function pluginYummyAnime() {
             console.error('[YummyAnime Search Source]', error);
             Lampa.Noty.show(t('catalog_load_error'));
         });
+    }
+
+    function openStandardLampaCard(card) {
+        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+        findStandardLampaCard(card).then(function (match) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            if (!match) return openYummyDetail(card, true);
+            match.card.yani_id = card.yani_id;
+            match.card.yani_card = card;
+            Lampa.Activity.push({
+                url: '',
+                component: 'full',
+                id: match.card.id,
+                method: match.method,
+                card: match.card,
+                source: 'tmdb'
+            });
+        }).catch(function (error) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            console.error('[YummyAnime Lampa Card]', error);
+            openYummyDetail(card, true);
+        });
+    }
+
+    function openYummyDetail(card, notifyFallback) {
+        if (notifyFallback && Lampa.Noty) Lampa.Noty.show(t('lampa_card_fallback'));
+        Lampa.Activity.push({
+            url: 'yani/detail/' + card.yani_id,
+            title: card.title,
+            component: 'yani_detail',
+            card: card
+        });
+    }
+
+    function findStandardLampaCard(card) {
+        var tmdb = Lampa.Api && Lampa.Api.sources && Lampa.Api.sources.tmdb;
+        if (!tmdb || !tmdb.get) return Promise.resolve(null);
+        var primaryTitle = card.title || '';
+        var originalTitle = card.original_title && card.original_title !== primaryTitle ? card.original_title : '';
+
+        return searchTmdbTitle(tmdb, primaryTitle).then(function (items) {
+            var match = bestStandardCard(items, card);
+            if (match || !originalTitle) return match;
+            return searchTmdbTitle(tmdb, originalTitle).then(function (originalItems) {
+                return bestStandardCard(originalItems, card);
+            });
+        });
+    }
+
+    function searchTmdbTitle(tmdb, title) {
+        if (!title) return Promise.resolve([]);
+        return Promise.all(['tv', 'movie'].map(function (method) {
+            return new Promise(function (resolve) {
+                tmdb.get('search/' + method, {query: title, page: 1, include_adult: false}, function (payload) {
+                    resolve((payload && payload.results || []).map(function (item) {
+                        return {card: item, method: method};
+                    }));
+                }, function () { resolve([]); }, {life: 60 * 24 * 7});
+            });
+        })).then(function (rows) { return rows[0].concat(rows[1]); });
+    }
+
+    function bestStandardCard(items, yaniCard) {
+        var expectedTitles = [yaniCard.title, yaniCard.original_title].map(normalizeMatchTitle).filter(Boolean);
+        var expectedYear = String(yaniCard.release_date || '').slice(0, 4);
+        items.forEach(function (entry) {
+            var candidate = entry.card || {};
+            var titles = [candidate.title, candidate.name, candidate.original_title, candidate.original_name].map(normalizeMatchTitle).filter(Boolean);
+            var exact = titles.some(function (title) { return expectedTitles.indexOf(title) >= 0; });
+            var partial = !exact && titles.some(function (title) {
+                return expectedTitles.some(function (expected) { return title.indexOf(expected) >= 0 || expected.indexOf(title) >= 0; });
+            });
+            var candidateYear = String(candidate.release_date || candidate.first_air_date || '').slice(0, 4);
+            entry.score = (exact ? 100 : partial ? 40 : 0) + (expectedYear && candidateYear === expectedYear ? 30 : 0);
+        });
+        items.sort(function (a, b) { return b.score - a.score; });
+        if (!items.length || items[0].score < 70) return null;
+        items[0].card.source = 'tmdb';
+        return items[0];
     }
 
     function findYummyMatches(movie) {
@@ -1375,7 +1444,9 @@ function pluginYummyAnime() {
             yani_ratings: ratings,
             overview: item.description || item.synopsis || '',
             yani_id: item.anime_id || item.id,
-            yani_url: item.anime_url || item.url
+            yani_url: item.anime_url || item.url,
+            yani_type: item.type || null,
+            yani_remote_ids: item.remote_ids || {}
         };
     }
 

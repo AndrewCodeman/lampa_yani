@@ -96,12 +96,7 @@
                     addCardRatings(element, card);
                     card.onEnter = function () {
                         if (!element.yani_id) return;
-                        Lampa.Activity.push({
-                            url: 'yani/detail/' + element.yani_id,
-                            title: element.title,
-                            component: 'yani_detail',
-                            card: element
-                        });
+                        openStandardLampaCard(element);
                     };
                     card.onMenu = function () {
                         if (!LampaYaniAuth.token()) {
@@ -620,12 +615,7 @@
             });
             row.on('hover:enter', function () {
                 card.yani_schedule = formatEpisode(episodes) + ', ' + formatScheduleDateTime(releaseDate);
-                Lampa.Activity.push({
-                    url: 'yani/detail/' + card.yani_id,
-                    title: card.title,
-                    component: 'yani_detail',
-                    card: card
-                });
+                openStandardLampaCard(card);
             });
 
             return row;
@@ -843,6 +833,85 @@
             console.error('[YummyAnime Search Source]', error);
             Lampa.Noty.show(t('catalog_load_error'));
         });
+    }
+
+    function openStandardLampaCard(card) {
+        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+        findStandardLampaCard(card).then(function (match) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            if (!match) return openYummyDetail(card, true);
+            match.card.yani_id = card.yani_id;
+            match.card.yani_card = card;
+            Lampa.Activity.push({
+                url: '',
+                component: 'full',
+                id: match.card.id,
+                method: match.method,
+                card: match.card,
+                source: 'tmdb'
+            });
+        }).catch(function (error) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            console.error('[YummyAnime Lampa Card]', error);
+            openYummyDetail(card, true);
+        });
+    }
+
+    function openYummyDetail(card, notifyFallback) {
+        if (notifyFallback && Lampa.Noty) Lampa.Noty.show(t('lampa_card_fallback'));
+        Lampa.Activity.push({
+            url: 'yani/detail/' + card.yani_id,
+            title: card.title,
+            component: 'yani_detail',
+            card: card
+        });
+    }
+
+    function findStandardLampaCard(card) {
+        var tmdb = Lampa.Api && Lampa.Api.sources && Lampa.Api.sources.tmdb;
+        if (!tmdb || !tmdb.get) return Promise.resolve(null);
+        var primaryTitle = card.title || '';
+        var originalTitle = card.original_title && card.original_title !== primaryTitle ? card.original_title : '';
+
+        return searchTmdbTitle(tmdb, primaryTitle).then(function (items) {
+            var match = bestStandardCard(items, card);
+            if (match || !originalTitle) return match;
+            return searchTmdbTitle(tmdb, originalTitle).then(function (originalItems) {
+                return bestStandardCard(originalItems, card);
+            });
+        });
+    }
+
+    function searchTmdbTitle(tmdb, title) {
+        if (!title) return Promise.resolve([]);
+        return Promise.all(['tv', 'movie'].map(function (method) {
+            return new Promise(function (resolve) {
+                tmdb.get('search/' + method, {query: title, page: 1, include_adult: false}, function (payload) {
+                    resolve((payload && payload.results || []).map(function (item) {
+                        return {card: item, method: method};
+                    }));
+                }, function () { resolve([]); }, {life: 60 * 24 * 7});
+            });
+        })).then(function (rows) { return rows[0].concat(rows[1]); });
+    }
+
+    function bestStandardCard(items, yaniCard) {
+        var expectedTitles = [yaniCard.title, yaniCard.original_title].map(normalizeMatchTitle).filter(Boolean);
+        var expectedYear = String(yaniCard.release_date || '').slice(0, 4);
+        items.forEach(function (entry) {
+            var candidate = entry.card || {};
+            var titles = [candidate.title, candidate.name, candidate.original_title, candidate.original_name].map(normalizeMatchTitle).filter(Boolean);
+            var exact = titles.some(function (title) { return expectedTitles.indexOf(title) >= 0; });
+            var partial = !exact && titles.some(function (title) {
+                return expectedTitles.some(function (expected) { return title.indexOf(expected) >= 0 || expected.indexOf(title) >= 0; });
+            });
+            var candidateYear = String(candidate.release_date || candidate.first_air_date || '').slice(0, 4);
+            entry.score = (exact ? 100 : partial ? 40 : 0) + (expectedYear && candidateYear === expectedYear ? 30 : 0);
+        });
+        items.sort(function (a, b) { return b.score - a.score; });
+        if (!items.length || items[0].score < 70) return null;
+        items[0].card.source = 'tmdb';
+        return items[0];
     }
 
     function findYummyMatches(movie) {
@@ -1079,7 +1148,9 @@
             yani_ratings: ratings,
             overview: item.description || item.synopsis || '',
             yani_id: item.anime_id || item.id,
-            yani_url: item.anime_url || item.url
+            yani_url: item.anime_url || item.url,
+            yani_type: item.type || null,
+            yani_remote_ids: item.remote_ids || {}
         };
     }
 

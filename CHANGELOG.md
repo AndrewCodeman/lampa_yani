@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.0 — 2026-08-06
+
+- YummyAnime catalog and schedule entries now open standard Lampa detail cards;
+- matched titles are resolved through Lampa's built-in TMDB source by title and year;
+- unmatched or ambiguous titles safely fall back to the YummyAnime detail view.
+
 ## 0.8.0 — 2026-08-06
 
 - added local playback history for the last 100 anime;
