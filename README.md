@@ -2,6 +2,8 @@
 
 Extension for Lampa powered by the YummyAnime (Yani) API.
 
+The plugin uses Lampa's standard `startPlugin()` entry point.
+
 Документация / Documentation:
 
 - [Русская версия](docs/README.ru.md)

@@ -1,5 +1,8 @@
-(function () {
+function startPlugin() {
     'use strict';
+
+    if (window.lampa_yani_started) return;
+    window.lampa_yani_started = true;
 
     var scripts = [
         'src/config.js',
@@ -31,4 +34,4 @@
     document.head.appendChild(style);
 
     load(0);
-}());
+}
