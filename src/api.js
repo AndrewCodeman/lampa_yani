@@ -45,6 +45,15 @@
         schedule: function (params) {
             return request('/anime/schedule?' + new URLSearchParams(params || {}));
         },
+        detail: function (id) {
+            return request('/anime/' + encodeURIComponent(id));
+        },
+        trailers: function (id) {
+            return request('/anime/' + encodeURIComponent(id) + '/trailers');
+        },
+        recommendations: function (id) {
+            return request('/anime/' + encodeURIComponent(id) + '/recommendations');
+        },
         rate: function (id, value) {
             return request('/anime/' + encodeURIComponent(id) + '/rate', {
                 method: 'PUT',

@@ -117,8 +117,28 @@
                 };
                 comp.cardRender = function (data, element, card) {
                     card.onEnter = function () {
-                        var query = data.title || data.name;
-                        if (query && Lampa.Search && Lampa.Search.open) Lampa.Search.open(query);
+                        if (!data.yani_id) return;
+                        Promise.all([
+                            LampaYaniApi.detail(data.yani_id),
+                            LampaYaniApi.trailers(data.yani_id).catch(function () { return {}; }),
+                            LampaYaniApi.recommendations(data.yani_id).catch(function () { return {}; })
+                        ]).then(function (parts) {
+                            var payload = parts[0];
+                            var detail = payload.response || payload;
+                            var cardData = toCard(detail.anime || detail);
+                            cardData.yani_id = data.yani_id;
+                            cardData.trailers = LampaYaniApi.normalize(parts[1]);
+                            cardData.recommendations = LampaYaniApi.normalize(parts[2]);
+                            Lampa.Activity.push({
+                                url: 'yani/detail/' + data.yani_id,
+                                title: cardData.title,
+                                component: 'full',
+                                card_data: cardData
+                            });
+                        }).catch(function () {
+                            var query = data.title || data.name;
+                            if (query && Lampa.Search && Lampa.Search.open) Lampa.Search.open(query);
+                        });
                     };
                     card.onMenu = function () {
                         if (!LampaYaniAuth.token()) {

@@ -56,3 +56,5 @@ MIT License. See [LICENSE](../LICENSE).
 - favorites and user lists;
 - Bearer token refresh through `/profile/token`;
 - comments: viewing, posting and replies.
+
+The detailed view uses Yani data, while trailers and recommendations are loaded through `/anime/{id}/trailers` and `/anime/{id}/recommendations`.
