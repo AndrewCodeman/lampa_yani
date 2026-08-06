@@ -429,3 +429,5 @@ function startPlugin() {
 
     window.LampaYani.register();
 }
+
+if (!window.lampa_yani_started) startPlugin();

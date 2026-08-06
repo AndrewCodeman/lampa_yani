@@ -35,3 +35,5 @@ function startPlugin() {
 
     load(0);
 }
+
+if (!window.lampa_yani_started) startPlugin();

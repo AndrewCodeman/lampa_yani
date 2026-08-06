@@ -17,6 +17,8 @@ const output = `function startPlugin() {
 ${body}
     window.LampaYani.register();
 }
+
+if (!window.lampa_yani_started) startPlugin();
 `;
 
 fs.mkdirSync(path.join(root, 'dist'), {recursive: true});
