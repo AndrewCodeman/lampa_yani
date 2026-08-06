@@ -44,6 +44,16 @@
         },
         schedule: function (params) {
             return request('/anime/schedule?' + new URLSearchParams(params || {}));
+        },
+        rate: function (id, value) {
+            return request('/anime/' + encodeURIComponent(id) + '/rate', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({rate: value})
+            });
+        },
+        removeRate: function (id) {
+            return request('/anime/' + encodeURIComponent(id) + '/rate', {method: 'DELETE'});
         }
     };
 }(window));

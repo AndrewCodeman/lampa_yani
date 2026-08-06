@@ -120,6 +120,27 @@
                         var query = data.title || data.name;
                         if (query && Lampa.Search && Lampa.Search.open) Lampa.Search.open(query);
                     };
+                    card.onMenu = function () {
+                        if (!LampaYaniAuth.token()) {
+                            Lampa.Noty.show('Сначала войдите в Yani Account');
+                            return;
+                        }
+                        if (!data.yani_id) return;
+                        Lampa.Select.show({
+                            title: 'Оценка Yani',
+                            items: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
+                                return {title: value + '/10', value: value};
+                            }),
+                            onSelect: function (item) {
+                                LampaYaniApi.rate(data.yani_id, item.value).then(function () {
+                                    Lampa.Noty.show('Оценка сохранена');
+                                }).catch(function (error) {
+                                    console.error('[Lampa Yani]', error);
+                                    Lampa.Noty.show('Не удалось сохранить оценку');
+                                });
+                            }
+                        });
+                    };
                 };
                 return comp;
             });
