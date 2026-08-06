@@ -70,6 +70,15 @@
                 });
             });
 
+            Lampa.Menu.addButton('icon-star', 'Top Rated', function () {
+                Lampa.Activity.push({
+                    url: 'yani/top-rated',
+                    title: 'Top Rated',
+                    component: 'yani_catalog',
+                    params: {limit: 30, sort: 'rating', sort_forward: false}
+                });
+            });
+
             Lampa.Component.add('yani_catalog', function (object) {
                 var comp = new Lampa.InteractionCategory(object);
                 comp.create = function () {
@@ -130,6 +139,8 @@
             img: poster,
             release_date: String(item.year || item.release_year || ''),
             vote_average: item.rating || item.score || item.rating_score || 0,
+            vote_count: item.rating_counters || item.votes || item.vote_count || 0,
+            yani_rating: item.rating || item.score || item.rating_score || 0,
             overview: item.description || item.synopsis || '',
             yani_id: item.id
         };
