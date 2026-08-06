@@ -2,14 +2,37 @@
     'use strict';
 
     var key = 'lampa_yani_auth';
+    var memory = {};
+
+    function readStored() {
+        try {
+            var stored = Lampa.Storage.get(key, '{}');
+            if (stored && typeof stored === 'object') return stored;
+            return stored ? JSON.parse(stored) : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function tokenFrom(data) {
+        if (typeof data === 'string') return data.trim();
+        return data && String(data.token || data.access_token || '').trim();
+    }
 
     window.LampaYaniAuth = {
         get: function () {
-            try { return JSON.parse(Lampa.Storage.get(key, '{}')); } catch (e) { return {}; }
+            var stored = readStored();
+            return tokenFrom(stored) ? stored : memory;
         },
-        token: function () { return this.get().token || ''; },
-        save: function (data) { Lampa.Storage.set(key, JSON.stringify(data || {})); },
-        clear: function () { Lampa.Storage.set(key, '{}'); },
+        token: function () { return tokenFrom(this.get()); },
+        save: function (data) {
+            var token = tokenFrom(data);
+            if (!token) throw new Error('Login response did not contain a token');
+            memory = {token: token, refreshed_at: data.refreshed_at || Date.now(), login: data.login || ''};
+            Lampa.Storage.set(key, JSON.stringify(memory));
+            return memory;
+        },
+        clear: function () { memory = {}; Lampa.Storage.set(key, '{}'); },
         refresh: function () {
             if (!this.token()) return Promise.reject(new Error('Not authorized'));
             return fetch(LampaYaniConfig.apiBase + '/profile/token', {
@@ -24,7 +47,7 @@
             }).then(function (payload) {
                 var current = LampaYaniAuth.get();
                 var data = payload.response || payload;
-                LampaYaniAuth.save({token: data.token || data.access_token || data, refreshed_at: Date.now(), login: current.login});
+                LampaYaniAuth.save({token: tokenFrom(data), refreshed_at: Date.now(), login: current.login});
                 return LampaYaniAuth.get();
             });
         },
@@ -38,7 +61,7 @@
                 return response.json();
             }).then(function (payload) {
                 var data = payload.response || payload;
-                LampaYaniAuth.save({token: data.token || data.access_token || data, refreshed_at: Date.now(), login: login});
+                LampaYaniAuth.save({token: tokenFrom(data), refreshed_at: Date.now(), login: login});
                 return data;
             });
         },

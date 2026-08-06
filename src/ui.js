@@ -372,6 +372,7 @@
 
             var identity = $('<div class="yani-account__identity"></div>');
             identity.append($('<div class="yani-account__name"></div>').text(profile.nickname || 'YummyAnime User'));
+            identity.append($('<div class="yani-account__status"></div>').text(t('authorized')));
             identity.append($('<div class="yani-account__id"></div>').text('ID ' + profile.id));
             if (profile.about) identity.append($('<div class="yani-account__about"></div>').text(profile.about));
             if (profile.banned) identity.append($('<div class="yani-account__warning"></div>').text(t('banned')));
