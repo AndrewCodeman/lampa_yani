@@ -9,7 +9,8 @@
         'src/ui.js'
     ];
     var current = document.currentScript;
-    var base = current && current.src ? current.src.substring(0, current.src.lastIndexOf('/') + 1) : '';
+    var base = current && current.src ? current.src.substring(0, current.src.lastIndexOf('/') + 1) :
+        'https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/';
 
     function load(i) {
         if (i >= scripts.length) {
