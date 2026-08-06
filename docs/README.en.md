@@ -63,7 +63,7 @@ MIT License. See [LICENSE](../LICENSE).
 - Bearer token refresh through `/profile/token`;
 - comments: viewing, posting and replies.
 
-Lampa settings include a `YummyAnime Settings` section with a YummyAnime resource and API availability check.
+Lampa settings include a `YummyAnime` section with a YummyAnime resource and API availability check.
 
 YummyAnime GET requests are cached locally for a short time and may still be shown during temporary API outages.
 
