@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 — 2026-08-06
+
+- account settings and read-only profile statistics;
+- verified YummyAnime API request contracts;
+- fixed genres, ratings, daily schedule and infinite catalog pagination;
+- public catalog requests no longer send stale account Bearer tokens.
+
 ## 0.1.0 — 2026-08-06
 
 - initial YummyAnime Lampa extension;
