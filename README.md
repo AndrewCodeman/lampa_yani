@@ -12,3 +12,7 @@ The plugin uses Lampa's standard `startPlugin()` entry point.
 Рекомендуемый URL для установки / Recommended installation URL:
 
 `https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/index.js`
+
+Для стабильной установки рекомендуется единый собранный файл:
+
+`https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/dist/index.js`

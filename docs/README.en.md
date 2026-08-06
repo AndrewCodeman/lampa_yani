@@ -27,6 +27,10 @@ After publishing, use:
 
 `https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/index.js`
 
+For installation, the bundled file without external modules is recommended:
+
+`https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/dist/index.js`
+
 For publication, use the raw file URL from GitHub.
 
 ## API

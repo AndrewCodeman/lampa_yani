@@ -27,6 +27,10 @@
 
 `https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/index.js`
 
+Для установки рекомендуется единый файл без внешних модулей:
+
+`https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/dist/index.js`
+
 Для публикации используйте URL raw-файла из GitHub.
 
 ## API
