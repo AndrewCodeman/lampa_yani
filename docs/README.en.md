@@ -48,3 +48,11 @@ Search is passed through the `q` parameter. The public token is sent in the `X-A
 ## License
 
 MIT License. See [LICENSE](../LICENSE).
+
+## Roadmap
+
+- detailed anime view;
+- recommendations and trailers;
+- favorites and user lists;
+- Bearer token refresh through `/profile/token`;
+- comments: viewing, posting and replies.
