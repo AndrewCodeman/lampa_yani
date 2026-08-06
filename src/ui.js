@@ -219,15 +219,15 @@
     }
 
     function addSettings() {
-        if (!Lampa.Settings || !Lampa.Settings.addComponent) return;
+        if (!Lampa.SettingsApi || !Lampa.SettingsApi.addComponent) return;
 
-        Lampa.Settings.addComponent({
+        Lampa.SettingsApi.addComponent({
             component: 'yani',
             icon: '<div class="icon-yani"></div>',
             name: 'YummyAnime Settings'
         });
 
-        Lampa.Settings.addParam({
+        Lampa.SettingsApi.addParam({
             component: 'yani',
             param: {name: 'yani_api_check', type: 'trigger', default: false},
             field: {name: 'Check Yani API', description: 'Проверить доступность API'},
