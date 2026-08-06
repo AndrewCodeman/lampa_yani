@@ -211,6 +211,7 @@
 
 .yani-card-rating {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     padding: 0.2em 0.3em;
     border-radius: 0.25em;
@@ -219,9 +220,32 @@
     font-size: 0.62em;
 }
 
-.yani-card-rating__source {
+.yani-rating-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.1em;
+    height: 1.45em;
+    padding: 0 0.3em;
+    box-sizing: border-box;
+    border-radius: 0.28em;
+    background: #fff;
+    color: #111;
+    font-size: 0.78em;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+}
+
+.yani-rating-logo--yummy { background: #ef6470; color: #fff; }
+.yani-rating-logo--kp { background: #f2c94c; color: #171717; }
+.yani-rating-logo--shikimori { background: #8b6fc9; color: #fff; }
+.yani-rating-logo--anidub { background: #3b9bd9; color: #fff; }
+.yani-rating-logo--mal { background: #2e5d93; color: #fff; }
+.yani-rating-logo--worldart { background: #f28c28; color: #fff; }
+
+.yani-card-rating__logo {
     margin-right: 0.25em;
-    opacity: 0.7;
 }
 
 .yani-card-rating__value {
@@ -241,6 +265,8 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
+.yani-ratings__header { display: flex; align-items: center; gap: 0.55em; }
+.yani-ratings__logo { min-width: 2.5em; height: 1.7em; font-size: 0.85em; }
 .yani-ratings__value {
     font-size: 1.35em;
     font-weight: 600;

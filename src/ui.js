@@ -1290,18 +1290,28 @@
         var block = $('<div class="yani-card-ratings"></div>');
         ratings.forEach(function (rating) {
             var badge = $('<div class="yani-card-rating yani-card-rating--' + rating.key + '"></div>');
-            badge.append($('<span class="yani-card-rating__source"></span>').text(rating.short));
+            badge.append(createRatingLogo(rating, 'yani-card-rating__logo'));
             badge.append($('<span class="yani-card-rating__value"></span>').text(formatRating(rating.value)));
             block.append(badge);
         });
         $('.card__view', render).append(block);
     }
 
+    function createRatingLogo(rating, className) {
+        return $('<span class="' + className + ' yani-rating-logo yani-rating-logo--' + rating.key + '"></span>')
+            .text(rating.short || rating.key)
+            .attr('title', rating.title || rating.key)
+            .attr('aria-label', rating.title || rating.key);
+    }
+
     function createDetailRatings(ratings, votes) {
         var block = $('<div class="yani-ratings"></div>');
         ratings.forEach(function (rating) {
             var item = $('<div class="yani-ratings__item"></div>');
-            item.append($('<div class="yani-ratings__value"></div>').text(formatRating(rating.value)));
+            var header = $('<div class="yani-ratings__header"></div>');
+            header.append(createRatingLogo(rating, 'yani-ratings__logo'));
+            header.append($('<div class="yani-ratings__value"></div>').text(formatRating(rating.value)));
+            item.append(header);
             item.append($('<div class="yani-ratings__source"></div>').text(rating.title));
             if (rating.key === 'yummy' && votes) item.append($('<div class="yani-ratings__votes"></div>').text(votes + ' ' + t('ratings_count')));
             block.append(item);
