@@ -59,4 +59,6 @@ MIT License. См. файл [LICENSE](../LICENSE).
 
 В настройках Lampa появится раздел `YummyAnime Settings` с проверкой доступности ресурса и API.
 
+Авторизованный токен автоматически обновляется через `GET /profile/token`.
+
 Подробная карточка использует данные Yani, а трейлеры и рекомендации подключаются через `/anime/{id}/trailers` и `/anime/{id}/recommendations`.

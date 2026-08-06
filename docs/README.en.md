@@ -59,4 +59,6 @@ MIT License. See [LICENSE](../LICENSE).
 
 Lampa settings include a `YummyAnime Settings` section with a YummyAnime resource and API availability check.
 
+The authenticated token is automatically refreshed through `GET /profile/token`.
+
 The detailed view uses Yani data, while trailers and recommendations are loaded through `/anime/{id}/trailers` and `/anime/{id}/recommendations`.
