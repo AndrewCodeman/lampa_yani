@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const STATUS_BASE = 'https://yummystatus.me';
+const STATUS_BASE = process.env.YUMMY_STATUS_BASE || 'https://yummystatus.me';
 const MAX_BUCKETS = 90;
+const REQUEST_ATTEMPTS = 3;
+const RETRY_DELAYS_MS = [1000, 3000];
 const PERIODS = {
     '3hour': {bucketMs: 2 * 60 * 1000},
     day: {bucketMs: 16 * 60 * 1000},
@@ -18,16 +20,37 @@ const LABELS = {
     'waf.valtrix.org': 'Защита'
 };
 
+function delay(milliseconds) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 async function getJson(url) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 30000);
-    try {
-        const response = await fetch(url, {signal: controller.signal});
-        if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
-        return response.json();
-    } finally {
-        clearTimeout(timer);
+    let lastError;
+
+    for (let attempt = 1; attempt <= REQUEST_ATTEMPTS; attempt += 1) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 30000);
+
+        try {
+            const response = await fetch(url, {
+                signal: controller.signal,
+                headers: {accept: 'application/json'}
+            });
+            if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            lastError = error;
+            if (attempt === REQUEST_ATTEMPTS) break;
+
+            const retryDelay = RETRY_DELAYS_MS[attempt - 1];
+            console.warn(`Request failed (${attempt}/${REQUEST_ATTEMPTS}): ${url}: ${error.message}. Retrying in ${retryDelay}ms.`);
+            await delay(retryDelay);
+        } finally {
+            clearTimeout(timer);
+        }
     }
+
+    throw lastError;
 }
 
 function isUp(code) {
@@ -112,14 +135,16 @@ function aggregateHttp(records, pingRecords, period) {
 }
 
 async function main() {
-    const entries = await Promise.all(Object.keys(PERIODS).map(async (period) => {
-        const [httpRecords, pingRecords] = await Promise.all([
-            getJson(`${STATUS_BASE}/http-logs?timeRange=${period}`),
-            getJson(`${STATUS_BASE}/ping-logs?timeRange=${period}`)
-        ]);
+    const target = path.join(__dirname, '..', 'status', 'status.json');
+    const entries = [];
+
+    for (const period of Object.keys(PERIODS)) {
+        const httpRecords = await getJson(`${STATUS_BASE}/http-logs?timeRange=${period}`);
+        const pingRecords = await getJson(`${STATUS_BASE}/ping-logs?timeRange=${period}`);
         if (!Array.isArray(httpRecords) || !httpRecords.length) throw new Error(`YummyStatus returned no HTTP measurements for ${period}`);
-        return [period, aggregateHttp(httpRecords, Array.isArray(pingRecords) ? pingRecords : [], period)];
-    }));
+        entries.push([period, aggregateHttp(httpRecords, Array.isArray(pingRecords) ? pingRecords : [], period)]);
+    }
+
     const periods = Object.fromEntries(entries);
     const output = {
         generated_at: new Date().toISOString(),
@@ -127,13 +152,21 @@ async function main() {
         default_period: '3hour',
         periods
     };
-    const target = path.join(__dirname, '..', 'status', 'status.json');
+    const temporaryTarget = `${target}.tmp`;
     fs.mkdirSync(path.dirname(target), {recursive: true});
-    fs.writeFileSync(target, JSON.stringify(output));
+    fs.writeFileSync(temporaryTarget, JSON.stringify(output));
+    fs.renameSync(temporaryTarget, target);
     console.log(`Created ${target}: ${Object.keys(periods).join(', ')}`);
 }
 
 main().catch((error) => {
+    const target = path.join(__dirname, '..', 'status', 'status.json');
+    if (fs.existsSync(target)) {
+        console.warn(`YummyStatus snapshot update failed: ${error.stack || error}`);
+        console.warn(`Keeping the previous snapshot: ${target}`);
+        return;
+    }
+
     console.error(error);
-    process.exit(1);
+    process.exitCode = 1;
 });
