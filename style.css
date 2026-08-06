@@ -302,6 +302,27 @@
     padding: 1.4em 2em 3em;
 }
 
+.yani-status__periods {
+    display: flex;
+    gap: 0.65em;
+    margin-bottom: 1em;
+}
+
+.yani-status__period {
+    padding: 0.65em 1.15em;
+    border-radius: 0.55em;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.yani-status__period.active {
+    background: #ef6470;
+    color: #fff;
+}
+
+.yani-status__period.focus {
+    box-shadow: 0 0 0 0.16em #fff;
+}
+
 .yani-status__summary {
     display: flex;
     align-items: center;

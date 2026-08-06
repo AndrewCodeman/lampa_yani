@@ -349,6 +349,7 @@
         var content = $('<div class="yani-status__content"></div>');
         var last;
         var ready = false;
+        var currentPeriod = '3hour';
 
         this.create = function () {
             scroll.append(content);
@@ -382,6 +383,24 @@
         function renderStatus(data) {
             content.empty();
             last = null;
+            var periods = data.periods || null;
+            var periodData = periods ? (periods[currentPeriod] || periods[data.default_period] || periods['3hour']) : data;
+            if (!periodData) return renderStatusError();
+            var periodLabels = {'3hour': '3 часа', day: 'День', week: 'Неделя', month: 'Месяц'};
+            var periodSwitch = $('<div class="yani-status__periods"></div>');
+            Object.keys(periodLabels).forEach(function (period) {
+                var button = $('<div class="yani-status__period selector"></div>').text(periodLabels[period]);
+                if (period === currentPeriod) button.addClass('active');
+                button.on('hover:enter', function () {
+                    currentPeriod = period;
+                    renderStatus(data);
+                });
+                bindStatusFocus(button);
+                periodSwitch.append(button);
+            });
+            content.append(periodSwitch);
+
+            data = periodData;
             var summary = data.summary || {};
             var status = summary.status || 'unknown';
             var statusTitle = status === 'up' ? 'Все системы работают' : status === 'down' ? 'Сервисы недоступны' : status === 'unknown' ? 'Нет данных мониторинга' : 'Возникли неполадки';
@@ -427,7 +446,7 @@
                 content.append(block);
             });
 
-            content.append('<div class="yani-status__source">Источник: YummyStatus · период наблюдения 3 часа · snapshot обновляется каждые 5 минут</div>');
+            content.append('<div class="yani-status__source">Источник: YummyStatus · период: ' + periodLabels[currentPeriod] + ' · snapshot обновляется каждые 5 минут</div>');
 
             var refresh = $('<div class="yani-status__refresh selector">Обновить статус</div>');
             refresh.on('hover:enter', function () {

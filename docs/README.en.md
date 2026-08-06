@@ -26,9 +26,9 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 
 Install the bundled file from GitHub Pages:
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.3.0`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.3.1`
 
-The `YummyAnime → Status` screen shows three hours of YummyStatus history. GitHub Actions refreshes the monitoring snapshot every five minutes.
+The `YummyAnime → Status` screen shows YummyStatus history for three hours, one day, one week or one month. GitHub Actions refreshes the monitoring snapshot every five minutes.
 
 ## API
 

@@ -2,9 +2,13 @@ const fs = require('fs');
 const path = require('path');
 
 const STATUS_BASE = 'https://yummystatus.me';
-const PERIOD = '3hour';
-const BUCKET_MS = 2 * 60 * 1000;
 const MAX_BUCKETS = 90;
+const PERIODS = {
+    '3hour': {bucketMs: 2 * 60 * 1000},
+    day: {bucketMs: 16 * 60 * 1000},
+    week: {bucketMs: 2 * 60 * 60 * 1000},
+    month: {bucketMs: 8 * 60 * 60 * 1000}
+};
 const LABELS = {
     'old.yummyani.me': 'Старый сайт',
     'old.yummy-ani.me': 'Старый сайт (зеркало)',
@@ -35,11 +39,12 @@ function average(values) {
     return usable.length ? Math.round(usable.reduce((sum, value) => sum + value, 0) / usable.length) : 0;
 }
 
-function bucketTime(value) {
-    return Math.floor(new Date(value).getTime() / BUCKET_MS) * BUCKET_MS;
+function bucketTime(value, bucketMs) {
+    return Math.floor(new Date(value).getTime() / bucketMs) * bucketMs;
 }
 
-function aggregateHttp(records, pingRecords) {
+function aggregateHttp(records, pingRecords, period) {
+    const bucketMs = PERIODS[period].bucketMs;
     const byDomain = new Map();
 
     records.forEach((record) => {
@@ -50,7 +55,7 @@ function aggregateHttp(records, pingRecords) {
     const domains = Array.from(byDomain.entries()).map(([domain, domainRecords]) => {
         const buckets = new Map();
         domainRecords.forEach((record) => {
-            const time = bucketTime(record.created_at);
+            const time = bucketTime(record.created_at, bucketMs);
             if (!buckets.has(time)) buckets.set(time, []);
             buckets.get(time).push(record);
         });
@@ -93,7 +98,7 @@ function aggregateHttp(records, pingRecords) {
 
     return {
         generated_at: new Date().toISOString(),
-        period: PERIOD,
+        period,
         source: `${STATUS_BASE}/`,
         summary: {
             status,
@@ -107,17 +112,25 @@ function aggregateHttp(records, pingRecords) {
 }
 
 async function main() {
-    const [httpRecords, pingRecords] = await Promise.all([
-        getJson(`${STATUS_BASE}/http-logs?timeRange=${PERIOD}`),
-        getJson(`${STATUS_BASE}/ping-logs?timeRange=${PERIOD}`)
-    ]);
-    if (!Array.isArray(httpRecords) || !httpRecords.length) throw new Error('YummyStatus returned no HTTP measurements');
-
-    const output = aggregateHttp(httpRecords, Array.isArray(pingRecords) ? pingRecords : []);
+    const entries = await Promise.all(Object.keys(PERIODS).map(async (period) => {
+        const [httpRecords, pingRecords] = await Promise.all([
+            getJson(`${STATUS_BASE}/http-logs?timeRange=${period}`),
+            getJson(`${STATUS_BASE}/ping-logs?timeRange=${period}`)
+        ]);
+        if (!Array.isArray(httpRecords) || !httpRecords.length) throw new Error(`YummyStatus returned no HTTP measurements for ${period}`);
+        return [period, aggregateHttp(httpRecords, Array.isArray(pingRecords) ? pingRecords : [], period)];
+    }));
+    const periods = Object.fromEntries(entries);
+    const output = {
+        generated_at: new Date().toISOString(),
+        source: `${STATUS_BASE}/`,
+        default_period: '3hour',
+        periods
+    };
     const target = path.join(__dirname, '..', 'status', 'status.json');
     fs.mkdirSync(path.dirname(target), {recursive: true});
     fs.writeFileSync(target, JSON.stringify(output));
-    console.log(`Created ${target}: ${output.summary.checks} checks, ${output.domains.length} domains`);
+    console.log(`Created ${target}: ${Object.keys(periods).join(', ')}`);
 }
 
 main().catch((error) => {

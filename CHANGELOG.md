@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 — 2026-08-06
+
+- added 3-hour, day, week and month switches to the YummyStatus dashboard.
+
 ## 0.3.0 — 2026-08-06
 
 - added a TV-friendly YummyStatus dashboard with five-minute monitoring snapshots.

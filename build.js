@@ -13,7 +13,7 @@ const output = `function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.3.0',
+            version: '0.3.1',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
