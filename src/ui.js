@@ -836,7 +836,10 @@
                 else Lampa.Controller.toggle('search');
             });
             bindDetailButtonFocus(searchButton);
-            actions.append(button, searchButton);
+            var commentsButton = $('<div class="yani-detail__button selector"></div>').text(t('comments') + (data.yani_comments_count ? ' (' + data.yani_comments_count + ')' : ''));
+            commentsButton.on('hover:enter', function () { commentsMenu(data.yani_id, 0, []); });
+            bindDetailButtonFocus(commentsButton);
+            actions.append(button, searchButton, commentsButton);
             info.append(actions);
             html.append(poster, info);
         }
@@ -1274,6 +1277,7 @@
             overview: item.description || item.synopsis || '',
             yani_id: item.anime_id || item.id,
             yani_url: item.anime_url || item.url,
+            yani_comments_count: Number(item.comments_count || 0),
             yani_type: item.type || null,
             yani_remote_ids: item.remote_ids || {}
         };
