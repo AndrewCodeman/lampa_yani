@@ -17,6 +17,10 @@
 2. Укажите его в `src/config.js` в поле `applicationHeader`.
 3. Подключите URL файла `index.js` в разделе расширений Lampa.
 
+После публикации используйте:
+
+`https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/index.js`
+
 Для публикации используйте URL raw-файла из GitHub.
 
 ## API

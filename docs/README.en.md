@@ -17,6 +17,10 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 2. Set it in `src/config.js` as `applicationHeader`.
 3. Add the URL of `index.js` to the Lampa extensions section.
 
+After publishing, use:
+
+`https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/index.js`
+
 For publication, use the raw file URL from GitHub.
 
 ## API
