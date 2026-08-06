@@ -6,13 +6,14 @@
     function request(path, options) {
         options = options || {};
         var headers = options.headers || {};
-        var cacheKey = 'lampa_yummyanime_cache_' + path;
+        var apiLanguage = window.LampaYaniI18n ? LampaYaniI18n.getLanguage() : 'ru';
+        var cacheKey = 'lampa_yummyanime_cache_' + apiLanguage + '_' + path;
         var cacheTtl = config.cacheTtl || 300000;
 
         if (config.applicationHeader) headers['X-Application'] = config.applicationHeader;
         if (options.auth && LampaYaniAuth && LampaYaniAuth.token()) headers.Authorization = 'Bearer ' + LampaYaniAuth.token();
         headers.Accept = 'application/json';
-        headers.Lang = (Lampa.Storage && Lampa.Storage.get('language')) || 'ru';
+        headers.Lang = apiLanguage;
         if (options.token) headers.Authorization = 'Bearer ' + options.token;
 
         return fetch(config.apiBase + path, {

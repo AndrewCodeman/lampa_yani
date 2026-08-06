@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.3.1',
+            version: '0.4.0',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,11 +20,59 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.3.1',
+        version: '0.4.0',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
         cacheTtl: 300000
+    };
+}(window));
+
+(function (window) {
+    'use strict';
+
+    var key = 'yani_language';
+    var messages = {
+        ru: {
+            catalog: 'Каталог', genres: 'Жанры', search: 'Поиск', schedule: 'Расписание', status: 'Статус', top_rated: 'Лучшие', account: 'Аккаунт', anime: 'Аниме',
+            catalog_load_error: 'Не удалось загрузить каталог YummyAnime', next_page_error: 'Не удалось загрузить следующую страницу YummyAnime',
+            login_required: 'Войдите в YummyAnime через настройки YummyAnime', actions: 'Действия YummyAnime', favorite: 'Добавить в любимые', watching: 'Смотрю', planned: 'В планах', completed: 'Просмотрено', dropped: 'Брошено', postponed: 'Отложено', comments: 'Комментарии', saved: 'Изменения сохранены в YummyAnime', save_error: 'Не удалось сохранить оценку',
+            not_logged_in: 'Вход не выполнен', login_hint: 'Откройте Настройки → YummyAnime и выберите «Войти в YummyAnime».', account_load_error: 'Не удалось загрузить аккаунт YummyAnime', account_retry: 'Обновите токен или выполните вход заново в Настройки → YummyAnime.', banned: 'Аккаунт заблокирован', registration: 'Регистрация', last_visit: 'Последний визит', roles: 'Роли', user: 'Пользователь', messages: 'Сообщения', unread: 'непрочитанных', notifications: 'Уведомления', total_lists: 'Всего в списках', list_stats: 'Статистика списков', list: 'Список', anime_count: 'аниме', total_time: 'Общее время', days_short: 'д', hours_short: 'ч',
+            period_3hour: '3 часа', period_day: 'День', period_week: 'Неделя', period_month: 'Месяц', all_up: 'Все системы работают', all_down: 'Сервисы недоступны', no_monitoring: 'Нет данных мониторинга', degraded: 'Возникли неполадки', checks: 'замеров', availability: 'Доступность', average_load: 'Средняя загрузка', errors: 'Ошибок', updated: 'Обновлено', up: 'Работает', unstable: 'Нестабильно', down: 'Недоступно', source: 'Источник', period: 'период', snapshot_notice: 'снимок обновляется каждые 5 минут', refresh_status: 'Обновить статус', refreshing_status: 'Обновляем статус YummyAnime', status_load_error: 'Не удалось загрузить статус YummyAnime', status_error_hint: 'Данные мониторинга временно недоступны. Это не означает, что сам плагин не работает.', milliseconds: 'мс', domain_old: 'Старый сайт', domain_old_mirror: 'Старый сайт (зеркало)', domain_new: 'Новый сайт', domain_new_mirror: 'Новый сайт (зеркало)', domain_api: 'YummyAnime API', domain_waf: 'Защита',
+            schedule_load_error: 'Не удалось загрузить расписание YummyAnime', no_releases: 'Нет запланированных выпусков', local_time: 'местное время', today: 'Сегодня', tomorrow: 'Завтра', release: 'Релиз', episode: 'Серия', of: 'из', open_lampa_search: 'Открыть в поиске Lampa',
+            genres_empty: 'YummyAnime не вернул список жанров', genres_title: 'Жанры YummyAnime', genres_load_error: 'Не удалось загрузить жанры YummyAnime', search_title: 'Поиск YummyAnime', untitled: 'Без названия', ratings_count: 'оценок',
+            language_name: 'Язык / Language', language_description: 'Язык интерфейса расширения YummyAnime', language_changed: 'Язык YummyAnime изменён. Откройте расширение заново.',
+            login_name: 'Войти в YummyAnime', login_description: 'Вход по email и паролю YummyAnime', refresh_name: 'Обновить токен YummyAnime', refresh_description: 'Обновить действующий Bearer-токен аккаунта', login_first: 'Сначала войдите в YummyAnime', token_refreshed: 'Токен YummyAnime обновлён', token_refresh_error: 'Не удалось обновить токен YummyAnime', logout_name: 'Выйти из YummyAnime', logout_description: 'Завершить сессию и удалить локальный токен', not_logged: 'Вход в YummyAnime не выполнен', logged_out: 'Вы вышли из YummyAnime', token_removed: 'Локальный токен YummyAnime удалён', api_check_name: 'Проверить YummyAnime API', api_check_description: 'Проверить доступность API и публичный токен приложения', api_ok: 'YummyAnime API работает', api_error: 'YummyAnime API недоступен или публичный токен неверный', email_prompt: 'Email YummyAnime', email_required: 'Введите email YummyAnime', password_prompt: 'Пароль YummyAnime', password_required: 'Введите пароль YummyAnime', login_ok: 'Вход в YummyAnime выполнен', login_error: 'Ошибка входа в YummyAnime', input_unavailable: 'Ввод недоступен в этой версии Lampa', comments_title: 'Комментарии YummyAnime', comments_error: 'Не удалось загрузить комментарии', kinopoisk: 'Кинопоиск'
+        },
+        en: {
+            catalog: 'Catalog', genres: 'Genres', search: 'Search', schedule: 'Schedule', status: 'Status', top_rated: 'Top Rated', account: 'Account', anime: 'Anime',
+            catalog_load_error: 'Failed to load the YummyAnime catalog', next_page_error: 'Failed to load the next YummyAnime page',
+            login_required: 'Sign in to YummyAnime in YummyAnime settings', actions: 'YummyAnime actions', favorite: 'Add to favorites', watching: 'Watching', planned: 'Planned', completed: 'Completed', dropped: 'Dropped', postponed: 'On hold', comments: 'Comments', saved: 'Changes saved to YummyAnime', save_error: 'Failed to save the rating',
+            not_logged_in: 'Not signed in', login_hint: 'Open Settings → YummyAnime and select “Sign in to YummyAnime”.', account_load_error: 'Failed to load the YummyAnime account', account_retry: 'Refresh the token or sign in again under Settings → YummyAnime.', banned: 'Account is banned', registration: 'Registered', last_visit: 'Last visit', roles: 'Roles', user: 'User', messages: 'Messages', unread: 'unread', notifications: 'Notifications', total_lists: 'Total in lists', list_stats: 'List statistics', list: 'List', anime_count: 'anime', total_time: 'Total time', days_short: 'd', hours_short: 'h',
+            period_3hour: '3 hours', period_day: 'Day', period_week: 'Week', period_month: 'Month', all_up: 'All systems operational', all_down: 'Services unavailable', no_monitoring: 'No monitoring data', degraded: 'Service disruption detected', checks: 'checks', availability: 'Availability', average_load: 'Average response', errors: 'Failures', updated: 'Updated', up: 'Operational', unstable: 'Degraded', down: 'Unavailable', source: 'Source', period: 'period', snapshot_notice: 'snapshot refreshes every 5 minutes', refresh_status: 'Refresh status', refreshing_status: 'Refreshing YummyAnime status', status_load_error: 'Failed to load YummyAnime status', status_error_hint: 'Monitoring data is temporarily unavailable. This does not mean that the plugin itself is not working.', milliseconds: 'ms', domain_old: 'Old website', domain_old_mirror: 'Old website (mirror)', domain_new: 'New website', domain_new_mirror: 'New website (mirror)', domain_api: 'YummyAnime API', domain_waf: 'Protection',
+            schedule_load_error: 'Failed to load the YummyAnime schedule', no_releases: 'No scheduled releases', local_time: 'local time', today: 'Today', tomorrow: 'Tomorrow', release: 'Release', episode: 'Episode', of: 'of', open_lampa_search: 'Open in Lampa search',
+            genres_empty: 'YummyAnime returned no genres', genres_title: 'YummyAnime Genres', genres_load_error: 'Failed to load YummyAnime genres', search_title: 'YummyAnime Search', untitled: 'Untitled', ratings_count: 'ratings',
+            language_name: 'Language / Язык', language_description: 'YummyAnime extension interface language', language_changed: 'YummyAnime language changed. Reopen the extension.',
+            login_name: 'Sign in to YummyAnime', login_description: 'Sign in with your YummyAnime email and password', refresh_name: 'Refresh YummyAnime token', refresh_description: 'Refresh the current account Bearer token', login_first: 'Sign in to YummyAnime first', token_refreshed: 'YummyAnime token refreshed', token_refresh_error: 'Failed to refresh the YummyAnime token', logout_name: 'Sign out of YummyAnime', logout_description: 'End the session and remove the local token', not_logged: 'Not signed in to YummyAnime', logged_out: 'Signed out of YummyAnime', token_removed: 'Local YummyAnime token removed', api_check_name: 'Check YummyAnime API', api_check_description: 'Check the API and public application token', api_ok: 'YummyAnime API is operational', api_error: 'YummyAnime API is unavailable or the public token is invalid', email_prompt: 'YummyAnime email', email_required: 'Enter your YummyAnime email', password_prompt: 'YummyAnime password', password_required: 'Enter your YummyAnime password', login_ok: 'Signed in to YummyAnime', login_error: 'YummyAnime sign-in failed', input_unavailable: 'Input is unavailable in this Lampa version', comments_title: 'YummyAnime Comments', comments_error: 'Failed to load comments', kinopoisk: 'KinoPoisk'
+        }
+    };
+
+    function language() {
+        var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
+        return value === 'en' ? 'en' : 'ru';
+    }
+
+    window.LampaYaniI18n = {
+        getLanguage: language,
+        setLanguage: function (value) {
+            var next = value === 'en' ? 'en' : 'ru';
+            if (window.Lampa && Lampa.Storage) Lampa.Storage.set(key, next);
+            return next;
+        },
+        locale: function () { return language() === 'en' ? 'en-US' : 'ru-RU'; },
+        t: function (name) {
+            return (messages[language()] && messages[language()][name]) || messages.ru[name] || name;
+        }
     };
 }(window));
 
@@ -107,13 +155,14 @@ function pluginYummyAnime() {
     function request(path, options) {
         options = options || {};
         var headers = options.headers || {};
-        var cacheKey = 'lampa_yummyanime_cache_' + path;
+        var apiLanguage = window.LampaYaniI18n ? LampaYaniI18n.getLanguage() : 'ru';
+        var cacheKey = 'lampa_yummyanime_cache_' + apiLanguage + '_' + path;
         var cacheTtl = config.cacheTtl || 300000;
 
         if (config.applicationHeader) headers['X-Application'] = config.applicationHeader;
         if (options.auth && LampaYaniAuth && LampaYaniAuth.token()) headers.Authorization = 'Bearer ' + LampaYaniAuth.token();
         headers.Accept = 'application/json';
-        headers.Lang = (Lampa.Storage && Lampa.Storage.get('language')) || 'ru';
+        headers.Lang = apiLanguage;
         if (options.token) headers.Authorization = 'Bearer ' + options.token;
 
         return fetch(config.apiBase + path, {
@@ -245,6 +294,14 @@ function pluginYummyAnime() {
 (function (window) {
     'use strict';
 
+    function t(name) {
+        return window.LampaYaniI18n ? LampaYaniI18n.t(name) : name;
+    }
+
+    function locale() {
+        return window.LampaYaniI18n ? LampaYaniI18n.locale() : 'ru-RU';
+    }
+
     window.LampaYani = {
         register: function () {
             if (!window.Lampa || !Lampa.Component || !Lampa.Component.add) {
@@ -304,12 +361,12 @@ function pluginYummyAnime() {
                         .then(function (payload) {
                             var results = mapUniqueCards(LampaYaniApi.normalize(payload), seen);
                             if (results.length < limit) object.page = maxPages;
-                            self.build({results: results, total_pages: maxPages, title: 'Anime'});
+                            self.build({results: results, total_pages: maxPages, title: t('anime')});
                         })
                         .catch(function (error) {
                             console.error('[YummyAnime]', error);
                             self.activity.loader(false);
-                            Lampa.Noty.show('Не удалось загрузить каталог YummyAnime');
+                            Lampa.Noty.show(t('catalog_load_error'));
                         });
                 };
                 comp.nextPageReuest = function (requestObject, resolve, reject) {
@@ -320,10 +377,10 @@ function pluginYummyAnime() {
                         var raw = LampaYaniApi.normalize(payload);
                         var results = mapUniqueCards(raw, seen);
                         if (raw.length < limit) requestObject.page = maxPages;
-                        resolve({results: results, total_pages: maxPages, title: 'Anime'});
+                        resolve({results: results, total_pages: maxPages, title: t('anime')});
                     }).catch(function (error) {
                         console.error('[YummyAnime]', error);
-                        Lampa.Noty.show('Не удалось загрузить следующую страницу YummyAnime');
+                        Lampa.Noty.show(t('next_page_error'));
                         reject(error);
                     });
                 };
@@ -340,23 +397,23 @@ function pluginYummyAnime() {
                     };
                     card.onMenu = function () {
                         if (!LampaYaniAuth.token()) {
-                            Lampa.Noty.show('Войдите в YummyAnime через настройки YummyAnime');
+                            Lampa.Noty.show(t('login_required'));
                             return;
                         }
                         if (!element.yani_id) return;
                         Lampa.Select.show({
-                            title: 'Действия YummyAnime',
-                            items: [{title: 'Добавить в любимые', action: 'favorite'}, {title: 'Смотрю', action: 'watching'}, {title: 'В планах', action: 'planned'}, {title: 'Просмотрено', action: 'completed'}, {title: 'Брошено', action: 'dropped'}, {title: 'Отложено', action: 'postponed'}, {title: 'Комментарии', action: 'comments'}].concat([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
+                            title: t('actions'),
+                            items: [{title: t('favorite'), action: 'favorite'}, {title: t('watching'), action: 'watching'}, {title: t('planned'), action: 'planned'}, {title: t('completed'), action: 'completed'}, {title: t('dropped'), action: 'dropped'}, {title: t('postponed'), action: 'postponed'}, {title: t('comments'), action: 'comments'}].concat([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
                                 return {title: value + '/10', value: value};
                             })),
                             onSelect: function (item) {
                                 if (item.action === 'comments') return commentsMenu(element.yani_id);
                                 var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(element.yani_id) : item.action ? LampaYaniApi.addToList(element.yani_id, item.action) : LampaYaniApi.rate(element.yani_id, item.value);
                                 action.then(function () {
-                                    Lampa.Noty.show('Изменения сохранены в YummyAnime');
+                                    Lampa.Noty.show(t('saved'));
                                 }).catch(function (error) {
                                     console.error('[YummyAnime]', error);
-                                    Lampa.Noty.show('Не удалось сохранить оценку');
+                                    Lampa.Noty.show(t('save_error'));
                                 });
                             }
                         });
@@ -385,21 +442,21 @@ function pluginYummyAnime() {
         var last;
 
         var items = [
-            {title: 'Catalog', icon: '◆', action: function () {
-                Lampa.Activity.push({url: 'yani/catalog', title: 'YummyAnime Catalog', component: 'yani_catalog', params: {limit: 30, sort: 'top', sort_forward: false}});
+            {title: t('catalog'), icon: '◆', action: function () {
+                Lampa.Activity.push({url: 'yani/catalog', title: 'YummyAnime ' + t('catalog'), component: 'yani_catalog', params: {limit: 30, sort: 'top', sort_forward: false}});
             }},
-            {title: 'Genres', icon: '≡', action: openGenres},
-            {title: 'Search', icon: '⌕', action: openSearch},
-            {title: 'Schedule', icon: '▦', action: function () {
-                Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime Schedule', component: 'yani_schedule'});
+            {title: t('genres'), icon: '≡', action: openGenres},
+            {title: t('search'), icon: '⌕', action: openSearch},
+            {title: t('schedule'), icon: '▦', action: function () {
+                Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime ' + t('schedule'), component: 'yani_schedule'});
             }},
-            {title: 'Status', icon: '●', action: function () {
-                Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime Status', component: 'yani_status'});
+            {title: t('status'), icon: '●', action: function () {
+                Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime ' + t('status'), component: 'yani_status'});
             }},
-            {title: 'Top Rated', icon: '★', action: function () {
-                Lampa.Activity.push({url: 'yani/top-rated', title: 'YummyAnime Top Rated', component: 'yani_catalog', params: {limit: 30, sort: 'rating', sort_forward: false}});
+            {title: t('top_rated'), icon: '★', action: function () {
+                Lampa.Activity.push({url: 'yani/top-rated', title: 'YummyAnime ' + t('top_rated'), component: 'yani_catalog', params: {limit: 30, sort: 'rating', sort_forward: false}});
             }},
-            {title: 'Account', icon: '●', action: openAccount}
+            {title: t('account'), icon: '●', action: openAccount}
         ];
 
         this.create = function () {
@@ -448,7 +505,7 @@ function pluginYummyAnime() {
             this.activity.loader(true);
 
             if (!LampaYaniAuth.token()) {
-                addAccountNotice('Вход не выполнен', 'Откройте Настройки → YummyAnime и выберите «Войти в YummyAnime».');
+                addAccountNotice(t('not_logged_in'), t('login_hint'));
                 finish(self);
                 return;
             }
@@ -465,7 +522,7 @@ function pluginYummyAnime() {
                 finish(self);
             }).catch(function (error) {
                 console.error('[YummyAnime]', error);
-                addAccountNotice('Не удалось загрузить YummyAnime Account', 'Обновите токен или выполните вход заново в Настройки → YummyAnime.');
+                addAccountNotice(t('account_load_error'), t('account_retry'));
                 finish(self);
             });
         };
@@ -501,18 +558,18 @@ function pluginYummyAnime() {
             identity.append($('<div class="yani-account__name"></div>').text(profile.nickname || 'YummyAnime User'));
             identity.append($('<div class="yani-account__id"></div>').text('ID ' + profile.id));
             if (profile.about) identity.append($('<div class="yani-account__about"></div>').text(profile.about));
-            if (profile.banned) identity.append('<div class="yani-account__warning">Аккаунт заблокирован</div>');
+            if (profile.banned) identity.append($('<div class="yani-account__warning"></div>').text(t('banned')));
             header.append(identity);
             bindAccountFocus(header);
             content.append(header);
 
             var info = $('<div class="yani-account__grid"></div>');
-            addInfo(info, 'Регистрация', formatAccountDate(profile.register_date));
-            addInfo(info, 'Последний визит', formatAccountDate(profile.last_online));
-            addInfo(info, 'Роли', profile.roles && profile.roles.length ? profile.roles.join(', ') : 'Пользователь');
-            addInfo(info, 'Сообщения', String(profile.messages && profile.messages.unread_count || 0) + ' непрочитанных');
-            addInfo(info, 'Уведомления', String(profile.notifications && profile.notifications.count || 0));
-            addInfo(info, 'Всего в списках', String(lists.length || 0));
+            addInfo(info, t('registration'), formatAccountDate(profile.register_date));
+            addInfo(info, t('last_visit'), formatAccountDate(profile.last_online));
+            addInfo(info, t('roles'), profile.roles && profile.roles.length ? profile.roles.join(', ') : t('user'));
+            addInfo(info, t('messages'), String(profile.messages && profile.messages.unread_count || 0) + ' ' + t('unread'));
+            addInfo(info, t('notifications'), String(profile.notifications && profile.notifications.count || 0));
+            addInfo(info, t('total_lists'), String(lists.length || 0));
             content.append(info);
 
             var counts = {};
@@ -523,14 +580,14 @@ function pluginYummyAnime() {
                 if (userList.is_fav) counts[4] = (counts[4] || 0) + 1;
             });
 
-            content.append('<div class="yani-account__section-title">Статистика списков</div>');
+            content.append($('<div class="yani-account__section-title"></div>').text(t('list_stats')));
             var listGrid = $('<div class="yani-account__lists"></div>');
             stats.forEach(function (stat) {
                 var list = stat.list || {};
                 var tile = $('<div class="yani-account__list selector"></div>');
-                tile.append($('<div class="yani-account__list-title"></div>').text(list.title || 'Список'));
-                tile.append($('<div class="yani-account__list-count"></div>').text(String(counts[list.id] || 0) + ' аниме'));
-                tile.append($('<div class="yani-account__list-time"></div>').text('Общее время: ' + formatWatchTime(stat.seconds)));
+                tile.append($('<div class="yani-account__list-title"></div>').text(list.title || t('list')));
+                tile.append($('<div class="yani-account__list-count"></div>').text(String(counts[list.id] || 0) + ' ' + t('anime_count')));
+                tile.append($('<div class="yani-account__list-time"></div>').text(t('total_time') + ': ' + formatWatchTime(stat.seconds)));
                 bindAccountFocus(tile);
                 listGrid.append(tile);
             });
@@ -574,7 +631,7 @@ function pluginYummyAnime() {
     function formatAccountDate(timestamp) {
         if (!timestamp) return '—';
         try {
-            return new Date(Number(timestamp) * 1000).toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', year: 'numeric'});
+            return new Date(Number(timestamp) * 1000).toLocaleDateString(locale(), {day: 'numeric', month: 'long', year: 'numeric'});
         } catch (error) {
             return new Date(Number(timestamp) * 1000).toLocaleDateString();
         }
@@ -584,7 +641,7 @@ function pluginYummyAnime() {
         var hours = Math.floor(Number(seconds || 0) / 3600);
         var days = Math.floor(hours / 24);
         var restHours = hours % 24;
-        return days ? days + ' д ' + restHours + ' ч' : hours + ' ч';
+        return days ? days + ' ' + t('days_short') + ' ' + restHours + ' ' + t('hours_short') : hours + ' ' + t('hours_short');
     }
 
     function StatusDashboard(object) {
@@ -630,7 +687,7 @@ function pluginYummyAnime() {
             var periods = data.periods || null;
             var periodData = periods ? (periods[currentPeriod] || periods[data.default_period] || periods['3hour']) : data;
             if (!periodData) return renderStatusError();
-            var periodLabels = {'3hour': '3 часа', day: 'День', week: 'Неделя', month: 'Месяц'};
+            var periodLabels = {'3hour': t('period_3hour'), day: t('period_day'), week: t('period_week'), month: t('period_month')};
             var periodSwitch = $('<div class="yani-status__periods"></div>');
             Object.keys(periodLabels).forEach(function (period) {
                 var button = $('<div class="yani-status__period selector"></div>').text(periodLabels[period]);
@@ -647,38 +704,38 @@ function pluginYummyAnime() {
             data = periodData;
             var summary = data.summary || {};
             var status = summary.status || 'unknown';
-            var statusTitle = status === 'up' ? 'Все системы работают' : status === 'down' ? 'Сервисы недоступны' : status === 'unknown' ? 'Нет данных мониторинга' : 'Возникли неполадки';
+            var statusTitle = status === 'up' ? t('all_up') : status === 'down' ? t('all_down') : status === 'unknown' ? t('no_monitoring') : t('degraded');
             var ringColor = status === 'up' ? '#4caf50' : status === 'down' ? '#db4455' : status === 'unknown' ? '#888' : '#f0a33b';
 
             var summaryBlock = $('<div class="yani-status__summary selector yani-status--' + status + '"></div>');
             var ring = $('<div class="yani-status__ring"><div class="yani-status__ring-center"></div></div>');
             ring.css('background', 'conic-gradient(#4caf50 0 ' + Number(summary.uptime_percent || 0) + '%, #db4455 ' + Number(summary.uptime_percent || 0) + '% 100%)');
-            ring.find('.yani-status__ring-center').append($('<strong></strong>').text(summary.checks || 0), '<span>замеров</span>');
+            ring.find('.yani-status__ring-center').append($('<strong></strong>').text(summary.checks || 0), $('<span></span>').text(t('checks')));
 
             var summaryInfo = $('<div class="yani-status__summary-info"></div>');
             summaryInfo.append($('<div class="yani-status__headline"></div>').css('color', ringColor).text(statusTitle));
             var metrics = $('<div class="yani-status__metrics"></div>');
-            metrics.append(statusMetric('Доступность', Number(summary.uptime_percent || 0).toFixed(1) + '%'));
-            metrics.append(statusMetric('Средняя загрузка', String(summary.average_ms || 0) + ' мс'));
-            metrics.append(statusMetric('Ошибок', String(summary.failed || 0)));
-            metrics.append(statusMetric('Обновлено', formatStatusDate(data.generated_at)));
+            metrics.append(statusMetric(t('availability'), Number(summary.uptime_percent || 0).toFixed(1) + '%'));
+            metrics.append(statusMetric(t('average_load'), String(summary.average_ms || 0) + ' ' + t('milliseconds')));
+            metrics.append(statusMetric(t('errors'), String(summary.failed || 0)));
+            metrics.append(statusMetric(t('updated'), formatStatusDate(data.generated_at)));
             summaryInfo.append(metrics);
             summaryBlock.append(ring, summaryInfo);
             bindStatusFocus(summaryBlock);
             content.append(summaryBlock);
 
-            content.append('<div class="yani-status__legend"><span class="yani-status__dot yani-status__dot--up"></span>Работает <span class="yani-status__dot yani-status__dot--degraded"></span>Нестабильно <span class="yani-status__dot yani-status__dot--down"></span>Недоступно</div>');
+            content.append('<div class="yani-status__legend"><span class="yani-status__dot yani-status__dot--up"></span>' + t('up') + ' <span class="yani-status__dot yani-status__dot--degraded"></span>' + t('unstable') + ' <span class="yani-status__dot yani-status__dot--down"></span>' + t('down') + '</div>');
 
             (data.domains || []).forEach(function (domain) {
                 var block = $('<div class="yani-status__domain selector yani-status--' + domain.status + '"></div>');
                 var head = $('<div class="yani-status__domain-head"></div>');
                 var name = $('<div class="yani-status__domain-name"></div>');
                 name.append('<span class="yani-status__state"></span>');
-                name.append($('<strong></strong>').text(domain.label || domain.domain));
+                name.append($('<strong></strong>').text(statusDomainName(domain)));
                 name.append($('<small></small>').text(domain.domain));
                 var values = $('<div class="yani-status__domain-values"></div>');
-                values.append($('<span></span>').text('HTTP ' + (domain.average_ms || 0) + ' мс'));
-                values.append($('<span></span>').text('Ping ' + (domain.ping_ms || 0) + ' мс'));
+                values.append($('<span></span>').text('HTTP ' + (domain.average_ms || 0) + ' ' + t('milliseconds')));
+                values.append($('<span></span>').text('Ping ' + (domain.ping_ms || 0) + ' ' + t('milliseconds')));
                 head.append(name, values);
 
                 var history = $('<div class="yani-status__history"></div>');
@@ -690,11 +747,11 @@ function pluginYummyAnime() {
                 content.append(block);
             });
 
-            content.append('<div class="yani-status__source">Источник: YummyStatus · период: ' + periodLabels[currentPeriod] + ' · snapshot обновляется каждые 5 минут</div>');
+            content.append($('<div class="yani-status__source"></div>').text(t('source') + ': YummyStatus · ' + t('period') + ': ' + periodLabels[currentPeriod] + ' · ' + t('snapshot_notice')));
 
-            var refresh = $('<div class="yani-status__refresh selector">Обновить статус</div>');
+            var refresh = $('<div class="yani-status__refresh selector"></div>').text(t('refresh_status'));
             refresh.on('hover:enter', function () {
-                Lampa.Noty.show('Обновляем YummyAnime Status');
+                Lampa.Noty.show(t('refreshing_status'));
                 load(false);
             });
             bindStatusFocus(refresh);
@@ -709,11 +766,23 @@ function pluginYummyAnime() {
             return metric;
         }
 
+        function statusDomainName(domain) {
+            var names = {
+                'old.yummyani.me': 'domain_old',
+                'old.yummy-ani.me': 'domain_old_mirror',
+                'ru.yummyani.me': 'domain_new',
+                'ru.yummy-ani.me': 'domain_new_mirror',
+                'api.yani.tv': 'domain_api',
+                'waf.valtrix.org': 'domain_waf'
+            };
+            return names[domain.domain] ? t(names[domain.domain]) : (domain.label || domain.domain);
+        }
+
         function renderStatusError() {
             content.empty();
             var error = $('<div class="yani-status__error selector"></div>');
-            error.append('<strong>Не удалось загрузить YummyAnime Status</strong>');
-            error.append('<span>Данные мониторинга временно недоступны. Это не означает, что сам плагин не работает.</span>');
+            error.append($('<strong></strong>').text(t('status_load_error')));
+            error.append($('<span></span>').text(t('status_error_hint')));
             bindStatusFocus(error);
             content.append(error);
             refreshStatusNavigation();
@@ -757,7 +826,7 @@ function pluginYummyAnime() {
     function formatStatusDate(value) {
         if (!value) return '—';
         try {
-            return new Date(value).toLocaleString('ru-RU', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+            return new Date(value).toLocaleString(locale(), {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
         } catch (error) {
             return new Date(value).toLocaleString();
         }
@@ -783,7 +852,7 @@ function pluginYummyAnime() {
             }).catch(function (error) {
                 console.error('[YummyAnime]', error);
                 self.activity.loader(false);
-                Lampa.Noty.show('Не удалось загрузить расписание YummyAnime');
+                Lampa.Noty.show(t('schedule_load_error'));
             });
         };
 
@@ -810,7 +879,7 @@ function pluginYummyAnime() {
                 section.append($('<div class="yani-schedule__day-title"></div>').text(formatScheduleDay(day, dayOffset)));
 
                 if (!releases.length) {
-                    section.append('<div class="yani-schedule__empty">Нет запланированных выпусков</div>');
+                    section.append($('<div class="yani-schedule__empty"></div>').text(t('no_releases')));
                 } else {
                     releases.forEach(function (item) {
                         section.append(createScheduleItem(item));
@@ -833,7 +902,7 @@ function pluginYummyAnime() {
             info.append($('<div class="yani-schedule__title"></div>').text(card.title));
             info.append($('<div class="yani-schedule__episode"></div>').text(formatEpisode(episodes)));
             release.append($('<div class="yani-schedule__time"></div>').text(formatScheduleTime(releaseDate)));
-            release.append('<div class="yani-schedule__timezone">местное время</div>');
+            release.append($('<div class="yani-schedule__timezone"></div>').text(t('local_time')));
             row.append(poster, info, release);
 
             row.on('hover:focus', function (event) {
@@ -873,9 +942,9 @@ function pluginYummyAnime() {
     }
 
     function formatScheduleDay(date, offset) {
-        var prefix = offset === 0 ? 'Сегодня, ' : offset === 1 ? 'Завтра, ' : '';
+        var prefix = offset === 0 ? t('today') + ', ' : offset === 1 ? t('tomorrow') + ', ' : '';
         try {
-            return prefix + date.toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'});
+            return prefix + date.toLocaleDateString(locale(), {weekday: 'long', day: 'numeric', month: 'long'});
         } catch (error) {
             return prefix + date.toLocaleDateString();
         }
@@ -883,7 +952,7 @@ function pluginYummyAnime() {
 
     function formatScheduleTime(date) {
         try {
-            return date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+            return date.toLocaleTimeString(locale(), {hour: '2-digit', minute: '2-digit'});
         } catch (error) {
             return ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2);
         }
@@ -891,7 +960,7 @@ function pluginYummyAnime() {
 
     function formatScheduleDateTime(date) {
         try {
-            return date.toLocaleString('ru-RU', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'});
+            return date.toLocaleString(locale(), {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'});
         } catch (error) {
             return date.toLocaleString();
         }
@@ -900,9 +969,9 @@ function pluginYummyAnime() {
     function formatEpisode(episodes) {
         var aired = Number(episodes.aired || 0);
         var count = Number(episodes.count || 0);
-        if (count === 1 && aired === 0) return 'Релиз';
+        if (count === 1 && aired === 0) return t('release');
         var next = aired + 1;
-        return count > 1 ? 'Серия ' + next + ' из ' + count : 'Серия ' + next;
+        return count > 1 ? t('episode') + ' ' + next + ' ' + t('of') + ' ' + count : t('episode') + ' ' + next;
     }
 
     function Detail(object) {
@@ -944,7 +1013,7 @@ function pluginYummyAnime() {
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
-            button = $('<div class="yani-detail__button selector">Открыть в поиске Lampa</div>');
+            button = $('<div class="yani-detail__button selector"></div>').text(t('open_lampa_search'));
             button.on('hover:enter', function () {
                 if (Lampa.Search && Lampa.Search.open) Lampa.Search.open(data.title || '');
                 else Lampa.Controller.toggle('search');
@@ -971,11 +1040,11 @@ function pluginYummyAnime() {
         LampaYaniApi.genres().then(function (payload) {
             var genres = LampaYaniApi.normalizeGenres(payload);
             if (!genres.length) {
-                Lampa.Noty.show('YummyAnime не вернул список жанров');
+                Lampa.Noty.show(t('genres_empty'));
                 return;
             }
             Lampa.Select.show({
-                title: 'Жанры YummyAnime',
+                title: t('genres_title'),
                 items: genres.map(function (genre) {
                     return {
                         title: genre.title || genre.name,
@@ -986,22 +1055,22 @@ function pluginYummyAnime() {
                     Lampa.Activity.push({url: 'yani/genre/' + item.value, title: item.title, component: 'yani_catalog', params: {limit: 30, genres: item.value}});
                 }
             });
-        }).catch(function () { Lampa.Noty.show('Не удалось загрузить жанры YummyAnime'); });
+        }).catch(function () { Lampa.Noty.show(t('genres_load_error')); });
     }
 
     function openSearch() {
-        showYummyInput({title: 'YummyAnime Search', value: ''}, function (query) {
+        showYummyInput({title: t('search_title'), value: ''}, function (query) {
             query = (query || '').trim();
             if (query) Lampa.Activity.push({url: 'yani/search/' + encodeURIComponent(query), title: query, component: 'yani_catalog', params: {q: query, limit: 30}});
         });
     }
 
     function openAccount() {
-        Lampa.Activity.push({url: 'yani/account', title: 'YummyAnime Account', component: 'yani_account'});
+        Lampa.Activity.push({url: 'yani/account', title: 'YummyAnime ' + t('account'), component: 'yani_account'});
     }
 
     function toCard(item) {
-        var title = item.title || item.name || item.russian || item.original_title || 'Без названия';
+        var title = item.title || item.name || item.russian || item.original_title || t('untitled');
         var poster = item.cover || item.image || item.poster_url || '';
         if (!poster && item.poster) poster = item.poster.fullsize || item.poster.medium || item.poster.original || '';
         if (poster.indexOf('//') === 0) poster = 'https:' + poster;
@@ -1045,7 +1114,7 @@ function pluginYummyAnime() {
         rating = rating && typeof rating === 'object' ? rating : {average: rating};
         return [
             {key: 'yummy', short: 'YA', title: 'YummyAnime', value: Number(rating.average || 0)},
-            {key: 'kp', short: 'KP', title: 'Кинопоиск', value: Number(rating.kp_rating || 0)},
+            {key: 'kp', short: 'KP', title: t('kinopoisk'), value: Number(rating.kp_rating || 0)},
             {key: 'shikimori', short: 'SH', title: 'Shikimori', value: Number(rating.shikimori_rating || 0)},
             {key: 'anidub', short: 'AD', title: 'AniDUB', value: Number(rating.anidub_rating || 0)},
             {key: 'mal', short: 'MAL', title: 'MyAnimeList', value: Number(rating.myanimelist_rating || 0)},
@@ -1080,7 +1149,7 @@ function pluginYummyAnime() {
             var item = $('<div class="yani-ratings__item"></div>');
             item.append($('<div class="yani-ratings__value"></div>').text(formatRating(rating.value)));
             item.append($('<div class="yani-ratings__source"></div>').text(rating.title));
-            if (rating.key === 'yummy' && votes) item.append($('<div class="yani-ratings__votes"></div>').text(votes + ' оценок'));
+            if (rating.key === 'yummy' && votes) item.append($('<div class="yani-ratings__votes"></div>').text(votes + ' ' + t('ratings_count')));
             block.append(item);
         });
         return block;
@@ -1097,22 +1166,33 @@ function pluginYummyAnime() {
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
+            param: {name: 'yani_language', type: 'select', values: {ru: 'Русский', en: 'English'}, default: 'ru'},
+            field: {name: t('language_name'), description: t('language_description')},
+            onChange: function (value) {
+                if (value && typeof value === 'object') value = value.value;
+                LampaYaniI18n.setLanguage(value);
+                Lampa.Noty.show(t('language_changed'));
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
             param: {name: 'yani_account_login', type: 'trigger', default: false},
-            field: {name: 'Войти в YummyAnime', description: 'Вход по email и паролю YummyAnime'},
+            field: {name: t('login_name'), description: t('login_description')},
             onChange: openSettingsLogin
         });
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
             param: {name: 'yani_account_refresh', type: 'trigger', default: false},
-            field: {name: 'Обновить токен YummyAnime', description: 'Обновить действующий Bearer-токен аккаунта'},
+            field: {name: t('refresh_name'), description: t('refresh_description')},
             onChange: function () {
-                if (!LampaYaniAuth.token()) return Lampa.Noty.show('Сначала войдите в YummyAnime');
+                if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_first'));
                 LampaYaniAuth.refresh().then(function () {
-                    Lampa.Noty.show('Токен YummyAnime обновлён');
+                    Lampa.Noty.show(t('token_refreshed'));
                 }).catch(function (error) {
                     console.error('[YummyAnime]', error);
-                    Lampa.Noty.show('Не удалось обновить токен YummyAnime');
+                    Lampa.Noty.show(t('token_refresh_error'));
                 });
             }
         });
@@ -1120,14 +1200,14 @@ function pluginYummyAnime() {
         Lampa.SettingsApi.addParam({
             component: 'yani',
             param: {name: 'yani_account_logout', type: 'trigger', default: false},
-            field: {name: 'Выйти из YummyAnime', description: 'Завершить сессию и удалить локальный токен'},
+            field: {name: t('logout_name'), description: t('logout_description')},
             onChange: function () {
-                if (!LampaYaniAuth.token()) return Lampa.Noty.show('Вход в YummyAnime не выполнен');
+                if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('not_logged'));
                 LampaYaniAuth.logout().then(function () {
-                    Lampa.Noty.show('Вы вышли из YummyAnime');
+                    Lampa.Noty.show(t('logged_out'));
                 }).catch(function (error) {
                     console.error('[YummyAnime]', error);
-                    Lampa.Noty.show('Локальный токен YummyAnime удалён');
+                    Lampa.Noty.show(t('token_removed'));
                 });
             }
         });
@@ -1135,29 +1215,29 @@ function pluginYummyAnime() {
         Lampa.SettingsApi.addParam({
             component: 'yani',
             param: {name: 'yani_api_check', type: 'trigger', default: false},
-            field: {name: 'Проверить YummyAnime API', description: 'Проверить доступность API и публичный токен приложения'},
+            field: {name: t('api_check_name'), description: t('api_check_description')},
             onChange: function () {
                 LampaYaniApi.health().then(function () {
-                    Lampa.Noty.show('YummyAnime API работает');
+                    Lampa.Noty.show(t('api_ok'));
                 }).catch(function (error) {
                     console.error('[YummyAnime]', error);
-                    Lampa.Noty.show('YummyAnime API недоступен или публичный токен неверный');
+                    Lampa.Noty.show(t('api_error'));
                 });
             }
         });
     }
 
     function openSettingsLogin() {
-        showYummyInput({title: 'Email YummyAnime', value: ''}, function (login) {
+        showYummyInput({title: t('email_prompt'), value: ''}, function (login) {
             login = (login || '').trim();
-            if (!login) return Lampa.Noty.show('Введите email YummyAnime');
-            showYummyInput({title: 'Пароль YummyAnime', value: '', password: true}, function (password) {
-                if (!password) return Lampa.Noty.show('Введите пароль YummyAnime');
+            if (!login) return Lampa.Noty.show(t('email_required'));
+            showYummyInput({title: t('password_prompt'), value: '', password: true}, function (password) {
+                if (!password) return Lampa.Noty.show(t('password_required'));
                 LampaYaniAuth.login(login, password).then(function () {
-                    Lampa.Noty.show('Вход в YummyAnime выполнен');
+                    Lampa.Noty.show(t('login_ok'));
                 }).catch(function (error) {
                     console.error('[YummyAnime]', error);
-                    Lampa.Noty.show('Ошибка входа в YummyAnime');
+                    Lampa.Noty.show(t('login_error'));
                 });
             });
         });
@@ -1165,7 +1245,7 @@ function pluginYummyAnime() {
 
     function showYummyInput(params, callback) {
         if (!Lampa.Input) {
-            Lampa.Noty.show('Ввод недоступен в этой версии Lampa');
+            Lampa.Noty.show(t('input_unavailable'));
             return;
         }
         if (Lampa.Input.show) {
@@ -1173,7 +1253,7 @@ function pluginYummyAnime() {
             return Lampa.Input.show(params);
         }
         if (Lampa.Input.edit) return Lampa.Input.edit(params, callback);
-        Lampa.Noty.show('Ввод недоступен в этой версии Lampa');
+        Lampa.Noty.show(t('input_unavailable'));
     }
 
     function commentsMenu(id) {
@@ -1182,8 +1262,8 @@ function pluginYummyAnime() {
             var items = comments.map(function (comment) {
                 return {title: comment.text || comment.body || 'Comment'};
             });
-            Lampa.Select.show({title: 'YummyAnime Comments', items: items});
-        }).catch(function () { Lampa.Noty.show('Не удалось загрузить комментарии'); });
+            Lampa.Select.show({title: t('comments_title'), items: items});
+        }).catch(function () { Lampa.Noty.show(t('comments_error')); });
     }
 
     function installFullRating() {

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 — 2026-08-06
+
+- added a Russian/English language selector under YummyAnime settings;
+- localized the plugin interface, notifications, dates and YummyAnime API language header.
+
 ## 0.3.1 — 2026-08-06
 
 - added 3-hour, day, week and month switches to the YummyStatus dashboard.

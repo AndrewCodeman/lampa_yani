@@ -7,7 +7,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.1.0',
+            version: '0.4.0',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -16,6 +16,7 @@ function pluginYummyAnime() {
 
     var scripts = [
         'src/config.js',
+        'src/i18n.js',
         'src/auth.js',
         'src/api.js',
         'src/catalog.js',
