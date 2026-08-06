@@ -6,9 +6,9 @@ const modules = ['src/config.js', 'src/auth.js', 'src/api.js', 'src/catalog.js',
 const body = modules.map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
 const css = fs.readFileSync(path.join(root, 'style.css'), 'utf8');
 
-const output = `function startPlugin() {
-    if (window.lampa_yani_started) return;
-    window.lampa_yani_started = true;
+const output = `function pluginYummyAnime() {
+    if (window.plugin_yummy_anime_ready) return;
+    window.plugin_yummy_anime_ready = true;
 
     var style = document.createElement('style');
     style.textContent = ${JSON.stringify(css)};
@@ -33,7 +33,7 @@ ${body}
     }
 }
 
-if (!window.lampa_yani_started) startPlugin();
+if (!window.plugin_yummy_anime_ready) pluginYummyAnime();
 `;
 
 fs.mkdirSync(path.join(root, 'dist'), {recursive: true});

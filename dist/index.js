@@ -1,6 +1,6 @@
-function startPlugin() {
-    if (window.lampa_yani_started) return;
-    window.lampa_yani_started = true;
+function pluginYummyAnime() {
+    if (window.plugin_yummy_anime_ready) return;
+    window.plugin_yummy_anime_ready = true;
 
     var style = document.createElement('style');
     style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n";
@@ -449,4 +449,4 @@ function startPlugin() {
     }
 }
 
-if (!window.lampa_yani_started) startPlugin();
+if (!window.plugin_yummy_anime_ready) pluginYummyAnime();

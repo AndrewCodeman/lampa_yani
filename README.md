@@ -6,7 +6,7 @@ Current version: `0.1.0`
 
 See the [changelog](CHANGELOG.md) for release history.
 
-The plugin uses Lampa's standard `startPlugin()` entry point.
+The plugin follows Lampa's standard global plugin initialization pattern.
 
 Документация / Documentation:
 

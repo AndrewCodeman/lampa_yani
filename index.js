@@ -1,8 +1,8 @@
-function startPlugin() {
+function pluginYummyAnime() {
     'use strict';
 
-    if (window.lampa_yani_started) return;
-    window.lampa_yani_started = true;
+    if (window.plugin_yummy_anime_ready) return;
+    window.plugin_yummy_anime_ready = true;
 
     var scripts = [
         'src/config.js',
@@ -51,4 +51,4 @@ function startPlugin() {
     load(0);
 }
 
-if (!window.lampa_yani_started) startPlugin();
+if (!window.plugin_yummy_anime_ready) pluginYummyAnime();
