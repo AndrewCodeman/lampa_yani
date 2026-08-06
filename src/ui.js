@@ -789,7 +789,13 @@
     function Detail(object) {
         var data = object.card || {};
         var html = $('<div class="yani-detail"></div>');
+        var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
         var button;
+
+        html.on('hover:focus', function (event) {
+            var target = $(event.target);
+            if (target.hasClass('selector')) scroll.update(target, true);
+        });
 
         this.create = function () {
             var self = this;
@@ -844,6 +850,7 @@
             info.append(actions);
             info.append(comments);
             html.append(poster, info);
+            scroll.append(html);
             loadInlineComments(data, comments);
         }
 
@@ -882,16 +889,18 @@
 
         this.start = function () {
             Lampa.Controller.add('content', {
-                toggle: function () { Lampa.Controller.collectionSet(html); Lampa.Controller.collectionFocus(button, html); },
-                left: function () { Lampa.Controller.toggle('menu'); },
-                up: function () { Lampa.Controller.toggle('head'); },
+                toggle: function () { Lampa.Controller.collectionSet(scroll.render()); Lampa.Controller.collectionFocus(button, scroll.render()); },
+                left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
+                right: function () { Navigator.move('right'); },
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
+                down: function () { Navigator.move('down'); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
         };
 
-        this.render = function (js) { return js ? html[0] : html; };
-        this.destroy = function () { html.remove(); };
+        this.render = function (js) { return js ? scroll.render(true) : scroll.render(); };
+        this.destroy = function () { scroll.destroy(); html.remove(); };
     }
 
     function openVideos(card, resume) {
