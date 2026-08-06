@@ -21,5 +21,10 @@
         document.head.appendChild(tag);
     }
 
+    var style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = 'style.css';
+    document.head.appendChild(style);
+
     load(0);
 }());

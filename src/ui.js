@@ -8,7 +8,7 @@
                 return;
             }
 
-            Lampa.Menu.addButton('icon-star', 'Anime', function () {
+            Lampa.Menu.addButton('icon-yani', 'Anime', function () {
                 Lampa.Activity.push({
                     url: 'yani',
                     title: 'Anime',
