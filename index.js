@@ -27,21 +27,10 @@ function pluginYummyAnime() {
 
     function load(i) {
         if (i >= scripts.length) {
-            var init = function () {
-                try {
-                    window.LampaYani.register();
-                } catch (error) {
-                    console.error('[YummyAnime] Plugin initialization failed', error);
-                    if (window.Lampa && Lampa.Noty && Lampa.Noty.show) {
-                        Lampa.Noty.show('YummyAnime: ' + (error.message || error));
-                    }
-                }
-            };
-            if (window.appready) init();
-            else if (window.Lampa && Lampa.Listener && Lampa.Listener.follow) {
-                Lampa.Listener.follow('app', function (event) {
-                    if (event.type === 'ready') init();
-                });
+            try {
+                window.LampaYani.register();
+            } catch (error) {
+                console.error('[YummyAnime] Plugin initialization failed', error);
             }
             return;
         }
