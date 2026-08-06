@@ -129,6 +129,11 @@ function pluginYummyAnime() {
             if (Array.isArray(response)) return response;
             return response && (response.anime || response.results || response.items || response.data) || [];
         },
+        normalizeGenres: function (payload) {
+            var response = payload && payload.response ? payload.response : payload;
+            if (Array.isArray(response)) return response;
+            return response && response.genres || [];
+        },
         genres: function () {
             return request('/anime/genres');
         },
@@ -581,10 +586,19 @@ function pluginYummyAnime() {
 
     function openGenres() {
         LampaYaniApi.genres().then(function (payload) {
-            var genres = LampaYaniApi.normalize(payload);
+            var genres = LampaYaniApi.normalizeGenres(payload);
+            if (!genres.length) {
+                Lampa.Noty.show('YummyAnime не вернул список жанров');
+                return;
+            }
             Lampa.Select.show({
-                title: 'YummyAnime Genres',
-                items: genres.map(function (genre) { return {title: genre.title || genre.name, value: genre.id || genre.alias}; }),
+                title: 'Жанры YummyAnime',
+                items: genres.map(function (genre) {
+                    return {
+                        title: genre.title || genre.name,
+                        value: genre.value || genre.id || genre.href || genre.alias
+                    };
+                }).filter(function (genre) { return genre.title && genre.value; }),
                 onSelect: function (item) {
                     Lampa.Activity.push({url: 'yani/genre/' + item.value, title: item.title, component: 'yani_catalog', params: {limit: 30, genres: item.value}});
                 }
