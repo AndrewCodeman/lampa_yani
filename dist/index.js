@@ -2,6 +2,15 @@ function pluginYummyAnime() {
     if (window.plugin_yummy_anime_ready) return;
     window.plugin_yummy_anime_ready = true;
 
+    if (window.Lampa && Lampa.Manifest) {
+        Lampa.Manifest.plugins = {
+            type: 'other',
+            version: '0.1.0',
+            name: 'YummyAnime',
+            description: 'YummyAnime catalog, ratings, lists and account integration'
+        };
+    }
+
     var style = document.createElement('style');
     style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n";
     document.head.appendChild(style);

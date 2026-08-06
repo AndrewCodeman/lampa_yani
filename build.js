@@ -10,6 +10,15 @@ const output = `function pluginYummyAnime() {
     if (window.plugin_yummy_anime_ready) return;
     window.plugin_yummy_anime_ready = true;
 
+    if (window.Lampa && Lampa.Manifest) {
+        Lampa.Manifest.plugins = {
+            type: 'other',
+            version: '0.1.0',
+            name: 'YummyAnime',
+            description: 'YummyAnime catalog, ratings, lists and account integration'
+        };
+    }
+
     var style = document.createElement('style');
     style.textContent = ${JSON.stringify(css)};
     document.head.appendChild(style);
