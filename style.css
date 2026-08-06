@@ -208,9 +208,102 @@
     opacity: 0.55;
 }
 
+.yani-account__content {
+    padding: 1.5em 2em 3em;
+}
+
+.yani-account__profile {
+    display: flex;
+    align-items: center;
+    padding: 1.2em;
+    border-radius: 0.8em;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.yani-account__profile.focus,
+.yani-account__info.focus,
+.yani-account__list.focus,
+.yani-account__notice.focus {
+    background: #fff;
+    color: #111;
+}
+
+.yani-account__avatar {
+    width: 7em;
+    height: 7em;
+    margin-right: 1.2em;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.yani-account__name {
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+.yani-account__id,
+.yani-account__about {
+    margin-top: 0.35em;
+    opacity: 0.7;
+}
+
+.yani-account__warning {
+    margin-top: 0.5em;
+    color: #ff6868;
+    font-weight: 600;
+}
+
+.yani-account__grid,
+.yani-account__lists {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(10em, 1fr));
+    gap: 0.7em;
+    margin-top: 1em;
+}
+
+.yani-account__info,
+.yani-account__list,
+.yani-account__notice {
+    padding: 1em;
+    border-radius: 0.65em;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.yani-account__info-title,
+.yani-account__list-time,
+.yani-account__notice-text {
+    opacity: 0.65;
+}
+
+.yani-account__info-value,
+.yani-account__list-count,
+.yani-account__notice-title {
+    margin-top: 0.3em;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.yani-account__list-title {
+    font-size: 1.15em;
+    font-weight: 600;
+}
+
+.yani-account__list-time {
+    margin-top: 0.35em;
+}
+
+.yani-account__section-title {
+    margin-top: 1.5em;
+    font-size: 1.45em;
+    font-weight: 600;
+}
+
 @media (max-width: 700px) {
     .yani-schedule__content { padding: 1em; }
     .yani-schedule__release { min-width: 5em; }
     .yani-schedule__timezone { display: none; }
     .yani-ratings { grid-template-columns: repeat(2, minmax(7em, 1fr)); }
+    .yani-account__content { padding: 1em; }
+    .yani-account__grid,
+    .yani-account__lists { grid-template-columns: repeat(2, minmax(8em, 1fr)); }
 }
