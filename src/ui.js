@@ -1384,6 +1384,16 @@
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
+            param: {name: 'yani_about', type: 'trigger', default: false},
+            field: {
+                name: t('version_name') + ' ' + LampaYaniConfig.version,
+                description: t('website_description') + ': ' + yummyWebsiteUrl()
+            },
+            onChange: openYummyWebsite
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
             param: {name: 'yani_language', type: 'select', values: {ru: 'Русский', en: 'English'}, default: 'ru'},
             field: {name: t('language_name'), description: t('language_description')},
             onChange: function (value) {
@@ -1464,6 +1474,19 @@
                 });
             }
         });
+    }
+
+    function yummyWebsiteUrl() {
+        return LampaYaniI18n.getLanguage() === 'en' ? 'https://en.yummyani.me/' : 'https://ru.yummyani.me/';
+    }
+
+    function openYummyWebsite() {
+        var url = yummyWebsiteUrl();
+        if (Lampa.Browser && Lampa.Browser.open) return Lampa.Browser.open(url);
+        if (Lampa.External && Lampa.External.open) return Lampa.External.open(url);
+        if (Lampa.Utils && Lampa.Utils.open) return Lampa.Utils.open(url);
+        if (window.open) return window.open(url, '_blank');
+        Lampa.Noty.show(url);
     }
 
     function openSettingsLogin() {
