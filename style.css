@@ -77,6 +77,15 @@
 .yani-detail__comment-stats { margin-top: 0.25em; opacity: .6; font-size: .82em; }
 .yani-detail__comments-loading, .yani-detail__comments-empty, .yani-detail__comments-error { opacity: .7; }
 
+.yani-detail__order { margin-top: 1.5em; padding: 1em 0; border-top: 0.08em solid rgba(255, 255, 255, .18); border-bottom: 0.08em solid rgba(255, 255, 255, .18); }
+.yani-detail__order-title { margin-bottom: 0.65em; font-size: 1.35em; font-weight: 600; }
+.yani-detail__order-list { display: grid; gap: 0.4em; }
+.yani-detail__order-item { display: flex; align-items: baseline; gap: 0.45em; padding: 0.55em 0.7em; border-radius: 0.4em; background: rgba(255, 255, 255, .07); }
+.yani-detail__order-item.focus { background: #fff; color: #111; outline: 0.16em solid #ef6470; }
+.yani-detail__order-index { opacity: .65; }
+.yani-detail__order-name { font-weight: 600; }
+.yani-detail__order-year, .yani-detail__order-relation { opacity: .7; }
+
 @media (max-width: 700px) {
     .yani-detail { gap: 1em; padding: 1em; }
     .yani-detail__poster { width: 10em; }

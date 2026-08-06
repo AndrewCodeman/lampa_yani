@@ -825,6 +825,7 @@
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
+            if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
@@ -1305,9 +1306,29 @@
             yani_id: item.anime_id || item.id,
             yani_url: item.anime_url || item.url,
             yani_comments_count: Number(item.comments_count || 0),
+            yani_viewing_order: Array.isArray(item.viewing_order) ? item.viewing_order : [],
             yani_type: item.type || null,
             yani_remote_ids: item.remote_ids || {}
         };
+    }
+
+    function createViewingOrder(data) {
+        var section = $('<div class="yani-detail__order"></div>');
+        section.append($('<div class="yani-detail__order-title"></div>').text(t('viewing_order')));
+        var list = $('<div class="yani-detail__order-list"></div>');
+        data.yani_viewing_order.forEach(function (entry, index) {
+            var related = toCard(entry);
+            var relation = entry.data && (entry.data.text || entry.data.title) || '';
+            var row = $('<div class="yani-detail__order-item selector"></div>');
+            row.append($('<span class="yani-detail__order-index"></span>').text((index + 1) + '.'));
+            row.append($('<span class="yani-detail__order-name"></span>').text(related.title));
+            if (related.release_date) row.append($('<span class="yani-detail__order-year"></span>').text(related.release_date));
+            if (relation) row.append($('<span class="yani-detail__order-relation"></span>').text('· ' + relation));
+            if (String(related.yani_id) !== String(data.yani_id)) row.on('hover:enter', function () { openYummyDetail(related, true); });
+            list.append(row);
+        });
+        section.append(list);
+        return section;
     }
 
     function copyParams(params) {
