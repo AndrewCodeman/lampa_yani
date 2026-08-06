@@ -12,7 +12,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 - Yani account login;
 - rating anime from 1 to 10;
 - favorites and user lists;
-- viewing and posting comments;
+- viewing comments;
 - posters, titles, year, rating and description;
 - opening the selected anime in Lampa search;
 - modular structure for future development.

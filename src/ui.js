@@ -244,17 +244,7 @@
             var items = comments.map(function (comment) {
                 return {title: comment.text || comment.body || 'Comment'};
             });
-            items.push({title: 'Add comment', action: 'add'});
-            Lampa.Select.show({title: 'YummyAnime Comments', items: items, onSelect: function (item) {
-                if (item.action !== 'add') return;
-                if (!LampaYaniAuth.token()) return Lampa.Noty.show('Сначала войдите в YummyAnime Settings');
-                Lampa.Input.show({title: 'New comment', value: '', onEnter: function (text) {
-                    if (!text || !text.trim()) return;
-                    LampaYaniApi.addComment(id, text.trim()).then(function () {
-                        Lampa.Noty.show('Комментарий добавлен');
-                    }).catch(function () { Lampa.Noty.show('Не удалось добавить комментарий'); });
-                }});
-            }});
+            Lampa.Select.show({title: 'YummyAnime Comments', items: items});
         }).catch(function () { Lampa.Noty.show('Не удалось загрузить комментарии'); });
     }
 }(window));
