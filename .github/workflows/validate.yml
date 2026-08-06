@@ -23,3 +23,13 @@ jobs:
         run: |
           set -e
           find . -name '*.js' -not -path './node_modules/*' -print0 | xargs -0 -n1 node --check
+
+      - name: Rebuild bundled plugin
+        run: node build.js
+
+      - name: Check bundled plugin
+        run: node --check dist/index.js
+
+      - name: Verify bundle is committed
+        shell: bash
+        run: git diff --exit-code -- dist/index.js
