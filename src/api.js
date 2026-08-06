@@ -69,6 +69,9 @@
         detail: function (id) {
             return request('/anime/' + encodeURIComponent(id));
         },
+        videos: function (id) {
+            return request('/anime/' + encodeURIComponent(id) + '/videos', {cache: false});
+        },
         trailers: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/trailers');
         },

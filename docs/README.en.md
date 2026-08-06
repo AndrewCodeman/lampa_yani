@@ -13,6 +13,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 - rating anime from 1 to 10;
 - favorites and user lists;
 - viewing comments;
+- dubbing and episode selection with embedded playback;
 - YummyAnime service status with availability, latency and per-service history;
 - Russian and English extension interface;
 - posters, titles, year, rating and description;
@@ -27,7 +28,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 
 Install the bundled file from GitHub Pages:
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.4.1`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.5.0`
 
 The `YummyAnime → Status` screen shows YummyStatus history for three hours, one day, one week or one month. GitHub Actions refreshes the monitoring snapshot every five minutes.
 
@@ -37,6 +38,7 @@ The extension uses:
 
 - `GET /anime` — catalog and filters;
 - `GET /anime/genres` — genres.
+- `GET /anime/{id}/videos` — available dubbings, episodes and iframe players.
 
 Search is passed through the `q` parameter. The public token is sent in the `X-Application` header.
 

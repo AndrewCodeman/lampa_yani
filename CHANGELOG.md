@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 — 2026-08-06
+
+- added YummyAnime dubbing and episode selection;
+- added embedded playback for official iframe players;
+- direct media URLs are handed to the native Lampa Player with a playlist.
+
 ## 0.4.1 — 2026-08-06
 
 - clarified that YummyAnime login accepts a nickname or email.

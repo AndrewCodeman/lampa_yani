@@ -135,6 +135,7 @@
             Lampa.Component.add('yani_account', Account);
 
             Lampa.Component.add('yani_status', StatusDashboard);
+            Lampa.Component.add('yani_player', IframePlayer);
 
             installFullRating();
 
@@ -720,12 +721,14 @@
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
-            button = $('<div class="yani-detail__button selector"></div>').text(t('open_lampa_search'));
-            button.on('hover:enter', function () {
+            button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(t('watch'));
+            button.on('hover:enter', function () { openVideos(data); });
+            var searchButton = $('<div class="yani-detail__button selector"></div>').text(t('open_lampa_search'));
+            searchButton.on('hover:enter', function () {
                 if (Lampa.Search && Lampa.Search.open) Lampa.Search.open(data.title || '');
                 else Lampa.Controller.toggle('search');
             });
-            info.append(button);
+            info.append(button, searchButton);
             html.append(poster, info);
         }
 
@@ -741,6 +744,127 @@
 
         this.render = function (js) { return js ? html[0] : html; };
         this.destroy = function () { html.remove(); };
+    }
+
+    function openVideos(card) {
+        if (!card || !card.yani_id) return Lampa.Noty.show(t('no_videos'));
+        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+
+        LampaYaniApi.videos(card.yani_id).then(function (payload) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            var videos = payload && payload.response ? payload.response : payload;
+            videos = (Array.isArray(videos) ? videos : []).filter(function (video) { return video && video.iframe_url; });
+            if (!videos.length) return Lampa.Noty.show(t('no_videos'));
+
+            var groups = {};
+            videos.forEach(function (video) {
+                var data = video.data || {};
+                var title = data.dubbing || data.player || t('player');
+                var key = title + '|' + String(data.player_id || data.player || '');
+                if (!groups[key]) groups[key] = {title: title, player: data.player || '', videos: []};
+                groups[key].videos.push(video);
+            });
+
+            var voices = Object.keys(groups).map(function (key) {
+                var group = groups[key];
+                return {title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : ''), group: group};
+            }).sort(function (a, b) { return a.title.localeCompare(b.title); });
+
+            if (voices.length === 1) return chooseEpisode(card, voices[0].group);
+            Lampa.Select.show({
+                title: t('choose_voice'),
+                items: voices,
+                onSelect: function (item) { chooseEpisode(card, item.group); }
+            });
+        }).catch(function (error) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            console.error('[YummyAnime Videos]', error);
+            Lampa.Noty.show(t('videos_load_error'));
+        });
+    }
+
+    function chooseEpisode(card, group) {
+        var videos = group.videos.slice().sort(function (a, b) {
+            var numberA = parseFloat(a.number);
+            var numberB = parseFloat(b.number);
+            if (isFinite(numberA) && isFinite(numberB)) return numberA - numberB;
+            return Number(a.index || 0) - Number(b.index || 0);
+        });
+        var episodes = videos.map(function (video) {
+            return {title: t('episode') + ' ' + (video.number || video.index || '?'), video: video};
+        });
+        if (episodes.length === 1) return launchVideo(card, group, videos, videos[0]);
+        Lampa.Select.show({
+            title: t('choose_episode') + ' · ' + group.title,
+            items: episodes,
+            onSelect: function (item) { launchVideo(card, group, videos, item.video); }
+        });
+    }
+
+    function launchVideo(card, group, videos, selected) {
+        var url = normalizeVideoUrl(selected.iframe_url);
+        if (!url) return Lampa.Noty.show(t('no_videos'));
+        var title = (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (selected.number || selected.index || '?') + ' · ' + group.title;
+
+        if (/\.(m3u8|mp4|webm)(?:\?|$)/i.test(url) && Lampa.Player && Lampa.Player.play) {
+            var directVideos = videos.filter(function (video) {
+                return /\.(m3u8|mp4|webm)(?:\?|$)/i.test(normalizeVideoUrl(video.iframe_url));
+            });
+            var playlist = directVideos.map(function (video) {
+                return {
+                    title: (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (video.number || video.index || '?'),
+                    url: normalizeVideoUrl(video.iframe_url)
+                };
+            });
+            var current = playlist[directVideos.indexOf(selected)] || playlist[0];
+            Lampa.Player.play(current);
+            if (Lampa.Player.playlist) Lampa.Player.playlist(playlist);
+            return;
+        }
+
+        Lampa.Activity.push({
+            url: 'yani/player/' + (selected.video_id || selected.index || selected.number),
+            title: title,
+            component: 'yani_player',
+            iframe_url: url
+        });
+    }
+
+    function normalizeVideoUrl(url) {
+        if (!url) return '';
+        return url.indexOf('//') === 0 ? 'https:' + url : url;
+    }
+
+    function IframePlayer(object) {
+        var html = $('<div class="yani-player"></div>');
+        var iframe = $('<iframe class="yani-player__iframe" frameborder="0" allowfullscreen></iframe>');
+
+        this.create = function () {
+            iframe.attr('src', normalizeVideoUrl(object.iframe_url));
+            iframe.attr('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+            iframe.on('load', function () { if (iframe[0] && iframe[0].focus) iframe[0].focus(); });
+            html.append(iframe);
+            this.activity.loader(false);
+            this.activity.toggle();
+        };
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () {
+                    iframe.attr('tabindex', '0');
+                    if (iframe[0] && iframe[0].focus) iframe[0].focus();
+                },
+                back: this.back
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? html[0] : html; };
+        this.destroy = function () {
+            iframe.attr('src', 'about:blank');
+            iframe.remove();
+            html.remove();
+        };
     }
 
     function openGenres() {
