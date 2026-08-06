@@ -44,21 +44,44 @@
 
             Lampa.Component.add('yani_catalog', function (object) {
                 var comp = new Lampa.InteractionCategory(object);
+                var baseParams = copyParams(object.params || {limit: 30, sort: 'top', sort_forward: false});
+                var limit = Number(baseParams.limit || 30);
+                var maxPages = Math.ceil(20000 / limit) + 1;
+                var seen = {};
+
+                object.page = 1;
+                baseParams.limit = limit;
+                baseParams.offset = Number(baseParams.offset || 0);
+
                 comp.create = function () {
                     var self = this;
                     this.activity.loader(true);
-                    LampaYaniApi.catalog(object.params || {limit: 30, sort: 'top', sort_forward: false})
+                    LampaYaniApi.catalog(baseParams)
                         .then(function (payload) {
-                            var results = LampaYaniApi.normalize(payload).map(toCard);
-                            self.build({results: results, title: 'Anime'});
-                            self.activity.loader(false);
-                            self.activity.toggle();
+                            var results = mapUniqueCards(LampaYaniApi.normalize(payload), seen);
+                            if (results.length < limit) object.page = maxPages;
+                            self.build({results: results, total_pages: maxPages, title: 'Anime'});
                         })
                         .catch(function (error) {
-                            console.error('[Lampa Yani]', error);
+                            console.error('[YummyAnime]', error);
                             self.activity.loader(false);
-                            Lampa.Noty.show('Не удалось загрузить каталог Yani');
+                            Lampa.Noty.show('Не удалось загрузить каталог YummyAnime');
                         });
+                };
+                comp.nextPageReuest = function (requestObject, resolve, reject) {
+                    var params = copyParams(baseParams);
+                    params.offset = baseParams.offset + (requestObject.page - 1) * limit;
+
+                    LampaYaniApi.catalog(params).then(function (payload) {
+                        var raw = LampaYaniApi.normalize(payload);
+                        var results = mapUniqueCards(raw, seen);
+                        if (raw.length < limit) requestObject.page = maxPages;
+                        resolve({results: results, total_pages: maxPages, title: 'Anime'});
+                    }).catch(function (error) {
+                        console.error('[YummyAnime]', error);
+                        Lampa.Noty.show('Не удалось загрузить следующую страницу YummyAnime');
+                        reject(error);
+                    });
                 };
                 comp.cardRender = function (page, element, card) {
                     addCardRatings(element, card);
@@ -427,6 +450,23 @@
             yani_id: item.anime_id || item.id,
             yani_url: item.anime_url || item.url
         };
+    }
+
+    function copyParams(params) {
+        var copy = {};
+        Object.keys(params || {}).forEach(function (key) {
+            copy[key] = params[key];
+        });
+        return copy;
+    }
+
+    function mapUniqueCards(items, seen) {
+        return items.map(toCard).filter(function (card) {
+            var key = card.yani_id || card.yani_url || card.title;
+            if (seen[key]) return false;
+            seen[key] = true;
+            return true;
+        });
     }
 
     function extractRatings(rating) {
