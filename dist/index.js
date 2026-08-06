@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.13.0',
+            version: '0.13.1',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,8 +20,9 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.13.0',
+        version: '0.13.1',
         apiBase: 'https://api.yani.tv',
+        episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
         cacheTtl: 300000
@@ -180,7 +181,7 @@ function pluginYummyAnime() {
         var headers = options.headers || {};
         var apiLanguage = window.LampaYaniI18n ? LampaYaniI18n.getLanguage() : 'ru';
         var cacheKey = 'lampa_yummyanime_cache_' + apiLanguage + '_' + path;
-        var cacheTtl = config.cacheTtl || 300000;
+        var cacheTtl = options.cacheTtl || config.cacheTtl || 300000;
 
         if (config.applicationHeader) headers['X-Application'] = config.applicationHeader;
         if (options.auth && LampaYaniAuth && LampaYaniAuth.token()) headers.Authorization = 'Bearer ' + LampaYaniAuth.token();
@@ -204,10 +205,22 @@ function pluginYummyAnime() {
             if ((options.method || 'GET') === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
                 try {
                     var cached = JSON.parse(Lampa.Storage.get(cacheKey, 'null'));
-                    if (cached && Date.now() - cached.time < cacheTtl) return cached.data;
+                    if (cached && (options.staleFallback || Date.now() - cached.time < cacheTtl)) return cached.data;
                 } catch (ignore) {}
             }
             throw error;
+        });
+    }
+
+    function externalRequest(base, path, options) {
+        options = options || {};
+        var url = base.replace(/\/$/, '') + path;
+        return fetch(url, {
+            method: options.method || 'GET',
+            headers: {Accept: 'application/json'}
+        }).then(function (response) {
+            if (!response.ok) throw new Error('YummyTV API: ' + response.status);
+            return response.json();
         });
     }
 
@@ -236,7 +249,14 @@ function pluginYummyAnime() {
             return request('/anime/genres');
         },
         schedule: function (params) {
-            return request('/anime/schedule?' + new URLSearchParams(params || {}));
+            return request('/anime/schedule?' + new URLSearchParams(params || {}), {
+                cacheTtl: 60 * 60 * 1000,
+                staleFallback: true
+            });
+        },
+        episodeInfo: function (malId) {
+            if (!config.episodesApiBase || !malId) return Promise.reject(new Error('MAL id is missing'));
+            return externalRequest(config.episodesApiBase, '/anime/mal/' + encodeURIComponent(malId));
         },
         detail: function (id) {
             return request('/anime/' + encodeURIComponent(id));
@@ -1312,14 +1332,18 @@ function pluginYummyAnime() {
 
             if (voices.length === 1) {
                 rememberPlayer(voices[0].group);
-                return chooseEpisode(card, voices[0].group);
+                return enrichEpisodeTitles(card, voices[0].group).then(function () {
+                    chooseEpisode(card, voices[0].group);
+                });
             }
             Lampa.Select.show({
                 title: t('choose_voice'),
                 items: voices,
                 onSelect: function (item) {
                     rememberPlayer(item.group);
-                    chooseEpisode(card, item.group);
+                    enrichEpisodeTitles(card, item.group).then(function () {
+                        chooseEpisode(card, item.group);
+                    });
                 }
             });
         }).catch(function (error) {
@@ -1485,6 +1509,27 @@ function pluginYummyAnime() {
         });
     }
 
+    function enrichEpisodeTitles(card, group) {
+        var malId = card && card.yani_remote_ids && (card.yani_remote_ids.myanimelist_id || card.yani_remote_ids.mal_id);
+        if (!malId || !group || group.episodeTitlesLoaded) return Promise.resolve();
+        group.episodeTitlesLoaded = true;
+        return LampaYaniApi.episodeInfo(malId).then(function (payload) {
+            var items = payload && payload.episodes;
+            if (!Array.isArray(items)) return;
+            var titles = {};
+            items.forEach(function (item) {
+                var number = Number(item.episodeNumber || item.episode || item.number);
+                if (number > 0 && item.title) titles[number] = item.title;
+            });
+            group.videos.forEach(function (video) {
+                var number = Number(video.number || video.index);
+                if (titles[number]) video.yani_episode_title = titles[number];
+            });
+        }).catch(function () {
+            // Episode metadata is optional; playback must continue if the helper API is down.
+        });
+    }
+
     function launchVideo(card, group, videos, selected) {
         var url = normalizeVideoUrl(selected.iframe_url);
         if (!url) return Lampa.Noty.show(t('no_videos'));
@@ -1594,6 +1639,7 @@ function pluginYummyAnime() {
         var parts = [t('episode') + ' ' + number];
         var quality = videoQualityLabel(video);
         if (quality) parts.push(quality);
+        if (video.yani_episode_title) parts.push(video.yani_episode_title);
         if (Number(video.duration) > 0) parts.push(Math.max(1, Math.round(Number(video.duration) / 60)) + ' ' + t('minutes_short'));
         if (Number(video.views) > 0) parts.push(formatCompactNumber(video.views) + ' ' + t('views_short'));
         var playback = getPlayback(card && card.yani_id);

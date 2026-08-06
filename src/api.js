@@ -8,7 +8,7 @@
         var headers = options.headers || {};
         var apiLanguage = window.LampaYaniI18n ? LampaYaniI18n.getLanguage() : 'ru';
         var cacheKey = 'lampa_yummyanime_cache_' + apiLanguage + '_' + path;
-        var cacheTtl = config.cacheTtl || 300000;
+        var cacheTtl = options.cacheTtl || config.cacheTtl || 300000;
 
         if (config.applicationHeader) headers['X-Application'] = config.applicationHeader;
         if (options.auth && LampaYaniAuth && LampaYaniAuth.token()) headers.Authorization = 'Bearer ' + LampaYaniAuth.token();
@@ -32,10 +32,22 @@
             if ((options.method || 'GET') === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
                 try {
                     var cached = JSON.parse(Lampa.Storage.get(cacheKey, 'null'));
-                    if (cached && Date.now() - cached.time < cacheTtl) return cached.data;
+                    if (cached && (options.staleFallback || Date.now() - cached.time < cacheTtl)) return cached.data;
                 } catch (ignore) {}
             }
             throw error;
+        });
+    }
+
+    function externalRequest(base, path, options) {
+        options = options || {};
+        var url = base.replace(/\/$/, '') + path;
+        return fetch(url, {
+            method: options.method || 'GET',
+            headers: {Accept: 'application/json'}
+        }).then(function (response) {
+            if (!response.ok) throw new Error('YummyTV API: ' + response.status);
+            return response.json();
         });
     }
 
@@ -64,7 +76,14 @@
             return request('/anime/genres');
         },
         schedule: function (params) {
-            return request('/anime/schedule?' + new URLSearchParams(params || {}));
+            return request('/anime/schedule?' + new URLSearchParams(params || {}), {
+                cacheTtl: 60 * 60 * 1000,
+                staleFallback: true
+            });
+        },
+        episodeInfo: function (malId) {
+            if (!config.episodesApiBase || !malId) return Promise.reject(new Error('MAL id is missing'));
+            return externalRequest(config.episodesApiBase, '/anime/mal/' + encodeURIComponent(malId));
         },
         detail: function (id) {
             return request('/anime/' + encodeURIComponent(id));

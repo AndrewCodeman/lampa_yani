@@ -985,14 +985,18 @@
 
             if (voices.length === 1) {
                 rememberPlayer(voices[0].group);
-                return chooseEpisode(card, voices[0].group);
+                return enrichEpisodeTitles(card, voices[0].group).then(function () {
+                    chooseEpisode(card, voices[0].group);
+                });
             }
             Lampa.Select.show({
                 title: t('choose_voice'),
                 items: voices,
                 onSelect: function (item) {
                     rememberPlayer(item.group);
-                    chooseEpisode(card, item.group);
+                    enrichEpisodeTitles(card, item.group).then(function () {
+                        chooseEpisode(card, item.group);
+                    });
                 }
             });
         }).catch(function (error) {
@@ -1158,6 +1162,27 @@
         });
     }
 
+    function enrichEpisodeTitles(card, group) {
+        var malId = card && card.yani_remote_ids && (card.yani_remote_ids.myanimelist_id || card.yani_remote_ids.mal_id);
+        if (!malId || !group || group.episodeTitlesLoaded) return Promise.resolve();
+        group.episodeTitlesLoaded = true;
+        return LampaYaniApi.episodeInfo(malId).then(function (payload) {
+            var items = payload && payload.episodes;
+            if (!Array.isArray(items)) return;
+            var titles = {};
+            items.forEach(function (item) {
+                var number = Number(item.episodeNumber || item.episode || item.number);
+                if (number > 0 && item.title) titles[number] = item.title;
+            });
+            group.videos.forEach(function (video) {
+                var number = Number(video.number || video.index);
+                if (titles[number]) video.yani_episode_title = titles[number];
+            });
+        }).catch(function () {
+            // Episode metadata is optional; playback must continue if the helper API is down.
+        });
+    }
+
     function launchVideo(card, group, videos, selected) {
         var url = normalizeVideoUrl(selected.iframe_url);
         if (!url) return Lampa.Noty.show(t('no_videos'));
@@ -1267,6 +1292,7 @@
         var parts = [t('episode') + ' ' + number];
         var quality = videoQualityLabel(video);
         if (quality) parts.push(quality);
+        if (video.yani_episode_title) parts.push(video.yani_episode_title);
         if (Number(video.duration) > 0) parts.push(Math.max(1, Math.round(Number(video.duration) / 60)) + ' ' + t('minutes_short'));
         if (Number(video.views) > 0) parts.push(formatCompactNumber(video.views) + ' ' + t('views_short'));
         var playback = getPlayback(card && card.yani_id);
