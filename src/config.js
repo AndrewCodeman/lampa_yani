@@ -2,7 +2,7 @@
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.4.0',
+        version: '0.4.1',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token

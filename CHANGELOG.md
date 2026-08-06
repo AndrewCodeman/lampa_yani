@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1 — 2026-08-06
+
+- clarified that YummyAnime login accepts a nickname or email.
+
 ## 0.4.0 — 2026-08-06
 
 - added a Russian/English language selector under YummyAnime settings;
