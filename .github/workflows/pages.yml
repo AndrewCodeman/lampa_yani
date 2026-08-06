@@ -9,12 +9,13 @@ on:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -47,7 +48,8 @@ jobs:
 
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages-${{ github.run_attempt }}
-          timeout: '1800000'
+        run: node scripts/deploy-pages.js
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PAGES_ARTIFACT_NAME: github-pages-${{ github.run_attempt }}
+          PAGES_DEPLOY_TIMEOUT_MS: '1800000'
