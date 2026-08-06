@@ -836,8 +836,7 @@
             bindDetailButtonFocus(button);
             var searchButton = $('<div class="yani-detail__button selector"></div>').text(t('open_lampa_search'));
             searchButton.on('hover:enter', function () {
-                if (Lampa.Search && Lampa.Search.open) Lampa.Search.open(data.title || '');
-                else Lampa.Controller.toggle('search');
+                Lampa.Activity.push({url: '', title: t('search') + ': ' + (data.title || ''), component: 'search', search: data.title || '', page: 1});
             });
             bindDetailButtonFocus(searchButton);
             var comments = $('<div class="yani-detail__comments"></div>');
@@ -909,14 +908,15 @@
             videos.forEach(function (video) {
                 var data = video.data || {};
                 var title = data.dubbing || data.player || t('player');
-                var key = title + '|' + String(data.player_id || data.player || '');
-                if (!groups[key]) groups[key] = {title: title, player: data.player || '', videos: []};
+                var quality = videoQualityLabel(video);
+                var key = title + '|' + String(data.player_id || data.player || '') + '|' + quality;
+                if (!groups[key]) groups[key] = {title: title, player: data.player || '', quality: quality, videos: []};
                 groups[key].videos.push(video);
             });
 
             var voices = Object.keys(groups).map(function (key) {
                 var group = groups[key];
-                return {title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : ''), group: group};
+                return {title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : '') + (group.quality ? ' · ' + group.quality : ''), group: group};
             });
             var preferredPlayer = getPreferredPlayer();
             voices.sort(function (a, b) {
@@ -1158,6 +1158,19 @@
         return url.indexOf('//') === 0 ? 'https:' + url : url;
     }
 
+    function videoQualityLabel(video) {
+        var data = video && video.data || {};
+        var values = [video && video.quality, video && video.resolution, data.quality, data.resolution];
+        var best = 0;
+        values.forEach(function (value) {
+            var text = String(value || '');
+            var match = text.match(/(2160|1440|1080|720|576|480|360)\s*p?/i);
+            if (match) best = Math.max(best, Number(match[1]));
+            if (/4k/i.test(text)) best = Math.max(best, 2160);
+        });
+        return best >= 2160 ? '4K' : best ? best + 'p' : '';
+    }
+
     function playerKey(group) {
         return String(group && (group.player || group.title) || '').toLowerCase();
     }
@@ -1207,6 +1220,8 @@
     function episodeOptionTitle(card, video) {
         var number = String(video.number || video.index || '?');
         var parts = [t('episode') + ' ' + number];
+        var quality = videoQualityLabel(video);
+        if (quality) parts.push(quality);
         if (Number(video.duration) > 0) parts.push(Math.max(1, Math.round(Number(video.duration) / 60)) + ' ' + t('minutes_short'));
         if (Number(video.views) > 0) parts.push(formatCompactNumber(video.views) + ' ' + t('views_short'));
         var playback = getPlayback(card && card.yani_id);
