@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 — 2026-08-06
+
+- registered YummyAnime with Lampa Online when that module is available;
+- added a YummyAnime playback button to matching standard Lampa cards;
+- exposed every player, dubbing and episode returned by the YummyAnime API.
+
 ## 0.5.0 — 2026-08-06
 
 - added YummyAnime dubbing and episode selection;

@@ -14,6 +14,8 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 - favorites and user lists;
 - viewing comments;
 - dubbing and episode selection with embedded playback;
+- YummyAnime button on standard Lampa cards and Online registration when that module is available;
+- all players and dubbings returned by the YummyAnime API;
 - YummyAnime service status with availability, latency and per-service history;
 - Russian and English extension interface;
 - posters, titles, year, rating and description;
@@ -28,7 +30,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 
 Install the bundled file from GitHub Pages:
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.5.0`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.6.0`
 
 The `YummyAnime → Status` screen shows YummyStatus history for three hours, one day, one week or one month. GitHub Actions refreshes the monitoring snapshot every five minutes.
 
