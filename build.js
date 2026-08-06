@@ -15,7 +15,13 @@ const output = `function startPlugin() {
     document.head.appendChild(style);
 
 ${body}
-    window.LampaYani.register();
+    var init = function () { window.LampaYani.register(); };
+    if (window.appready) init();
+    else if (window.Lampa && Lampa.Listener && Lampa.Listener.follow) {
+        Lampa.Listener.follow('app', function (event) {
+            if (event.type === 'ready') init();
+        });
+    }
 }
 
 if (!window.lampa_yani_started) startPlugin();

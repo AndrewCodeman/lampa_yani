@@ -17,7 +17,13 @@ function startPlugin() {
 
     function load(i) {
         if (i >= scripts.length) {
-            window.LampaYani.register();
+            var init = function () { window.LampaYani.register(); };
+            if (window.appready) init();
+            else if (window.Lampa && Lampa.Listener && Lampa.Listener.follow) {
+                Lampa.Listener.follow('app', function (event) {
+                    if (event.type === 'ready') init();
+                });
+            }
             return;
         }
 
