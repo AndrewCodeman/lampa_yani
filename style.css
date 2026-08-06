@@ -48,6 +48,8 @@
     display: flex;
     gap: 2.5em;
     padding: 2em;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .yani-detail__poster {
@@ -57,13 +59,19 @@
     border-radius: 0.8em;
 }
 
-.yani-detail__info { max-width: 48em; }
+.yani-detail__info { min-width: 0; max-width: 48em; flex: 1 1 auto; }
 .yani-detail__title { font-size: 2.2em; font-weight: 600; }
 .yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }
 .yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }
-.yani-detail__button { display: inline-block; margin: 0 0.6em 0.6em 0; padding: 0.8em 1.2em; border-radius: 0.5em; background: rgba(255,255,255,.15); }
+.yani-detail__actions { display: flex; flex-wrap: wrap; gap: 0.7em; max-width: 100%; }
+.yani-detail__button { display: block; max-width: 100%; box-sizing: border-box; padding: 0.8em 1.2em; border: 0.12em solid transparent; border-radius: 0.5em; background: rgba(255,255,255,.15); overflow-wrap: anywhere; }
 .yani-detail__button--watch { background: #ef6470; color: #fff; }
-.yani-detail__button.focus { background: #fff; color: #111; }
+.yani-detail__button.focus { background: #fff; color: #111; border-color: #fff; box-shadow: 0 0 0 0.2em rgba(239, 100, 112, .95), 0 0 1.2em rgba(255, 255, 255, .55); transform: scale(1.02); }
+
+@media (max-width: 700px) {
+    .yani-detail { gap: 1em; padding: 1em; }
+    .yani-detail__poster { width: 10em; }
+}
 
 .yani-player {
     position: fixed;

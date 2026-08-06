@@ -795,15 +795,26 @@
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
+            var actions = $('<div class="yani-detail__actions"></div>');
             button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(watchTitle);
             button.on('hover:enter', function () { openVideos(data, !!playback); });
+            bindDetailButtonFocus(button);
             var searchButton = $('<div class="yani-detail__button selector"></div>').text(t('open_lampa_search'));
             searchButton.on('hover:enter', function () {
                 if (Lampa.Search && Lampa.Search.open) Lampa.Search.open(data.title || '');
                 else Lampa.Controller.toggle('search');
             });
-            info.append(button, searchButton);
+            bindDetailButtonFocus(searchButton);
+            actions.append(button, searchButton);
+            info.append(actions);
             html.append(poster, info);
+        }
+
+        function bindDetailButtonFocus(element) {
+            element.on('hover:focus', function () {
+                element.siblings('.focus').removeClass('focus');
+                element.addClass('focus');
+            });
         }
 
         this.start = function () {
