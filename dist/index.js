@@ -186,7 +186,11 @@ function startPlugin() {
                 return;
             }
 
-            addSettings();
+            try {
+                addSettings();
+            } catch (settingsError) {
+                console.error('[YummyAnime] Settings registration failed', settingsError);
+            }
             var account = LampaYaniAuth.get();
             if (account.token && (!account.refreshed_at || Date.now() - account.refreshed_at > 2 * 24 * 60 * 60 * 1000)) {
                 LampaYaniAuth.refresh().catch(function () { console.warn('[YummyAnime] Token refresh failed'); });
@@ -427,7 +431,16 @@ function startPlugin() {
     }
 }(window));
 
-    var init = function () { window.LampaYani.register(); };
+    var init = function () {
+        try {
+            window.LampaYani.register();
+        } catch (error) {
+            console.error('[YummyAnime] Plugin initialization failed', error);
+            if (window.Lampa && Lampa.Noty && Lampa.Noty.show) {
+                Lampa.Noty.show('YummyAnime: ' + (error.message || error));
+            }
+        }
+    };
     if (window.appready) init();
     else if (window.Lampa && Lampa.Listener && Lampa.Listener.follow) {
         Lampa.Listener.follow('app', function (event) {

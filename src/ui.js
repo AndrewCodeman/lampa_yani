@@ -8,7 +8,11 @@
                 return;
             }
 
-            addSettings();
+            try {
+                addSettings();
+            } catch (settingsError) {
+                console.error('[YummyAnime] Settings registration failed', settingsError);
+            }
             var account = LampaYaniAuth.get();
             if (account.token && (!account.refreshed_at || Date.now() - account.refreshed_at > 2 * 24 * 60 * 60 * 1000)) {
                 LampaYaniAuth.refresh().catch(function () { console.warn('[YummyAnime] Token refresh failed'); });
