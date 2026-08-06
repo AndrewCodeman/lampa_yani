@@ -68,6 +68,15 @@
 .yani-detail__button--watch { background: #ef6470; color: #fff; }
 .yani-detail__button.focus { background: #fff; color: #111; border-color: #fff; box-shadow: 0 0 0 0.2em rgba(239, 100, 112, .95), 0 0 1.2em rgba(255, 255, 255, .55); transform: scale(1.02); }
 
+.yani-detail__comments { margin-top: 1.5em; padding-top: 1em; border-top: 0.08em solid rgba(255, 255, 255, .18); }
+.yani-detail__comments-title { margin-bottom: 0.7em; font-size: 1.35em; font-weight: 600; }
+.yani-detail__comments-list { display: grid; gap: 0.55em; }
+.yani-detail__comment, .yani-detail__comments-loading, .yani-detail__comments-empty, .yani-detail__comments-error { padding: 0.7em 0.85em; border-radius: 0.45em; background: rgba(255, 255, 255, .08); }
+.yani-detail__comment.focus { background: #fff; color: #111; outline: 0.18em solid #ef6470; }
+.yani-detail__comment-title { line-height: 1.35; }
+.yani-detail__comment-stats { margin-top: 0.25em; opacity: .6; font-size: .82em; }
+.yani-detail__comments-loading, .yani-detail__comments-empty, .yani-detail__comments-error { opacity: .7; }
+
 @media (max-width: 700px) {
     .yani-detail { gap: 1em; padding: 1em; }
     .yani-detail__poster { width: 10em; }
