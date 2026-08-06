@@ -1,0 +1,41 @@
+# Lampa Yani — Documentation
+
+A new Lampa extension powered by the official YummyAnime (Yani) API.
+
+## MVP features
+
+- anime catalog;
+- genre catalog;
+- posters, titles, year, rating and description;
+- opening the selected anime in Lampa search;
+- modular structure for future development.
+
+## Installation
+
+1. Get a public application token from [yummyani.me/dev/applications](https://yummyani.me/dev/applications).
+2. Set it in `src/config.js` as `applicationHeader`.
+3. Add the URL of `index.js` to the Lampa extensions section.
+
+For publication, use the raw file URL from GitHub.
+
+## API
+
+The extension uses:
+
+- `GET /anime` — catalog and filters;
+- `GET /anime/genres` — genres.
+
+Search is passed through the `q` parameter. The public token is sent in the `X-Application` header.
+
+## Project structure
+
+- `index.js` — entry point;
+- `src/api.js` — Yani API client;
+- `src/catalog.js` — catalog module;
+- `src/config.js` — configuration;
+- `src/ui.js` — Lampa integration;
+- `style.css` — styles.
+
+## License
+
+MIT License. See [LICENSE](../LICENSE).
