@@ -63,6 +63,8 @@ Lampa settings include a `YummyAnime Settings` section with a YummyAnime resourc
 
 YummyAnime GET requests are cached locally for a short time and may still be shown during temporary API outages.
 
+GitHub Actions automatically checks JavaScript syntax on every push and pull request.
+
 The authenticated token is automatically refreshed through `GET /profile/token`.
 
 The detailed view uses Yani data, while trailers and recommendations are loaded through `/anime/{id}/trailers` and `/anime/{id}/recommendations`.

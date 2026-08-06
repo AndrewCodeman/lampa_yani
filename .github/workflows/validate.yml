@@ -1,0 +1,25 @@
+name: Validate YummyAnime Lampa extension
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -e
+          find . -name '*.js' -not -path './node_modules/*' -print0 | xargs -0 -n1 node --check

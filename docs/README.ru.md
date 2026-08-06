@@ -63,6 +63,8 @@ MIT License. См. файл [LICENSE](../LICENSE).
 
 GET-запросы к YummyAnime кэшируются локально на короткое время и могут быть показаны при временной недоступности API.
 
+GitHub Actions автоматически проверяет синтаксис JavaScript при каждом push и pull request.
+
 Авторизованный токен автоматически обновляется через `GET /profile/token`.
 
 Подробная карточка использует данные Yani, а трейлеры и рекомендации подключаются через `/anime/{id}/trailers` и `/anime/{id}/recommendations`.
