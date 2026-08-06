@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.1 — 2026-08-06
+
+- fixed premature catalog completion when a full API page contains duplicate titles;
+- failed pagination requests now retry the same offset instead of skipping a page;
+- prevented duplicate requests for an offset already loaded by Lampa.
+
 ## 0.12.0 — 2026-08-06
 
 - added read-only nested comment replies through `/comments/{id}/children`;

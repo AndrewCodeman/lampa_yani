@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.12.0',
+            version: '0.12.1',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.12.0',
+        version: '0.12.1',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
@@ -361,6 +361,7 @@ function pluginYummyAnime() {
                 var limit = Number(baseParams.limit || 30);
                 var maxPages = Math.ceil(20000 / limit) + 1;
                 var seen = {};
+                var requestedOffsets = {};
 
                 object.page = 1;
                 baseParams.limit = limit;
@@ -371,8 +372,10 @@ function pluginYummyAnime() {
                     this.activity.loader(true);
                     LampaYaniApi.catalog(baseParams)
                         .then(function (payload) {
-                            var results = mapUniqueCards(LampaYaniApi.normalize(payload), seen);
-                            if (results.length < limit) object.page = maxPages;
+                            var raw = LampaYaniApi.normalize(payload);
+                            var results = mapUniqueCards(raw, seen);
+                            requestedOffsets[baseParams.offset] = true;
+                            if (raw.length < limit) object.page = maxPages;
                             self.build({results: results, total_pages: maxPages, title: t('anime')});
                         })
                         .catch(function (error) {
@@ -384,6 +387,11 @@ function pluginYummyAnime() {
                 comp.nextPageReuest = function (requestObject, resolve, reject) {
                     var params = copyParams(baseParams);
                     params.offset = baseParams.offset + (requestObject.page - 1) * limit;
+                    if (requestedOffsets[params.offset]) {
+                        resolve({results: [], total_pages: maxPages, title: t('anime')});
+                        return;
+                    }
+                    requestedOffsets[params.offset] = true;
 
                     LampaYaniApi.catalog(params).then(function (payload) {
                         var raw = LampaYaniApi.normalize(payload);
@@ -391,6 +399,8 @@ function pluginYummyAnime() {
                         if (raw.length < limit) requestObject.page = maxPages;
                         resolve({results: results, total_pages: maxPages, title: t('anime')});
                     }).catch(function (error) {
+                        delete requestedOffsets[params.offset];
+                        requestObject.page = Math.max(1, requestObject.page - 1);
                         console.error('[YummyAnime]', error);
                         Lampa.Noty.show(t('next_page_error'));
                         reject(error);

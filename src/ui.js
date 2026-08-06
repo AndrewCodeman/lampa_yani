@@ -57,6 +57,7 @@
                 var limit = Number(baseParams.limit || 30);
                 var maxPages = Math.ceil(20000 / limit) + 1;
                 var seen = {};
+                var requestedOffsets = {};
 
                 object.page = 1;
                 baseParams.limit = limit;
@@ -67,8 +68,10 @@
                     this.activity.loader(true);
                     LampaYaniApi.catalog(baseParams)
                         .then(function (payload) {
-                            var results = mapUniqueCards(LampaYaniApi.normalize(payload), seen);
-                            if (results.length < limit) object.page = maxPages;
+                            var raw = LampaYaniApi.normalize(payload);
+                            var results = mapUniqueCards(raw, seen);
+                            requestedOffsets[baseParams.offset] = true;
+                            if (raw.length < limit) object.page = maxPages;
                             self.build({results: results, total_pages: maxPages, title: t('anime')});
                         })
                         .catch(function (error) {
@@ -80,6 +83,11 @@
                 comp.nextPageReuest = function (requestObject, resolve, reject) {
                     var params = copyParams(baseParams);
                     params.offset = baseParams.offset + (requestObject.page - 1) * limit;
+                    if (requestedOffsets[params.offset]) {
+                        resolve({results: [], total_pages: maxPages, title: t('anime')});
+                        return;
+                    }
+                    requestedOffsets[params.offset] = true;
 
                     LampaYaniApi.catalog(params).then(function (payload) {
                         var raw = LampaYaniApi.normalize(payload);
@@ -87,6 +95,8 @@
                         if (raw.length < limit) requestObject.page = maxPages;
                         resolve({results: results, total_pages: maxPages, title: t('anime')});
                     }).catch(function (error) {
+                        delete requestedOffsets[params.offset];
+                        requestObject.page = Math.max(1, requestObject.page - 1);
                         console.error('[YummyAnime]', error);
                         Lampa.Noty.show(t('next_page_error'));
                         reject(error);
