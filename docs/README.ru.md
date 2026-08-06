@@ -13,6 +13,7 @@
 - оценка аниме от 1 до 10;
 - избранное и пользовательские списки;
 - просмотр комментариев;
+- экран состояния YummyAnime с доступностью, задержкой и историей сервисов;
 - постеры, названия, год, рейтинг и описание;
 - переход к поиску выбранного аниме в Lampa;
 - модульная структура для дальнейшего развития.
@@ -23,15 +24,11 @@
 2. Укажите его в `src/config.js` в поле `applicationHeader`.
 3. Подключите URL файла `index.js` в разделе расширений Lampa.
 
-После публикации используйте:
+Для установки используйте собранный файл с GitHub Pages:
 
-`https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/index.js`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.3.0`
 
-Для установки рекомендуется единый файл без внешних модулей:
-
-`https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/dist/index.js`
-
-Для публикации используйте URL raw-файла из GitHub.
+Экран `YummyAnime → Статус` показывает трёхчасовую историю YummyStatus. Снимок мониторинга обновляется GitHub Actions каждые пять минут.
 
 ## API
 

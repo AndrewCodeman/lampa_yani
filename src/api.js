@@ -121,6 +121,12 @@
         },
         health: function () {
             return request('/anime?limit=1');
+        },
+        status: function () {
+            return fetch(config.statusUrl + '?_=' + Date.now(), {cache: 'no-store'}).then(function (response) {
+                if (!response.ok) throw new Error('YummyStatus snapshot: ' + response.status);
+                return response.json();
+            })
         }
     };
 }(window));

@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.2.0',
+            version: '0.3.0',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -13,15 +13,16 @@ function pluginYummyAnime() {
     }
 
     var style = document.createElement('style');
-    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.2em;\n    padding: 2em;\n}\n\n.yani-home__item {\n    min-height: 8em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n}\n\n.yani-home__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-home__icon {\n    font-size: 2.4em;\n}\n\n.yani-home__title {\n    font-size: 1.35em;\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); }\n}\n\n.yani-detail {\n    display: flex;\n    gap: 2.5em;\n    padding: 2em;\n}\n\n.yani-detail__poster {\n    width: 16em;\n    max-height: 24em;\n    object-fit: cover;\n    border-radius: 0.8em;\n}\n\n.yani-detail__info { max-width: 48em; }\n.yani-detail__title { font-size: 2.2em; font-weight: 600; }\n.yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }\n.yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }\n.yani-detail__button { display: inline-block; padding: 0.8em 1.2em; border-radius: 0.5em; background: rgba(255,255,255,.15); }\n.yani-detail__button.focus { background: #fff; color: #111; }\n\n.yani-schedule__content {\n    padding: 1.2em 2em 3em;\n}\n\n.yani-schedule__day {\n    margin-bottom: 2em;\n}\n\n.yani-schedule__day-title {\n    margin-bottom: 0.7em;\n    font-size: 1.55em;\n    font-weight: 600;\n    text-transform: capitalize;\n}\n\n.yani-schedule__item {\n    display: flex;\n    align-items: center;\n    min-height: 6.2em;\n    margin-bottom: 0.65em;\n    padding: 0.65em 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-schedule__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-schedule__poster {\n    width: 4em;\n    height: 5.5em;\n    margin-right: 1em;\n    border-radius: 0.35em;\n    object-fit: cover;\n    background: rgba(255, 255, 255, 0.08);\n}\n\n.yani-schedule__info {\n    flex: 1;\n    min-width: 0;\n}\n\n.yani-schedule__title {\n    overflow: hidden;\n    font-size: 1.15em;\n    font-weight: 500;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n.yani-schedule__episode {\n    margin-top: 0.4em;\n    opacity: 0.75;\n}\n\n.yani-schedule__release {\n    min-width: 8em;\n    margin-left: 1em;\n    text-align: right;\n}\n\n.yani-schedule__time {\n    font-size: 1.25em;\n    font-weight: 600;\n}\n\n.yani-schedule__timezone,\n.yani-schedule__empty {\n    opacity: 0.55;\n}\n\n.yani-schedule__empty {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.06);\n}\n\n.yani-detail__schedule {\n    margin-bottom: 1.2em;\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-card-ratings {\n    position: absolute;\n    right: 0.35em;\n    bottom: 0.35em;\n    left: 0.35em;\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    gap: 0.2em;\n    pointer-events: none;\n}\n\n.yani-card-rating {\n    display: flex;\n    justify-content: space-between;\n    padding: 0.2em 0.3em;\n    border-radius: 0.25em;\n    background: rgba(0, 0, 0, 0.78);\n    color: #fff;\n    font-size: 0.62em;\n}\n\n.yani-card-rating__source {\n    margin-right: 0.25em;\n    opacity: 0.7;\n}\n\n.yani-card-rating__value {\n    font-weight: 600;\n}\n\n.yani-ratings {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(8em, 1fr));\n    gap: 0.6em;\n    margin: 1em 0 1.4em;\n}\n\n.yani-ratings__item {\n    padding: 0.65em 0.8em;\n    border-radius: 0.5em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-ratings__value {\n    font-size: 1.35em;\n    font-weight: 600;\n}\n\n.yani-ratings__source {\n    margin-top: 0.15em;\n    opacity: 0.78;\n}\n\n.yani-ratings__votes {\n    margin-top: 0.2em;\n    font-size: 0.75em;\n    opacity: 0.55;\n}\n\n.yani-account__content {\n    padding: 1.5em 2em 3em;\n}\n\n.yani-account__profile {\n    display: flex;\n    align-items: center;\n    padding: 1.2em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-account__profile.focus,\n.yani-account__info.focus,\n.yani-account__list.focus,\n.yani-account__notice.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-account__avatar {\n    width: 7em;\n    height: 7em;\n    margin-right: 1.2em;\n    border-radius: 50%;\n    object-fit: cover;\n}\n\n.yani-account__name {\n    font-size: 1.8em;\n    font-weight: 600;\n}\n\n.yani-account__id,\n.yani-account__about {\n    margin-top: 0.35em;\n    opacity: 0.7;\n}\n\n.yani-account__warning {\n    margin-top: 0.5em;\n    color: #ff6868;\n    font-weight: 600;\n}\n\n.yani-account__grid,\n.yani-account__lists {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(10em, 1fr));\n    gap: 0.7em;\n    margin-top: 1em;\n}\n\n.yani-account__info,\n.yani-account__list,\n.yani-account__notice {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-account__info-title,\n.yani-account__list-time,\n.yani-account__notice-text {\n    opacity: 0.65;\n}\n\n.yani-account__info-value,\n.yani-account__list-count,\n.yani-account__notice-title {\n    margin-top: 0.3em;\n    font-size: 1.2em;\n    font-weight: 600;\n}\n\n.yani-account__list-title {\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-account__list-time {\n    margin-top: 0.35em;\n}\n\n.yani-account__section-title {\n    margin-top: 1.5em;\n    font-size: 1.45em;\n    font-weight: 600;\n}\n\n@media (max-width: 700px) {\n    .yani-schedule__content { padding: 1em; }\n    .yani-schedule__release { min-width: 5em; }\n    .yani-schedule__timezone { display: none; }\n    .yani-ratings { grid-template-columns: repeat(2, minmax(7em, 1fr)); }\n    .yani-account__content { padding: 1em; }\n    .yani-account__grid,\n    .yani-account__lists { grid-template-columns: repeat(2, minmax(8em, 1fr)); }\n}\n";
+    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.2em;\n    padding: 2em;\n}\n\n.yani-home__item {\n    min-height: 8em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n}\n\n.yani-home__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-home__icon {\n    font-size: 2.4em;\n}\n\n.yani-home__title {\n    font-size: 1.35em;\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); }\n}\n\n.yani-detail {\n    display: flex;\n    gap: 2.5em;\n    padding: 2em;\n}\n\n.yani-detail__poster {\n    width: 16em;\n    max-height: 24em;\n    object-fit: cover;\n    border-radius: 0.8em;\n}\n\n.yani-detail__info { max-width: 48em; }\n.yani-detail__title { font-size: 2.2em; font-weight: 600; }\n.yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }\n.yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }\n.yani-detail__button { display: inline-block; padding: 0.8em 1.2em; border-radius: 0.5em; background: rgba(255,255,255,.15); }\n.yani-detail__button.focus { background: #fff; color: #111; }\n\n.yani-schedule__content {\n    padding: 1.2em 2em 3em;\n}\n\n.yani-schedule__day {\n    margin-bottom: 2em;\n}\n\n.yani-schedule__day-title {\n    margin-bottom: 0.7em;\n    font-size: 1.55em;\n    font-weight: 600;\n    text-transform: capitalize;\n}\n\n.yani-schedule__item {\n    display: flex;\n    align-items: center;\n    min-height: 6.2em;\n    margin-bottom: 0.65em;\n    padding: 0.65em 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-schedule__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-schedule__poster {\n    width: 4em;\n    height: 5.5em;\n    margin-right: 1em;\n    border-radius: 0.35em;\n    object-fit: cover;\n    background: rgba(255, 255, 255, 0.08);\n}\n\n.yani-schedule__info {\n    flex: 1;\n    min-width: 0;\n}\n\n.yani-schedule__title {\n    overflow: hidden;\n    font-size: 1.15em;\n    font-weight: 500;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n.yani-schedule__episode {\n    margin-top: 0.4em;\n    opacity: 0.75;\n}\n\n.yani-schedule__release {\n    min-width: 8em;\n    margin-left: 1em;\n    text-align: right;\n}\n\n.yani-schedule__time {\n    font-size: 1.25em;\n    font-weight: 600;\n}\n\n.yani-schedule__timezone,\n.yani-schedule__empty {\n    opacity: 0.55;\n}\n\n.yani-schedule__empty {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.06);\n}\n\n.yani-detail__schedule {\n    margin-bottom: 1.2em;\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-card-ratings {\n    position: absolute;\n    right: 0.35em;\n    bottom: 0.35em;\n    left: 0.35em;\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    gap: 0.2em;\n    pointer-events: none;\n}\n\n.yani-card-rating {\n    display: flex;\n    justify-content: space-between;\n    padding: 0.2em 0.3em;\n    border-radius: 0.25em;\n    background: rgba(0, 0, 0, 0.78);\n    color: #fff;\n    font-size: 0.62em;\n}\n\n.yani-card-rating__source {\n    margin-right: 0.25em;\n    opacity: 0.7;\n}\n\n.yani-card-rating__value {\n    font-weight: 600;\n}\n\n.yani-ratings {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(8em, 1fr));\n    gap: 0.6em;\n    margin: 1em 0 1.4em;\n}\n\n.yani-ratings__item {\n    padding: 0.65em 0.8em;\n    border-radius: 0.5em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-ratings__value {\n    font-size: 1.35em;\n    font-weight: 600;\n}\n\n.yani-ratings__source {\n    margin-top: 0.15em;\n    opacity: 0.78;\n}\n\n.yani-ratings__votes {\n    margin-top: 0.2em;\n    font-size: 0.75em;\n    opacity: 0.55;\n}\n\n.yani-account__content {\n    padding: 1.5em 2em 3em;\n}\n\n.yani-account__profile {\n    display: flex;\n    align-items: center;\n    padding: 1.2em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-account__profile.focus,\n.yani-account__info.focus,\n.yani-account__list.focus,\n.yani-account__notice.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-account__avatar {\n    width: 7em;\n    height: 7em;\n    margin-right: 1.2em;\n    border-radius: 50%;\n    object-fit: cover;\n}\n\n.yani-account__name {\n    font-size: 1.8em;\n    font-weight: 600;\n}\n\n.yani-account__id,\n.yani-account__about {\n    margin-top: 0.35em;\n    opacity: 0.7;\n}\n\n.yani-account__warning {\n    margin-top: 0.5em;\n    color: #ff6868;\n    font-weight: 600;\n}\n\n.yani-account__grid,\n.yani-account__lists {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(10em, 1fr));\n    gap: 0.7em;\n    margin-top: 1em;\n}\n\n.yani-account__info,\n.yani-account__list,\n.yani-account__notice {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-account__info-title,\n.yani-account__list-time,\n.yani-account__notice-text {\n    opacity: 0.65;\n}\n\n.yani-account__info-value,\n.yani-account__list-count,\n.yani-account__notice-title {\n    margin-top: 0.3em;\n    font-size: 1.2em;\n    font-weight: 600;\n}\n\n.yani-account__list-title {\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-account__list-time {\n    margin-top: 0.35em;\n}\n\n.yani-account__section-title {\n    margin-top: 1.5em;\n    font-size: 1.45em;\n    font-weight: 600;\n}\n\n.yani-status__content {\n    padding: 1.4em 2em 3em;\n}\n\n.yani-status__summary {\n    display: flex;\n    align-items: center;\n    gap: 2em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-status__summary.focus,\n.yani-status__domain.focus,\n.yani-status__refresh.focus,\n.yani-status__error.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-status__ring {\n    display: flex;\n    flex: 0 0 10em;\n    align-items: center;\n    justify-content: center;\n    width: 10em;\n    height: 10em;\n    border-radius: 50%;\n}\n\n.yani-status__ring-center {\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    justify-content: center;\n    width: 7em;\n    height: 7em;\n    border-radius: 50%;\n    background: #292929;\n    color: #fff;\n}\n\n.yani-status__ring-center strong {\n    font-size: 1.65em;\n}\n\n.yani-status__ring-center span {\n    margin-top: 0.2em;\n    opacity: 0.7;\n}\n\n.yani-status__summary-info {\n    flex: 1;\n}\n\n.yani-status__headline {\n    margin-bottom: 0.7em;\n    font-size: 1.8em;\n    font-weight: 700;\n}\n\n.yani-status__metrics {\n    display: grid;\n    grid-template-columns: repeat(4, minmax(8em, 1fr));\n    gap: 0.6em;\n}\n\n.yani-status__metric {\n    padding: 0.65em;\n    border-radius: 0.45em;\n    background: rgba(0, 0, 0, 0.18);\n}\n\n.yani-status__metric span,\n.yani-status__metric strong {\n    display: block;\n}\n\n.yani-status__metric span {\n    margin-bottom: 0.25em;\n    opacity: 0.65;\n}\n\n.yani-status__metric strong {\n    font-size: 1.1em;\n}\n\n.yani-status__legend {\n    display: flex;\n    align-items: center;\n    gap: 0.45em;\n    margin: 1.1em 0 0.7em;\n    opacity: 0.75;\n}\n\n.yani-status__dot,\n.yani-status__state {\n    display: inline-block;\n    width: 0.7em;\n    height: 0.7em;\n    border-radius: 50%;\n}\n\n.yani-status__dot--up,\n.yani-status--up .yani-status__state,\n.yani-status__bar--up { background: #4caf50; }\n.yani-status__dot--degraded,\n.yani-status--degraded .yani-status__state,\n.yani-status__bar--degraded { background: #f0a33b; }\n.yani-status__dot--down,\n.yani-status--down .yani-status__state,\n.yani-status__bar--down { background: #db4455; }\n.yani-status__bar--unknown { background: #777; }\n\n.yani-status__domain {\n    margin-bottom: 0.65em;\n    padding: 0.85em 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-status__domain-head,\n.yani-status__domain-name,\n.yani-status__domain-values {\n    display: flex;\n    align-items: center;\n}\n\n.yani-status__domain-head {\n    justify-content: space-between;\n    margin-bottom: 0.6em;\n}\n\n.yani-status__domain-name {\n    gap: 0.55em;\n}\n\n.yani-status__domain-name strong {\n    font-size: 1.1em;\n}\n\n.yani-status__domain-name small {\n    opacity: 0.5;\n}\n\n.yani-status__domain-values {\n    gap: 1em;\n    opacity: 0.7;\n}\n\n.yani-status__history {\n    display: flex;\n    gap: 0.12em;\n    width: 100%;\n    height: 1.35em;\n}\n\n.yani-status__bar {\n    flex: 1 1 0;\n    min-width: 0.18em;\n    border-radius: 0.15em;\n}\n\n.yani-status__refresh,\n.yani-status__error {\n    margin-top: 1em;\n    padding: 0.9em 1.1em;\n    border-radius: 0.6em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-status__source {\n    margin-top: 0.8em;\n    opacity: 0.55;\n}\n\n.yani-status__refresh {\n    display: inline-block;\n}\n\n.yani-status__error strong,\n.yani-status__error span {\n    display: block;\n}\n\n.yani-status__error span {\n    margin-top: 0.4em;\n    opacity: 0.65;\n}\n\n@media (max-width: 700px) {\n    .yani-schedule__content { padding: 1em; }\n    .yani-schedule__release { min-width: 5em; }\n    .yani-schedule__timezone { display: none; }\n    .yani-ratings { grid-template-columns: repeat(2, minmax(7em, 1fr)); }\n    .yani-account__content { padding: 1em; }\n    .yani-account__grid,\n    .yani-account__lists { grid-template-columns: repeat(2, minmax(8em, 1fr)); }\n    .yani-status__content { padding: 1em; }\n    .yani-status__summary { align-items: flex-start; gap: 1em; }\n    .yani-status__ring { flex-basis: 7em; width: 7em; height: 7em; }\n    .yani-status__ring-center { width: 5em; height: 5em; }\n    .yani-status__metrics { grid-template-columns: repeat(2, minmax(7em, 1fr)); }\n    .yani-status__domain-name small { display: none; }\n}\n";
     document.head.appendChild(style);
 
 (function (window) {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.2.0',
+        version: '0.3.0',
         apiBase: 'https://api.yani.tv',
+        statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
         cacheTtl: 300000
     };
@@ -221,6 +222,12 @@ function pluginYummyAnime() {
         },
         health: function () {
             return request('/anime?limit=1');
+        },
+        status: function () {
+            return fetch(config.statusUrl + '?_=' + Date.now(), {cache: 'no-store'}).then(function (response) {
+                if (!response.ok) throw new Error('YummyStatus snapshot: ' + response.status);
+                return response.json();
+            })
         }
     };
 }(window));
@@ -363,6 +370,8 @@ function pluginYummyAnime() {
             Lampa.Component.add('yani_detail', Detail);
             Lampa.Component.add('yani_account', Account);
 
+            Lampa.Component.add('yani_status', StatusDashboard);
+
             installFullRating();
 
             console.log('[YummyAnime] Extension registered');
@@ -383,6 +392,9 @@ function pluginYummyAnime() {
             {title: 'Search', icon: '⌕', action: openSearch},
             {title: 'Schedule', icon: '▦', action: function () {
                 Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime Schedule', component: 'yani_schedule'});
+            }},
+            {title: 'Status', icon: '●', action: function () {
+                Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime Status', component: 'yani_status'});
             }},
             {title: 'Top Rated', icon: '★', action: function () {
                 Lampa.Activity.push({url: 'yani/top-rated', title: 'YummyAnime Top Rated', component: 'yani_catalog', params: {limit: 30, sort: 'rating', sort_forward: false}});
@@ -573,6 +585,163 @@ function pluginYummyAnime() {
         var days = Math.floor(hours / 24);
         var restHours = hours % 24;
         return days ? days + ' д ' + restHours + ' ч' : hours + ' ч';
+    }
+
+    function StatusDashboard(object) {
+        var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        var html = $('<div class="yani-status"></div>');
+        var content = $('<div class="yani-status__content"></div>');
+        var last;
+        var ready = false;
+
+        this.create = function () {
+            scroll.append(content);
+            html.append(scroll.render(true));
+            load(true);
+        };
+
+        function load(first) {
+            var self = thisComponent;
+            if (first) self.activity.loader(true);
+            LampaYaniApi.status().then(function (payload) {
+                renderStatus(payload);
+                if (first) {
+                    self.activity.loader(false);
+                    self.activity.toggle();
+                    ready = true;
+                }
+            }).catch(function (error) {
+                console.error('[YummyAnime Status]', error);
+                renderStatusError();
+                if (first) {
+                    self.activity.loader(false);
+                    self.activity.toggle();
+                    ready = true;
+                }
+            });
+        }
+
+        var thisComponent = this;
+
+        function renderStatus(data) {
+            content.empty();
+            last = null;
+            var summary = data.summary || {};
+            var status = summary.status || 'unknown';
+            var statusTitle = status === 'up' ? 'Все системы работают' : status === 'down' ? 'Сервисы недоступны' : status === 'unknown' ? 'Нет данных мониторинга' : 'Возникли неполадки';
+            var ringColor = status === 'up' ? '#4caf50' : status === 'down' ? '#db4455' : status === 'unknown' ? '#888' : '#f0a33b';
+
+            var summaryBlock = $('<div class="yani-status__summary selector yani-status--' + status + '"></div>');
+            var ring = $('<div class="yani-status__ring"><div class="yani-status__ring-center"></div></div>');
+            ring.css('background', 'conic-gradient(#4caf50 0 ' + Number(summary.uptime_percent || 0) + '%, #db4455 ' + Number(summary.uptime_percent || 0) + '% 100%)');
+            ring.find('.yani-status__ring-center').append($('<strong></strong>').text(summary.checks || 0), '<span>замеров</span>');
+
+            var summaryInfo = $('<div class="yani-status__summary-info"></div>');
+            summaryInfo.append($('<div class="yani-status__headline"></div>').css('color', ringColor).text(statusTitle));
+            var metrics = $('<div class="yani-status__metrics"></div>');
+            metrics.append(statusMetric('Доступность', Number(summary.uptime_percent || 0).toFixed(1) + '%'));
+            metrics.append(statusMetric('Средняя загрузка', String(summary.average_ms || 0) + ' мс'));
+            metrics.append(statusMetric('Ошибок', String(summary.failed || 0)));
+            metrics.append(statusMetric('Обновлено', formatStatusDate(data.generated_at)));
+            summaryInfo.append(metrics);
+            summaryBlock.append(ring, summaryInfo);
+            bindStatusFocus(summaryBlock);
+            content.append(summaryBlock);
+
+            content.append('<div class="yani-status__legend"><span class="yani-status__dot yani-status__dot--up"></span>Работает <span class="yani-status__dot yani-status__dot--degraded"></span>Нестабильно <span class="yani-status__dot yani-status__dot--down"></span>Недоступно</div>');
+
+            (data.domains || []).forEach(function (domain) {
+                var block = $('<div class="yani-status__domain selector yani-status--' + domain.status + '"></div>');
+                var head = $('<div class="yani-status__domain-head"></div>');
+                var name = $('<div class="yani-status__domain-name"></div>');
+                name.append('<span class="yani-status__state"></span>');
+                name.append($('<strong></strong>').text(domain.label || domain.domain));
+                name.append($('<small></small>').text(domain.domain));
+                var values = $('<div class="yani-status__domain-values"></div>');
+                values.append($('<span></span>').text('HTTP ' + (domain.average_ms || 0) + ' мс'));
+                values.append($('<span></span>').text('Ping ' + (domain.ping_ms || 0) + ' мс'));
+                head.append(name, values);
+
+                var history = $('<div class="yani-status__history"></div>');
+                (domain.history || []).forEach(function (point) {
+                    history.append($('<i class="yani-status__bar yani-status__bar--' + point.status + '"></i>').attr('title', formatStatusDate(point.time)));
+                });
+                block.append(head, history);
+                bindStatusFocus(block);
+                content.append(block);
+            });
+
+            content.append('<div class="yani-status__source">Источник: YummyStatus · период наблюдения 3 часа · snapshot обновляется каждые 5 минут</div>');
+
+            var refresh = $('<div class="yani-status__refresh selector">Обновить статус</div>');
+            refresh.on('hover:enter', function () {
+                Lampa.Noty.show('Обновляем YummyAnime Status');
+                load(false);
+            });
+            bindStatusFocus(refresh);
+            content.append(refresh);
+            refreshStatusNavigation();
+        }
+
+        function statusMetric(title, value) {
+            var metric = $('<div class="yani-status__metric"></div>');
+            metric.append($('<span></span>').text(title));
+            metric.append($('<strong></strong>').text(value));
+            return metric;
+        }
+
+        function renderStatusError() {
+            content.empty();
+            var error = $('<div class="yani-status__error selector"></div>');
+            error.append('<strong>Не удалось загрузить YummyAnime Status</strong>');
+            error.append('<span>Данные мониторинга временно недоступны. Это не означает, что сам плагин не работает.</span>');
+            bindStatusFocus(error);
+            content.append(error);
+            refreshStatusNavigation();
+        }
+
+        function refreshStatusNavigation() {
+            if (!ready) return;
+            Lampa.Controller.collectionSet(scroll.render());
+            Lampa.Controller.collectionFocus(false, scroll.render());
+        }
+
+        function bindStatusFocus(element) {
+            element.on('hover:focus', function (event) {
+                last = event.target;
+                scroll.update($(event.target), true);
+            });
+        }
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () {
+                    Lampa.Controller.collectionSet(scroll.render());
+                    Lampa.Controller.collectionFocus(last || false, scroll.render());
+                },
+                left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
+                right: function () { Navigator.move('right'); },
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
+                down: function () { Navigator.move('down'); },
+                back: this.back
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? html[0] : html; };
+        this.destroy = function () {
+            scroll.destroy();
+            html.remove();
+        };
+    }
+
+    function formatStatusDate(value) {
+        if (!value) return '—';
+        try {
+            return new Date(value).toLocaleString('ru-RU', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+        } catch (error) {
+            return new Date(value).toLocaleString();
+        }
     }
 
     function Schedule(object) {

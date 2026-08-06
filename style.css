@@ -298,6 +298,197 @@
     font-weight: 600;
 }
 
+.yani-status__content {
+    padding: 1.4em 2em 3em;
+}
+
+.yani-status__summary {
+    display: flex;
+    align-items: center;
+    gap: 2em;
+    padding: 1.4em;
+    border-radius: 0.8em;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.yani-status__summary.focus,
+.yani-status__domain.focus,
+.yani-status__refresh.focus,
+.yani-status__error.focus {
+    background: #fff;
+    color: #111;
+}
+
+.yani-status__ring {
+    display: flex;
+    flex: 0 0 10em;
+    align-items: center;
+    justify-content: center;
+    width: 10em;
+    height: 10em;
+    border-radius: 50%;
+}
+
+.yani-status__ring-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 7em;
+    height: 7em;
+    border-radius: 50%;
+    background: #292929;
+    color: #fff;
+}
+
+.yani-status__ring-center strong {
+    font-size: 1.65em;
+}
+
+.yani-status__ring-center span {
+    margin-top: 0.2em;
+    opacity: 0.7;
+}
+
+.yani-status__summary-info {
+    flex: 1;
+}
+
+.yani-status__headline {
+    margin-bottom: 0.7em;
+    font-size: 1.8em;
+    font-weight: 700;
+}
+
+.yani-status__metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(8em, 1fr));
+    gap: 0.6em;
+}
+
+.yani-status__metric {
+    padding: 0.65em;
+    border-radius: 0.45em;
+    background: rgba(0, 0, 0, 0.18);
+}
+
+.yani-status__metric span,
+.yani-status__metric strong {
+    display: block;
+}
+
+.yani-status__metric span {
+    margin-bottom: 0.25em;
+    opacity: 0.65;
+}
+
+.yani-status__metric strong {
+    font-size: 1.1em;
+}
+
+.yani-status__legend {
+    display: flex;
+    align-items: center;
+    gap: 0.45em;
+    margin: 1.1em 0 0.7em;
+    opacity: 0.75;
+}
+
+.yani-status__dot,
+.yani-status__state {
+    display: inline-block;
+    width: 0.7em;
+    height: 0.7em;
+    border-radius: 50%;
+}
+
+.yani-status__dot--up,
+.yani-status--up .yani-status__state,
+.yani-status__bar--up { background: #4caf50; }
+.yani-status__dot--degraded,
+.yani-status--degraded .yani-status__state,
+.yani-status__bar--degraded { background: #f0a33b; }
+.yani-status__dot--down,
+.yani-status--down .yani-status__state,
+.yani-status__bar--down { background: #db4455; }
+.yani-status__bar--unknown { background: #777; }
+
+.yani-status__domain {
+    margin-bottom: 0.65em;
+    padding: 0.85em 1em;
+    border-radius: 0.65em;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.yani-status__domain-head,
+.yani-status__domain-name,
+.yani-status__domain-values {
+    display: flex;
+    align-items: center;
+}
+
+.yani-status__domain-head {
+    justify-content: space-between;
+    margin-bottom: 0.6em;
+}
+
+.yani-status__domain-name {
+    gap: 0.55em;
+}
+
+.yani-status__domain-name strong {
+    font-size: 1.1em;
+}
+
+.yani-status__domain-name small {
+    opacity: 0.5;
+}
+
+.yani-status__domain-values {
+    gap: 1em;
+    opacity: 0.7;
+}
+
+.yani-status__history {
+    display: flex;
+    gap: 0.12em;
+    width: 100%;
+    height: 1.35em;
+}
+
+.yani-status__bar {
+    flex: 1 1 0;
+    min-width: 0.18em;
+    border-radius: 0.15em;
+}
+
+.yani-status__refresh,
+.yani-status__error {
+    margin-top: 1em;
+    padding: 0.9em 1.1em;
+    border-radius: 0.6em;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.yani-status__source {
+    margin-top: 0.8em;
+    opacity: 0.55;
+}
+
+.yani-status__refresh {
+    display: inline-block;
+}
+
+.yani-status__error strong,
+.yani-status__error span {
+    display: block;
+}
+
+.yani-status__error span {
+    margin-top: 0.4em;
+    opacity: 0.65;
+}
+
 @media (max-width: 700px) {
     .yani-schedule__content { padding: 1em; }
     .yani-schedule__release { min-width: 5em; }
@@ -306,4 +497,10 @@
     .yani-account__content { padding: 1em; }
     .yani-account__grid,
     .yani-account__lists { grid-template-columns: repeat(2, minmax(8em, 1fr)); }
+    .yani-status__content { padding: 1em; }
+    .yani-status__summary { align-items: flex-start; gap: 1em; }
+    .yani-status__ring { flex-basis: 7em; width: 7em; height: 7em; }
+    .yani-status__ring-center { width: 5em; height: 5em; }
+    .yani-status__metrics { grid-template-columns: repeat(2, minmax(7em, 1fr)); }
+    .yani-status__domain-name small { display: none; }
 }

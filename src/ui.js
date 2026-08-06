@@ -126,6 +126,8 @@
             Lampa.Component.add('yani_detail', Detail);
             Lampa.Component.add('yani_account', Account);
 
+            Lampa.Component.add('yani_status', StatusDashboard);
+
             installFullRating();
 
             console.log('[YummyAnime] Extension registered');
@@ -146,6 +148,9 @@
             {title: 'Search', icon: '⌕', action: openSearch},
             {title: 'Schedule', icon: '▦', action: function () {
                 Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime Schedule', component: 'yani_schedule'});
+            }},
+            {title: 'Status', icon: '●', action: function () {
+                Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime Status', component: 'yani_status'});
             }},
             {title: 'Top Rated', icon: '★', action: function () {
                 Lampa.Activity.push({url: 'yani/top-rated', title: 'YummyAnime Top Rated', component: 'yani_catalog', params: {limit: 30, sort: 'rating', sort_forward: false}});
@@ -336,6 +341,163 @@
         var days = Math.floor(hours / 24);
         var restHours = hours % 24;
         return days ? days + ' д ' + restHours + ' ч' : hours + ' ч';
+    }
+
+    function StatusDashboard(object) {
+        var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        var html = $('<div class="yani-status"></div>');
+        var content = $('<div class="yani-status__content"></div>');
+        var last;
+        var ready = false;
+
+        this.create = function () {
+            scroll.append(content);
+            html.append(scroll.render(true));
+            load(true);
+        };
+
+        function load(first) {
+            var self = thisComponent;
+            if (first) self.activity.loader(true);
+            LampaYaniApi.status().then(function (payload) {
+                renderStatus(payload);
+                if (first) {
+                    self.activity.loader(false);
+                    self.activity.toggle();
+                    ready = true;
+                }
+            }).catch(function (error) {
+                console.error('[YummyAnime Status]', error);
+                renderStatusError();
+                if (first) {
+                    self.activity.loader(false);
+                    self.activity.toggle();
+                    ready = true;
+                }
+            });
+        }
+
+        var thisComponent = this;
+
+        function renderStatus(data) {
+            content.empty();
+            last = null;
+            var summary = data.summary || {};
+            var status = summary.status || 'unknown';
+            var statusTitle = status === 'up' ? 'Все системы работают' : status === 'down' ? 'Сервисы недоступны' : status === 'unknown' ? 'Нет данных мониторинга' : 'Возникли неполадки';
+            var ringColor = status === 'up' ? '#4caf50' : status === 'down' ? '#db4455' : status === 'unknown' ? '#888' : '#f0a33b';
+
+            var summaryBlock = $('<div class="yani-status__summary selector yani-status--' + status + '"></div>');
+            var ring = $('<div class="yani-status__ring"><div class="yani-status__ring-center"></div></div>');
+            ring.css('background', 'conic-gradient(#4caf50 0 ' + Number(summary.uptime_percent || 0) + '%, #db4455 ' + Number(summary.uptime_percent || 0) + '% 100%)');
+            ring.find('.yani-status__ring-center').append($('<strong></strong>').text(summary.checks || 0), '<span>замеров</span>');
+
+            var summaryInfo = $('<div class="yani-status__summary-info"></div>');
+            summaryInfo.append($('<div class="yani-status__headline"></div>').css('color', ringColor).text(statusTitle));
+            var metrics = $('<div class="yani-status__metrics"></div>');
+            metrics.append(statusMetric('Доступность', Number(summary.uptime_percent || 0).toFixed(1) + '%'));
+            metrics.append(statusMetric('Средняя загрузка', String(summary.average_ms || 0) + ' мс'));
+            metrics.append(statusMetric('Ошибок', String(summary.failed || 0)));
+            metrics.append(statusMetric('Обновлено', formatStatusDate(data.generated_at)));
+            summaryInfo.append(metrics);
+            summaryBlock.append(ring, summaryInfo);
+            bindStatusFocus(summaryBlock);
+            content.append(summaryBlock);
+
+            content.append('<div class="yani-status__legend"><span class="yani-status__dot yani-status__dot--up"></span>Работает <span class="yani-status__dot yani-status__dot--degraded"></span>Нестабильно <span class="yani-status__dot yani-status__dot--down"></span>Недоступно</div>');
+
+            (data.domains || []).forEach(function (domain) {
+                var block = $('<div class="yani-status__domain selector yani-status--' + domain.status + '"></div>');
+                var head = $('<div class="yani-status__domain-head"></div>');
+                var name = $('<div class="yani-status__domain-name"></div>');
+                name.append('<span class="yani-status__state"></span>');
+                name.append($('<strong></strong>').text(domain.label || domain.domain));
+                name.append($('<small></small>').text(domain.domain));
+                var values = $('<div class="yani-status__domain-values"></div>');
+                values.append($('<span></span>').text('HTTP ' + (domain.average_ms || 0) + ' мс'));
+                values.append($('<span></span>').text('Ping ' + (domain.ping_ms || 0) + ' мс'));
+                head.append(name, values);
+
+                var history = $('<div class="yani-status__history"></div>');
+                (domain.history || []).forEach(function (point) {
+                    history.append($('<i class="yani-status__bar yani-status__bar--' + point.status + '"></i>').attr('title', formatStatusDate(point.time)));
+                });
+                block.append(head, history);
+                bindStatusFocus(block);
+                content.append(block);
+            });
+
+            content.append('<div class="yani-status__source">Источник: YummyStatus · период наблюдения 3 часа · snapshot обновляется каждые 5 минут</div>');
+
+            var refresh = $('<div class="yani-status__refresh selector">Обновить статус</div>');
+            refresh.on('hover:enter', function () {
+                Lampa.Noty.show('Обновляем YummyAnime Status');
+                load(false);
+            });
+            bindStatusFocus(refresh);
+            content.append(refresh);
+            refreshStatusNavigation();
+        }
+
+        function statusMetric(title, value) {
+            var metric = $('<div class="yani-status__metric"></div>');
+            metric.append($('<span></span>').text(title));
+            metric.append($('<strong></strong>').text(value));
+            return metric;
+        }
+
+        function renderStatusError() {
+            content.empty();
+            var error = $('<div class="yani-status__error selector"></div>');
+            error.append('<strong>Не удалось загрузить YummyAnime Status</strong>');
+            error.append('<span>Данные мониторинга временно недоступны. Это не означает, что сам плагин не работает.</span>');
+            bindStatusFocus(error);
+            content.append(error);
+            refreshStatusNavigation();
+        }
+
+        function refreshStatusNavigation() {
+            if (!ready) return;
+            Lampa.Controller.collectionSet(scroll.render());
+            Lampa.Controller.collectionFocus(false, scroll.render());
+        }
+
+        function bindStatusFocus(element) {
+            element.on('hover:focus', function (event) {
+                last = event.target;
+                scroll.update($(event.target), true);
+            });
+        }
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () {
+                    Lampa.Controller.collectionSet(scroll.render());
+                    Lampa.Controller.collectionFocus(last || false, scroll.render());
+                },
+                left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
+                right: function () { Navigator.move('right'); },
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
+                down: function () { Navigator.move('down'); },
+                back: this.back
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? html[0] : html; };
+        this.destroy = function () {
+            scroll.destroy();
+            html.remove();
+        };
+    }
+
+    function formatStatusDate(value) {
+        if (!value) return '—';
+        try {
+            return new Date(value).toLocaleString('ru-RU', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+        } catch (error) {
+            return new Date(value).toLocaleString();
+        }
     }
 
     function Schedule(object) {
