@@ -332,10 +332,13 @@
                 return Promise.all([
                     Promise.resolve(profile),
                     LampaYaniApi.userListStats(profile.id).then(responseData).catch(function () { return []; }),
-                    LampaYaniApi.userLists(profile.id).then(responseData).catch(function () { return []; })
+                    LampaYaniApi.userLists(profile.id).then(responseData).catch(function () { return []; }),
+                    LampaYaniApi.userStatsGenres(profile.id).then(responseData).catch(function () { return []; }),
+                    LampaYaniApi.userStatsRatings(profile.id).then(responseData).catch(function () { return []; }),
+                    LampaYaniApi.userStatsTypes(profile.id).then(responseData).catch(function () { return []; })
                 ]);
             }).then(function (result) {
-                renderAccount(result[0], result[1], result[2]);
+                renderAccount(result[0], result[1], result[2], result[3], result[4], result[5]);
                 finish(self);
             }).catch(function (error) {
                 console.error('[YummyAnime]', error);
@@ -363,7 +366,7 @@
             content.append(notice);
         }
 
-        function renderAccount(profile, stats, lists) {
+        function renderAccount(profile, stats, lists, genreStats, ratingStats, typeStats) {
             stats = Array.isArray(stats) ? stats : [];
             lists = Array.isArray(lists) ? lists : [];
             var header = $('<div class="yani-account__profile selector"></div>');
@@ -407,10 +410,34 @@
                 tile.append($('<div class="yani-account__list-count"></div>').text(String(counts[definition.id] || 0) + ' ' + t('anime_count')));
                 tile.append($('<div class="yani-account__list-time"></div>').text(t('total_time') + ': ' + formatWatchTime(stat.seconds)));
                 bindAccountFocus(tile);
-                tile.on('hover:enter', function () { openAccountList(definition, lists); });
+                tile.on('hover:enter', function () { openAccountList(definition, lists, profile.id); });
                 listGrid.append(tile);
             });
             content.append(listGrid);
+            renderAccountStatistics(genreStats, ratingStats, typeStats);
+        }
+
+        function renderAccountStatistics(genreStats, ratingStats, typeStats) {
+            var sections = [
+                {title: t('genres_statistics'), items: genreStats, label: function (item) { return item.title || item.name; }},
+                {title: t('ratings_statistics'), items: ratingStats, label: function (item) { return String(item.rating || '—'); }},
+                {title: t('types_statistics'), items: typeStats, label: function (item) { return item.type && (item.type.name || item.type.shortname) || item.name; }}
+            ];
+            var available = sections.filter(function (section) { return Array.isArray(section.items) && section.items.length; });
+            if (!available.length) return;
+            content.append($('<div class="yani-account__section-title"></div>').text(t('account_statistics')));
+            available.forEach(function (section) {
+                var block = $('<div class="yani-account__stats"></div>');
+                block.append($('<div class="yani-account__stats-title"></div>').text(section.title));
+                section.items.slice(0, 12).forEach(function (item) {
+                    var row = $('<div class="yani-account__stats-row selector"></div>');
+                    row.append($('<span></span>').text(section.label(item) || '—'));
+                    row.append($('<strong></strong>').text(String(item.count || 0)));
+                    bindAccountFocus(row);
+                    block.append(row);
+                });
+                content.append(block);
+            });
         }
 
         function addInfo(grid, title, value) {
@@ -459,16 +486,22 @@
         ];
     }
 
-    function openAccountList(definition, items) {
+    function openAccountList(definition, items, userId) {
         var selected = (items || []).filter(function (item) {
             var userList = item.user && item.user.list;
             return definition.id === 4 ? Boolean(userList && userList.is_fav) : Boolean(userList && userList.list && Number(userList.list.id) === definition.id);
         });
-        Lampa.Activity.push({
-            url: 'yani/account/list/' + definition.key,
-            title: 'YummyAnime · ' + definition.title,
-            component: 'yani_account_list',
-            items: selected
+        var load = definition.id === 4 || !userId ? Promise.resolve(selected) : LampaYaniApi.userList(userId, definition.id).then(function (payload) {
+            var response = payload && payload.response ? payload.response : payload;
+            return Array.isArray(response) ? response : selected;
+        }).catch(function () { return selected; });
+        load.then(function (result) {
+            Lampa.Activity.push({
+                url: 'yani/account/list/' + definition.key,
+                title: 'YummyAnime · ' + definition.title,
+                component: 'yani_account_list',
+                items: result
+            });
         });
     }
 
@@ -1188,6 +1221,7 @@
         if (!url) return Lampa.Noty.show(t('no_videos'));
         var title = (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (selected.number || selected.index || '?') + ' · ' + group.title;
         rememberPlayback(card, group, selected);
+        syncServerProgress(selected);
 
         if (/\.(m3u8|mp4|webm)(?:\?|$)/i.test(url) && Lampa.Player && Lampa.Player.play) {
             var directVideos = videos.filter(function (video) {
@@ -1196,7 +1230,8 @@
             var playlist = directVideos.map(function (video) {
                 return {
                     title: (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (video.number || video.index || '?'),
-                    url: normalizeVideoUrl(video.iframe_url)
+                    url: normalizeVideoUrl(video.iframe_url),
+                    time: Number(video.watched && video.watched.end_time || 0)
                 };
             });
             var current = playlist[directVideos.indexOf(selected)] || playlist[0];
@@ -1220,6 +1255,13 @@
             title: title,
             component: 'yani_player',
             iframe_url: url
+        });
+    }
+
+    function syncServerProgress(video) {
+        if (!LampaYaniAuth.token() || !video || !video.video_id) return;
+        LampaYaniApi.syncVideoProgress(video.video_id, video.watched && video.watched.end_time, video.duration).catch(function (error) {
+            console.warn('[YummyAnime] Progress sync failed', error);
         });
     }
 

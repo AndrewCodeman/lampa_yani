@@ -150,6 +150,26 @@
         userLists: function (id) {
             return request('/users/' + encodeURIComponent(id) + '/lists', {auth: true, cache: false});
         },
+        userList: function (id, listId) {
+            return request('/users/' + encodeURIComponent(id) + '/lists/' + encodeURIComponent(listId), {auth: true, cache: false});
+        },
+        userStatsGenres: function (id) {
+            return request('/users/' + encodeURIComponent(id) + '/stats/genres', {auth: true, cache: false});
+        },
+        userStatsRatings: function (id) {
+            return request('/users/' + encodeURIComponent(id) + '/stats/ratings', {auth: true, cache: false});
+        },
+        userStatsTypes: function (id) {
+            return request('/users/' + encodeURIComponent(id) + '/stats/types-v2', {auth: true, cache: false});
+        },
+        syncVideoProgress: function (videoId, time, duration) {
+            return request('/video/' + encodeURIComponent(videoId), {
+                method: 'PUT',
+                auth: true,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({time: Math.max(0, Number(time) || 0), duration: Math.max(0, Number(duration) || 0), times: []})
+            });
+        },
         health: function () {
             return request('/anime?limit=1');
         },

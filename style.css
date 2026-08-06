@@ -425,6 +425,36 @@
     font-weight: 600;
 }
 
+.yani-account__stats {
+    display: inline-flex;
+    flex-direction: column;
+    width: min(100%, 34em);
+    margin: 0.7em 0.7em 0 0;
+    padding: 0.8em;
+    border-radius: 0.65em;
+    background: rgba(255, 255, 255, 0.08);
+    vertical-align: top;
+}
+
+.yani-account__stats-title {
+    margin-bottom: 0.45em;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.yani-account__stats-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+    padding: 0.4em 0.55em;
+    border-radius: 0.35em;
+}
+
+.yani-account__stats-row.focus {
+    background: #fff;
+    color: #111;
+}
+
 .yani-status__content {
     padding: 1.4em 2em 3em;
 }
