@@ -57,4 +57,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PAGES_ARTIFACT_NAME: github-pages-${{ github.run_attempt }}
-          PAGES_DEPLOY_TIMEOUT_MS: '1800000'
+          PAGES_DEPLOY_TIMEOUT_MS: '3600000'
