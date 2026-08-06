@@ -8,7 +8,7 @@
                 return;
             }
 
-            Lampa.Menu.addButton('yani', 'Anime', function () {
+            Lampa.Menu.addButton('icon-star', 'Anime', function () {
                 Lampa.Activity.push({
                     url: 'yani',
                     title: 'Anime',
@@ -17,7 +17,7 @@
                 });
             });
 
-            Lampa.Menu.addButton('yani_genres', 'Genres', function () {
+            Lampa.Menu.addButton('icon-filter', 'Genres', function () {
                 LampaYaniApi.genres().then(function (payload) {
                     var genres = LampaYaniApi.normalize(payload);
                     if (!genres.length) return Lampa.Noty.show('Жанры не найдены');
@@ -40,7 +40,7 @@
                 });
             });
 
-            Lampa.Menu.addButton('yani_search', 'Search', function () {
+            Lampa.Menu.addButton('icon-search', 'Search', function () {
                 if (!Lampa.Input || !Lampa.Input.show) {
                     return Lampa.Noty.show('Поиск недоступен в этой версии Lampa');
                 }
