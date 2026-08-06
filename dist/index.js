@@ -313,6 +313,12 @@ function pluginYummyAnime() {
         return window.LampaYaniI18n ? LampaYaniI18n.locale() : 'ru-RU';
     }
 
+    function goBack() {
+        if (window.Lampa && Lampa.Activity && Lampa.Activity.backward) {
+            Lampa.Activity.backward();
+        }
+    }
+
     window.LampaYani = {
         register: function () {
             if (!window.Lampa || !Lampa.Component || !Lampa.Component.add) {
@@ -480,7 +486,7 @@ function pluginYummyAnime() {
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
                 down: function () { Navigator.move('down'); },
-                back: this.back
+                back: goBack
             });
             Lampa.Controller.toggle('content');
         };
@@ -702,7 +708,7 @@ function pluginYummyAnime() {
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
                 down: function () { Navigator.move('down'); },
-                back: this.back
+                back: goBack
             });
             Lampa.Controller.toggle('content');
         };
@@ -894,7 +900,7 @@ function pluginYummyAnime() {
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
                 down: function () { Navigator.move('down'); },
-                back: this.back
+                back: goBack
             });
             Lampa.Controller.toggle('content');
         };
@@ -1010,7 +1016,7 @@ function pluginYummyAnime() {
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
                 down: function () { Navigator.move('down'); },
-                back: this.back
+                back: goBack
             });
             Lampa.Controller.toggle('content');
         };
@@ -1109,7 +1115,7 @@ function pluginYummyAnime() {
                 toggle: function () { Lampa.Controller.collectionSet(html); Lampa.Controller.collectionFocus(button, html); },
                 left: function () { Lampa.Controller.toggle('menu'); },
                 up: function () { Lampa.Controller.toggle('head'); },
-                back: this.back
+                back: goBack
             });
             Lampa.Controller.toggle('content');
         };
@@ -1462,7 +1468,7 @@ function pluginYummyAnime() {
                     iframe.attr('tabindex', '0');
                     if (iframe[0] && iframe[0].focus) iframe[0].focus();
                 },
-                back: this.back
+                back: goBack
             });
             Lampa.Controller.toggle('content');
         };
