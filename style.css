@@ -455,6 +455,74 @@
     color: #111;
 }
 
+.yani-auth__content {
+    width: min(100%, 42em);
+    margin: 0 auto;
+    padding: 2em;
+}
+
+.yani-auth__title {
+    margin-bottom: 0.35em;
+    font-size: 2em;
+    font-weight: 600;
+}
+
+.yani-auth__status {
+    margin-bottom: 1.4em;
+    color: #f0a33b;
+    opacity: 0.9;
+}
+
+.yani-auth__status.is-authorized {
+    color: #4caf50;
+}
+
+.yani-auth__form,
+.yani-auth__actions {
+    display: grid;
+    gap: 0.7em;
+}
+
+.yani-auth__field,
+.yani-auth__button {
+    padding: 1em 1.2em;
+    border-radius: 0.65em;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.yani-auth__field.focus,
+.yani-auth__button.focus {
+    background: #fff;
+    color: #111;
+    outline: 0.16em solid #ef6470;
+}
+
+.yani-auth__field-title {
+    margin-bottom: 0.3em;
+    opacity: 0.65;
+}
+
+.yani-auth__field-value {
+    font-size: 1.15em;
+    font-weight: 600;
+}
+
+.yani-auth__button {
+    text-align: center;
+    font-weight: 600;
+}
+
+.yani-auth__button--primary {
+    background: #ef6470;
+    color: #fff;
+}
+
+.yani-auth__account,
+.yani-auth__hint {
+    margin-top: 1em;
+    opacity: 0.65;
+}
+
 .yani-status__content {
     padding: 1.4em 2em 3em;
 }

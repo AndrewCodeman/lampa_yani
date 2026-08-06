@@ -120,6 +120,7 @@
             Lampa.Component.add('yani_detail', Detail);
             Lampa.Component.add('yani_account', Account);
             Lampa.Component.add('yani_account_list', AccountList);
+            Lampa.Component.add('yani_auth', AuthPage);
 
             Lampa.Component.add('yani_status', StatusDashboard);
             Lampa.Component.add('yani_player', IframePlayer);
@@ -452,6 +453,128 @@
             element.on('hover:focus', function (event) {
                 last = event.target;
                 scroll.update($(event.target), true);
+            });
+        }
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () {
+                    Lampa.Controller.collectionSet(scroll.render());
+                    Lampa.Controller.collectionFocus(last || false, scroll.render());
+                },
+                left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
+                right: function () { Navigator.move('right'); },
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
+                down: function () { Navigator.move('down'); },
+                back: goBack
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? html[0] : html; };
+        this.destroy = function () { scroll.destroy(); html.remove(); };
+    }
+
+    function AuthPage(object) {
+        var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        var html = $('<div class="yani-auth"></div>');
+        var content = $('<div class="yani-auth__content"></div>');
+        var loginValue = (LampaYaniAuth.get().login || '').trim();
+        var passwordValue = '';
+        var last;
+
+        this.create = function () {
+            render();
+            scroll.append(content);
+            html.append(scroll.render(true));
+            this.activity.loader(false);
+            this.activity.toggle();
+        };
+
+        function render() {
+            content.empty();
+            var account = LampaYaniAuth.get();
+            var authorized = Boolean(LampaYaniAuth.token());
+            content.append($('<div class="yani-auth__title"></div>').text(t('auth_title')));
+            content.append($('<div class="yani-auth__status ' + (authorized ? 'is-authorized' : '') + '"></div>').text(authorized ? t('auth_authorized') : t('auth_not_authorized')));
+
+            var form = $('<div class="yani-auth__form"></div>');
+            addField(form, t('auth_login'), loginValue || t('auth_login_empty'), function () {
+                showYummyInput({title: t('email_prompt'), value: loginValue}, function (value) {
+                    loginValue = String(value || '').trim();
+                    render();
+                });
+            });
+            addField(form, t('auth_password'), passwordValue ? '••••••••' : t('auth_password_empty'), function () {
+                showYummyInput({title: t('password_prompt'), value: '', password: true}, function (value) {
+                    passwordValue = String(value || '');
+                    render();
+                });
+            });
+            content.append(form);
+
+            var actions = $('<div class="yani-auth__actions"></div>');
+            if (!authorized) addAction(actions, t('auth_submit'), 'primary', submitLogin);
+            if (authorized) {
+                addAction(actions, t('refresh_name'), '', refreshToken);
+                addAction(actions, t('logout_name'), '', logout);
+            }
+            content.append(actions);
+            if (authorized && account.login) content.append($('<div class="yani-auth__account"></div>').text(t('auth_account') + ': ' + account.login));
+            content.append($('<div class="yani-auth__hint"></div>').text(t('auth_hint')));
+        }
+
+        function addField(parent, title, value, action) {
+            var field = $('<div class="yani-auth__field selector"></div>');
+            field.append($('<div class="yani-auth__field-title"></div>').text(title));
+            field.append($('<div class="yani-auth__field-value"></div>').text(value));
+            bindFocus(field);
+            field.on('hover:enter', action);
+            parent.append(field);
+        }
+
+        function addAction(parent, title, className, action) {
+            var button = $('<div class="yani-auth__button selector ' + (className ? 'yani-auth__button--' + className : '') + '"></div>').text(title);
+            bindFocus(button);
+            button.on('hover:enter', action);
+            parent.append(button);
+        }
+
+        function bindFocus(element) {
+            element.on('hover:focus', function (event) {
+                last = event.target;
+                scroll.update($(event.target), true);
+            });
+        }
+
+        function submitLogin() {
+            if (!loginValue) return Lampa.Noty.show(t('email_required'));
+            if (!passwordValue) return Lampa.Noty.show(t('password_required'));
+            Lampa.Loading && Lampa.Loading.start && Lampa.Loading.start();
+            LampaYaniAuth.login(loginValue, passwordValue).then(function () {
+                passwordValue = '';
+                Lampa.Noty.show(t('login_ok'));
+                render();
+            }).catch(function (error) {
+                console.error('[YummyAnime Auth]', error);
+                Lampa.Noty.show(t('login_error'));
+            }).then(function () { Lampa.Loading && Lampa.Loading.stop && Lampa.Loading.stop(); });
+        }
+
+        function refreshToken() {
+            LampaYaniAuth.refresh().then(function () {
+                Lampa.Noty.show(t('token_refreshed'));
+                render();
+            }).catch(function () { Lampa.Noty.show(t('token_refresh_error')); });
+        }
+
+        function logout() {
+            LampaYaniAuth.logout().then(function () {
+                Lampa.Noty.show(t('logged_out'));
+                render();
+            }).catch(function () {
+                Lampa.Noty.show(t('token_removed'));
+                render();
             });
         }
 
@@ -1725,18 +1848,10 @@
     }
 
     function openSettingsLogin() {
-        showYummyInput({title: t('email_prompt'), value: ''}, function (login) {
-            login = (login || '').trim();
-            if (!login) return Lampa.Noty.show(t('email_required'));
-            showYummyInput({title: t('password_prompt'), value: '', password: true}, function (password) {
-                if (!password) return Lampa.Noty.show(t('password_required'));
-                LampaYaniAuth.login(login, password).then(function () {
-                    Lampa.Noty.show(t('login_ok'));
-                }).catch(function (error) {
-                    console.error('[YummyAnime]', error);
-                    Lampa.Noty.show(t('login_error'));
-                });
-            });
+        Lampa.Activity.push({
+            url: 'yani/auth',
+            title: 'YummyAnime · ' + t('auth_title'),
+            component: 'yani_auth'
         });
     }
 
