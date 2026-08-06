@@ -10,7 +10,7 @@ function pluginYummyAnime() {
             version: '0.1.0',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
-            component: 'yani_catalog'
+            component: 'yani_home'
         };
     }
 

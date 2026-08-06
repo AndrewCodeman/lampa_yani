@@ -8,12 +8,12 @@ function pluginYummyAnime() {
             version: '0.1.0',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
-            component: 'yani_catalog'
+            component: 'yani_home'
         };
     }
 
     var style = document.createElement('style');
-    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n";
+    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.2em;\n    padding: 2em;\n}\n\n.yani-home__item {\n    min-height: 8em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n}\n\n.yani-home__item.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-home__icon {\n    font-size: 2.4em;\n}\n\n.yani-home__title {\n    font-size: 1.35em;\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); }\n}\n";
     document.head.appendChild(style);
 
 (function (window) {
@@ -197,7 +197,6 @@ function pluginYummyAnime() {
             }
 
             var yummyIcon = '<svg viewBox="0 0 20 20"><path fill="currentColor" d="M18.45 0H1.55A1.55 1.55 0 000 1.55v16.9A1.54 1.54 0 001.55 20h16.9A1.55 1.55 0 0020 18.45V1.55A1.54 1.54 0 0018.45 0Zm-2.83 5.93-2.1 2.66-2.3-5.43a6.95 6.95 0 014.4 2.77Zm-2.9 6.57h-4l2.03-4.8 1.98 4.8Zm-2.37-9.34L7.8 9.06 4.87 5.33c.64-.7 1.4-1.26 2.27-1.65a8.18 8.18 0 013.2-.52ZM3.57 7.39l3.2 4.06-1.56 3.58A6.96 6.96 0 013.57 7.39Zm6.57 9.56c-1.05.01-2.1-.2-3.05-.65l.76-1.8h5.7l.49 1.15a6.93 6.93 0 01-3.9 1.3Zm6.8-7.07a7.8 7.8 0 01-1.17 4L14.55 11l2.17-2.77c.14.54.21 1.1.23 1.65Z"/></svg>';
-            var sprite = function (name) { return '<svg><use xlink:href="#sprite-' + name + '"></use></svg>'; };
 
             function addInterface() {
                 if (!Lampa.Menu || !Lampa.Menu.addButton) return;
@@ -215,90 +214,9 @@ function pluginYummyAnime() {
             Lampa.Menu.addButton(yummyIcon, 'YummyAnime', function () {
                 Lampa.Activity.push({
                     url: 'yani',
-                    title: 'Anime',
-                    component: 'yani_catalog',
-                    params: {limit: 30, sort: 'top', sort_forward: false}
+                    title: 'YummyAnime',
+                    component: 'yani_home'
                 });
-            });
-
-            Lampa.Menu.addButton(sprite('filter'), 'YummyAnime Genres', function () {
-                LampaYaniApi.genres().then(function (payload) {
-                    var genres = LampaYaniApi.normalize(payload);
-                    if (!genres.length) return Lampa.Noty.show('Жанры не найдены');
-                    Lampa.Select.show({
-                        title: 'Genres',
-                        items: genres.map(function (genre) {
-                            return {title: genre.title || genre.name, value: genre.id || genre.alias};
-                        }),
-                        onSelect: function (item) {
-                            Lampa.Activity.push({
-                                url: 'yani/genre/' + item.value,
-                                title: item.title,
-                                component: 'yani_catalog',
-                                params: {limit: 30, genres: item.value}
-                            });
-                        }
-                    });
-                }).catch(function () {
-                    Lampa.Noty.show('Не удалось загрузить жанры Yani');
-                });
-            });
-
-            Lampa.Menu.addButton(sprite('search'), 'YummyAnime Search', function () {
-                if (!Lampa.Input || !Lampa.Input.show) {
-                    return Lampa.Noty.show('Поиск недоступен в этой версии Lampa');
-                }
-
-                Lampa.Input.show({
-                    title: 'Search Anime',
-                    value: '',
-                    onBack: function () { Lampa.Controller.toggle('menu'); },
-                    onEnter: function (query) {
-                        query = (query || '').trim();
-                        if (!query) return;
-                        Lampa.Activity.push({
-                            url: 'yani/search/' + encodeURIComponent(query),
-                            title: query,
-                            component: 'yani_catalog',
-                            params: {q: query, limit: 30}
-                        });
-                    }
-                });
-            });
-
-            Lampa.Menu.addButton(sprite('calendar'), 'YummyAnime Schedule', function () {
-                Lampa.Activity.push({
-                    url: 'yani/schedule',
-                    title: 'Schedule',
-                    component: 'yani_schedule'
-                });
-            });
-
-            Lampa.Menu.addButton(sprite('favorite'), 'YummyAnime Top Rated', function () {
-                Lampa.Activity.push({
-                    url: 'yani/top-rated',
-                    title: 'Top Rated',
-                    component: 'yani_catalog',
-                    params: {limit: 30, sort: 'rating', sort_forward: false}
-                });
-            });
-
-            Lampa.Menu.addButton(sprite('person'), 'YummyAnime Account', function () {
-                var auth = LampaYaniAuth.get();
-                if (auth.token) {
-                    Lampa.Select.show({title: 'Yani Account', items: [{title: 'Log out'}], onSelect: function () {
-                        LampaYaniAuth.clear();
-                        Lampa.Noty.show('Вы вышли из Yani');
-                    }});
-                    return;
-                }
-                Lampa.Input.show({title: 'Yani Login', value: '', onEnter: function (login) {
-                    Lampa.Input.show({title: 'Yani Password', value: '', onEnter: function (password) {
-                        LampaYaniAuth.login(login, password).then(function () {
-                            Lampa.Noty.show('Вход в Yani выполнен');
-                        }).catch(function () { Lampa.Noty.show('Ошибка входа в Yani'); });
-                    }});
-                }});
             });
 
             }
@@ -309,6 +227,8 @@ function pluginYummyAnime() {
                     if (event.type === 'ready') addInterface();
                 });
             }
+
+            Lampa.Component.add('yani_home', Home);
 
             Lampa.Component.add('yani_catalog', function (object) {
                 var comp = new Lampa.InteractionCategory(object);
@@ -402,6 +322,99 @@ function pluginYummyAnime() {
             console.log('[Lampa Yani] Extension registered');
         }
     };
+
+    function Home(object) {
+        var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        var html = $('<div class="yani-home"></div>');
+        var grid = $('<div class="yani-home__grid"></div>');
+        var last;
+
+        var items = [
+            {title: 'Catalog', icon: '◆', action: function () {
+                Lampa.Activity.push({url: 'yani/catalog', title: 'YummyAnime Catalog', component: 'yani_catalog', params: {limit: 30, sort: 'top', sort_forward: false}});
+            }},
+            {title: 'Genres', icon: '≡', action: openGenres},
+            {title: 'Search', icon: '⌕', action: openSearch},
+            {title: 'Schedule', icon: '▦', action: function () {
+                Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime Schedule', component: 'yani_schedule'});
+            }},
+            {title: 'Top Rated', icon: '★', action: function () {
+                Lampa.Activity.push({url: 'yani/top-rated', title: 'YummyAnime Top Rated', component: 'yani_catalog', params: {limit: 30, sort: 'rating', sort_forward: false}});
+            }},
+            {title: 'Account', icon: '●', action: openAccount}
+        ];
+
+        this.create = function () {
+            items.forEach(function (item) {
+                var button = $('<div class="yani-home__item selector"><div class="yani-home__icon">' + item.icon + '</div><div class="yani-home__title">' + item.title + '</div></div>');
+                button.on('hover:focus', function (event) {
+                    last = event.target;
+                    scroll.update($(event.target), true);
+                });
+                button.on('hover:enter', item.action);
+                grid.append(button);
+            });
+            scroll.append(grid);
+            html.append(scroll.render(true));
+            this.activity.loader(false);
+            this.activity.toggle();
+        };
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () {
+                    Lampa.Controller.collectionSet(scroll.render());
+                    Lampa.Controller.collectionFocus(last || false, scroll.render());
+                },
+                left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
+                right: function () { Navigator.move('right'); },
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
+                down: function () { Navigator.move('down'); },
+                back: this.back
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? html[0] : html; };
+        this.destroy = function () { scroll.destroy(); html.remove(); };
+    }
+
+    function openGenres() {
+        LampaYaniApi.genres().then(function (payload) {
+            var genres = LampaYaniApi.normalize(payload);
+            Lampa.Select.show({
+                title: 'YummyAnime Genres',
+                items: genres.map(function (genre) { return {title: genre.title || genre.name, value: genre.id || genre.alias}; }),
+                onSelect: function (item) {
+                    Lampa.Activity.push({url: 'yani/genre/' + item.value, title: item.title, component: 'yani_catalog', params: {limit: 30, genres: item.value}});
+                }
+            });
+        }).catch(function () { Lampa.Noty.show('Не удалось загрузить жанры YummyAnime'); });
+    }
+
+    function openSearch() {
+        if (!Lampa.Input || !Lampa.Input.show) return Lampa.Noty.show('Поиск недоступен в этой версии Lampa');
+        Lampa.Input.show({title: 'YummyAnime Search', value: '', onEnter: function (query) {
+            query = (query || '').trim();
+            if (query) Lampa.Activity.push({url: 'yani/search/' + encodeURIComponent(query), title: query, component: 'yani_catalog', params: {q: query, limit: 30}});
+        }});
+    }
+
+    function openAccount() {
+        var auth = LampaYaniAuth.get();
+        if (auth.token) {
+            Lampa.Select.show({title: 'YummyAnime Account', items: [{title: 'Log out'}], onSelect: function () {
+                LampaYaniAuth.clear();
+                Lampa.Noty.show('Вы вышли из YummyAnime');
+            }});
+            return;
+        }
+        Lampa.Input.show({title: 'YummyAnime Login', value: '', onEnter: function (login) {
+            Lampa.Input.show({title: 'YummyAnime Password', value: '', onEnter: function (password) {
+                LampaYaniAuth.login(login, password).then(function () { Lampa.Noty.show('Вход в YummyAnime выполнен'); }).catch(function () { Lampa.Noty.show('Ошибка входа в YummyAnime'); });
+            }});
+        }});
+    }
 
     function toCard(item) {
         var title = item.title || item.name || item.russian || item.original_title || 'Без названия';

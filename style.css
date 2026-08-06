@@ -9,3 +9,37 @@
     height: 2.4em;
     background: center / contain no-repeat url('./assets/yummyanime.svg');
 }
+
+.yani-home__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(12em, 1fr));
+    gap: 1.2em;
+    padding: 2em;
+}
+
+.yani-home__item {
+    min-height: 8em;
+    padding: 1.4em;
+    border-radius: 0.8em;
+    background: rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    gap: 1em;
+}
+
+.yani-home__item.focus {
+    background: #fff;
+    color: #111;
+}
+
+.yani-home__icon {
+    font-size: 2.4em;
+}
+
+.yani-home__title {
+    font-size: 1.35em;
+}
+
+@media (max-width: 700px) {
+    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); }
+}
