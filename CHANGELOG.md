@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.0 — 2026-08-06
+
+- added read-only nested comment replies through `/comments/{id}/children`;
+- added 20-item pagination for anime comments and reply threads;
+- added comment markup cleanup and dislike counters.
+
 ## 0.11.0 — 2026-08-06
 
 - added YummyAnime actions to standard Lampa detail cards;

@@ -111,8 +111,11 @@
                 body: JSON.stringify({list: listId, date: Math.floor(Date.now() / 1000)})
             });
         },
-        comments: function (id) {
-            return request('/comments/anime/' + encodeURIComponent(id) + '?limit=20&sort=new&skip=0');
+        comments: function (id, skip) {
+            return request('/comments/anime/' + encodeURIComponent(id) + '?limit=20&sort=new&skip=' + encodeURIComponent(skip || 0));
+        },
+        commentChildren: function (id, skip) {
+            return request('/comments/' + encodeURIComponent(id) + '/children?skip=' + encodeURIComponent(skip || 0));
         },
         normalizeComments: function (payload) {
             var response = payload && payload.response ? payload.response : payload;

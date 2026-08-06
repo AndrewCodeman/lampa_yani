@@ -1404,31 +1404,80 @@
         Lampa.Noty.show(t('input_unavailable'));
     }
 
-    function commentsMenu(id) {
+    function commentsMenu(id, skip, existing) {
+        skip = Number(skip || 0);
+        existing = existing || [];
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
-        LampaYaniApi.comments(id).then(function (payload) {
+        LampaYaniApi.comments(id, skip).then(function (payload) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
-            var comments = LampaYaniApi.normalizeComments(payload);
+            var page = LampaYaniApi.normalizeComments(payload);
+            var comments = existing.concat(page);
             if (!comments.length) return Lampa.Noty.show(t('comments_empty'));
-            var items = comments.map(function (comment) {
-                var author = comment.name || (comment.author && comment.author.name) || t('user');
-                var text = comment.text || comment.body || '';
-                var date = Number(comment.time) > 0 ? new Date(Number(comment.time) * 1000).toLocaleDateString(locale()) : '';
-                var stats = [];
-                if (Number(comment.likes) > 0) stats.push('♥ ' + comment.likes);
-                if (Number(comment.children_count) > 0) stats.push('↳ ' + comment.children_count + ' ' + t('replies'));
-                return {
-                    title: author + (date ? ' · ' + date : '') + ': ' + text,
-                    subtitle: stats.join(' · '),
-                    comment: comment
-                };
-            });
-            Lampa.Select.show({title: t('comments_title'), items: items});
+            renderCommentList(t('comments_title'), comments, page.length >= 20 ? function () {
+                commentsMenu(id, skip + page.length, comments);
+            } : null);
         }).catch(function (error) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             console.error('[YummyAnime Comments]', error);
             Lampa.Noty.show(t('comments_error'));
         });
+    }
+
+    function commentReplies(comment, skip, existing, onBack) {
+        skip = Number(skip || 0);
+        existing = existing || [];
+        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+        LampaYaniApi.commentChildren(comment.id, skip).then(function (payload) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            var page = LampaYaniApi.normalizeComments(payload);
+            var comments = existing.concat(page);
+            if (!comments.length) return Lampa.Noty.show(t('comments_empty'));
+            renderCommentList(t('replies_title'), comments, page.length >= 20 ? function () {
+                commentReplies(comment, skip + page.length, comments, onBack);
+            } : null, onBack);
+        }).catch(function (error) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            console.error('[YummyAnime Comment Replies]', error);
+            Lampa.Noty.show(t('comments_error'));
+        });
+    }
+
+    function renderCommentList(title, comments, onMore, onBack) {
+        var items = comments.map(commentItem);
+        if (onMore) items.push({title: t('load_more'), load_more: true});
+        var params = {
+            title: title,
+            items: items,
+            onSelect: function (item) {
+                if (item.load_more) return onMore();
+                if (item.comment && Number(item.comment.children_count) > 0) {
+                    return commentReplies(item.comment, 0, [], function () {
+                        renderCommentList(title, comments, onMore, onBack);
+                    });
+                }
+            }
+        };
+        if (onBack) params.onBack = onBack;
+        Lampa.Select.show(params);
+    }
+
+    function commentItem(comment) {
+        var author = comment.name || (comment.author && comment.author.name) || t('user');
+        var text = cleanCommentText(comment.text || comment.body || '');
+        var date = Number(comment.time) > 0 ? new Date(Number(comment.time) * 1000).toLocaleDateString(locale()) : '';
+        var stats = [];
+        if (Number(comment.likes) > 0) stats.push('♥ ' + comment.likes);
+        if (Number(comment.dislikes) > 0) stats.push('−' + comment.dislikes);
+        if (Number(comment.children_count) > 0) stats.push('↳ ' + comment.children_count + ' ' + t('replies'));
+        return {
+            title: author + (date ? ' · ' + date : '') + ': ' + text,
+            subtitle: stats.join(' · '),
+            comment: comment
+        };
+    }
+
+    function cleanCommentText(text) {
+        return String(text || '').replace(/\[ник\]([^[]+)\[\/ник\]/gi, '@$1').replace(/\[[^\]]+\]/g, '').replace(/\s+/g, ' ').trim();
     }
 
     function installFullRating() {
