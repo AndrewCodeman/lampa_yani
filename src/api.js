@@ -77,6 +77,16 @@
                 body: JSON.stringify({list: list})
             });
         },
+        comments: function (id) {
+            return request('/comments/anime/' + encodeURIComponent(id));
+        },
+        addComment: function (id, text) {
+            return request('/comments/anime/' + encodeURIComponent(id), {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text: text})
+            });
+        },
         health: function () {
             return request('/anime?limit=1', {publicOnly: true});
         }

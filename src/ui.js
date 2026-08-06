@@ -154,10 +154,11 @@
                         if (!data.yani_id) return;
                         Lampa.Select.show({
                             title: 'Оценка Yani',
-                            items: [{title: 'Add to Favorites', action: 'favorite'}, {title: 'Watching', action: 'watching'}, {title: 'Completed', action: 'completed'}, {title: 'Planned', action: 'planned'}].concat([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
+                            items: [{title: 'Add to Favorites', action: 'favorite'}, {title: 'Watching', action: 'watching'}, {title: 'Completed', action: 'completed'}, {title: 'Planned', action: 'planned'}, {title: 'Comments', action: 'comments'}].concat([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
                                 return {title: value + '/10', value: value};
                             })),
                             onSelect: function (item) {
+                                if (item.action === 'comments') return commentsMenu(data.yani_id);
                                 var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(data.yani_id) : item.action ? LampaYaniApi.addToList(data.yani_id, item.action) : LampaYaniApi.rate(data.yani_id, item.value);
                                 action.then(function () {
                                     Lampa.Noty.show('Изменения сохранены в YummyAnime');
@@ -235,5 +236,25 @@
                 });
             }
         });
+    }
+
+    function commentsMenu(id) {
+        LampaYaniApi.comments(id).then(function (payload) {
+            var comments = LampaYaniApi.normalize(payload);
+            var items = comments.map(function (comment) {
+                return {title: comment.text || comment.body || 'Comment'};
+            });
+            items.push({title: 'Add comment', action: 'add'});
+            Lampa.Select.show({title: 'YummyAnime Comments', items: items, onSelect: function (item) {
+                if (item.action !== 'add') return;
+                if (!LampaYaniAuth.token()) return Lampa.Noty.show('Сначала войдите в YummyAnime Settings');
+                Lampa.Input.show({title: 'New comment', value: '', onEnter: function (text) {
+                    if (!text || !text.trim()) return;
+                    LampaYaniApi.addComment(id, text.trim()).then(function () {
+                        Lampa.Noty.show('Комментарий добавлен');
+                    }).catch(function () { Lampa.Noty.show('Не удалось добавить комментарий'); });
+                }});
+            }});
+        }).catch(function () { Lampa.Noty.show('Не удалось загрузить комментарии'); });
     }
 }(window));
