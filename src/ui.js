@@ -722,8 +722,10 @@
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
-            button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(t('watch'));
-            button.on('hover:enter', function () { openVideos(data); });
+            var playback = getPlayback(data.yani_id);
+            var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
+            button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(watchTitle);
+            button.on('hover:enter', function () { openVideos(data, !!playback); });
             var searchButton = $('<div class="yani-detail__button selector"></div>').text(t('open_lampa_search'));
             searchButton.on('hover:enter', function () {
                 if (Lampa.Search && Lampa.Search.open) Lampa.Search.open(data.title || '');
@@ -747,7 +749,7 @@
         this.destroy = function () { html.remove(); };
     }
 
-    function openVideos(card) {
+    function openVideos(card, resume) {
         if (!card || !card.yani_id) return Lampa.Noty.show(t('no_videos'));
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
 
@@ -777,6 +779,18 @@
                 return preferredB - preferredA || a.title.localeCompare(b.title);
             });
             if (voices.length && playerMatchesPreference(voices[0].group, preferredPlayer)) voices[0].title = '★ ' + voices[0].title;
+
+            if (resume) {
+                var playback = getPlayback(card.yani_id);
+                var resumeVoice = playback && voices.filter(function (voice) { return playerMatchesPreference(voice.group, playback.player); })[0];
+                var resumeVideo = resumeVoice && resumeVoice.group.videos.filter(function (video) {
+                    return String(video.number || video.index || '') === playback.number;
+                })[0];
+                if (resumeVideo) {
+                    rememberPlayer(resumeVoice.group);
+                    return launchVideo(card, resumeVoice.group, resumeVoice.group.videos, resumeVideo);
+                }
+            }
 
             if (voices.length === 1) {
                 rememberPlayer(voices[0].group);
@@ -863,7 +877,7 @@
             return Number(a.index || 0) - Number(b.index || 0);
         });
         var episodes = videos.map(function (video) {
-            return {title: t('episode') + ' ' + (video.number || video.index || '?'), video: video};
+            return {title: episodeOptionTitle(card, video), video: video};
         });
         if (episodes.length === 1) return launchVideo(card, group, videos, videos[0]);
         Lampa.Select.show({
@@ -877,6 +891,7 @@
         var url = normalizeVideoUrl(selected.iframe_url);
         if (!url) return Lampa.Noty.show(t('no_videos'));
         var title = (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (selected.number || selected.index || '?') + ' · ' + group.title;
+        rememberPlayback(card, group, selected);
 
         if (/\.(m3u8|mp4|webm)(?:\?|$)/i.test(url) && Lampa.Player && Lampa.Player.play) {
             var directVideos = videos.filter(function (video) {
@@ -937,6 +952,46 @@
 
     function rememberPlayer(group) {
         if (Lampa.Storage) Lampa.Storage.set('yani_last_player', playerKey(group));
+    }
+
+    function playbackHistory() {
+        if (!Lampa.Storage) return {};
+        try { return JSON.parse(Lampa.Storage.get('yani_playback_history', '{}')); } catch (error) { return {}; }
+    }
+
+    function getPlayback(animeId) {
+        return playbackHistory()[String(animeId)] || null;
+    }
+
+    function rememberPlayback(card, group, video) {
+        if (!Lampa.Storage || !card || !card.yani_id) return;
+        var history = playbackHistory();
+        history[String(card.yani_id)] = {
+            number: String(video.number || video.index || ''),
+            video_id: video.video_id || '',
+            player: playerKey(group),
+            title: card.title || '',
+            updated_at: Date.now()
+        };
+        var ids = Object.keys(history).sort(function (a, b) { return Number(history[b].updated_at || 0) - Number(history[a].updated_at || 0); });
+        ids.slice(100).forEach(function (id) { delete history[id]; });
+        Lampa.Storage.set('yani_playback_history', JSON.stringify(history));
+    }
+
+    function episodeOptionTitle(card, video) {
+        var number = String(video.number || video.index || '?');
+        var parts = [t('episode') + ' ' + number];
+        if (Number(video.duration) > 0) parts.push(Math.max(1, Math.round(Number(video.duration) / 60)) + ' ' + t('minutes_short'));
+        if (Number(video.views) > 0) parts.push(formatCompactNumber(video.views) + ' ' + t('views_short'));
+        var playback = getPlayback(card && card.yani_id);
+        return (playback && playback.number === number ? '▶ ' : '') + parts.join(' · ');
+    }
+
+    function formatCompactNumber(value) {
+        value = Number(value) || 0;
+        if (value >= 1000000) return (value / 1000000).toFixed(value >= 10000000 ? 0 : 1).replace('.0', '') + t('million_short');
+        if (value >= 1000) return (value / 1000).toFixed(value >= 10000 ? 0 : 1).replace('.0', '') + t('thousand_short');
+        return String(value);
     }
 
     function IframePlayer(object) {
@@ -1119,6 +1174,16 @@
                 default: 'last'
             },
             field: {name: t('player_preference'), description: t('player_preference_description')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_clear_playback_history', type: 'trigger', default: false},
+            field: {name: t('clear_history'), description: t('clear_history_description')},
+            onChange: function () {
+                if (Lampa.Storage) Lampa.Storage.set('yani_playback_history', '{}');
+                Lampa.Noty.show(t('history_cleared'));
+            }
         });
 
         Lampa.SettingsApi.addParam({

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0 — 2026-08-06
+
+- added local playback history for the last 100 anime;
+- added one-click resume from the last opened episode and player;
+- added episode duration and view counts to the episode selector;
+- added a playback-history reset under YummyAnime settings.
+
 ## 0.7.0 — 2026-08-06
 
 - added a preferred-player setting;
