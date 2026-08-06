@@ -6,6 +6,8 @@
     function request(path, options) {
         options = options || {};
         var headers = options.headers || {};
+        var cacheKey = 'lampa_yummyanime_cache_' + path;
+        var cacheTtl = config.cacheTtl || 300000;
 
         if (config.applicationHeader) headers['X-Application'] = config.applicationHeader;
         if (!options.publicOnly && LampaYaniAuth && LampaYaniAuth.token()) headers.Authorization = 'Bearer ' + LampaYaniAuth.token();
@@ -20,6 +22,19 @@
         }).then(function (response) {
             if (!response.ok) throw new Error('Yani API: ' + response.status);
             return response.json();
+        }).then(function (payload) {
+            if ((options.method || 'GET') === 'GET' && window.Lampa && Lampa.Storage) {
+                Lampa.Storage.set(cacheKey, JSON.stringify({time: Date.now(), data: payload}));
+            }
+            return payload;
+        }).catch(function (error) {
+            if ((options.method || 'GET') === 'GET' && window.Lampa && Lampa.Storage) {
+                try {
+                    var cached = JSON.parse(Lampa.Storage.get(cacheKey, 'null'));
+                    if (cached && Date.now() - cached.time < cacheTtl) return cached.data;
+                } catch (ignore) {}
+            }
+            throw error;
         });
     }
 
