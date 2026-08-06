@@ -20,3 +20,7 @@ The plugin follows Lampa's standard global plugin initialization pattern.
 Для стабильной установки рекомендуется единый собранный файл:
 
 `https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/dist/index.js`
+
+Рекомендуемая ссылка GitHub Pages с MIME `application/javascript`:
+
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js`
