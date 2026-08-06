@@ -36,6 +36,7 @@
         },
         normalize: function (payload) {
             var response = payload && payload.response ? payload.response : payload;
+            if (Array.isArray(response)) return response;
             return response && (response.anime || response.results || response.items || response.data) || [];
         },
         genres: function () {

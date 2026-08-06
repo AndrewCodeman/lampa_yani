@@ -149,7 +149,8 @@
 
     function toCard(item) {
         var title = item.title || item.name || item.russian || item.original_title || 'Без названия';
-        var poster = item.cover || item.poster || item.image || item.poster_url || '';
+        var poster = item.cover || item.image || item.poster_url || '';
+        if (!poster && item.poster) poster = item.poster.fullsize || item.poster.medium || item.poster.original || '';
         return {
             title: title,
             original_title: item.original_title || item.japanese || title,
