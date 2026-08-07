@@ -904,6 +904,10 @@
     }
 
     function Subscriptions(object) {
+        return LampaYaniAccountLists.subscriptions(object, {toCard: toCard, cardRender: bindYummyCardRender, t: t});
+    }
+
+    function LegacySubscriptions(object) {
         var comp = new Lampa.InteractionCategory(object);
         comp.create = function () {
             var self = this;
@@ -1065,6 +1069,10 @@
     }
 
     function AccountList(object) {
+        return LampaYaniAccountLists.accountList(object, {toCard: toCard, cardRender: bindYummyCardRender});
+    }
+
+    function LegacyAccountList(object) {
         var comp = new Lampa.InteractionCategory(object);
         comp.create = function () {
             this.build({results: (object.items || []).map(toCard), total_pages: 1, title: object.title});
