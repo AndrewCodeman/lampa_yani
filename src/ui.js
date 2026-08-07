@@ -271,18 +271,22 @@
             if (!value) return;
             var isElement = value.jquery || value.nodeType || (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement);
             if (isElement) element = value;
-            else if (value.render || value.yani_id || value.title) card = value;
+            else if (!card && hasYummyCardData(value)) card = value;
         });
         [first, second, third].forEach(function (value) {
             if (!value || card) return;
             var candidate = value.card || value.object || value.data;
-            if (candidate && (candidate.render || candidate.yani_id || candidate.title)) card = candidate;
+            if (candidate && hasYummyCardData(candidate)) card = candidate;
         });
         if (!element && second && (second.jquery || second.nodeType)) element = second;
-        if (!card && first && (first.render || first.yani_id)) card = first;
+        if (!card && first && hasYummyCardData(first)) card = first;
         if (!element && card && card.render) element = card.render(true);
         if (!card || !element) return;
         bindYummyCard(element, card);
+    }
+
+    function hasYummyCardData(value) {
+        return Boolean(value && (getYummyId(value) || value.title || value.name || value.russian));
     }
 
     function bindYummyCard(element, card) {
