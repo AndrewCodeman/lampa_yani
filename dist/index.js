@@ -68,12 +68,14 @@ function pluginYummyAnime() {
     messages.ru.mark_all_read = 'Отметить все прочитанными';
     messages.ru.notification = 'Уведомление';
     messages.ru.community_stats = 'Статистика сообщества';
+    messages.ru.manage_list = 'Изменить список';
     messages.en.notifications_title = 'YummyAnime notifications';
     messages.en.notifications_empty = 'There are no notifications';
     messages.en.notifications_error = 'Failed to load notifications';
     messages.en.mark_all_read = 'Mark all as read';
     messages.en.notification = 'Notification';
     messages.en.community_stats = 'Community statistics';
+    messages.en.manage_list = 'Change list';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -91,6 +93,7 @@ function pluginYummyAnime() {
     messages.uk.mark_all_read = 'Позначити всі як прочитані';
     messages.uk.notification = 'Сповіщення';
     messages.uk.community_stats = 'Статистика спільноти';
+    messages.uk.manage_list = 'Змінити список';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
@@ -1775,6 +1778,9 @@ function pluginYummyAnime() {
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
+            var listButton = $('<div class="yani-detail__button selector"></div>').text(detailListLabel(data));
+            listButton.on('hover:enter click.yaniDetailList', function () { showYummyActions(data); });
+            bindDetailButtonFocus(listButton);
             button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(watchTitle);
             button.on('hover:enter', function () { openVideos(data, !!playback); });
             bindDetailButtonFocus(button);
@@ -1784,12 +1790,18 @@ function pluginYummyAnime() {
             });
             bindDetailButtonFocus(searchButton);
             var comments = $('<div class="yani-detail__comments"></div>');
-            actions.append(button, searchButton);
+            actions.append(listButton, button, searchButton);
             info.append(actions);
             info.append(comments);
             html.append(poster, info);
             scroll.append(html);
             loadInlineComments(data, comments);
+        }
+
+        function detailListLabel(cardData) {
+            var ids = {0: 'watching', 1: 'planned', 2: 'completed', 3: 'dropped', 5: 'postponed'};
+            var label = ids[Number(cardData.yani_list_id)] ? t(ids[Number(cardData.yani_list_id)]) : t('manage_list');
+            return cardData.yani_is_favorite ? '♥ ' + label : label;
         }
 
         function loadDetailCommunityStats(cardData, container) {

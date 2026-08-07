@@ -1350,6 +1350,9 @@
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
+            var listButton = $('<div class="yani-detail__button selector"></div>').text(detailListLabel(data));
+            listButton.on('hover:enter click.yaniDetailList', function () { showYummyActions(data); });
+            bindDetailButtonFocus(listButton);
             button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(watchTitle);
             button.on('hover:enter', function () { openVideos(data, !!playback); });
             bindDetailButtonFocus(button);
@@ -1359,12 +1362,18 @@
             });
             bindDetailButtonFocus(searchButton);
             var comments = $('<div class="yani-detail__comments"></div>');
-            actions.append(button, searchButton);
+            actions.append(listButton, button, searchButton);
             info.append(actions);
             info.append(comments);
             html.append(poster, info);
             scroll.append(html);
             loadInlineComments(data, comments);
+        }
+
+        function detailListLabel(cardData) {
+            var ids = {0: 'watching', 1: 'planned', 2: 'completed', 3: 'dropped', 5: 'postponed'};
+            var label = ids[Number(cardData.yani_list_id)] ? t(ids[Number(cardData.yani_list_id)]) : t('manage_list');
+            return cardData.yani_is_favorite ? '♥ ' + label : label;
         }
 
         function loadDetailCommunityStats(cardData, container) {
