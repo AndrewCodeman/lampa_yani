@@ -30,6 +30,9 @@ jobs:
       - name: Check bundled plugin
         run: node --check dist/index.js
 
+      - name: Run utility tests
+        run: node tests/ui-utils.test.js
+
       - name: Verify bundle is committed
         shell: bash
         run: git diff --exit-code -- dist/index.js
