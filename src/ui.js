@@ -1801,7 +1801,7 @@
     function findStandardLampaCard(card) {
         var tmdb = Lampa.Api && Lampa.Api.sources && Lampa.Api.sources.tmdb;
         if (!tmdb || !tmdb.get) return Promise.resolve(null);
-        var titles = standardSearchTitles(card).filter(function (title, index, list) {
+        var titles = LampaYaniUiUtils.standardSearchTitles(card).filter(function (title, index, list) {
             return title && list.indexOf(title) === index;
         });
 
@@ -1830,7 +1830,7 @@
     }
 
     function bestStandardCard(items, yaniCard) {
-        var expectedTitles = standardSearchTitles(yaniCard).map(normalizeMatchTitle).filter(Boolean);
+        var expectedTitles = LampaYaniUiUtils.standardSearchTitles(yaniCard).map(LampaYaniUiUtils.normalizeMatchTitle).filter(Boolean);
         var expectedYear = String(yaniCard.release_date || '').slice(0, 4);
         items.forEach(function (entry) {
             var candidate = entry.card || {};
@@ -1848,25 +1848,13 @@
         return items[0];
     }
 
-    function standardSearchTitles(card) {
-        var result = [];
-        var values = titleValues(card || {});
-        if (card && Array.isArray(card.yani_titles)) values = values.concat(card.yani_titles);
-        values.forEach(function (title) {
-            if (result.indexOf(title) < 0) result.push(title);
-            var withoutYear = String(title).replace(/\s*[\(\[]?\s*\d{4}\s*[\)\]]?\s*$/i, '').trim();
-            if (withoutYear && result.indexOf(withoutYear) < 0) result.push(withoutYear);
-        });
-        return result;
-    }
-
     function findYummyMatches(movie) {
         movie = movie || {};
         var title = movie.title || movie.name || movie.original_title || movie.original_name || '';
         var year = String(movie.release_date || movie.first_air_date || movie.year || '').slice(0, 4);
         if (!title) return Promise.resolve([]);
 
-        var queries = titleValues(movie);
+        var queries = LampaYaniUiUtils.titleValues(movie);
         if (queries.indexOf(title) < 0) queries.unshift(title);
         return Promise.all(queries.slice(0, 8).map(function (query) {
             return LampaYaniApi.search(query, {limit: 10}).then(function (payload) {
@@ -1879,7 +1867,7 @@
                 if (!cardsById[key]) cardsById[key] = card;
             }); });
             var cards = Object.keys(cardsById).map(function (key) { return cardsById[key]; });
-            var expected = normalizeMatchTitle(title);
+            var expected = LampaYaniUiUtils.normalizeMatchTitle(title);
             cards.forEach(function (card) {
                 var titles = card.yani_titles.map(normalizeMatchTitle);
                 card._match_score = (titles.indexOf(expected) >= 0 ? 100 : titles.some(function (value) { return value.indexOf(expected) >= 0 || expected.indexOf(value) >= 0; }) ? 40 : 0) + (year && card.release_date === year ? 30 : 0);
@@ -1889,24 +1877,6 @@
             var best = cards[0]._match_score;
             return cards.filter(function (card, index) { return index < 5 && (card._match_score === best || card._match_score >= 70); });
         });
-    }
-
-    function titleValues(item) {
-        var values = [];
-        var add = function (value) {
-            if (typeof value === 'string' && value.trim() && values.indexOf(value.trim()) < 0) values.push(value.trim());
-        };
-        ['title', 'name', 'russian', 'english', 'original_title', 'original_name', 'japanese', 'romaji', 'synonym'].forEach(function (key) { add(item[key]); });
-        ['aliases', 'alternative_titles', 'alternative_names', 'titles', 'synonyms', 'names'].forEach(function (key) {
-            var list = item[key];
-            if (!Array.isArray(list)) return;
-            list.forEach(function (value) { add(typeof value === 'string' ? value : value && (value.title || value.name || value.value)); });
-        });
-        return values;
-    }
-
-    function normalizeMatchTitle(value) {
-        return String(value || '').toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9]+/gi, ' ').trim();
     }
 
     function movePageDown(scroll) {
@@ -2202,7 +2172,7 @@
             item = nestedAnime;
         }
         var title = item.title || item.name || item.russian || item.original_title || t('untitled');
-        var titles = titleValues(item);
+        var titles = LampaYaniUiUtils.titleValues(item);
         if (titles.indexOf(title) < 0) titles.unshift(title);
         var image = item.image && typeof item.image === 'object' ? item.image : {};
         var cover = item.cover && typeof item.cover === 'object' ? item.cover : {};

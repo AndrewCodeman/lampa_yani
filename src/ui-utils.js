@@ -23,9 +23,36 @@
         try { return new URL(url).hostname.replace(/^www\./, ''); } catch (error) { return ''; }
     }
 
+    function titleValues(item) {
+        var values = [];
+        var add = function (value) { if (typeof value === 'string' && value.trim() && values.indexOf(value.trim()) < 0) values.push(value.trim()); };
+        ['title', 'name', 'russian', 'english', 'original_title', 'original_name', 'japanese', 'romaji', 'synonym'].forEach(function (key) { add(item && item[key]); });
+        ['aliases', 'alternative_titles', 'alternative_names', 'titles', 'synonyms', 'names'].forEach(function (key) {
+            var list = item && item[key];
+            if (Array.isArray(list)) list.forEach(function (value) { add(typeof value === 'string' ? value : value && (value.title || value.name || value.value)); });
+        });
+        return values;
+    }
+
+    function normalizeMatchTitle(value) { return String(value || '').toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9]+/gi, ' ').trim(); }
+
+    function standardSearchTitles(card) {
+        var result = [], values = titleValues(card || {});
+        if (card && Array.isArray(card.yani_titles)) values = values.concat(card.yani_titles);
+        values.forEach(function (title) {
+            if (result.indexOf(title) < 0) result.push(title);
+            var withoutYear = String(title).replace(/\s*[\(\[]?\s*\d{4}\s*[\)\]]?\s*$/i, '').trim();
+            if (withoutYear && result.indexOf(withoutYear) < 0) result.push(withoutYear);
+        });
+        return result;
+    }
+
     window.LampaYaniUiUtils = {
         videoData: videoData,
         normalizeVideoUrl: normalizeVideoUrl,
-        videoHost: videoHost
+        videoHost: videoHost,
+        titleValues: titleValues,
+        normalizeMatchTitle: normalizeMatchTitle,
+        standardSearchTitles: standardSearchTitles
     };
 }(window));
