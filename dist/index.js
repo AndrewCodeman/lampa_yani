@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.16.2',
+        version: '0.16.3',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -592,10 +592,14 @@ function pluginYummyAnime() {
             }
 
             Promise.all(ids.map(function (id) {
+                var saved = history[id] || {};
+                var fallback = toCard(saved.card || {anime_id: id, title: saved.title || t('untitled'), poster: saved.poster || ''});
                 return LampaYaniApi.detail(id).then(function (payload) {
                     var item = payload && payload.response ? payload.response : payload;
-                    return item ? toCard(item) : null;
-                }).catch(function () { return null; });
+                    var card = item ? toCard(item) : fallback;
+                    card.yani_id = card.yani_id || Number(id) || id;
+                    return card;
+                }).catch(function () { return fallback; });
             })).then(function (cards) {
                 self.build({results: cards.filter(Boolean), total_pages: 1, title: t('continue_watching')});
             }).catch(function (error) {
@@ -1993,7 +1997,11 @@ function pluginYummyAnime() {
 
     function playbackHistory() {
         if (!Lampa.Storage) return {};
-        try { return JSON.parse(Lampa.Storage.get('yani_playback_history', '{}')); } catch (error) { return {}; }
+        try {
+            var value = Lampa.Storage.get('yani_playback_history', '{}');
+            if (value && typeof value === 'object') return value;
+            return JSON.parse(value || '{}');
+        } catch (error) { return {}; }
     }
 
     function getPlayback(animeId) {
@@ -2008,6 +2016,16 @@ function pluginYummyAnime() {
             video_id: video.video_id || '',
             player: playerKey(group),
             title: card.title || '',
+            poster: card.poster || card.img || '',
+            card: {
+                title: card.title || '',
+                original_title: card.original_title || '',
+                poster: card.poster || card.img || '',
+                release_date: card.release_date || '',
+                overview: card.overview || '',
+                anime_id: card.yani_id,
+                remote_ids: card.yani_remote_ids || {}
+            },
             updated_at: Date.now()
         };
         var ids = Object.keys(history).sort(function (a, b) { return Number(history[b].updated_at || 0) - Number(history[a].updated_at || 0); });
