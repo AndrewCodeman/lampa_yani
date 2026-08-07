@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.18.13',
+        version: '0.18.14',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -2546,18 +2546,8 @@ function pluginYummyAnime() {
             }
             subscribeButton.on('hover:enter', function () { toggleEpisodeSubscription(data, subscribeButton); });
             bindDetailButtonFocus(subscribeButton);
-            var extrasButton = $('<div class="yani-detail__button selector"></div>').text(t('more_information'));
-            var extrasLoaded = false;
-            extrasButton.on('hover:enter click.yaniDetailExtras', function () {
-                if (extrasLoaded) return;
-                extrasLoaded = true;
-                extrasButton.text('…');
-                loadDetailCommunityStats(data, info);
-                setTimeout(function () { loadDetailCollections(data, info, bindDetailScrollTargets); }, 150);
-            });
-            bindDetailButtonFocus(extrasButton);
             var comments = $('<div class="yani-detail__comments"></div>');
-            actions.append(listButton, button, trailersButton, searchButton, subscribeButton, extrasButton);
+            actions.append(listButton, button, trailersButton, searchButton, subscribeButton);
             // Keep the principal actions next to the synopsis, before the
             // long viewing-order, recommendations and comments sections.
             info.append(actions);
@@ -2987,6 +2977,7 @@ function pluginYummyAnime() {
         var titles = LampaYaniUiUtils.standardSearchTitles(card).filter(function (title, index, list) {
             return title && list.indexOf(title) === index;
         });
+        console.info('[YummyAnime] Native TMDB resolve started', {yaniId: getYummyId(card), titles: titles});
 
         function searchNext(index) {
             if (index >= titles.length || index >= 8) return Promise.resolve(null);
@@ -2996,7 +2987,19 @@ function pluginYummyAnime() {
             });
         }
 
-        return searchNext(0);
+        return searchNext(0).then(function (match) {
+            if (match) {
+                console.info('[YummyAnime] Native TMDB match found', {
+                    id: match.card.id,
+                    method: match.method,
+                    title: match.card.name || match.card.title || '',
+                    source: match.card.source || ''
+                });
+            } else {
+                console.warn('[YummyAnime] Native TMDB resolver found no matching card', {yaniId: getYummyId(card), titles: titles});
+            }
+            return match;
+        });
     }
 
     function searchTmdbTitle(tmdb, title) {

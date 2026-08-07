@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.18.14 — 2026-08-08
+
+- Remove the redundant More information action from the title page.
+- Add concise console diagnostics for native Lampa TMDB resolution, so a failed proxy lookup and a failed card transition are distinguishable.
+
 ## 0.18.13 — 2026-08-08
 
 - Place title actions directly after the synopsis and add a Trailers action that opens its list on demand.
