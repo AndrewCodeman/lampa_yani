@@ -4,6 +4,7 @@
     function create(object, deps) {
         var t = deps.t, locale = deps.locale, toCard = deps.toCard;
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-schedule"></div>');
         var content = $('<div class="yani-schedule__content"></div>');
         var last, dayGroups = [], selectedDay = 0;

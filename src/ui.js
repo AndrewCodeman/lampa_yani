@@ -138,6 +138,7 @@
 
     function Home(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-home"></div>');
         var grid = $('<div class="yani-home__grid"></div>');
         var last;
@@ -563,6 +564,7 @@
 
     function Account(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-account"></div>');
         var content = $('<div class="yani-account__content"></div>');
         var last;
@@ -774,6 +776,7 @@
 
     function LegacyAuthPage(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-auth"></div>');
         var content = $('<div class="yani-auth__content"></div>');
         var loginValue = (LampaYaniAuth.get().login || '').trim();
@@ -977,6 +980,7 @@
 
     function LegacyNotifications(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-notifications"></div>');
         var content = $('<div class="yani-notifications__content"></div>');
         var last;
@@ -1153,6 +1157,7 @@
 
     function LegacyStatusDashboard(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-status"></div>');
         var content = $('<div class="yani-status__content"></div>');
         var last;
@@ -1358,6 +1363,7 @@
     // Kept temporarily as an internal fallback while deployed clients refresh the bundle.
     function LegacySchedule(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-schedule"></div>');
         var content = $('<div class="yani-schedule__content"></div>');
         var last;
@@ -1532,6 +1538,7 @@
         var data = object.card || {};
         var html = $('<div class="yani-detail"></div>');
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var button;
 
         html.on('hover:focus', function (event) {

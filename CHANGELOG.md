@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.18.6 — 2026-08-08
+
+- Enabled the native Lampa scroll viewport on every custom YummyAnime page, so focus movement scrolls the visible area instead of escaping below it.
+
 ## 0.18.5 — 2026-08-07
 
 - Kept the focused item visible on every YummyAnime page by scrolling to each selector root instead of an inner text or icon node.

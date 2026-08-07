@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.18.5',
+        version: '0.18.6',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -727,6 +727,7 @@ function pluginYummyAnime() {
     function create(object, deps) {
         var t = deps.t, locale = deps.locale, toCard = deps.toCard;
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-schedule"></div>');
         var content = $('<div class="yani-schedule__content"></div>');
         var last, dayGroups = [], selectedDay = 0;
@@ -769,6 +770,7 @@ function pluginYummyAnime() {
     'use strict';
     function create(object, deps) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250}), html = $('<div class="yani-notifications"></div>'), content = $('<div class="yani-notifications__content"></div>'), last, offset = 0;
+        scroll.minus();
         function render(items, append) {
             if (!append) content.empty();
             var title = $('<div class="yani-notifications__title"></div>').text(deps.t('notifications_title'));
@@ -798,6 +800,7 @@ function pluginYummyAnime() {
     'use strict';
     function create(object, deps) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250}), html = $('<div class="yani-auth"></div>'), content = $('<div class="yani-auth__content"></div>'), login = (LampaYaniAuth.get().login || '').trim(), password = '', last;
+        scroll.minus();
         function focus(element) { element.on('hover:focus', function (event) { var target = event.currentTarget || event.target; last = target; scroll.update($(target), true); }); return element; }
         function render() {
             content.empty(); var account = LampaYaniAuth.get(), authorized = Boolean(LampaYaniAuth.token());
@@ -828,6 +831,7 @@ function pluginYummyAnime() {
     'use strict';
     function create(object, deps) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250}), html = $('<div class="yani-status"></div>'), content = $('<div class="yani-status__content"></div>'), last, ready = false, period = '3hour', component;
+        scroll.minus();
         function date(value) { if (!value) return '—'; try { return new Date(value).toLocaleString(deps.locale(), {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'}); } catch (error) { return new Date(value).toLocaleString(); } }
         function focus(element) { element.on('hover:focus', function (event) { var target = event.currentTarget || event.target; last = target; scroll.update($(target), true); }); return element; }
         function metric(title, value) { return $('<div class="yani-status__metric"></div>').append($('<span></span>').text(title), $('<strong></strong>').text(value)); }
@@ -1052,6 +1056,7 @@ function pluginYummyAnime() {
 
     function Home(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-home"></div>');
         var grid = $('<div class="yani-home__grid"></div>');
         var last;
@@ -1477,6 +1482,7 @@ function pluginYummyAnime() {
 
     function Account(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-account"></div>');
         var content = $('<div class="yani-account__content"></div>');
         var last;
@@ -1688,6 +1694,7 @@ function pluginYummyAnime() {
 
     function LegacyAuthPage(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-auth"></div>');
         var content = $('<div class="yani-auth__content"></div>');
         var loginValue = (LampaYaniAuth.get().login || '').trim();
@@ -1891,6 +1898,7 @@ function pluginYummyAnime() {
 
     function LegacyNotifications(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-notifications"></div>');
         var content = $('<div class="yani-notifications__content"></div>');
         var last;
@@ -2067,6 +2075,7 @@ function pluginYummyAnime() {
 
     function LegacyStatusDashboard(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-status"></div>');
         var content = $('<div class="yani-status__content"></div>');
         var last;
@@ -2272,6 +2281,7 @@ function pluginYummyAnime() {
     // Kept temporarily as an internal fallback while deployed clients refresh the bundle.
     function LegacySchedule(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var html = $('<div class="yani-schedule"></div>');
         var content = $('<div class="yani-schedule__content"></div>');
         var last;
@@ -2446,6 +2456,7 @@ function pluginYummyAnime() {
         var data = object.card || {};
         var html = $('<div class="yani-detail"></div>');
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
         var button;
 
         html.on('hover:focus', function (event) {

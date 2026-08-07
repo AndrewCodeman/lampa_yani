@@ -2,6 +2,7 @@
     'use strict';
     function create(object, deps) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250}), html = $('<div class="yani-notifications"></div>'), content = $('<div class="yani-notifications__content"></div>'), last, offset = 0;
+        scroll.minus();
         function render(items, append) {
             if (!append) content.empty();
             var title = $('<div class="yani-notifications__title"></div>').text(deps.t('notifications_title'));
