@@ -1748,7 +1748,7 @@
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
-            param: {name: 'yani_about', type: 'trigger', default: false},
+            param: {name: 'yani_about', type: 'trigger'},
             field: {
                 name: t('version_name') + ' ' + LampaYaniConfig.version,
                 description: t('unofficial_extension') + ' · ' + t('website_description') + ': ' + yummyWebsiteUrl()
@@ -1780,7 +1780,7 @@
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
-            param: {name: 'yani_clear_playback_history', type: 'trigger', default: false},
+            param: {name: 'yani_clear_playback_history', type: 'trigger'},
             field: {name: t('clear_history'), description: t('clear_history_description')},
             onChange: function () {
                 if (Lampa.Storage) Lampa.Storage.set('yani_playback_history', '{}');
@@ -1792,13 +1792,13 @@
         if (authorized) {
             Lampa.SettingsApi.addParam({
                 component: 'yani',
-                param: {name: 'yani_account_state', type: 'trigger', default: false},
+                param: {name: 'yani_account_state', type: 'trigger'},
                 field: {name: t('authorized') + ': ' + authDisplayName(), description: t('auth_manage_description')},
                 onChange: openSettingsLogin
             });
             Lampa.SettingsApi.addParam({
                 component: 'yani',
-                param: {name: 'yani_account_refresh', type: 'trigger', default: false},
+                param: {name: 'yani_account_refresh', type: 'trigger'},
                 field: {name: t('refresh_name'), description: t('refresh_description')},
                 onChange: function () {
                     LampaYaniAuth.refresh().then(function () {
@@ -1811,7 +1811,7 @@
             });
             Lampa.SettingsApi.addParam({
                 component: 'yani',
-                param: {name: 'yani_account_logout', type: 'trigger', default: false},
+                param: {name: 'yani_account_logout', type: 'trigger'},
                 field: {name: t('logout_name'), description: t('logout_description')},
                 onChange: function () {
                     LampaYaniAuth.logout().then(function () {
@@ -1825,7 +1825,7 @@
         } else {
             Lampa.SettingsApi.addParam({
                 component: 'yani',
-                param: {name: 'yani_account_login', type: 'trigger', default: false},
+                param: {name: 'yani_account_login', type: 'trigger'},
                 field: {name: t('login_name'), description: t('login_description')},
                 onChange: openSettingsLogin
             });
@@ -1833,7 +1833,7 @@
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
-            param: {name: 'yani_api_check', type: 'trigger', default: false},
+            param: {name: 'yani_api_check', type: 'trigger'},
             field: {name: t('api_check_name'), description: t('api_check_description')},
             onChange: function () {
                 LampaYaniApi.health().then(function () {

@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.14.2',
+            version: '0.14.3',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.14.2',
+        version: '0.14.3',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -2115,7 +2115,7 @@ function pluginYummyAnime() {
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
-            param: {name: 'yani_about', type: 'trigger', default: false},
+            param: {name: 'yani_about', type: 'trigger'},
             field: {
                 name: t('version_name') + ' ' + LampaYaniConfig.version,
                 description: t('unofficial_extension') + ' · ' + t('website_description') + ': ' + yummyWebsiteUrl()
@@ -2147,7 +2147,7 @@ function pluginYummyAnime() {
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
-            param: {name: 'yani_clear_playback_history', type: 'trigger', default: false},
+            param: {name: 'yani_clear_playback_history', type: 'trigger'},
             field: {name: t('clear_history'), description: t('clear_history_description')},
             onChange: function () {
                 if (Lampa.Storage) Lampa.Storage.set('yani_playback_history', '{}');
@@ -2159,13 +2159,13 @@ function pluginYummyAnime() {
         if (authorized) {
             Lampa.SettingsApi.addParam({
                 component: 'yani',
-                param: {name: 'yani_account_state', type: 'trigger', default: false},
+                param: {name: 'yani_account_state', type: 'trigger'},
                 field: {name: t('authorized') + ': ' + authDisplayName(), description: t('auth_manage_description')},
                 onChange: openSettingsLogin
             });
             Lampa.SettingsApi.addParam({
                 component: 'yani',
-                param: {name: 'yani_account_refresh', type: 'trigger', default: false},
+                param: {name: 'yani_account_refresh', type: 'trigger'},
                 field: {name: t('refresh_name'), description: t('refresh_description')},
                 onChange: function () {
                     LampaYaniAuth.refresh().then(function () {
@@ -2178,7 +2178,7 @@ function pluginYummyAnime() {
             });
             Lampa.SettingsApi.addParam({
                 component: 'yani',
-                param: {name: 'yani_account_logout', type: 'trigger', default: false},
+                param: {name: 'yani_account_logout', type: 'trigger'},
                 field: {name: t('logout_name'), description: t('logout_description')},
                 onChange: function () {
                     LampaYaniAuth.logout().then(function () {
@@ -2192,7 +2192,7 @@ function pluginYummyAnime() {
         } else {
             Lampa.SettingsApi.addParam({
                 component: 'yani',
-                param: {name: 'yani_account_login', type: 'trigger', default: false},
+                param: {name: 'yani_account_login', type: 'trigger'},
                 field: {name: t('login_name'), description: t('login_description')},
                 onChange: openSettingsLogin
             });
@@ -2200,7 +2200,7 @@ function pluginYummyAnime() {
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
-            param: {name: 'yani_api_check', type: 'trigger', default: false},
+            param: {name: 'yani_api_check', type: 'trigger'},
             field: {name: t('api_check_name'), description: t('api_check_description')},
             onChange: function () {
                 LampaYaniApi.health().then(function () {
