@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const {execFileSync} = require('child_process');
 
 const root = __dirname;
 const modules = ['src/config.js', 'src/i18n.js', 'src/auth.js', 'src/api.js', 'src/catalog.js', 'src/ui-utils.js', 'src/ui-media.js', 'src/ui-navigation.js', 'src/ui-schedule.js', 'src/ui.js'];
+modules.forEach((file) => execFileSync(process.execPath, ['--check', path.join(root, file)], {stdio: 'inherit'}));
 const body = modules.map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
 const css = fs.readFileSync(path.join(root, 'style.css'), 'utf8');
 
