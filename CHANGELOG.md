@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.18.4 — 2026-08-07
+
+- Added a final activity-level guard that redirects YummyAnime cards with a missing TMDB ID to the YummyAnime detail page before Lampa requests `movie/undefined`.
+
 ## 0.18.3 — 2026-08-07
 
 - Prevented YummyAnime card clicks from also invoking Lampa's native TMDB handler with an undefined ID.

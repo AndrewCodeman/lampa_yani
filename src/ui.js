@@ -129,6 +129,7 @@
             Lampa.Component.add('yani_status', StatusDashboard);
             Lampa.Component.add('yani_player', IframePlayer);
 
+            installUndefinedTmdbGuard();
             installFullRating();
 
             console.log('[YummyAnime] Extension registered');
@@ -412,6 +413,10 @@
     }
 
     function bindYummyCard(element, card) {
+        // Keep an explicit marker on the original Lampa card.  Some Lampa
+        // versions preserve only custom fields when forwarding a card to the
+        // default detail handler.
+        card._yani_card = true;
         addCardRatings(element, card);
         addCardMediaBadges(element, card);
         addCardUpdateBadge(element, card);
@@ -1870,6 +1875,39 @@
         // "Open in Lampa search" action for users who need a native card.
         if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
         openYummyDetail(card, true);
+    }
+
+    function installUndefinedTmdbGuard() {
+        if (!Lampa.Activity || !Lampa.Activity.push || Lampa.Activity.push._yaniUndefinedTmdbGuard) return;
+
+        var originalPush = Lampa.Activity.push;
+        function guardedPush(activity) {
+            var card = activity && (activity.card || activity.object || activity.data);
+            var missingId = !activity || activity.id === undefined || activity.id === null || activity.id === '' || activity.id === 'undefined';
+            var isNativeDetail = activity && activity.component === 'full';
+            var isYummyCard = card && (card._yani_card || hasYummyCardData(card));
+
+            // A native Lampa detail page cannot open an anime without a TMDB
+            // id.  Redirect only our marked cards, leaving all normal Lampa
+            // activity navigation untouched.
+            if (isNativeDetail && missingId && isYummyCard) {
+                var yaniId = getYummyId(card);
+                if (yaniId) {
+                    console.warn('[YummyAnime] Blocked native TMDB detail with undefined id', yaniId);
+                    return originalPush.call(this, {
+                        url: 'yani/detail/' + encodeURIComponent(yaniId),
+                        title: card.title || card.name || 'YummyAnime',
+                        component: 'yani_detail',
+                        card: card
+                    });
+                }
+            }
+            return originalPush.apply(this, arguments);
+        }
+
+        guardedPush._yaniUndefinedTmdbGuard = true;
+        guardedPush._yaniOriginalPush = originalPush;
+        Lampa.Activity.push = guardedPush;
     }
 
     function openYummyDetail(card, notifyFallback) {
