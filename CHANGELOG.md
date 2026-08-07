@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.15.2 — 2026-08-07
+
+- added an 8-second timeout for standard Lampa card matching;
+- fall back to the YummyAnime detail page instead of leaving an endless loader.
+
 ## 0.15.1 — 2026-08-07
 
 - changed action settings to button rows without `Да/Нет` or `undefined` values;

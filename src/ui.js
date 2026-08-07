@@ -240,6 +240,7 @@
         });
         if (!element && second && (second.jquery || second.nodeType)) element = second;
         if (!card && first && (first.render || first.yani_id)) card = first;
+        if (!element && card && card.render) element = card.render(true);
         if (!card || !element) return;
         bindYummyCard(element, card);
     }
@@ -1304,7 +1305,11 @@
 
     function openStandardLampaCard(card) {
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
-        findStandardLampaCard(card).then(function (match) {
+        var lookup = findStandardLampaCard(card);
+        var timeout = new Promise(function (resolve) {
+            setTimeout(function () { resolve(null); }, 8000);
+        });
+        Promise.race([lookup, timeout]).then(function (match) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             if (!match) return openYummyDetail(card, true);
             match.card.yani_id = card.yani_id;

@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.15.1',
+            version: '0.15.2',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.15.1',
+        version: '0.15.2',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -607,6 +607,7 @@ function pluginYummyAnime() {
         });
         if (!element && second && (second.jquery || second.nodeType)) element = second;
         if (!card && first && (first.render || first.yani_id)) card = first;
+        if (!element && card && card.render) element = card.render(true);
         if (!card || !element) return;
         bindYummyCard(element, card);
     }
@@ -1671,7 +1672,11 @@ function pluginYummyAnime() {
 
     function openStandardLampaCard(card) {
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
-        findStandardLampaCard(card).then(function (match) {
+        var lookup = findStandardLampaCard(card);
+        var timeout = new Promise(function (resolve) {
+            setTimeout(function () { resolve(null); }, 8000);
+        });
+        Promise.race([lookup, timeout]).then(function (match) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             if (!match) return openYummyDetail(card, true);
             match.card.yani_id = card.yani_id;
