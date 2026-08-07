@@ -38,6 +38,8 @@
     messages.ru.delete_all_notifications = 'Удалить все уведомления';
     messages.ru.notifications_more = 'Загрузить ещё уведомления';
     messages.ru.for_you = 'Для вас';
+    messages.ru.collections = 'Коллекции';
+    messages.ru.collection = 'Коллекция';
     messages.ru.episodes_short = 'серий';
     messages.ru.recommendations_empty = 'Рекомендации появятся после просмотра тайтлов';
     messages.ru.updates = 'Обновления';
@@ -61,6 +63,8 @@
     messages.en.delete_all_notifications = 'Delete all notifications';
     messages.en.notifications_more = 'Load more notifications';
     messages.en.for_you = 'For you';
+    messages.en.collections = 'Collections';
+    messages.en.collection = 'Collection';
     messages.en.episodes_short = 'episodes';
     messages.en.recommendations_empty = 'Recommendations will appear after you watch some anime';
     messages.en.updates = 'Updates';
@@ -95,6 +99,8 @@
     messages.uk.delete_all_notifications = 'Видалити всі сповіщення';
     messages.uk.notifications_more = 'Завантажити ще сповіщення';
     messages.uk.for_you = 'Для вас';
+    messages.uk.collections = 'Колекції';
+    messages.uk.collection = 'Колекція';
     messages.uk.episodes_short = 'серій';
     messages.uk.recommendations_empty = 'Рекомендації з’являться після перегляду тайтлів';
     messages.uk.updates = 'Оновлення';

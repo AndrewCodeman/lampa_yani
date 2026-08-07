@@ -1523,6 +1523,7 @@
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
+            loadDetailCollections(data, info);
             loadDetailRecommendations(data, info);
             loadDetailTrailers(data, info);
             var playback = getPlayback(data.yani_id);
@@ -2329,6 +2330,36 @@
                 row.on('hover:focus', function () { row.addClass('focus'); });
                 row.on('hover:blur', function () { row.removeClass('focus'); });
                 row.on('hover:enter click.yaniRecommendation', function () { openYummyDetail(card, true); });
+                list.append(row);
+            });
+        }).catch(function () { section.remove(); });
+    }
+
+    function loadDetailCollections(data, container) {
+        var section = $('<div class="yani-detail__extra yani-detail__collections"><div class="yani-detail__extra-title"></div></div>');
+        section.find('.yani-detail__extra-title').text(t('collections'));
+        var list = $('<div class="yani-detail__collections-list"></div>');
+        section.append(list);
+        container.append(section);
+        LampaYaniApi.collections(data.yani_id, 10, 0).then(function (payload) {
+            var response = payload && payload.response ? payload.response : payload;
+            var items = Array.isArray(response) ? response : response && (response.items || response.data || response.collections) || [];
+            if (!items.length) return section.remove();
+            items.forEach(function (collection) {
+                var row = $('<div class="yani-detail__collection selector"></div>');
+                row.append($('<div class="yani-detail__collection-title"></div>').text(collection.title || collection.name || t('collection')));
+                if (collection.description) row.append($('<div class="yani-detail__collection-description"></div>').text(cleanCommentText(collection.description)));
+                var animes = Array.isArray(collection.animes) ? collection.animes : [];
+                if (animes.length) row.append($('<div class="yani-detail__collection-count"></div>').text(animes.length + ' ' + t('anime_count')));
+                row.on('hover:focus', function () { row.addClass('focus'); });
+                row.on('hover:blur', function () { row.removeClass('focus'); });
+                row.on('hover:enter click.yaniCollection', function () {
+                    if (!animes.length) return;
+                    Lampa.Select.show({title: collection.title || t('collection'), items: animes.map(function (item) {
+                        var card = toCard(item);
+                        return {title: card.title, card: card};
+                    }), onSelect: function (item) { openYummyDetail(item.card, true); }});
+                });
                 list.append(row);
             });
         }).catch(function () { section.remove(); });

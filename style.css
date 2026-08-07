@@ -162,6 +162,11 @@
 .yani-detail__trailers-list { display: grid; gap: .45em; }
 .yani-detail__trailer { padding: .7em .85em; border-radius: .45em; background: rgba(255, 255, 255, .08); }
 .yani-detail__trailer.focus { background: #fff; color: #111; outline: .16em solid #ef6470; }
+.yani-detail__collection { padding: .7em .85em; border-radius: .45em; background: rgba(255, 255, 255, .08); }
+.yani-detail__collection.focus { background: #fff; color: #111; outline: .16em solid #ef6470; }
+.yani-detail__collection-title { font-weight: 700; }
+.yani-detail__collection-description { margin-top: .25em; opacity: .72; font-size: .85em; white-space: pre-wrap; }
+.yani-detail__collection-count { margin-top: .3em; opacity: .7; font-size: .78em; }
 .yani-detail__order-item.selector:focus,
 .yani-detail__comment.selector:focus,
 .yani-detail__recommendation.selector:focus,

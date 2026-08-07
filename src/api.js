@@ -111,6 +111,9 @@
         recommendations: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/recommendations');
         },
+        collections: function (id, limit, offset) {
+            return request('/anime/' + encodeURIComponent(id) + '/collections?limit=' + encodeURIComponent(limit || 10) + '&offset=' + encodeURIComponent(offset || 0));
+        },
         ratingBuckets: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/rates', {auth: true});
         },
