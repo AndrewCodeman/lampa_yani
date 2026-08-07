@@ -2572,6 +2572,8 @@
             ['continue_watching', 'continue_watching'],
             ['status', 'status'],
             ['top_rated', 'top_rated'],
+            ['for_you', 'for_you'],
+            ['updates', 'updates'],
             ['account', 'account']
         ].forEach(function (section) {
             Lampa.SettingsApi.addParam({
