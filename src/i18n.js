@@ -38,6 +38,7 @@
     messages.ru.delete_all_notifications = 'Удалить все уведомления';
     messages.ru.notifications_more = 'Загрузить ещё уведомления';
     messages.ru.for_you = 'Для вас';
+    messages.ru.episodes_short = 'серий';
     messages.ru.recommendations_empty = 'Рекомендации появятся после просмотра тайтлов';
     messages.ru.updates = 'Обновления';
     messages.ru.updates_error = 'Не удалось загрузить обновления';
@@ -60,6 +61,7 @@
     messages.en.delete_all_notifications = 'Delete all notifications';
     messages.en.notifications_more = 'Load more notifications';
     messages.en.for_you = 'For you';
+    messages.en.episodes_short = 'episodes';
     messages.en.recommendations_empty = 'Recommendations will appear after you watch some anime';
     messages.en.updates = 'Updates';
     messages.en.updates_error = 'Failed to load updates';
@@ -93,6 +95,7 @@
     messages.uk.delete_all_notifications = 'Видалити всі сповіщення';
     messages.uk.notifications_more = 'Завантажити ще сповіщення';
     messages.uk.for_you = 'Для вас';
+    messages.uk.episodes_short = 'серій';
     messages.uk.recommendations_empty = 'Рекомендації з’являться після перегляду тайтлів';
     messages.uk.updates = 'Оновлення';
     messages.uk.updates_error = 'Не вдалося завантажити оновлення';

@@ -1699,13 +1699,13 @@
                 var title = data.dubbing || data.player || t('player');
                 var quality = videoQualityLabel(video);
                 var key = title + '|' + String(data.player_id || data.player || '') + '|' + quality;
-                if (!groups[key]) groups[key] = {title: title, player: data.player || '', quality: quality, videos: []};
+                if (!groups[key]) groups[key] = {title: title, player: data.player || '', quality: quality, source: videoHost(videoSourceUrl(video)), videos: []};
                 groups[key].videos.push(video);
             });
 
             var voices = Object.keys(groups).map(function (key) {
                 var group = groups[key];
-                return {title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : '') + (group.quality ? ' · ' + group.quality : ''), group: group};
+                return {title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : '') + (group.quality ? ' · ' + group.quality : '') + (group.source ? ' · ' + group.source : '') + ' · ' + group.videos.length + ' ' + t('episodes_short'), group: group};
             });
             var preferredPlayer = getPreferredPlayer();
             voices.sort(function (a, b) {
@@ -2020,13 +2020,7 @@
             return;
         }
 
-        if (Lampa.Iframe && Lampa.Iframe.show) {
-            var enabledController = Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
-            var previousController = enabledController && enabledController.name;
-            Lampa.Iframe.show({
-                url: url,
-                onBack: function () { Lampa.Controller.toggle(previousController || 'content'); }
-            });
+        if (showYummyIframe(url)) {
             return;
         }
 
@@ -2060,6 +2054,24 @@
             try { return JSON.parse(value) || {}; } catch (error) { return {}; }
         }
         return {};
+    }
+
+    function videoHost(url) {
+        try { return new URL(url).hostname.replace(/^www\./, ''); } catch (error) { return ''; }
+    }
+
+    function showYummyIframe(url) {
+        if (!Lampa.Iframe || !Lampa.Iframe.show) return false;
+        var enabledController = Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
+        var previousController = enabledController && enabledController.name;
+        var restored = false;
+        var restore = function () {
+            if (restored) return;
+            restored = true;
+            Lampa.Controller.toggle(previousController || 'content');
+        };
+        Lampa.Iframe.show({url: url, onBack: restore, onClose: restore});
+        return true;
     }
 
     function isKodikUrl(url) {
@@ -2347,11 +2359,7 @@
     function openTrailer(url, title) {
         url = normalizeVideoUrl(url);
         if (!url) return;
-        if (Lampa.Iframe && Lampa.Iframe.show) {
-            var enabledController = Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
-            var previousController = enabledController && enabledController.name;
-            Lampa.Iframe.show({url: url, onBack: function () { Lampa.Controller.toggle(previousController || 'content'); }});
-        } else {
+        if (!showYummyIframe(url)) {
             Lampa.Activity.push({url: 'yani/trailer/' + encodeURIComponent(title), title: title, component: 'yani_player', iframe_url: url});
         }
     }

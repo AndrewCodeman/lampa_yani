@@ -69,6 +69,7 @@ function pluginYummyAnime() {
     messages.ru.delete_all_notifications = 'Удалить все уведомления';
     messages.ru.notifications_more = 'Загрузить ещё уведомления';
     messages.ru.for_you = 'Для вас';
+    messages.ru.episodes_short = 'серий';
     messages.ru.recommendations_empty = 'Рекомендации появятся после просмотра тайтлов';
     messages.ru.updates = 'Обновления';
     messages.ru.updates_error = 'Не удалось загрузить обновления';
@@ -91,6 +92,7 @@ function pluginYummyAnime() {
     messages.en.delete_all_notifications = 'Delete all notifications';
     messages.en.notifications_more = 'Load more notifications';
     messages.en.for_you = 'For you';
+    messages.en.episodes_short = 'episodes';
     messages.en.recommendations_empty = 'Recommendations will appear after you watch some anime';
     messages.en.updates = 'Updates';
     messages.en.updates_error = 'Failed to load updates';
@@ -124,6 +126,7 @@ function pluginYummyAnime() {
     messages.uk.delete_all_notifications = 'Видалити всі сповіщення';
     messages.uk.notifications_more = 'Завантажити ще сповіщення';
     messages.uk.for_you = 'Для вас';
+    messages.uk.episodes_short = 'серій';
     messages.uk.recommendations_empty = 'Рекомендації з’являться після перегляду тайтлів';
     messages.uk.updates = 'Оновлення';
     messages.uk.updates_error = 'Не вдалося завантажити оновлення';
@@ -2189,13 +2192,13 @@ function pluginYummyAnime() {
                 var title = data.dubbing || data.player || t('player');
                 var quality = videoQualityLabel(video);
                 var key = title + '|' + String(data.player_id || data.player || '') + '|' + quality;
-                if (!groups[key]) groups[key] = {title: title, player: data.player || '', quality: quality, videos: []};
+                if (!groups[key]) groups[key] = {title: title, player: data.player || '', quality: quality, source: videoHost(videoSourceUrl(video)), videos: []};
                 groups[key].videos.push(video);
             });
 
             var voices = Object.keys(groups).map(function (key) {
                 var group = groups[key];
-                return {title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : '') + (group.quality ? ' · ' + group.quality : ''), group: group};
+                return {title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : '') + (group.quality ? ' · ' + group.quality : '') + (group.source ? ' · ' + group.source : '') + ' · ' + group.videos.length + ' ' + t('episodes_short'), group: group};
             });
             var preferredPlayer = getPreferredPlayer();
             voices.sort(function (a, b) {
@@ -2510,13 +2513,7 @@ function pluginYummyAnime() {
             return;
         }
 
-        if (Lampa.Iframe && Lampa.Iframe.show) {
-            var enabledController = Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
-            var previousController = enabledController && enabledController.name;
-            Lampa.Iframe.show({
-                url: url,
-                onBack: function () { Lampa.Controller.toggle(previousController || 'content'); }
-            });
+        if (showYummyIframe(url)) {
             return;
         }
 
@@ -2550,6 +2547,24 @@ function pluginYummyAnime() {
             try { return JSON.parse(value) || {}; } catch (error) { return {}; }
         }
         return {};
+    }
+
+    function videoHost(url) {
+        try { return new URL(url).hostname.replace(/^www\./, ''); } catch (error) { return ''; }
+    }
+
+    function showYummyIframe(url) {
+        if (!Lampa.Iframe || !Lampa.Iframe.show) return false;
+        var enabledController = Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
+        var previousController = enabledController && enabledController.name;
+        var restored = false;
+        var restore = function () {
+            if (restored) return;
+            restored = true;
+            Lampa.Controller.toggle(previousController || 'content');
+        };
+        Lampa.Iframe.show({url: url, onBack: restore, onClose: restore});
+        return true;
     }
 
     function isKodikUrl(url) {
@@ -2837,11 +2852,7 @@ function pluginYummyAnime() {
     function openTrailer(url, title) {
         url = normalizeVideoUrl(url);
         if (!url) return;
-        if (Lampa.Iframe && Lampa.Iframe.show) {
-            var enabledController = Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
-            var previousController = enabledController && enabledController.name;
-            Lampa.Iframe.show({url: url, onBack: function () { Lampa.Controller.toggle(previousController || 'content'); }});
-        } else {
+        if (!showYummyIframe(url)) {
             Lampa.Activity.push({url: 'yani/trailer/' + encodeURIComponent(title), title: title, component: 'yani_player', iframe_url: url});
         }
     }
