@@ -140,25 +140,25 @@
         var last;
 
         var items = [
-            {title: t('catalog'), icon: '◆', action: function () {
+            {key: 'catalog', title: t('catalog'), icon: '◆', action: function () {
                 Lampa.Activity.push({url: 'yani/catalog', title: 'YummyAnime ' + t('catalog'), component: 'yani_catalog', params: {limit: 30, sort: 'top', sort_forward: false}});
             }},
-            {title: t('genres'), icon: '≡', action: openGenres},
-            {title: t('search'), icon: '⌕', action: openSearch},
-            {title: t('schedule'), icon: '▦', action: function () {
+            {key: 'genres', title: t('genres'), icon: '≡', action: openGenres},
+            {key: 'search', title: t('search'), icon: '⌕', action: openSearch},
+            {key: 'schedule', title: t('schedule'), icon: '▦', action: function () {
                 Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime ' + t('schedule'), component: 'yani_schedule'});
             }},
-            {title: t('continue_watching'), icon: '▶', action: function () {
+            {key: 'continue_watching', title: t('continue_watching'), icon: '▶', action: function () {
                 Lampa.Activity.push({url: 'yani/history', title: 'YummyAnime ' + t('continue_watching'), component: 'yani_history'});
             }},
-            {title: t('status'), icon: '●', action: function () {
+            {key: 'status', title: t('status'), icon: '●', action: function () {
                 Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime ' + t('status'), component: 'yani_status'});
             }},
-            {title: t('top_rated'), icon: '★', action: function () {
+            {key: 'top_rated', title: t('top_rated'), icon: '★', action: function () {
                 Lampa.Activity.push({url: 'yani/top-rated', title: 'YummyAnime ' + t('top_rated'), component: 'yani_catalog', params: {limit: 30, sort: 'rating', sort_forward: false}});
             }},
-            {title: t('account'), icon: '●', action: openAccount}
-        ];
+            {key: 'account', title: t('account'), icon: '●', action: openAccount}
+        ].filter(function (item) { return homeSectionEnabled(item.key); });
 
         this.create = function () {
             items.forEach(function (item) {
@@ -1407,6 +1407,12 @@
         else if (scroll && scroll.isFilled()) scroll.wheel(250);
     }
 
+    function homeSectionEnabled(key) {
+        if (!Lampa.Storage || !Lampa.Storage.get) return true;
+        var value = Lampa.Storage.get('yani_section_' + key, true);
+        return value !== false && value !== 'false';
+    }
+
     function chooseEpisode(card, group) {
         var videos = group.videos.slice().sort(function (a, b) {
             var numberA = parseFloat(a.number);
@@ -1875,6 +1881,23 @@
                 LampaYaniI18n.setLanguage(value);
                 Lampa.Noty.show(t('language_changed'));
             }
+        });
+
+        [
+            ['catalog', 'catalog'],
+            ['genres', 'genres'],
+            ['search', 'search'],
+            ['schedule', 'schedule'],
+            ['continue_watching', 'continue_watching'],
+            ['status', 'status'],
+            ['top_rated', 'top_rated'],
+            ['account', 'account']
+        ].forEach(function (section) {
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_section_' + section[0], type: 'trigger', default: true},
+                field: {name: t(section[1]), description: t('section_visibility_description')}
+            });
         });
 
         Lampa.SettingsApi.addParam({
