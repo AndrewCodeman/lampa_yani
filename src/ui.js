@@ -1222,7 +1222,13 @@
         LampaYaniApi.videos(card.yani_id).then(function (payload) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             var videos = payload && payload.response ? payload.response : payload;
-            videos = (Array.isArray(videos) ? videos : []).filter(function (video) { return video && video.iframe_url; });
+            videos = (Array.isArray(videos) ? videos : []).filter(function (video) {
+                return video && videoSourceUrl(video);
+            });
+            videos.forEach(function (video) {
+                // Keep one normalized field for all player implementations.
+                video.iframe_url = videoSourceUrl(video);
+            });
             if (!videos.length) return Lampa.Noty.show(t('no_videos'));
 
             var groups = {};
@@ -1503,7 +1509,7 @@
     }
 
     function launchVideo(card, group, videos, selected) {
-        var url = normalizeVideoUrl(selected.iframe_url);
+        var url = videoSourceUrl(selected);
         if (!url) return Lampa.Noty.show(t('no_videos'));
         var title = (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (selected.number || selected.index || '?') + ' · ' + group.title;
         rememberPlayback(card, group, selected);
@@ -1511,18 +1517,26 @@
 
         if (/\.(m3u8|mp4|webm)(?:\?|$)/i.test(url) && Lampa.Player && Lampa.Player.play) {
             var directVideos = videos.filter(function (video) {
-                return /\.(m3u8|mp4|webm)(?:\?|$)/i.test(normalizeVideoUrl(video.iframe_url));
+                return /\.(m3u8|mp4|webm)(?:\?|$)/i.test(videoSourceUrl(video));
             });
             var playlist = directVideos.map(function (video) {
                 return {
                     title: (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (video.number || video.index || '?'),
-                    url: normalizeVideoUrl(video.iframe_url),
+                    url: videoSourceUrl(video),
                     time: Number(video.watched && video.watched.end_time || 0)
                 };
             });
             var current = playlist[directVideos.indexOf(selected)] || playlist[0];
             Lampa.Player.play(current);
             if (Lampa.Player.playlist) Lampa.Player.playlist(playlist);
+            return;
+        }
+
+        // Kodik may reject an iframe created from the GitHub Pages origin.
+        // Lampa's browser keeps the same playback URL but provides a compatible
+        // top-level browsing context, which is also how the Android client opens it.
+        if (isKodikUrl(url) && Lampa.Browser && Lampa.Browser.open) {
+            Lampa.Browser.open(url);
             return;
         }
 
@@ -1551,9 +1565,23 @@
         });
     }
 
+    function videoSourceUrl(video) {
+        if (!video) return '';
+        var data = video.data || {};
+        return normalizeVideoUrl(video.iframe_url || video.url || video.player_url || video.link ||
+            data.iframe_url || data.url || data.player_url || data.link);
+    }
+
+    function isKodikUrl(url) {
+        return /(^|\/\/)(?:www\.)?kodik\.(?:info|cc|biz|site|com|tv)(?:[/:]|$)/i.test(url || '');
+    }
+
     function normalizeVideoUrl(url) {
         if (!url) return '';
-        return url.indexOf('//') === 0 ? 'https:' + url : url;
+        url = String(url).trim();
+        if (url.indexOf('//') === 0) url = 'https:' + url;
+        if (/^http:\/\/(?:www\.)?kodik\./i.test(url)) url = 'https://' + url.slice(7);
+        return url;
     }
 
     function videoQualityLabel(video) {
@@ -1639,8 +1667,8 @@
         var iframe = $('<iframe class="yani-player__iframe" frameborder="0" allowfullscreen></iframe>');
 
         this.create = function () {
-            iframe.attr('src', normalizeVideoUrl(object.iframe_url));
-            iframe.attr('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+            iframe.attr('src', videoSourceUrl(object));
+            iframe.attr('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture; payment');
             iframe.on('load', function () { if (iframe[0] && iframe[0].focus) iframe[0].focus(); });
             html.append(iframe);
             this.activity.loader(false);
