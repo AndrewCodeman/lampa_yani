@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.18.15 — 2026-08-08
+
+- Prefer the TMDB source used by Lampa online plugins and Cub TMDB Proxy when resolving YummyAnime titles; retain the modern Lampa TMDB API as fallback.
+
 ## 0.18.14 — 2026-08-08
 
 - Remove the redundant More information action from the title page.

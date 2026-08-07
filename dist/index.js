@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.18.14',
+        version: '0.18.15',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -2972,7 +2972,10 @@ function pluginYummyAnime() {
         // Use the same public resolver as Lampa's own search screen. Calling
         // individual API endpoints skipped parts of the active TMDB source
         // configuration on some builds, so YummyAnime titles never matched.
-        var tmdb = Lampa.TMDB;
+        // Online plugins which work with Cub TMDB Proxy use this source. The
+        // proxy may decorate it while leaving Lampa.TMDB untouched, so prefer
+        // it and retain the public object as a fallback for newer builds.
+        var tmdb = Lampa.Api && Lampa.Api.sources && Lampa.Api.sources.tmdb || Lampa.TMDB;
         if (!tmdb || !tmdb.search) return Promise.resolve(null);
         var titles = LampaYaniUiUtils.standardSearchTitles(card).filter(function (title, index, list) {
             return title && list.indexOf(title) === index;
