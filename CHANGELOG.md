@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.18.2 — 2026-08-07
+
+- Prevent opening a TMDB detail page when the matched card has no TMDB ID.
+
 ## 0.18.1 — 2026-08-07
 
 - Restored the proven local detail-section renderer to fix card opening.
