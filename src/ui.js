@@ -1582,7 +1582,7 @@
 
             var groups = {};
             videos.forEach(function (video) {
-                var data = video.data || {};
+                var data = videoData(video);
                 var title = data.dubbing || data.player || t('player');
                 var quality = videoQualityLabel(video);
                 var key = title + '|' + String(data.player_id || data.player || '') + '|' + quality;
@@ -1934,9 +1934,19 @@
 
     function videoSourceUrl(video) {
         if (!video) return '';
-        var data = video.data || {};
+        var data = videoData(video);
         return normalizeVideoUrl(video.iframe_url || video.url || video.player_url || video.link ||
             data.iframe_url || data.url || data.player_url || data.link);
+    }
+
+    function videoData(video) {
+        var value = video && video.data;
+        if (!value) return {};
+        if (typeof value === 'object') return value;
+        if (typeof value === 'string') {
+            try { return JSON.parse(value) || {}; } catch (error) { return {}; }
+        }
+        return {};
     }
 
     function isKodikUrl(url) {
@@ -1952,7 +1962,7 @@
     }
 
     function videoQualityLabel(video) {
-        var data = video && video.data || {};
+        var data = videoData(video);
         var values = [video && video.quality, video && video.resolution, data.quality, data.resolution];
         var best = 0;
         values.forEach(function (value) {
@@ -2268,7 +2278,7 @@
         var voices = {};
         var quality = 0;
         videos.forEach(function (video) {
-            var data = video && video.data || {};
+        var data = videoData(video);
             var voice = data.dubbing || data.translation || data.voice || data.player;
             if (voice) voices[String(voice)] = true;
             [video.quality, video.resolution, data.quality, data.resolution].forEach(function (value) {
