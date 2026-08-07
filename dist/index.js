@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.16.6',
+        version: '0.16.7',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -1766,7 +1766,7 @@ function pluginYummyAnime() {
     function findStandardLampaCard(card) {
         var tmdb = Lampa.Api && Lampa.Api.sources && Lampa.Api.sources.tmdb;
         if (!tmdb || !tmdb.get) return Promise.resolve(null);
-        var titles = (card.yani_titles || [card.title, card.original_title]).filter(function (title, index, list) {
+        var titles = standardSearchTitles(card).filter(function (title, index, list) {
             return title && list.indexOf(title) === index;
         });
 
@@ -1795,7 +1795,7 @@ function pluginYummyAnime() {
     }
 
     function bestStandardCard(items, yaniCard) {
-        var expectedTitles = (yaniCard.yani_titles || [yaniCard.title, yaniCard.original_title]).map(normalizeMatchTitle).filter(Boolean);
+        var expectedTitles = standardSearchTitles(yaniCard).map(normalizeMatchTitle).filter(Boolean);
         var expectedYear = String(yaniCard.release_date || '').slice(0, 4);
         items.forEach(function (entry) {
             var candidate = entry.card || {};
@@ -1811,6 +1811,18 @@ function pluginYummyAnime() {
         if (!items.length || items[0].score < 70) return null;
         items[0].card.source = 'tmdb';
         return items[0];
+    }
+
+    function standardSearchTitles(card) {
+        var result = [];
+        var values = titleValues(card || {});
+        if (card && Array.isArray(card.yani_titles)) values = values.concat(card.yani_titles);
+        values.forEach(function (title) {
+            if (result.indexOf(title) < 0) result.push(title);
+            var withoutYear = String(title).replace(/\s*[\(\[]?\s*\d{4}\s*[\)\]]?\s*$/i, '').trim();
+            if (withoutYear && result.indexOf(withoutYear) < 0) result.push(withoutYear);
+        });
+        return result;
     }
 
     function findYummyMatches(movie) {
