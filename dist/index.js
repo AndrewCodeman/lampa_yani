@@ -68,6 +68,9 @@ function pluginYummyAnime() {
     messages.ru.mark_all_read = 'Отметить все прочитанными';
     messages.ru.delete_all_notifications = 'Удалить все уведомления';
     messages.ru.notifications_more = 'Загрузить ещё уведомления';
+    messages.ru.subscriptions = 'Подписки на новые серии';
+    messages.ru.subscriptions_empty = 'Подписок на новые серии нет';
+    messages.ru.subscriptions_error = 'Не удалось загрузить подписки';
     messages.ru.notification = 'Уведомление';
     messages.ru.community_stats = 'Статистика сообщества';
     messages.ru.manage_list = 'Изменить список';
@@ -83,6 +86,9 @@ function pluginYummyAnime() {
     messages.en.mark_all_read = 'Mark all as read';
     messages.en.delete_all_notifications = 'Delete all notifications';
     messages.en.notifications_more = 'Load more notifications';
+    messages.en.subscriptions = 'New episode subscriptions';
+    messages.en.subscriptions_empty = 'There are no episode subscriptions';
+    messages.en.subscriptions_error = 'Failed to load subscriptions';
     messages.en.notification = 'Notification';
     messages.en.community_stats = 'Community statistics';
     messages.en.manage_list = 'Change list';
@@ -109,6 +115,9 @@ function pluginYummyAnime() {
     messages.uk.mark_all_read = 'Позначити всі як прочитані';
     messages.uk.delete_all_notifications = 'Видалити всі сповіщення';
     messages.uk.notifications_more = 'Завантажити ще сповіщення';
+    messages.uk.subscriptions = 'Підписки на нові серії';
+    messages.uk.subscriptions_empty = 'Підписок на нові серії немає';
+    messages.uk.subscriptions_error = 'Не вдалося завантажити підписки';
     messages.uk.notification = 'Сповіщення';
     messages.uk.community_stats = 'Статистика спільноти';
     messages.uk.manage_list = 'Змінити список';
@@ -404,6 +413,9 @@ function pluginYummyAnime() {
         userLists: function (id) {
             return request('/users/' + encodeURIComponent(id) + '/lists', {auth: true, cache: false});
         },
+        subscriptions: function (id) {
+            return request('/users/' + encodeURIComponent(id) + '/lists/subs', {auth: true, cache: false});
+        },
         userList: function (id, listId) {
             return request('/users/' + encodeURIComponent(id) + '/lists/' + encodeURIComponent(listId), {auth: true, cache: false});
         },
@@ -587,6 +599,7 @@ function pluginYummyAnime() {
             Lampa.Component.add('yani_account', Account);
             Lampa.Component.add('yani_account_list', AccountList);
             Lampa.Component.add('yani_notifications', Notifications);
+            Lampa.Component.add('yani_subscriptions', Subscriptions);
             Lampa.Component.add('yani_auth', AuthPage);
 
             Lampa.Component.add('yani_status', StatusDashboard);
@@ -1053,6 +1066,12 @@ function pluginYummyAnime() {
             bindAccountFocus(notificationButton);
             notificationButton.on('hover:enter click.yaniNotifications', openNotifications);
             content.append(notificationButton);
+            var subscriptionsButton = $('<div class="yani-account__notification-button selector"></div>');
+            subscriptionsButton.append($('<strong></strong>').text(t('subscriptions')));
+            subscriptionsButton.append($('<span></span>').text(t('subscriptions')));
+            bindAccountFocus(subscriptionsButton);
+            subscriptionsButton.on('hover:enter click.yaniSubscriptions', function () { openSubscriptions(profile.id); });
+            content.append(subscriptionsButton);
 
             var counts = {};
             lists.forEach(function (anime) {
@@ -1265,6 +1284,34 @@ function pluginYummyAnime() {
 
     function openNotifications() {
         Lampa.Activity.push({url: 'yani/notifications', title: t('notifications_title'), component: 'yani_notifications'});
+    }
+
+    function openSubscriptions(userId) {
+        Lampa.Activity.push({url: 'yani/subscriptions', title: t('subscriptions'), component: 'yani_subscriptions', userId: userId});
+    }
+
+    function Subscriptions(object) {
+        var comp = new Lampa.InteractionCategory(object);
+        comp.create = function () {
+            var self = this;
+            this.activity.loader(true);
+            LampaYaniApi.subscriptions(object.userId).then(function (payload) {
+                var response = payload && payload.response ? payload.response : payload;
+                var values = Array.isArray(response) ? response : response && (response.anime || response.items || response.data || response.subscriptions) || [];
+                var cards = values.map(function (item) {
+                    var source = item && (item.anime || item.title_data || item.object) || item;
+                    return source && (source.anime_id || source.id || source.title) ? toCard(source) : null;
+                }).filter(Boolean);
+                if (!cards.length) Lampa.Noty.show(t('subscriptions_empty'));
+                self.build({results: cards, total_pages: 1, title: t('subscriptions')});
+            }).catch(function (error) {
+                console.error('[YummyAnime Subscriptions]', error);
+                self.activity.loader(false);
+                Lampa.Noty.show(t('subscriptions_error'));
+            });
+        };
+        comp.cardRender = bindYummyCardRender;
+        return comp;
     }
 
     function Notifications(object) {

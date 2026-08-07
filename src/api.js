@@ -170,6 +170,9 @@
         userLists: function (id) {
             return request('/users/' + encodeURIComponent(id) + '/lists', {auth: true, cache: false});
         },
+        subscriptions: function (id) {
+            return request('/users/' + encodeURIComponent(id) + '/lists/subs', {auth: true, cache: false});
+        },
         userList: function (id, listId) {
             return request('/users/' + encodeURIComponent(id) + '/lists/' + encodeURIComponent(listId), {auth: true, cache: false});
         },

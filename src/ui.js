@@ -121,6 +121,7 @@
             Lampa.Component.add('yani_account', Account);
             Lampa.Component.add('yani_account_list', AccountList);
             Lampa.Component.add('yani_notifications', Notifications);
+            Lampa.Component.add('yani_subscriptions', Subscriptions);
             Lampa.Component.add('yani_auth', AuthPage);
 
             Lampa.Component.add('yani_status', StatusDashboard);
@@ -587,6 +588,12 @@
             bindAccountFocus(notificationButton);
             notificationButton.on('hover:enter click.yaniNotifications', openNotifications);
             content.append(notificationButton);
+            var subscriptionsButton = $('<div class="yani-account__notification-button selector"></div>');
+            subscriptionsButton.append($('<strong></strong>').text(t('subscriptions')));
+            subscriptionsButton.append($('<span></span>').text(t('subscriptions')));
+            bindAccountFocus(subscriptionsButton);
+            subscriptionsButton.on('hover:enter click.yaniSubscriptions', function () { openSubscriptions(profile.id); });
+            content.append(subscriptionsButton);
 
             var counts = {};
             lists.forEach(function (anime) {
@@ -799,6 +806,34 @@
 
     function openNotifications() {
         Lampa.Activity.push({url: 'yani/notifications', title: t('notifications_title'), component: 'yani_notifications'});
+    }
+
+    function openSubscriptions(userId) {
+        Lampa.Activity.push({url: 'yani/subscriptions', title: t('subscriptions'), component: 'yani_subscriptions', userId: userId});
+    }
+
+    function Subscriptions(object) {
+        var comp = new Lampa.InteractionCategory(object);
+        comp.create = function () {
+            var self = this;
+            this.activity.loader(true);
+            LampaYaniApi.subscriptions(object.userId).then(function (payload) {
+                var response = payload && payload.response ? payload.response : payload;
+                var values = Array.isArray(response) ? response : response && (response.anime || response.items || response.data || response.subscriptions) || [];
+                var cards = values.map(function (item) {
+                    var source = item && (item.anime || item.title_data || item.object) || item;
+                    return source && (source.anime_id || source.id || source.title) ? toCard(source) : null;
+                }).filter(Boolean);
+                if (!cards.length) Lampa.Noty.show(t('subscriptions_empty'));
+                self.build({results: cards, total_pages: 1, title: t('subscriptions')});
+            }).catch(function (error) {
+                console.error('[YummyAnime Subscriptions]', error);
+                self.activity.loader(false);
+                Lampa.Noty.show(t('subscriptions_error'));
+            });
+        };
+        comp.cardRender = bindYummyCardRender;
+        return comp;
     }
 
     function Notifications(object) {
