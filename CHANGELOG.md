@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.18.3 — 2026-08-07
+
+- Prevented YummyAnime card clicks from also invoking Lampa's native TMDB handler with an undefined ID.
+- Open schedule items in the stable YummyAnime detail page; native Lampa search remains an explicit action.
+- Deferred optional detail sections until the user requests them, reducing memory and network pressure on Android devices.
+
 ## 0.18.2 — 2026-08-07
 
 - Prevent opening a TMDB detail page when the matched card has no TMDB ID.

@@ -404,7 +404,11 @@
     }
 
     function hasYummyCardData(value) {
-        return Boolean(value && (getYummyId(value) || value.title || value.name || value.russian));
+        // Do not attach YummyAnime handlers to arbitrary Lampa cards.  The
+        // previous title-based check also matched native TMDB cards and left
+        // Lampa trying to open a movie with an undefined id.
+        return Boolean(value && (value.yani_id || value.anime_id || value.animeId ||
+            value.anime && (value.anime.yani_id || value.anime.anime_id || value.anime.animeId)));
     }
 
     function bindYummyCard(element, card) {
@@ -416,8 +420,17 @@
         // Some Lampa versions clone the card object after cardRender. Keep a
         // DOM-level handler as a fallback so search results remain clickable.
         var rendered = element && element.jquery ? element : $(element);
-        rendered.off('hover:enter.yaniOpen click.yaniOpen').on('hover:enter.yaniOpen click.yaniOpen', function () {
+        // Lampa cards already have a default `hover:enter` handler.  Remove it
+        // for our cards: otherwise one Enter can open both the YummyAnime
+        // detail and a native TMDB detail with id=undefined.
+        rendered.off('hover:enter click');
+        rendered.on('hover:enter.yaniOpen click.yaniOpen', function (event) {
+            if (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
             openCardOnce(card);
+            return false;
         });
         card.onEnter = function () { openCardOnce(card); };
         card.onMenu = function () {
@@ -436,8 +449,8 @@
 
     function getYummyId(card) {
         if (!card) return null;
-        return card.yani_id || card.anime_id || card.animeId || card.id || card._id ||
-            card.anime && (card.anime.anime_id || card.anime.id) || null;
+        return card.yani_id || card.anime_id || card.animeId ||
+            card.anime && (card.anime.yani_id || card.anime.anime_id || card.anime.animeId) || null;
     }
 
     function addCardMediaBadges(element, card) {
@@ -1568,13 +1581,9 @@
             if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             if (data.yani_user_rating) info.append($('<div class="yani-detail__personal-rating"></div>').text(t('my_rating') + ': ' + data.yani_user_rating + '/10'));
-            loadDetailCommunityStats(data, info);
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
-            loadDetailCollections(data, info);
-            loadDetailRecommendations(data, info);
-            loadDetailTrailers(data, info);
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
@@ -1595,13 +1604,25 @@
             }
             subscribeButton.on('hover:enter', function () { toggleEpisodeSubscription(data, subscribeButton); });
             bindDetailButtonFocus(subscribeButton);
+            var extrasButton = $('<div class="yani-detail__button selector"></div>').text(t('more_information'));
+            var extrasLoaded = false;
+            extrasButton.on('hover:enter click.yaniDetailExtras', function () {
+                if (extrasLoaded) return;
+                extrasLoaded = true;
+                extrasButton.text('…');
+                loadDetailCommunityStats(data, info);
+                setTimeout(function () { loadDetailCollections(data, info); }, 150);
+                setTimeout(function () { loadDetailRecommendations(data, info); }, 300);
+                setTimeout(function () { loadDetailTrailers(data, info); }, 450);
+                setTimeout(function () { loadInlineComments(data, comments); }, 600);
+            });
+            bindDetailButtonFocus(extrasButton);
             var comments = $('<div class="yani-detail__comments"></div>');
-            actions.append(listButton, button, searchButton, subscribeButton);
+            actions.append(listButton, button, searchButton, subscribeButton, extrasButton);
             info.append(actions);
             info.append(comments);
             html.append(poster, info);
             scroll.append(html);
-            loadInlineComments(data, comments);
         }
 
         function detailListLabel(cardData) {
@@ -1843,29 +1864,12 @@
     }
 
     function openStandardLampaCard(card) {
-        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
-        var lookup = findStandardLampaCard(card);
-        var timeout = new Promise(function (resolve) {
-            setTimeout(function () { resolve(null); }, 2500);
-        });
-        Promise.race([lookup, timeout]).then(function (match) {
-            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
-            if (!match || !match.card || !match.card.id || !match.method) return openYummyDetail(card, true);
-            match.card.yani_id = card.yani_id;
-            match.card.yani_card = card;
-            Lampa.Activity.push({
-                url: '',
-                component: 'full',
-                id: match.card.id,
-                method: match.method,
-                card: match.card,
-                source: 'tmdb'
-            });
-        }).catch(function (error) {
-            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
-            console.error('[YummyAnime Lampa Card]', error);
-            openYummyDetail(card, true);
-        });
+        // Native Lampa detail resolution is asynchronous and can hand Lampa a
+        // missing TMDB id on older clients.  Always use the known YummyAnime
+        // id here.  The detail screen still provides a separate, explicit
+        // "Open in Lampa search" action for users who need a native card.
+        if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+        openYummyDetail(card, true);
     }
 
     function openYummyDetail(card, notifyFallback) {
