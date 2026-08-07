@@ -733,6 +733,14 @@
     }
 
     function AuthPage(object) {
+        return LampaYaniAuthPage.create(object, {
+            t: t,
+            input: showYummyInput,
+            goBack: goBack
+        });
+    }
+
+    function LegacyAuthPage(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
         var html = $('<div class="yani-auth"></div>');
         var content = $('<div class="yani-auth__content"></div>');
