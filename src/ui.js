@@ -138,29 +138,29 @@
         var last;
 
         var items = [
-            {key: 'catalog', title: t('catalog'), icon: '◆', action: function () {
+            {key: 'catalog', title: t('catalog'), action: function () {
                 Lampa.Activity.push({url: 'yani/catalog', title: 'YummyAnime ' + t('catalog'), component: 'yani_catalog', params: {limit: 30, sort: 'top', sort_forward: false}});
             }},
-            {key: 'genres', title: t('genres'), icon: '≡', action: openGenres},
-            {key: 'search', title: t('search'), icon: '⌕', action: openSearch},
-            {key: 'schedule', title: t('schedule'), icon: '▦', action: function () {
+            {key: 'genres', title: t('genres'), action: openGenres},
+            {key: 'search', title: t('search'), action: openSearch},
+            {key: 'schedule', title: t('schedule'), action: function () {
                 Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime ' + t('schedule'), component: 'yani_schedule'});
             }},
-            {key: 'continue_watching', title: t('continue_watching'), icon: '▶', action: function () {
+            {key: 'continue_watching', title: t('continue_watching'), action: function () {
                 Lampa.Activity.push({url: 'yani/history', title: 'YummyAnime ' + t('continue_watching'), component: 'yani_history'});
             }},
-            {key: 'status', title: t('status'), icon: '●', action: function () {
+            {key: 'status', title: t('status'), action: function () {
                 Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime ' + t('status'), component: 'yani_status'});
             }},
-            {key: 'top_rated', title: t('top_rated'), icon: '★', action: function () {
+            {key: 'top_rated', title: t('top_rated'), action: function () {
                 Lampa.Activity.push({url: 'yani/top-rated', title: 'YummyAnime ' + t('top_rated'), component: 'yani_catalog', params: {limit: 30, sort: 'rating', sort_forward: false}});
             }},
-            {key: 'account', title: t('account'), icon: '●', action: openAccount}
+            {key: 'account', title: t('account'), action: openAccount}
         ].filter(function (item) { return homeSectionEnabled(item.key); });
 
         this.create = function () {
             items.forEach(function (item) {
-                var button = $('<div class="yani-home__item selector"><div class="yani-home__icon">' + item.icon + '</div><div class="yani-home__title">' + item.title + '</div></div>');
+                var button = $('<div class="yani-home__item yani-home__item--' + item.key + ' selector"><div class="yani-home__icon">' + homeIcon(item.key) + '</div><div class="yani-home__title">' + item.title + '</div><div class="yani-home__arrow">›</div></div>');
                 button.on('hover:focus', function (event) {
                     last = event.target;
                     scroll.update($(event.target), true);
@@ -191,6 +191,20 @@
 
         this.render = function (js) { return js ? html[0] : html; };
         this.destroy = function () { scroll.destroy(); html.remove(); };
+    }
+
+    function homeIcon(key) {
+        var icons = {
+            catalog: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+            genres: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg>',
+            search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>',
+            schedule: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M7 14h3M14 14h3M7 18h3"/></svg>',
+            continue_watching: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg>',
+            status: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h4l2-6 4 12 2-6h6"/></svg>',
+            top_rated: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg>',
+            account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/></svg>'
+        };
+        return icons[key] || icons.catalog;
     }
 
     function History(object) {

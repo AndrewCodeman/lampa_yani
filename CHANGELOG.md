@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.16.0 — 2026-08-07
+
+- redesigned the YummyAnime home screen with responsive SVG icons, color accents, depth, arrows and clearer focus styling.
+
 ## 0.15.2 — 2026-08-07
 
 - added an 8-second timeout for standard Lampa card matching;
