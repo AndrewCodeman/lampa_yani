@@ -1450,7 +1450,7 @@ function pluginYummyAnime() {
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { Navigator.move('down'); },
+                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -1578,7 +1578,7 @@ function pluginYummyAnime() {
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { Navigator.move('down'); },
+                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -1722,7 +1722,7 @@ function pluginYummyAnime() {
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { Navigator.move('down'); },
+                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -2143,7 +2143,7 @@ function pluginYummyAnime() {
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { Navigator.move('down'); },
+                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
