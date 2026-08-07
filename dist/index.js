@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.16.7',
+        version: '0.16.8',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -1736,7 +1736,7 @@ function pluginYummyAnime() {
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
         var lookup = findStandardLampaCard(card);
         var timeout = new Promise(function (resolve) {
-            setTimeout(function () { resolve(null); }, 8000);
+            setTimeout(function () { resolve(null); }, 2500);
         });
         Promise.race([lookup, timeout]).then(function (match) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
