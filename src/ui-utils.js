@@ -27,7 +27,11 @@
         var values = [];
         var add = function (value) { if (typeof value === 'string' && value.trim() && values.indexOf(value.trim()) < 0) values.push(value.trim()); };
         ['title', 'name', 'russian', 'english', 'original_title', 'original_name', 'japanese', 'romaji', 'synonym'].forEach(function (key) { add(item && item[key]); });
-        ['aliases', 'alternative_titles', 'alternative_names', 'titles', 'synonyms', 'names'].forEach(function (key) {
+        // YummyAnime keeps the most useful international aliases in
+        // `other_titles` (for example, "Наруто" -> "NARUTO", "ナルト").
+        // Include it together with the generic alias fields so both native
+        // Lampa and YummyAnime searches can resolve the same title.
+        ['aliases', 'alternative_titles', 'alternative_names', 'other_titles', 'titles', 'synonyms', 'names'].forEach(function (key) {
             var list = item && item[key];
             if (Array.isArray(list)) list.forEach(function (value) { add(typeof value === 'string' ? value : value && (value.title || value.name || value.value)); });
         });

@@ -1947,9 +1947,37 @@
         // drops a request. The normal request callbacks still win when they
         // finish in time.
         setTimeout(function () { finish(null); }, 9000);
-        findStandardLampaCard(card).then(finish).catch(function (error) {
+        enrichCardForStandardSearch(card).then(findStandardLampaCard).then(finish).catch(function (error) {
             console.warn('[YummyAnime] Native Lampa card lookup failed', error);
             finish(null);
+        });
+    }
+
+    function enrichCardForStandardSearch(card) {
+        // Catalog responses deliberately stay small.  The detail response
+        // contains `other_titles`, including romanised and Japanese names,
+        // which TMDB indexes more reliably than a single localised title.
+        var id = getYummyId(card);
+        if (!id || !LampaYaniApi || !LampaYaniApi.detail) return Promise.resolve(card);
+
+        return LampaYaniApi.detail(id).then(function (payload) {
+            var item = payload && payload.response ? payload.response : payload;
+            if (!item || typeof item !== 'object') return card;
+
+            var detailed = toCard(item);
+            var titles = (card.yani_titles || []).concat(detailed.yani_titles || []);
+            card.yani_titles = titles.filter(function (title, index, list) {
+                return title && list.indexOf(title) === index;
+            });
+            card.yani_remote_ids = Object.assign({}, card.yani_remote_ids || {}, detailed.yani_remote_ids || {});
+            if (!card.original_title || card.original_title === card.title) card.original_title = detailed.original_title || card.original_title;
+            if (!card.release_date) card.release_date = detailed.release_date || '';
+            return card;
+        }).catch(function (error) {
+            // A temporary YummyAnime detail failure must not prevent the
+            // existing list-card title from being looked up in Lampa.
+            console.warn('[YummyAnime] Could not enrich title aliases', error);
+            return card;
         });
     }
 

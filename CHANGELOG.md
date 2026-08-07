@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.18.12 — 2026-08-08
+
+- Use the complete YummyAnime detail aliases, including `other_titles`, before resolving a title through Lampa's native TMDB search.
+- Keep the original catalog title as a fallback if the YummyAnime detail request is temporarily unavailable.
+
 ## 0.18.11 — 2026-08-08
 
 - Added `Andrew Codeman` as the YummyAnime extension author in Lampa metadata.
