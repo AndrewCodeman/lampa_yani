@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.18.10',
+        version: '0.18.11',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -3881,6 +3881,7 @@ function pluginYummyAnime() {
             type: 'other',
             version: LampaYaniConfig.version,
             name: 'YummyAnime',
+            author: 'Andrew Codeman',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
         };
