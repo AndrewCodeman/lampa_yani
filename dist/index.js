@@ -16,7 +16,7 @@ function pluginYummyAnime() {
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
         cacheTtl: 300000,
-        cacheEntries: 80,
+        cacheEntries: 100,
         requestTimeout: 15000,
         requestRetries: 2
     };
@@ -298,13 +298,15 @@ function pluginYummyAnime() {
             var timer = setTimeout(function () { if (controller) controller.abort(); }, timeout);
             return fetch(url, requestOptions).then(function (response) {
                 clearTimeout(timer);
-                if (!response.ok && response.status >= 500 && number < retries) {
+                var retryableStatus = response.status === 408 || response.status === 425 || response.status === 429 || response.status >= 500;
+                if (!response.ok && retryableStatus && number < retries) {
                     return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
                 }
                 return response;
             }).catch(function (error) {
                 clearTimeout(timer);
-                if (number < retries) return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
+                var aborted = error && error.name === 'AbortError';
+                if (number < retries && !aborted) return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
                 throw error;
             });
         }
@@ -681,6 +683,30 @@ function pluginYummyAnime() {
     }
     function bind(image, card) { image.off('error.yaniPoster').on('error.yaniPoster', function () { find(card).then(function (poster) { if (poster) image.attr('src', poster); }); }); if (!card.poster && !card.img) find(card).then(function (poster) { if (poster) image.attr('src', poster); }); }
     global.LampaYaniMedia = {findAlternativePoster: find, attachPosterFallback: attach, bindPosterFallback: bind};
+}(window));
+
+(function (window) {
+    'use strict';
+
+    function moveDown(scroll) {
+        if (Navigator.canmove('down')) Navigator.move('down');
+        else if (scroll && scroll.wheel) scroll.wheel(250);
+    }
+
+    function moveUp(scroll) {
+        if (Navigator.canmove('up')) Navigator.move('up');
+        else if (scroll && scroll.wheel) scroll.wheel(-250);
+    }
+
+    function bindFocus(element, scroll, state) {
+        element.on('hover:focus', function (event) {
+            if (state) state.last = event.target;
+            if (scroll) scroll.update($(event.target), true);
+        });
+        return element;
+    }
+
+    window.LampaYaniNavigation = {moveDown: moveDown, moveUp: moveUp, bindFocus: bindFocus};
 }(window));
 
 (function (window) {
@@ -1450,7 +1476,7 @@ function pluginYummyAnime() {
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
+                down: function () { LampaYaniNavigation.moveDown(scroll); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -1578,7 +1604,7 @@ function pluginYummyAnime() {
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
+                down: function () { LampaYaniNavigation.moveDown(scroll); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -1722,7 +1748,7 @@ function pluginYummyAnime() {
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
+                down: function () { LampaYaniNavigation.moveDown(scroll); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -1982,7 +2008,7 @@ function pluginYummyAnime() {
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
+                down: function () { LampaYaniNavigation.moveDown(scroll); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -2630,10 +2656,7 @@ function pluginYummyAnime() {
         });
     }
 
-    function movePageDown(scroll) {
-        if (Navigator.canmove('down')) Navigator.move('down');
-        else if (scroll && scroll.isFilled()) scroll.wheel(250);
-    }
+    function movePageDown(scroll) { LampaYaniNavigation.moveDown(scroll); }
 
     function homeSectionEnabled(key) {
         if (!Lampa.Storage || !Lampa.Storage.get) return true;

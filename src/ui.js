@@ -722,7 +722,7 @@
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
+                down: function () { LampaYaniNavigation.moveDown(scroll); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -850,7 +850,7 @@
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
+                down: function () { LampaYaniNavigation.moveDown(scroll); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -994,7 +994,7 @@
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
+                down: function () { LampaYaniNavigation.moveDown(scroll); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -1254,7 +1254,7 @@
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
+                down: function () { LampaYaniNavigation.moveDown(scroll); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -1902,10 +1902,7 @@
         });
     }
 
-    function movePageDown(scroll) {
-        if (Navigator.canmove('down')) Navigator.move('down');
-        else if (scroll && scroll.isFilled()) scroll.wheel(250);
-    }
+    function movePageDown(scroll) { LampaYaniNavigation.moveDown(scroll); }
 
     function homeSectionEnabled(key) {
         if (!Lampa.Storage || !Lampa.Storage.get) return true;

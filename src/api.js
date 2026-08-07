@@ -17,13 +17,15 @@
             var timer = setTimeout(function () { if (controller) controller.abort(); }, timeout);
             return fetch(url, requestOptions).then(function (response) {
                 clearTimeout(timer);
-                if (!response.ok && response.status >= 500 && number < retries) {
+                var retryableStatus = response.status === 408 || response.status === 425 || response.status === 429 || response.status >= 500;
+                if (!response.ok && retryableStatus && number < retries) {
                     return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
                 }
                 return response;
             }).catch(function (error) {
                 clearTimeout(timer);
-                if (number < retries) return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
+                var aborted = error && error.name === 'AbortError';
+                if (number < retries && !aborted) return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
                 throw error;
             });
         }
