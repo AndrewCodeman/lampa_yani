@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.16.3',
+        version: '0.16.4',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -609,9 +609,26 @@ function pluginYummyAnime() {
             });
         };
 
-        comp.cardRender = bindYummyCardRender;
+        comp.cardRender = bindHistoryCardRender;
 
         return comp;
+    }
+
+    function bindHistoryCardRender(first, second, third) {
+        bindYummyCardRender(first, second, third);
+        var card;
+        [first, second, third].forEach(function (value) {
+            if (!value || card) return;
+            if (value.render || value.yani_id || value.title) card = value;
+            else {
+                var candidate = value.card || value.object || value.data;
+                if (candidate && (candidate.render || candidate.yani_id || candidate.title)) card = candidate;
+            }
+        });
+        if (card && card.yani_id) {
+            // Continue Watching is a playback queue, not an information catalog.
+            card.onEnter = function () { openVideos(card, true); };
+        }
     }
 
     function bindYummyCardRender(first, second, third) {
