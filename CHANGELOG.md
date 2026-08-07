@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.18.13 — 2026-08-08
+
+- Place title actions directly after the synopsis and add a Trailers action that opens its list on demand.
+- Remove the permanent trailers section from the title page.
+- Keep every focused detail selector visible while moving both down and up the page.
+- Resolve native Lampa cards through direct TV and movie TMDB searches before using Lampa's aggregate search fallback.
+
 ## 0.18.12 — 2026-08-08
 
 - Use the complete YummyAnime detail aliases, including `other_titles`, before resolving a title through Lampa's native TMDB search.

@@ -1601,9 +1601,6 @@
             if (data.yani_user_rating) info.append($('<div class="yani-detail__personal-rating"></div>').text(t('my_rating') + ': ' + data.yani_user_rating + '/10'));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
-            if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
-            loadDetailRecommendations(data, info);
-            loadDetailTrailers(data, info);
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
@@ -1613,6 +1610,9 @@
             button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(watchTitle);
             button.on('hover:enter', function () { openVideos(data, !!playback); });
             bindDetailButtonFocus(button);
+            var trailersButton = $('<div class="yani-detail__button selector"></div>').text(t('trailers'));
+            trailersButton.on('hover:enter click.yaniDetailTrailers', function () { openTrailers(data); });
+            bindDetailButtonFocus(trailersButton);
             var searchButton = $('<div class="yani-detail__button selector"></div>').text(t('open_lampa_search'));
             searchButton.on('hover:enter', function () {
                 openStandardLampaCard(data);
@@ -1631,15 +1631,20 @@
                 extrasLoaded = true;
                 extrasButton.text('…');
                 loadDetailCommunityStats(data, info);
-                setTimeout(function () { loadDetailCollections(data, info); }, 150);
+                setTimeout(function () { loadDetailCollections(data, info, bindDetailScrollTargets); }, 150);
             });
             bindDetailButtonFocus(extrasButton);
             var comments = $('<div class="yani-detail__comments"></div>');
-            actions.append(listButton, button, searchButton, subscribeButton, extrasButton);
+            actions.append(listButton, button, trailersButton, searchButton, subscribeButton, extrasButton);
+            // Keep the principal actions next to the synopsis, before the
+            // long viewing-order, recommendations and comments sections.
             info.append(actions);
+            if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
+            loadDetailRecommendations(data, info, bindDetailScrollTargets);
             info.append(comments);
             html.append(poster, info);
             scroll.append(html);
+            bindDetailScrollTargets(html);
             loadInlineComments(data, comments);
         }
 
@@ -1654,6 +1659,7 @@
             section.on('hover:focus', function () { section.addClass('focus'); });
             section.find('.yani-detail__community-title').text(t('community_stats'));
             container.append(section);
+            bindDetailScrollTargets(section);
             Promise.all([LampaYaniApi.ratingBuckets(cardData.yani_id), LampaYaniApi.listStats(cardData.yani_id)]).then(function (responses) {
                 var rates = normalizeDetailStats(responses[0]);
                 var lists = normalizeDetailStats(responses[1]);
@@ -1682,6 +1688,22 @@
             element.on('hover:focus', function () {
                 element.siblings('.focus').removeClass('focus');
                 element.addClass('focus');
+                scroll.update(element, true);
+            });
+            element.on('hover:blur', function () { element.removeClass('focus'); });
+        }
+
+        function bindDetailScrollTargets(container) {
+            var targets = container.hasClass && container.hasClass('selector') ? container.add(container.find('.selector')) : container.find('.selector');
+            targets.each(function () {
+                var element = $(this);
+                element.off('hover:focus.yaniDetailScroll').on('hover:focus.yaniDetailScroll', function () {
+                    // Bind on the selector itself. In some Lampa builds the
+                    // custom hover event does not bubble to the detail root,
+                    // which previously allowed focus to leave the viewport
+                    // when moving back up through a long page.
+                    scroll.update(element, true);
+                });
             });
         }
 
@@ -1692,6 +1714,7 @@
             var list = $('<div class="yani-detail__comments-list"></div>');
             list.append($('<div class="yani-detail__comments-loading"></div>').text('…'));
             container.append(list);
+            bindDetailScrollTargets(container);
             LampaYaniApi.comments(cardData.yani_id, 0).then(function (payload) {
                 var comments = LampaYaniApi.normalizeComments(payload);
                 list.empty();
@@ -1699,6 +1722,7 @@
                     var empty = $('<div class="yani-detail__comments-empty selector"></div>').text(t('comments_empty'));
                     empty.on('hover:focus', function () { empty.addClass('focus'); });
                     list.append(empty);
+                    bindDetailScrollTargets(empty);
                     return;
                 }
                 comments.forEach(function (comment) {
@@ -1712,12 +1736,14 @@
                         else commentsMenu(cardData.yani_id);
                     });
                     list.append(row);
+                    bindDetailScrollTargets(row);
                 });
             }).catch(function (error) {
                 console.error('[YummyAnime Comments]', error);
                 var errorRow = $('<div class="yani-detail__comments-error selector"></div>').text(t('comments_error'));
                 errorRow.on('hover:focus', function () { errorRow.addClass('focus'); });
                 list.empty().append(errorRow);
+                bindDetailScrollTargets(errorRow);
             });
         }
 
@@ -1732,7 +1758,7 @@
             });
             Lampa.Controller.toggle('content');
             setTimeout(function () {
-                var first = html.find('.yani-detail__order-item.selector, .yani-detail__button.selector, .yani-detail__comment.selector').first();
+                var first = html.find('.yani-detail__button.selector, .yani-detail__order-item.selector, .yani-detail__comment.selector').first();
                 if (first.length) {
                     scroll.update(first, true);
                     Lampa.Controller.collectionFocus(first, scroll.render());
@@ -2053,6 +2079,53 @@
 
     function searchTmdbTitle(tmdb, title) {
         if (!title) return Promise.resolve([]);
+        // Lampa.TMDB.search waits for movie, TV and person requests together.
+        // Some proxy configurations fail only the person request and never
+        // reach that aggregate callback.  Resolve the two card endpoints
+        // directly first, through the same Lampa TMDB client and credentials.
+        if (tmdb.get) {
+            return searchTmdbCardEndpoints(tmdb, title).then(function (items) {
+                return items.length ? items : searchTmdbAggregate(tmdb, title);
+            });
+        }
+        return searchTmdbAggregate(tmdb, title);
+    }
+
+    function searchTmdbCardEndpoints(tmdb, title) {
+        return new Promise(function (resolve) {
+            var pending = 2;
+            var completed = false;
+            var items = [];
+            var timeout = setTimeout(finish, 6000);
+
+            function finish() {
+                if (completed) return;
+                completed = true;
+                clearTimeout(timeout);
+                resolve(items);
+            }
+
+            function complete() {
+                pending--;
+                if (pending <= 0) finish();
+            }
+
+            ['tv', 'movie'].forEach(function (method) {
+                try {
+                    tmdb.get('search/' + method, {query: title, page: 1}, function (response) {
+                        var results = response && Array.isArray(response.results) ? response.results : [];
+                        results.forEach(function (card) { items.push({card: card, method: method}); });
+                        complete();
+                    }, complete);
+                } catch (error) {
+                    console.warn('[YummyAnime] TMDB ' + method + ' search call failed', error);
+                    complete();
+                }
+            });
+        });
+    }
+
+    function searchTmdbAggregate(tmdb, title) {
         return new Promise(function (resolve) {
             var completed = false;
             var timeout = setTimeout(function () { finish([]); }, 6000);
@@ -2505,7 +2578,7 @@
         return section;
     }
 
-    function loadDetailRecommendations(data, container) {
+    function loadDetailRecommendations(data, container, bindFocus) {
         var section = $('<div class="yani-detail__extra yani-detail__recommendations"><div class="yani-detail__extra-title"></div></div>');
         $('.yani-detail__extra-title', section).text(t('recommendations'));
         var list = $('<div class="yani-detail__recommendations-list"></div>');
@@ -2526,11 +2599,12 @@
                 row.on('hover:blur', function () { row.removeClass('focus'); });
                 row.on('hover:enter click.yaniRecommendation', function () { openYummyDetail(card, true); });
                 list.append(row);
+                if (bindFocus) bindFocus(row);
             });
         }).catch(function () { section.remove(); });
     }
 
-    function loadDetailCollections(data, container) {
+    function loadDetailCollections(data, container, bindFocus) {
         var section = $('<div class="yani-detail__extra yani-detail__collections"><div class="yani-detail__extra-title"></div></div>');
         section.find('.yani-detail__extra-title').text(t('collections'));
         var list = $('<div class="yani-detail__collections-list"></div>');
@@ -2556,30 +2630,37 @@
                     }), onSelect: function (item) { openYummyDetail(item.card, true); }});
                 });
                 list.append(row);
+                if (bindFocus) bindFocus(row);
             });
         }).catch(function () { section.remove(); });
     }
 
-    function loadDetailTrailers(data, container) {
-        var section = $('<div class="yani-detail__extra yani-detail__trailers"><div class="yani-detail__extra-title"></div></div>');
-        $('.yani-detail__extra-title', section).text(t('trailers'));
-        var list = $('<div class="yani-detail__trailers-list"></div>');
-        section.append(list);
-        container.append(section);
-        LampaYaniApi.trailers(data.yani_id).then(function (payload) {
+    function openTrailers(card) {
+        if (!card || !card.yani_id) return;
+        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+        LampaYaniApi.trailers(card.yani_id).then(function (payload) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             var items = payload && payload.response ? payload.response : payload;
             items = Array.isArray(items) ? items : [];
-            if (!items.length) return section.remove();
-            items.forEach(function (trailer, index) {
-                var title = trailer.title || trailer.name || ('Trailer ' + (index + 1));
-                var url = trailer.iframe_url || trailer.url || trailer.video_url || trailer.link;
-                var row = $('<div class="yani-detail__trailer selector"></div>').text('▶ ' + title);
-                row.on('hover:focus', function () { row.addClass('focus'); });
-                row.on('hover:blur', function () { row.removeClass('focus'); });
-                if (url) row.on('hover:enter click.yaniTrailer', function () { openTrailer(url, title); });
-                list.append(row);
+            if (!items.length) {
+                Lampa.Noty.show(t('no_videos'));
+                return;
+            }
+            Lampa.Select.show({
+                title: t('trailers'),
+                items: items.map(function (trailer, index) {
+                    return {
+                        title: trailer.title || trailer.name || ('Trailer ' + (index + 1)),
+                        url: trailer.iframe_url || trailer.url || trailer.video_url || trailer.link
+                    };
+                }).filter(function (item) { return item.url; }),
+                onSelect: function (item) { openTrailer(item.url, item.title); }
             });
-        }).catch(function () { section.remove(); });
+        }).catch(function (error) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            console.error('[YummyAnime] Trailers failed', error);
+            Lampa.Noty.show(t('catalog_load_error'));
+        });
     }
 
     function openTrailer(url, title) {
