@@ -1891,7 +1891,10 @@ function pluginYummyAnime() {
             bindStatusFocus(summaryBlock);
             content.append(summaryBlock);
 
-            content.append('<div class="yani-status__legend"><span class="yani-status__dot yani-status__dot--up"></span>' + t('up') + ' <span class="yani-status__dot yani-status__dot--degraded"></span>' + t('unstable') + ' <span class="yani-status__dot yani-status__dot--down"></span>' + t('down') + '</div>');
+            var legend = $('<div class="yani-status__legend selector"></div>');
+            legend.append('<span class="yani-status__dot yani-status__dot--up"></span>' + t('up') + ' <span class="yani-status__dot yani-status__dot--degraded"></span>' + t('unstable') + ' <span class="yani-status__dot yani-status__dot--down"></span>' + t('down'));
+            bindStatusFocus(legend);
+            content.append(legend);
 
             (data.domains || []).forEach(function (domain) {
                 var block = $('<div class="yani-status__domain selector yani-status--' + domain.status + '"></div>');
@@ -1914,7 +1917,9 @@ function pluginYummyAnime() {
                 content.append(block);
             });
 
-            content.append($('<div class="yani-status__source"></div>').text(t('source') + ': YummyStatus · ' + t('period') + ': ' + periodLabels[currentPeriod] + ' · ' + t('snapshot_notice')));
+            var source = $('<div class="yani-status__source selector"></div>').text(t('source') + ': YummyStatus · ' + t('period') + ': ' + periodLabels[currentPeriod] + ' · ' + t('snapshot_notice'));
+            bindStatusFocus(source);
+            content.append(source);
 
             var refresh = $('<div class="yani-status__refresh selector"></div>').text(t('refresh_status'));
             refresh.on('hover:enter', function () {
@@ -1977,7 +1982,7 @@ function pluginYummyAnime() {
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { Navigator.move('down'); },
+                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
