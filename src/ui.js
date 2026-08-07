@@ -2008,8 +2008,8 @@
             component: 'yani',
             param: {name: 'yani_about', type: 'button'},
             field: {
-                name: t('version_name') + ' ' + LampaYaniConfig.version,
-                description: t('unofficial_extension') + ' · ' + t('website_description') + ': ' + yummyWebsiteUrl()
+                name: t('version_name'),
+                description: t('version_label') + ' ' + LampaYaniConfig.version + ' · ' + t('unofficial_extension') + ' · ' + t('website_description') + ': ' + yummyWebsiteUrl()
             },
             onChange: openYummyWebsite
         });
