@@ -2481,10 +2481,10 @@ function pluginYummyAnime() {
             loadDetailCommunityStats(data, info);
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
-            if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(detailSections().order(data));
-            detailSections().collections(data, info);
-            detailSections().recommendations(data, info);
-            detailSections().trailers(data, info);
+            if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
+            loadDetailCollections(data, info);
+            loadDetailRecommendations(data, info);
+            loadDetailTrailers(data, info);
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
@@ -3204,16 +3204,6 @@ function pluginYummyAnime() {
             yani_type: item.type || null,
             yani_remote_ids: item.remote_ids || {}
         };
-    }
-
-    function detailSections() {
-        return LampaYaniDetailSections.create({
-            t: t,
-            toCard: toCard,
-            clean: cleanCommentText,
-            openDetail: openYummyDetail,
-            showIframe: showYummyIframe
-        });
     }
 
     function createViewingOrder(data) {
