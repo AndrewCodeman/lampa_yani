@@ -2430,24 +2430,30 @@ function pluginYummyAnime() {
             var self = this;
             this.activity.loader(true);
 
+            function finish(card) {
+                try {
+                    renderDetail(card);
+                } catch (error) {
+                    console.error('[YummyAnime Detail render]', error);
+                    html.empty().append($('<div class="yani-detail__error selector"></div>').text(t('detail_load_error')));
+                } finally {
+                    self.activity.loader(false);
+                    self.activity.toggle();
+                }
+            }
+
             if (data.yani_id) {
                 LampaYaniApi.detail(data.yani_id).then(function (payload) {
                     var item = payload && payload.response ? payload.response : payload;
                     var detailed = item ? toCard(item) : data;
                     detailed.yani_schedule = data.yani_schedule;
-                    renderDetail(detailed);
-                    self.activity.loader(false);
-                    self.activity.toggle();
+                    finish(detailed);
                 }).catch(function (error) {
                     console.error('[YummyAnime]', error);
-                    renderDetail(data);
-                    self.activity.loader(false);
-                    self.activity.toggle();
+                    finish(data);
                 });
             } else {
-                renderDetail(data);
-                this.activity.loader(false);
-                this.activity.toggle();
+                finish(data);
             }
         };
 
