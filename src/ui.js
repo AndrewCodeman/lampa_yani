@@ -1272,6 +1272,17 @@
     }
 
     function Schedule(object) {
+        return LampaYaniSchedule.create(object, {
+            t: t,
+            locale: locale,
+            toCard: toCard,
+            openStandardLampaCard: openStandardLampaCard,
+            goBack: goBack
+        });
+    }
+
+    // Kept temporarily as an internal fallback while deployed clients refresh the bundle.
+    function LegacySchedule(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
         var html = $('<div class="yani-schedule"></div>');
         var content = $('<div class="yani-schedule__content"></div>');

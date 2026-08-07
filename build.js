@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const root = __dirname;
-const modules = ['src/config.js', 'src/i18n.js', 'src/auth.js', 'src/api.js', 'src/catalog.js', 'src/ui-utils.js', 'src/ui-media.js', 'src/ui.js'];
+const modules = ['src/config.js', 'src/i18n.js', 'src/auth.js', 'src/api.js', 'src/catalog.js', 'src/ui-utils.js', 'src/ui-media.js', 'src/ui-schedule.js', 'src/ui.js'];
 const body = modules.map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
 const css = fs.readFileSync(path.join(root, 'style.css'), 'utf8');
 
