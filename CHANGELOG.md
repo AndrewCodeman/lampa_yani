@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.18.10 — 2026-08-08
+
+- Reworked YummyAnime-to-TMDB matching to use `Lampa.TMDB.search`, the same resolver as Lampa's own search screen, before opening the shared card and its standard player sources.
+
 ## 0.18.9 — 2026-08-08
 
 - Added YummyAnime as a source in Lampa's global search, with opening through the known YummyAnime title id.

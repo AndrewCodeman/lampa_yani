@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.18.9',
+        version: '0.18.10',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -2921,10 +2921,11 @@ function pluginYummyAnime() {
     }
 
     function findStandardLampaCard(card) {
-        // `Lampa.Api.sources.tmdb` belonged to older Lampa builds. Current
-        // Lampa exposes the supported request method as `Lampa.TMDB.get`.
+        // Use the same public resolver as Lampa's own search screen. Calling
+        // individual API endpoints skipped parts of the active TMDB source
+        // configuration on some builds, so YummyAnime titles never matched.
         var tmdb = Lampa.TMDB;
-        if (!tmdb || !tmdb.get) return Promise.resolve(null);
+        if (!tmdb || !tmdb.search) return Promise.resolve(null);
         var titles = LampaYaniUiUtils.standardSearchTitles(card).filter(function (title, index, list) {
             return title && list.indexOf(title) === index;
         });
@@ -2942,15 +2943,34 @@ function pluginYummyAnime() {
 
     function searchTmdbTitle(tmdb, title) {
         if (!title) return Promise.resolve([]);
-        return Promise.all(['tv', 'movie'].map(function (method) {
-            return new Promise(function (resolve) {
-                tmdb.get('search/' + method, {query: title, page: 1, include_adult: false}, function (payload) {
-                    resolve((payload && payload.results || []).map(function (item) {
-                        return {card: item, method: method};
-                    }));
-                }, function () { resolve([]); }, {life: 60 * 24 * 7});
-            });
-        })).then(function (rows) { return rows[0].concat(rows[1]); });
+        return new Promise(function (resolve) {
+            var completed = false;
+            var timeout = setTimeout(function () { finish([]); }, 6000);
+
+            function finish(items) {
+                if (completed) return;
+                completed = true;
+                clearTimeout(timeout);
+                resolve(items);
+            }
+
+            try {
+                tmdb.search({query: title, page: 1}, function (groups) {
+                    var items = [];
+                    (Array.isArray(groups) ? groups : []).forEach(function (group) {
+                        var method = group && group.type;
+                        if (method !== 'tv' && method !== 'movie') return;
+                        (group.results || []).forEach(function (item) {
+                            items.push({card: item, method: method});
+                        });
+                    });
+                    finish(items);
+                });
+            } catch (error) {
+                console.warn('[YummyAnime] TMDB search call failed', error);
+                finish([]);
+            }
+        });
     }
 
     function isValidNativeId(id) {
