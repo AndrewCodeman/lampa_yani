@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.18.16 — 2026-08-08
+
+- Fix TMDB resolution when the proxy-aware Lampa source exposes `get` but not `search`.
+- On an unresolved title with a MyAnimeList ID, retry TMDB matching using its English, Japanese and synonym titles.
+
 ## 0.18.15 — 2026-08-08
 
 - Prefer the TMDB source used by Lampa online plugins and Cub TMDB Proxy when resolving YummyAnime titles; retain the modern Lampa TMDB API as fallback.

@@ -95,6 +95,25 @@
         });
     }
 
+    var malTitlesCache = {};
+
+    function malTitles(malId) {
+        if (!malId) return Promise.resolve([]);
+        var key = String(malId);
+        if (malTitlesCache[key]) return malTitlesCache[key];
+        malTitlesCache[key] = externalRequest('https://api.jikan.moe/v4', '/anime/' + encodeURIComponent(key) + '/full').then(function (payload) {
+            var anime = payload && payload.data || {};
+            var titles = [anime.title, anime.title_english, anime.title_japanese].concat(Array.isArray(anime.title_synonyms) ? anime.title_synonyms : []);
+            return titles.filter(function (title, index, list) {
+                return typeof title === 'string' && title.trim() && list.indexOf(title) === index;
+            });
+        }).catch(function (error) {
+            delete malTitlesCache[key];
+            throw error;
+        });
+        return malTitlesCache[key];
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Api = window.LampaYaniApi = {
         request: request,
@@ -130,6 +149,7 @@
             if (!config.episodesApiBase || !malId) return Promise.reject(new Error('MAL id is missing'));
             return externalRequest(config.episodesApiBase, '/anime/mal/' + encodeURIComponent(malId));
         },
+        malTitles: malTitles,
         detail: function (id) {
             return request('/anime/' + encodeURIComponent(id), {auth: true});
         },

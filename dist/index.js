@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.18.15',
+        version: '0.18.16',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -379,6 +379,25 @@ function pluginYummyAnime() {
         });
     }
 
+    var malTitlesCache = {};
+
+    function malTitles(malId) {
+        if (!malId) return Promise.resolve([]);
+        var key = String(malId);
+        if (malTitlesCache[key]) return malTitlesCache[key];
+        malTitlesCache[key] = externalRequest('https://api.jikan.moe/v4', '/anime/' + encodeURIComponent(key) + '/full').then(function (payload) {
+            var anime = payload && payload.data || {};
+            var titles = [anime.title, anime.title_english, anime.title_japanese].concat(Array.isArray(anime.title_synonyms) ? anime.title_synonyms : []);
+            return titles.filter(function (title, index, list) {
+                return typeof title === 'string' && title.trim() && list.indexOf(title) === index;
+            });
+        }).catch(function (error) {
+            delete malTitlesCache[key];
+            throw error;
+        });
+        return malTitlesCache[key];
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Api = window.LampaYaniApi = {
         request: request,
@@ -414,6 +433,7 @@ function pluginYummyAnime() {
             if (!config.episodesApiBase || !malId) return Promise.reject(new Error('MAL id is missing'));
             return externalRequest(config.episodesApiBase, '/anime/mal/' + encodeURIComponent(malId));
         },
+        malTitles: malTitles,
         detail: function (id) {
             return request('/anime/' + encodeURIComponent(id), {auth: true});
         },
@@ -2976,21 +2996,44 @@ function pluginYummyAnime() {
         // proxy may decorate it while leaving Lampa.TMDB untouched, so prefer
         // it and retain the public object as a fallback for newer builds.
         var tmdb = Lampa.Api && Lampa.Api.sources && Lampa.Api.sources.tmdb || Lampa.TMDB;
-        if (!tmdb || !tmdb.search) return Promise.resolve(null);
+        if (!tmdb || (!tmdb.search && !tmdb.get)) return Promise.resolve(null);
         var titles = LampaYaniUiUtils.standardSearchTitles(card).filter(function (title, index, list) {
             return title && list.indexOf(title) === index;
         });
         console.info('[YummyAnime] Native TMDB resolve started', {yaniId: getYummyId(card), titles: titles});
 
-        function searchNext(index) {
-            if (index >= titles.length || index >= 8) return Promise.resolve(null);
-            return searchTmdbTitle(tmdb, titles[index]).then(function (items) {
-                var match = bestStandardCard(items, card);
-                return match || searchNext(index + 1);
-            });
+        function resolveTitles(searchTitles) {
+            function searchNext(index) {
+                if (index >= searchTitles.length || index >= 8) return Promise.resolve(null);
+                return searchTmdbTitle(tmdb, searchTitles[index]).then(function (items) {
+                    var match = bestStandardCard(items, card);
+                    return match || searchNext(index + 1);
+                });
+            }
+            return searchNext(0);
         }
 
-        return searchNext(0).then(function (match) {
+        return resolveTitles(titles).then(function (match) {
+            if (match) return match;
+            var remoteIds = card.yani_remote_ids || {};
+            var malId = remoteIds.myanimelist_id || remoteIds.mal_id;
+            if (!malId || !LampaYaniApi.malTitles) return null;
+            return LampaYaniApi.malTitles(malId).then(function (malTitles) {
+                var known = card.yani_titles || [];
+                card.yani_titles = known.concat(malTitles || []).filter(function (title, index, list) {
+                    return title && list.indexOf(title) === index;
+                });
+                // Retry only newly acquired names. Otherwise a long Yummy
+                // alias list could consume the eight-query budget first.
+                var retryTitles = (malTitles || []).filter(function (title, index, list) {
+                    return title && known.indexOf(title) < 0 && list.indexOf(title) === index;
+                });
+                return resolveTitles(retryTitles);
+            }).catch(function (error) {
+                console.warn('[YummyAnime] Could not load MyAnimeList title aliases', error);
+                return null;
+            });
+        }).then(function (match) {
             if (match) {
                 console.info('[YummyAnime] Native TMDB match found', {
                     id: match.card.id,
