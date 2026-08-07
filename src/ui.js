@@ -2147,6 +2147,10 @@
     }
 
     function IframePlayer(object) {
+        return LampaYaniPlayer.create(object, {sourceUrl: videoSourceUrl, goBack: goBack});
+    }
+
+    function LegacyIframePlayer(object) {
         var html = $('<div class="yani-player"></div>');
         var iframe = $('<iframe class="yani-player__iframe" frameborder="0" allowfullscreen></iframe>');
 
