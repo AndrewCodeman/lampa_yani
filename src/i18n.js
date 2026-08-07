@@ -35,6 +35,8 @@
     messages.ru.notifications_empty = 'Новых уведомлений нет';
     messages.ru.notifications_error = 'Не удалось загрузить уведомления';
     messages.ru.mark_all_read = 'Отметить все прочитанными';
+    messages.ru.delete_all_notifications = 'Удалить все уведомления';
+    messages.ru.notifications_more = 'Загрузить ещё уведомления';
     messages.ru.notification = 'Уведомление';
     messages.ru.community_stats = 'Статистика сообщества';
     messages.ru.manage_list = 'Изменить список';
@@ -42,6 +44,8 @@
     messages.en.notifications_empty = 'There are no notifications';
     messages.en.notifications_error = 'Failed to load notifications';
     messages.en.mark_all_read = 'Mark all as read';
+    messages.en.delete_all_notifications = 'Delete all notifications';
+    messages.en.notifications_more = 'Load more notifications';
     messages.en.notification = 'Notification';
     messages.en.community_stats = 'Community statistics';
     messages.en.manage_list = 'Change list';
@@ -60,6 +64,8 @@
     messages.uk.notifications_empty = 'Нових сповіщень немає';
     messages.uk.notifications_error = 'Не вдалося завантажити сповіщення';
     messages.uk.mark_all_read = 'Позначити всі як прочитані';
+    messages.uk.delete_all_notifications = 'Видалити всі сповіщення';
+    messages.uk.notifications_more = 'Завантажити ще сповіщення';
     messages.uk.notification = 'Сповіщення';
     messages.uk.community_stats = 'Статистика спільноти';
     messages.uk.manage_list = 'Змінити список';

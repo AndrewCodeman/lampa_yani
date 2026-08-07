@@ -66,6 +66,8 @@ function pluginYummyAnime() {
     messages.ru.notifications_empty = 'Новых уведомлений нет';
     messages.ru.notifications_error = 'Не удалось загрузить уведомления';
     messages.ru.mark_all_read = 'Отметить все прочитанными';
+    messages.ru.delete_all_notifications = 'Удалить все уведомления';
+    messages.ru.notifications_more = 'Загрузить ещё уведомления';
     messages.ru.notification = 'Уведомление';
     messages.ru.community_stats = 'Статистика сообщества';
     messages.ru.manage_list = 'Изменить список';
@@ -73,6 +75,8 @@ function pluginYummyAnime() {
     messages.en.notifications_empty = 'There are no notifications';
     messages.en.notifications_error = 'Failed to load notifications';
     messages.en.mark_all_read = 'Mark all as read';
+    messages.en.delete_all_notifications = 'Delete all notifications';
+    messages.en.notifications_more = 'Load more notifications';
     messages.en.notification = 'Notification';
     messages.en.community_stats = 'Community statistics';
     messages.en.manage_list = 'Change list';
@@ -91,6 +95,8 @@ function pluginYummyAnime() {
     messages.uk.notifications_empty = 'Нових сповіщень немає';
     messages.uk.notifications_error = 'Не вдалося завантажити сповіщення';
     messages.uk.mark_all_read = 'Позначити всі як прочитані';
+    messages.uk.delete_all_notifications = 'Видалити всі сповіщення';
+    messages.uk.notifications_more = 'Завантажити ще сповіщення';
     messages.uk.notification = 'Сповіщення';
     messages.uk.community_stats = 'Статистика спільноти';
     messages.uk.manage_list = 'Змінити список';
@@ -1232,12 +1238,13 @@ function pluginYummyAnime() {
         var html = $('<div class="yani-notifications"></div>');
         var content = $('<div class="yani-notifications__content"></div>');
         var last;
+        var offset = 0;
 
         this.create = function () {
             var self = this;
             this.activity.loader(true);
-            LampaYaniApi.notifications(30, 0).then(function (payload) {
-                renderNotifications(responseData(payload));
+            LampaYaniApi.notifications(30, offset).then(function (payload) {
+                renderNotifications(responseData(payload), offset > 0);
                 scroll.append(content);
                 html.append(scroll.render(true));
                 self.activity.loader(false);
@@ -1252,7 +1259,8 @@ function pluginYummyAnime() {
             });
         };
 
-        function renderNotifications(items) {
+        function renderNotifications(items, append) {
+            if (!append) content.empty();
             var title = $('<div class="yani-notifications__title"></div>').text(t('notifications_title'));
             var markAll = $('<div class="yani-detail__button selector"></div>').text(t('mark_all_read'));
             markAll.on('hover:enter click', function () {
@@ -1261,9 +1269,13 @@ function pluginYummyAnime() {
                     Lampa.Noty.show(t('saved'));
                 });
             });
-            content.append(title, markAll);
+            var deleteAll = $('<div class="yani-detail__button selector"></div>').text(t('delete_all_notifications'));
+            deleteAll.on('hover:enter click', function () {
+                LampaYaniApi.deleteAllNotifications().then(function () { content.empty(); content.append(title).append($('<div class="yani-account__notice"></div>').text(t('notifications_empty'))); });
+            });
+            if (!append) content.append(title, markAll, deleteAll);
             if (!items.length) {
-                content.append($('<div class="yani-account__notice"></div>').text(t('notifications_empty')));
+                if (!append) content.append($('<div class="yani-account__notice"></div>').text(t('notifications_empty')));
                 return;
             }
             items.forEach(function (notification) {
@@ -1280,6 +1292,13 @@ function pluginYummyAnime() {
                 });
                 content.append(item);
             });
+            var more = $('<div class="yani-detail__button selector"></div>').text(t('notifications_more'));
+            more.on('hover:enter click', function () {
+                more.remove();
+                offset += items.length;
+                LampaYaniApi.notifications(30, offset).then(function (payload) { renderNotifications(responseData(payload), true); });
+            });
+            content.append(more);
         }
 
         this.start = function () {

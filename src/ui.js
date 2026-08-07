@@ -804,12 +804,13 @@
         var html = $('<div class="yani-notifications"></div>');
         var content = $('<div class="yani-notifications__content"></div>');
         var last;
+        var offset = 0;
 
         this.create = function () {
             var self = this;
             this.activity.loader(true);
-            LampaYaniApi.notifications(30, 0).then(function (payload) {
-                renderNotifications(responseData(payload));
+            LampaYaniApi.notifications(30, offset).then(function (payload) {
+                renderNotifications(responseData(payload), offset > 0);
                 scroll.append(content);
                 html.append(scroll.render(true));
                 self.activity.loader(false);
@@ -824,7 +825,8 @@
             });
         };
 
-        function renderNotifications(items) {
+        function renderNotifications(items, append) {
+            if (!append) content.empty();
             var title = $('<div class="yani-notifications__title"></div>').text(t('notifications_title'));
             var markAll = $('<div class="yani-detail__button selector"></div>').text(t('mark_all_read'));
             markAll.on('hover:enter click', function () {
@@ -833,9 +835,13 @@
                     Lampa.Noty.show(t('saved'));
                 });
             });
-            content.append(title, markAll);
+            var deleteAll = $('<div class="yani-detail__button selector"></div>').text(t('delete_all_notifications'));
+            deleteAll.on('hover:enter click', function () {
+                LampaYaniApi.deleteAllNotifications().then(function () { content.empty(); content.append(title).append($('<div class="yani-account__notice"></div>').text(t('notifications_empty'))); });
+            });
+            if (!append) content.append(title, markAll, deleteAll);
             if (!items.length) {
-                content.append($('<div class="yani-account__notice"></div>').text(t('notifications_empty')));
+                if (!append) content.append($('<div class="yani-account__notice"></div>').text(t('notifications_empty')));
                 return;
             }
             items.forEach(function (notification) {
@@ -852,6 +858,13 @@
                 });
                 content.append(item);
             });
+            var more = $('<div class="yani-detail__button selector"></div>').text(t('notifications_more'));
+            more.on('hover:enter click', function () {
+                more.remove();
+                offset += items.length;
+                LampaYaniApi.notifications(30, offset).then(function (payload) { renderNotifications(responseData(payload), true); });
+            });
+            content.append(more);
         }
 
         this.start = function () {
