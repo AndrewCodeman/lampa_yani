@@ -8,7 +8,7 @@ function pluginYummyAnime() {
         Lampa.Manifest.plugins = {
             type: 'other',
             version: '0.16.7',
-            name: 'YummyAnime for Lampa',
+            name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
         };
