@@ -665,15 +665,20 @@ function pluginYummyAnime() {
         // Some Lampa versions clone the card object after cardRender. Keep a
         // DOM-level handler as a fallback so search results remain clickable.
         var rendered = element && element.jquery ? element : $(element);
-        rendered.off('hover:enter.yaniOpen').on('hover:enter.yaniOpen', function () {
-            if (card.yani_id) openYummyDetail(card, false);
+        rendered.off('hover:enter.yaniOpen click.yaniOpen').on('hover:enter.yaniOpen click.yaniOpen', function () {
+            openCardOnce(card);
         });
-        card.onEnter = function () {
-            if (card.yani_id) openYummyDetail(card, false);
-        };
+        card.onEnter = function () { openCardOnce(card); };
         card.onMenu = function () {
             if (card.yani_id) showYummyActions(card);
         };
+    }
+
+    function openCardOnce(card) {
+        if (!card || !card.yani_id || card._yani_opening) return;
+        card._yani_opening = true;
+        openYummyDetail(card, false);
+        setTimeout(function () { card._yani_opening = false; }, 500);
     }
 
     var posterFallbackCache = {};
@@ -1459,6 +1464,14 @@ function pluginYummyAnime() {
             release.append($('<div class="yani-schedule__time"></div>').text(formatScheduleTime(releaseDate)));
             release.append($('<div class="yani-schedule__timezone"></div>').text(t('local_time')));
             row.append(poster, info, release);
+            var opened = false;
+            function openScheduleCard() {
+                if (opened) return;
+                opened = true;
+                card.yani_schedule = formatEpisode(episodes) + ', ' + formatScheduleDateTime(releaseDate);
+                openStandardLampaCard(card);
+                setTimeout(function () { opened = false; }, 500);
+            }
 
             row.on('hover:focus', function (event) {
                 content.find('.yani-schedule__item.focus').removeClass('focus');
@@ -1467,10 +1480,7 @@ function pluginYummyAnime() {
                 scroll.update($(event.target), true);
             });
             row.on('hover:blur', function () { row.removeClass('focus'); });
-            row.on('hover:enter', function () {
-                card.yani_schedule = formatEpisode(episodes) + ', ' + formatScheduleDateTime(releaseDate);
-                openStandardLampaCard(card);
-            });
+            row.on('hover:enter click.yaniSchedule', openScheduleCard);
 
             return row;
         }
