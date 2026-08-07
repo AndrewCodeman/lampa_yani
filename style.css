@@ -111,6 +111,9 @@
     padding: 2em;
     max-width: 100%;
     box-sizing: border-box;
+    color: #f4f7fb;
+    opacity: 1;
+    filter: none;
 }
 
 .yani-detail__poster {
@@ -159,6 +162,10 @@
 .yani-detail__trailers-list { display: grid; gap: .45em; }
 .yani-detail__trailer { padding: .7em .85em; border-radius: .45em; background: rgba(255, 255, 255, .08); }
 .yani-detail__trailer.focus { background: #fff; color: #111; outline: .16em solid #ef6470; }
+.yani-detail__order-item.selector:focus,
+.yani-detail__comment.selector:focus,
+.yani-detail__recommendation.selector:focus,
+.yani-detail__trailer.selector:focus { outline: .16em solid #ef6470; }
 
 @media (max-width: 700px) {
     .yani-detail { gap: 1em; padding: 1em; }

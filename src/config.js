@@ -2,7 +2,7 @@
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.16.5',
+        version: '0.16.6',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',

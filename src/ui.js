@@ -1216,7 +1216,11 @@
                     var row = $('<div class="yani-detail__comment selector"></div>');
                     row.append($('<div class="yani-detail__comment-title"></div>').text(item.title));
                     if (item.subtitle) row.append($('<div class="yani-detail__comment-stats"></div>').text(item.subtitle));
-                    if (Number(comment.children_count) > 0) row.on('hover:enter', function () { commentReplies(comment, 0, [], function () {}); });
+                    row.on('hover:focus', function () { row.addClass('focus'); });
+                    row.on('hover:enter', function () {
+                        if (Number(comment.children_count) > 0) commentReplies(comment, 0, [], function () {});
+                        else commentsMenu(cardData.yani_id);
+                    });
                     list.append(row);
                 });
             }).catch(function (error) {
@@ -1235,6 +1239,13 @@
                 back: goBack
             });
             Lampa.Controller.toggle('content');
+            setTimeout(function () {
+                var first = html.find('.yani-detail__order-item.selector, .yani-detail__button.selector, .yani-detail__comment.selector').first();
+                if (first.length) {
+                    scroll.update(first, true);
+                    Lampa.Controller.collectionFocus(first, scroll.render());
+                }
+            }, 0);
         };
 
         this.render = function (js) { return js ? scroll.render(true) : scroll.render(); };
@@ -1815,7 +1826,8 @@
             row.append($('<span class="yani-detail__order-name"></span>').text(related.title));
             if (related.release_date) row.append($('<span class="yani-detail__order-year"></span>').text(related.release_date));
             if (relation) row.append($('<span class="yani-detail__order-relation"></span>').text('· ' + relation));
-            if (String(related.yani_id) !== String(data.yani_id)) row.on('hover:enter', function () { openYummyDetail(related, true); });
+            row.on('hover:focus', function () { row.addClass('focus'); });
+            row.on('hover:enter', function () { openYummyDetail(related, true); });
             list.append(row);
         });
         section.append(list);
