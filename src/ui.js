@@ -1518,9 +1518,14 @@
 
         this.create = function () {
             var self = this;
+            var settled = false;
+            var timeoutId;
             this.activity.loader(true);
 
             function finish(card) {
+                if (settled) return;
+                settled = true;
+                if (timeoutId) clearTimeout(timeoutId);
                 try {
                     renderDetail(card);
                 } catch (error) {
@@ -1531,6 +1536,11 @@
                     self.activity.toggle();
                 }
             }
+
+            timeoutId = setTimeout(function () {
+                console.error('[YummyAnime Detail] timeout');
+                finish(data);
+            }, 20000);
 
             if (data.yani_id) {
                 LampaYaniApi.detail(data.yani_id).then(function (payload) {
