@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.18.0 — 2026-08-07
+
+- Added a detail-page timeout guard to prevent infinite loading.
+- Continued splitting UI pages into independent components.
+
 ## 0.17.0 — 2026-08-07
 
 - Added collections, personalized updates, watch synchronization and account reviews.

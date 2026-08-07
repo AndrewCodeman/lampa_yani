@@ -38,7 +38,7 @@
 
 Для установки используйте собранный файл с GitHub Pages:
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.16.1`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.18.0`
 
 Экран `YummyAnime → Статус` показывает историю YummyStatus за 3 часа, день, неделю или месяц. Снимок мониторинга обновляется GitHub Actions каждые пять минут.
 
