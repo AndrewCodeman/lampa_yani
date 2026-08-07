@@ -115,6 +115,7 @@
             });
 
             Lampa.Component.add('yani_recommended', Recommended);
+            Lampa.Component.add('yani_updates', Updates);
             Lampa.Component.add('yani_schedule', Schedule);
             Lampa.Component.add('yani_history', History);
 
@@ -160,6 +161,9 @@
             }},
             {key: 'for_you', title: t('for_you'), action: function () {
                 Lampa.Activity.push({url: 'yani/for-you', title: 'YummyAnime ' + t('for_you'), component: 'yani_recommended'});
+            }},
+            {key: 'updates', title: t('updates'), action: function () {
+                Lampa.Activity.push({url: 'yani/updates', title: 'YummyAnime ' + t('updates'), component: 'yani_updates'});
             }},
             {key: 'account', title: t('account'), action: openAccount}
         ].filter(function (item) { return homeSectionEnabled(item.key); });
@@ -209,6 +213,7 @@
             status: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h4l2-6 4 12 2-6h6"/></svg>',
             top_rated: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg>',
             for_you: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S4 15.7 4 9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5c0 6.2-8 11-8 11Z"/><path d="M12 11v5M9.5 13.5h5"/></svg>',
+            updates: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="16" r="3"/><path d="M18 14v2l1.3 1"/></svg>',
             account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/></svg>'
         };
         return icons[key] || icons.catalog;
@@ -246,6 +251,60 @@
                 self.build({results: cards.slice(0, 40), total_pages: 1, title: t('for_you')});
             }).catch(function () {
                 self.build({results: [], total_pages: 1, title: t('for_you')});
+            });
+        };
+        comp.cardRender = bindYummyCardRender;
+        return comp;
+    }
+
+    function Updates(object) {
+        var comp = new Lampa.InteractionCategory(object);
+        comp.create = function () {
+            var self = this;
+            this.activity.loader(true);
+            if (!LampaYaniAuth.token()) {
+                Lampa.Noty.show(t('login_required'));
+                return self.build({results: [], total_pages: 1, title: t('updates')});
+            }
+            LampaYaniApi.profile().then(function (payload) {
+                var profile = payload && payload.response ? payload.response : payload;
+                return Promise.all([
+                    LampaYaniApi.userLists(profile.id).then(normalizeUserList).catch(function () { return []; }),
+                    LampaYaniApi.subscriptions(profile.id).then(function (response) {
+                        var value = response && response.response ? response.response : response;
+                        var items = Array.isArray(value) ? value : value && (value.items || value.data || value.subscriptions || value.anime) || [];
+                        return items.map(function (item) {
+                            var source = item && (item.anime || item.title_data || item.object) || item;
+                            return source && (source.anime_id || source.id || source.title) ? toCard(source) : null;
+                        }).filter(Boolean);
+                    }).catch(function () { return []; }),
+                    LampaYaniApi.schedule().then(function (response) {
+                        return LampaYaniApi.normalize(response);
+                    }).catch(function () { return []; })
+                ]);
+            }).then(function (result) {
+                var listCards = result[0].filter(function (item) {
+                    var list = item.user && item.user.list && item.user.list.list;
+                    return list && [0, 1, 5].indexOf(Number(list.id)) >= 0;
+                }).map(toCard);
+                var cards = listCards.concat(result[1]);
+                var schedule = {};
+                result[2].forEach(function (item) { schedule[String(item.anime_id || item.id)] = item.episodes || {}; });
+                var seen = {};
+                cards = cards.filter(function (card) {
+                    var key = String(card.yani_id || card.title);
+                    if (seen[key]) return false;
+                    seen[key] = true;
+                    card.yani_update_date = schedule[key] && schedule[key].next_date;
+                    return true;
+                }).sort(function (a, b) {
+                    return Number(a.yani_update_date || 0) - Number(b.yani_update_date || 0);
+                });
+                self.build({results: cards, total_pages: 1, title: t('updates')});
+            }).catch(function (error) {
+                console.error('[YummyAnime Updates]', error);
+                self.activity.loader(false);
+                Lampa.Noty.show(t('updates_error'));
             });
         };
         comp.cardRender = bindYummyCardRender;
