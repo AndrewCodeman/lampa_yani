@@ -120,6 +120,7 @@
             Lampa.Component.add('yani_detail', Detail);
             Lampa.Component.add('yani_account', Account);
             Lampa.Component.add('yani_account_list', AccountList);
+            Lampa.Component.add('yani_notifications', Notifications);
             Lampa.Component.add('yani_auth', AuthPage);
 
             Lampa.Component.add('yani_status', StatusDashboard);
@@ -578,6 +579,13 @@
             addInfo(info, t('total_lists'), String(lists.length || 0));
             content.append(info);
 
+            var notificationButton = $('<div class="yani-account__notification-button selector"></div>');
+            notificationButton.append($('<strong></strong>').text(t('notifications')));
+            notificationButton.append($('<span></span>').text(String(profile.notifications && (profile.notifications.unread_count || profile.notifications.count) || 0) + ' ' + t('unread')));
+            bindAccountFocus(notificationButton);
+            notificationButton.on('hover:enter click.yaniNotifications', openNotifications);
+            content.append(notificationButton);
+
             var counts = {};
             lists.forEach(function (anime) {
                 var userList = anime.user && anime.user.list;
@@ -783,6 +791,80 @@
             Lampa.Controller.toggle('content');
         };
 
+        this.render = function (js) { return js ? html[0] : html; };
+        this.destroy = function () { scroll.destroy(); html.remove(); };
+    }
+
+    function openNotifications() {
+        Lampa.Activity.push({url: 'yani/notifications', title: t('notifications_title'), component: 'yani_notifications'});
+    }
+
+    function Notifications(object) {
+        var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        var html = $('<div class="yani-notifications"></div>');
+        var content = $('<div class="yani-notifications__content"></div>');
+        var last;
+
+        this.create = function () {
+            var self = this;
+            this.activity.loader(true);
+            LampaYaniApi.notifications(30, 0).then(function (payload) {
+                renderNotifications(responseData(payload));
+                scroll.append(content);
+                html.append(scroll.render(true));
+                self.activity.loader(false);
+                self.activity.toggle();
+            }).catch(function (error) {
+                console.error('[YummyAnime Notifications]', error);
+                content.append($('<div class="yani-account__notice"></div>').text(t('notifications_error')));
+                scroll.append(content);
+                html.append(scroll.render(true));
+                self.activity.loader(false);
+                self.activity.toggle();
+            });
+        };
+
+        function renderNotifications(items) {
+            var title = $('<div class="yani-notifications__title"></div>').text(t('notifications_title'));
+            var markAll = $('<div class="yani-detail__button selector"></div>').text(t('mark_all_read'));
+            markAll.on('hover:enter click', function () {
+                LampaYaniApi.markAllNotificationsRead().then(function () {
+                    content.find('.yani-notification').removeClass('unread');
+                    Lampa.Noty.show(t('saved'));
+                });
+            });
+            content.append(title, markAll);
+            if (!items.length) {
+                content.append($('<div class="yani-account__notice"></div>').text(t('notifications_empty')));
+                return;
+            }
+            items.forEach(function (notification) {
+                var item = $('<div class="yani-notification selector"></div>');
+                if (!notification.viewed && !notification.read) item.addClass('unread');
+                item.append($('<div class="yani-notification__title"></div>').text(notification.title || notification.type || t('notification')));
+                if (notification.text || notification.message) item.append($('<div class="yani-notification__text"></div>').text(notification.text || notification.message));
+                if (notification.date || notification.date_seconds) item.append($('<div class="yani-notification__date"></div>').text(formatAccountDate(notification.date || notification.date_seconds)));
+                item.on('hover:focus', function (event) { last = event.target; scroll.update($(event.target), true); });
+                item.on('hover:enter click', function () {
+                    if (notification.id && !notification.viewed) LampaYaniApi.markNotificationRead(notification.id).catch(function () {});
+                    var animeId = notification.anime_id || notification.object_id;
+                    if (animeId) openYummyDetail(toCard({anime_id: animeId, title: notification.title || t('anime')}), false);
+                });
+                content.append(item);
+            });
+        }
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () { Lampa.Controller.collectionSet(scroll.render()); Lampa.Controller.collectionFocus(last || false, scroll.render()); },
+                left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
+                right: function () { Navigator.move('right'); },
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
+                down: function () { Navigator.move('down'); },
+                back: goBack
+            });
+            Lampa.Controller.toggle('content');
+        };
         this.render = function (js) { return js ? html[0] : html; };
         this.destroy = function () { scroll.destroy(); html.remove(); };
     }

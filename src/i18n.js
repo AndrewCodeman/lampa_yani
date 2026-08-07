@@ -31,6 +31,16 @@
     messages.ru.version_label = 'Версия';
     messages.en.version_name = 'YummyAnime';
     messages.en.version_label = 'Version';
+    messages.ru.notifications_title = 'Уведомления YummyAnime';
+    messages.ru.notifications_empty = 'Новых уведомлений нет';
+    messages.ru.notifications_error = 'Не удалось загрузить уведомления';
+    messages.ru.mark_all_read = 'Отметить все прочитанными';
+    messages.ru.notification = 'Уведомление';
+    messages.en.notifications_title = 'YummyAnime notifications';
+    messages.en.notifications_empty = 'There are no notifications';
+    messages.en.notifications_error = 'Failed to load notifications';
+    messages.en.mark_all_read = 'Mark all as read';
+    messages.en.notification = 'Notification';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -42,6 +52,11 @@
         language_name: 'Мова / Language', language_description: 'Мова інтерфейсу розширення YummyAnime', language_changed: 'Мову YummyAnime змінено. Відкрийте розширення знову.', section_visibility_description: 'Показувати цей розділ на головному екрані YummyAnime', version_name: 'YummyAnime', version_label: 'Версія', website_description: 'Офіційний сайт YummyAnime', unofficial_extension: 'Неофіційне розширення', account_statistics: 'Статистика', genres_statistics: 'Жанри', ratings_statistics: 'Оцінки', types_statistics: 'Типи', auth_title: 'Авторизація YummyAnime', auth_authorized: 'Ви увійшли до облікового запису YummyAnime', auth_not_authorized: 'Вхід не виконано', auth_login: 'Нікнейм або Email', auth_password: 'Пароль', auth_submit: 'Увійти', auth_account: 'Обліковий запис',
         login_name: 'Увійти до YummyAnime', refresh_name: 'Оновити токен YummyAnime', login_first: 'Спочатку увійдіть до YummyAnime', token_refreshed: 'Токен YummyAnime оновлено', token_refresh_error: 'Не вдалося оновити токен YummyAnime', logout_name: 'Вийти з YummyAnime', logged_out: 'Ви вийшли з YummyAnime', api_check_name: 'Перевірити YummyAnime API', api_ok: 'YummyAnime API працює', api_error: 'YummyAnime API недоступний або публічний токен неправильний', email_prompt: 'Нікнейм або Email', email_required: 'Введіть нікнейм або email YummyAnime', password_prompt: 'Пароль YummyAnime', password_required: 'Введіть пароль YummyAnime', login_ok: 'Вхід до YummyAnime виконано', login_error: 'Помилка входу до YummyAnime', comments_title: 'Коментарі YummyAnime', comments_error: 'Не вдалося завантажити коментарі', kinopoisk: 'Кінопошук'
     });
+    messages.uk.notifications_title = 'Сповіщення YummyAnime';
+    messages.uk.notifications_empty = 'Нових сповіщень немає';
+    messages.uk.notifications_error = 'Не вдалося завантажити сповіщення';
+    messages.uk.mark_all_read = 'Позначити всі як прочитані';
+    messages.uk.notification = 'Сповіщення';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

@@ -162,6 +162,24 @@
         userStatsTypes: function (id) {
             return request('/users/' + encodeURIComponent(id) + '/stats/types-v2', {auth: true, cache: false});
         },
+        notifications: function (limit, offset) {
+            return request('/profile/notifications?limit=' + encodeURIComponent(limit || 30) + '&offset=' + encodeURIComponent(offset || 0), {auth: true, cache: false});
+        },
+        notificationCounts: function () {
+            return request('/profile/notifications/counts', {auth: true, cache: false});
+        },
+        markNotificationRead: function (id) {
+            return request('/profile/notifications/' + encodeURIComponent(id) + '/read', {method: 'POST', auth: true, cache: false});
+        },
+        markAllNotificationsRead: function () {
+            return request('/profile/notifications/read', {method: 'POST', auth: true, cache: false, headers: {'Content-Type': 'application/json'}, body: '{}'});
+        },
+        deleteNotification: function (id) {
+            return request('/profile/notifications/' + encodeURIComponent(id), {method: 'DELETE', auth: true, cache: false});
+        },
+        deleteAllNotifications: function () {
+            return request('/profile/notifications', {method: 'DELETE', auth: true, cache: false});
+        },
         syncVideoProgress: function (videoId, time, duration) {
             return request('/video/' + encodeURIComponent(videoId), {
                 method: 'PUT',

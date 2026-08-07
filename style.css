@@ -500,6 +500,29 @@
     padding: 1.5em 2em 3em;
 }
 
+.yani-account__notification-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1em 0;
+    padding: 1em 1.2em;
+    border: 0.08em solid rgba(255,255,255,.16);
+    border-radius: .7em;
+    background: rgba(36, 58, 78, .85);
+}
+
+.yani-account__notification-button.focus { background: #287da9; box-shadow: 0 0 0 .14em rgba(98,201,255,.65); }
+.yani-account__notification-button span { color: #72d8ff; }
+.yani-notifications__content { padding: 1.5em 2em 3em; }
+.yani-notifications__title { margin-bottom: .8em; color: #fff; font-size: 1.6em; font-weight: 700; }
+.yani-notification { margin: .7em 0; padding: 1em 1.2em; border-radius: .65em; background: rgba(255,255,255,.08); border: .08em solid rgba(255,255,255,.1); }
+.yani-notification.unread { border-color: #72d8ff; background: rgba(40,125,169,.3); }
+.yani-notification.focus { background: #fff; color: #17222e; box-shadow: 0 0 0 .14em rgba(98,201,255,.75); }
+.yani-notification__title { font-size: 1.15em; font-weight: 700; }
+.yani-notification__text { margin-top: .35em; color: #cbd8e5; }
+.yani-notification.focus .yani-notification__text { color: #41566b; }
+.yani-notification__date { margin-top: .45em; color: #8ea4b8; font-size: .82em; }
+
 .yani-account__profile {
     display: flex;
     align-items: center;
