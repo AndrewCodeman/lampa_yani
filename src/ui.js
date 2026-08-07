@@ -295,12 +295,13 @@
                     var key = String(card.yani_id || card.title);
                     if (seen[key]) return false;
                     seen[key] = true;
-                    card.yani_update_date = schedule[key] && schedule[key].next_date;
+                    var episodeDates = schedule[key] || {};
+                    card.yani_update_date = Number(episodeDates.prev_date || episodeDates.next_date || 0);
                     return true;
                 }).sort(function (a, b) {
-                    return Number(a.yani_update_date || 0) - Number(b.yani_update_date || 0);
+                    return Number(b.yani_update_date || 0) - Number(a.yani_update_date || 0);
                 });
-                self.build({results: cards, total_pages: 1, title: t('updates')});
+                self.build({results: cards.slice(0, 20), total_pages: 1, title: t('updates')});
             }).catch(function (error) {
                 console.error('[YummyAnime Updates]', error);
                 self.activity.loader(false);
