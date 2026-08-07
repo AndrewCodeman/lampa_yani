@@ -662,6 +662,12 @@ function pluginYummyAnime() {
         addCardMediaBadges(element, card);
         addCardListBadge(element, card);
         attachPosterFallback(element, card);
+        // Some Lampa versions clone the card object after cardRender. Keep a
+        // DOM-level handler as a fallback so search results remain clickable.
+        var rendered = element && element.jquery ? element : $(element);
+        rendered.off('hover:enter.yaniOpen').on('hover:enter.yaniOpen', function () {
+            if (card.yani_id) openYummyDetail(card, false);
+        });
         card.onEnter = function () {
             if (card.yani_id) openYummyDetail(card, false);
         };
@@ -2214,7 +2220,7 @@ function pluginYummyAnime() {
             yani_ratings: ratings,
             yani_media: mediaMeta(item),
             overview: item.description || item.synopsis || '',
-            yani_id: item.anime_id || item.id,
+            yani_id: item.anime_id || item.animeId || item.id || item._id || item.anime && (item.anime.anime_id || item.anime.id),
             yani_url: item.anime_url || item.url,
             yani_comments_count: Number(item.comments_count || 0),
             yani_list_id: item.user && item.user.list && item.user.list.list ? Number(item.user.list.list.id) : null,
