@@ -816,12 +816,13 @@ function pluginYummyAnime() {
 
         var ids = card.yani_remote_ids || {};
         var urls = [];
-        if (ids.mal || ids.myanimelist) urls.push('https://api.jikan.moe/v4/anime/' + encodeURIComponent(ids.mal || ids.myanimelist) + '/full');
-        if (ids.shikimori) urls.push('https://shikimori.one/api/animes/' + encodeURIComponent(ids.shikimori) + '.json');
-        if (card.title) {
-            urls.push('https://api.jikan.moe/v4/anime?q=' + encodeURIComponent(card.title) + '&limit=1');
-            urls.push('https://graphql.anilist.co');
-        }
+        if (ids.mal || ids.myanimelist) urls.push({url: 'https://api.jikan.moe/v4/anime/' + encodeURIComponent(ids.mal || ids.myanimelist) + '/full'});
+        if (ids.shikimori) urls.push({url: 'https://shikimori.one/api/animes/' + encodeURIComponent(ids.shikimori) + '.json'});
+        var posterTitles = titleValues(card).slice(0, 5);
+        posterTitles.forEach(function (title) {
+            urls.push({url: 'https://api.jikan.moe/v4/anime?q=' + encodeURIComponent(title) + '&limit=1'});
+            urls.push({url: 'https://graphql.anilist.co', query: title});
+        });
         if (!urls.length) {
             posterFallbackCache[key] = null;
             return Promise.resolve('');
@@ -832,12 +833,13 @@ function pluginYummyAnime() {
                 posterFallbackCache[key] = null;
                 return Promise.resolve('');
             }
-            var isAniList = urls[index] === 'https://graphql.anilist.co';
-            var request = isAniList ? fetch(urls[index], {
+            var source = urls[index];
+            var isAniList = source.url === 'https://graphql.anilist.co';
+            var request = isAniList ? fetch(source.url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({query: 'query ($search: String) { Page(perPage: 1) { media(search: $search, type: ANIME) { coverImage { extraLarge large } } } }', variables: {search: card.title}})
-            }) : fetch(urls[index]);
+                body: JSON.stringify({query: 'query ($search: String) { Page(perPage: 1) { media(search: $search, type: ANIME) { coverImage { extraLarge large } } } }', variables: {search: source.query}})
+            }) : fetch(source.url);
             return request.then(function (response) {
                 if (!response.ok) throw new Error('poster source ' + response.status);
                 return response.json();
