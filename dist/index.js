@@ -9,7 +9,8 @@ function pluginYummyAnime() {
 (function (window) {
     'use strict';
 
-    window.LampaYaniConfig = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Config = window.LampaYaniConfig = {
         version: '0.17.0',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
@@ -171,7 +172,8 @@ function pluginYummyAnime() {
         return value === 'en' || value === 'uk' ? value : 'ru';
     }
 
-    window.LampaYaniI18n = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.I18n = window.LampaYaniI18n = {
         getLanguage: language,
         setLanguage: function (value) {
             var next = value === 'en' || value === 'uk' ? value : 'ru';
@@ -206,7 +208,8 @@ function pluginYummyAnime() {
         return data && String(data.token || data.access_token || '').trim();
     }
 
-    window.LampaYaniAuth = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Auth = window.LampaYaniAuth = {
         get: function () {
             var stored = readStored();
             return tokenFrom(stored) ? stored : memory;
@@ -376,7 +379,8 @@ function pluginYummyAnime() {
         });
     }
 
-    window.LampaYaniApi = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Api = window.LampaYaniApi = {
         request: request,
         search: function (query, params) {
             params = params || {};
@@ -565,7 +569,8 @@ function pluginYummyAnime() {
 (function (window) {
     'use strict';
 
-    window.LampaYaniCatalog = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Catalog = window.LampaYaniCatalog = {
         search: function (query, params) {
             return window.LampaYaniApi.search(query, params);
         }
@@ -621,7 +626,8 @@ function pluginYummyAnime() {
         return result;
     }
 
-    window.LampaYaniUiUtils = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.UiUtils = window.LampaYaniUiUtils = {
         videoData: videoData,
         normalizeVideoUrl: normalizeVideoUrl,
         videoHost: videoHost,
@@ -682,7 +688,8 @@ function pluginYummyAnime() {
         var probe = new Image(); probe.onload = function () {}; probe.onerror = alternative; probe.src = card.poster;
     }
     function bind(image, card) { image.off('error.yaniPoster').on('error.yaniPoster', function () { find(card).then(function (poster) { if (poster) image.attr('src', poster); }); }); if (!card.poster && !card.img) find(card).then(function (poster) { if (poster) image.attr('src', poster); }); }
-    global.LampaYaniMedia = {findAlternativePoster: find, attachPosterFallback: attach, bindPosterFallback: bind};
+    global.LampaYani = global.LampaYani || {};
+    global.LampaYani.Media = global.LampaYaniMedia = {findAlternativePoster: find, attachPosterFallback: attach, bindPosterFallback: bind};
 }(window));
 
 (function (window) {
@@ -706,7 +713,8 @@ function pluginYummyAnime() {
         return element;
     }
 
-    window.LampaYaniNavigation = {moveDown: moveDown, moveUp: moveUp, bindFocus: bindFocus};
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Navigation = window.LampaYaniNavigation = {moveDown: moveDown, moveUp: moveUp, bindFocus: bindFocus};
 }(window));
 
 (function (window) {
@@ -749,7 +757,8 @@ function pluginYummyAnime() {
         var comp = {create: function () { var self = this; this.activity.loader(true); LampaYaniApi.schedule({}).then(function (payload) { render(LampaYaniApi.normalize(payload)); scroll.append(content); html.append(scroll.render(true)); self.activity.loader(false); self.activity.toggle(); }).catch(function (error) { console.error('[YummyAnime]', error); self.activity.loader(false); Lampa.Noty.show(t('schedule_load_error')); }); }, start: function () { Lampa.Controller.add('content', {toggle: function () { Lampa.Controller.collectionSet(scroll.render()); Lampa.Controller.collectionFocus(last || false, scroll.render()); }, left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); }, right: function () { Navigator.move('right'); }, up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); }, down: function () { Navigator.move('down'); }, back: deps.goBack}); Lampa.Controller.toggle('content'); }, render: function (js) { return js ? html[0] : html; }, destroy: function () { scroll.destroy(); html.remove(); } };
         return comp;
     }
-    window.LampaYaniSchedule = {create: create};
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Schedule = window.LampaYaniSchedule = {create: create};
 }(window));
 
 (function (window) {

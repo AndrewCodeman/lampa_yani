@@ -19,5 +19,6 @@
         return element;
     }
 
-    window.LampaYaniNavigation = {moveDown: moveDown, moveUp: moveUp, bindFocus: bindFocus};
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Navigation = window.LampaYaniNavigation = {moveDown: moveDown, moveUp: moveUp, bindFocus: bindFocus};
 }(window));

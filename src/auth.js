@@ -19,7 +19,8 @@
         return data && String(data.token || data.access_token || '').trim();
     }
 
-    window.LampaYaniAuth = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Auth = window.LampaYaniAuth = {
         get: function () {
             var stored = readStored();
             return tokenFrom(stored) ? stored : memory;

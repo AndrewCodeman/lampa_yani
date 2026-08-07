@@ -1,7 +1,8 @@
 (function (window) {
     'use strict';
 
-    window.LampaYaniConfig = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Config = window.LampaYaniConfig = {
         version: '0.17.0',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',

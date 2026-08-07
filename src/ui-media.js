@@ -49,5 +49,6 @@
         var probe = new Image(); probe.onload = function () {}; probe.onerror = alternative; probe.src = card.poster;
     }
     function bind(image, card) { image.off('error.yaniPoster').on('error.yaniPoster', function () { find(card).then(function (poster) { if (poster) image.attr('src', poster); }); }); if (!card.poster && !card.img) find(card).then(function (poster) { if (poster) image.attr('src', poster); }); }
-    global.LampaYaniMedia = {findAlternativePoster: find, attachPosterFallback: attach, bindPosterFallback: bind};
+    global.LampaYani = global.LampaYani || {};
+    global.LampaYani.Media = global.LampaYaniMedia = {findAlternativePoster: find, attachPosterFallback: attach, bindPosterFallback: bind};
 }(window));

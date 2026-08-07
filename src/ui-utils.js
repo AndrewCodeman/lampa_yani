@@ -47,7 +47,8 @@
         return result;
     }
 
-    window.LampaYaniUiUtils = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.UiUtils = window.LampaYaniUiUtils = {
         videoData: videoData,
         normalizeVideoUrl: normalizeVideoUrl,
         videoHost: videoHost,

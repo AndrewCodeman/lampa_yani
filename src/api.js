@@ -95,7 +95,8 @@
         });
     }
 
-    window.LampaYaniApi = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Api = window.LampaYaniApi = {
         request: request,
         search: function (query, params) {
             params = params || {};

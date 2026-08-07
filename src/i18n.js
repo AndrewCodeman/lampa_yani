@@ -147,7 +147,8 @@
         return value === 'en' || value === 'uk' ? value : 'ru';
     }
 
-    window.LampaYaniI18n = {
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.I18n = window.LampaYaniI18n = {
         getLanguage: language,
         setLanguage: function (value) {
             var next = value === 'en' || value === 'uk' ? value : 'ru';
