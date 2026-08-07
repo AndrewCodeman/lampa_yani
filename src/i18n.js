@@ -41,6 +41,11 @@
     messages.ru.community_stats = 'Статистика сообщества';
     messages.ru.manage_list = 'Изменить список';
     messages.ru.my_rating = 'Моя оценка';
+    messages.ru.subscribe_episodes = 'Подписаться на новые серии';
+    messages.ru.unsubscribe_episodes = 'Отписаться от новых серий';
+    messages.ru.subscription_added = 'Подписка на новые серии включена';
+    messages.ru.subscription_removed = 'Подписка на новые серии отключена';
+    messages.ru.subscription_error = 'Не удалось изменить подписку';
     messages.en.notifications_title = 'YummyAnime notifications';
     messages.en.notifications_empty = 'There are no notifications';
     messages.en.notifications_error = 'Failed to load notifications';
@@ -51,6 +56,11 @@
     messages.en.community_stats = 'Community statistics';
     messages.en.manage_list = 'Change list';
     messages.en.my_rating = 'My rating';
+    messages.en.subscribe_episodes = 'Subscribe to new episodes';
+    messages.en.unsubscribe_episodes = 'Unsubscribe from new episodes';
+    messages.en.subscription_added = 'New episode subscription enabled';
+    messages.en.subscription_removed = 'New episode subscription disabled';
+    messages.en.subscription_error = 'Could not update subscription';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -72,6 +82,11 @@
     messages.uk.community_stats = 'Статистика спільноти';
     messages.uk.manage_list = 'Змінити список';
     messages.uk.my_rating = 'Моя оцінка';
+    messages.uk.subscribe_episodes = 'Підписатися на нові серії';
+    messages.uk.unsubscribe_episodes = 'Відписатися від нових серій';
+    messages.uk.subscription_added = 'Підписку на нові серії увімкнено';
+    messages.uk.subscription_removed = 'Підписку на нові серії вимкнено';
+    messages.uk.subscription_error = 'Не вдалося змінити підписку';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

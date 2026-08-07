@@ -72,6 +72,11 @@ function pluginYummyAnime() {
     messages.ru.community_stats = 'Статистика сообщества';
     messages.ru.manage_list = 'Изменить список';
     messages.ru.my_rating = 'Моя оценка';
+    messages.ru.subscribe_episodes = 'Подписаться на новые серии';
+    messages.ru.unsubscribe_episodes = 'Отписаться от новых серий';
+    messages.ru.subscription_added = 'Подписка на новые серии включена';
+    messages.ru.subscription_removed = 'Подписка на новые серии отключена';
+    messages.ru.subscription_error = 'Не удалось изменить подписку';
     messages.en.notifications_title = 'YummyAnime notifications';
     messages.en.notifications_empty = 'There are no notifications';
     messages.en.notifications_error = 'Failed to load notifications';
@@ -82,6 +87,11 @@ function pluginYummyAnime() {
     messages.en.community_stats = 'Community statistics';
     messages.en.manage_list = 'Change list';
     messages.en.my_rating = 'My rating';
+    messages.en.subscribe_episodes = 'Subscribe to new episodes';
+    messages.en.unsubscribe_episodes = 'Unsubscribe from new episodes';
+    messages.en.subscription_added = 'New episode subscription enabled';
+    messages.en.subscription_removed = 'New episode subscription disabled';
+    messages.en.subscription_error = 'Could not update subscription';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -103,6 +113,11 @@ function pluginYummyAnime() {
     messages.uk.community_stats = 'Статистика спільноти';
     messages.uk.manage_list = 'Змінити список';
     messages.uk.my_rating = 'Моя оцінка';
+    messages.uk.subscribe_episodes = 'Підписатися на нові серії';
+    messages.uk.unsubscribe_episodes = 'Відписатися від нових серій';
+    messages.uk.subscription_added = 'Підписку на нові серії увімкнено';
+    messages.uk.subscription_removed = 'Підписку на нові серії вимкнено';
+    messages.uk.subscription_error = 'Не вдалося змінити підписку';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
@@ -309,6 +324,20 @@ function pluginYummyAnime() {
         },
         videos: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/videos', {cache: false});
+        },
+        subscribeVideo: function (videoId) {
+            return request('/video/' + encodeURIComponent(videoId) + '/subscribe', {
+                method: 'PUT',
+                auth: true,
+                headers: {'Content-Type': 'application/json'},
+                body: '{}'
+            });
+        },
+        unsubscribeVideo: function (videoId) {
+            return request('/video/' + encodeURIComponent(videoId) + '/subscribe', {
+                method: 'DELETE',
+                auth: true
+            });
         },
         trailers: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/trailers');
@@ -1247,7 +1276,7 @@ function pluginYummyAnime() {
             var self = this;
             this.activity.loader(true);
             LampaYaniApi.notifications(30, offset).then(function (payload) {
-                renderNotifications(responseData(payload), offset > 0);
+                renderNotifications(normalizeNotifications(payload), offset > 0);
                 scroll.append(content);
                 html.append(scroll.render(true));
                 self.activity.loader(false);
@@ -1286,11 +1315,12 @@ function pluginYummyAnime() {
                 if (!notification.viewed && !notification.read) item.addClass('unread');
                 item.append($('<div class="yani-notification__title"></div>').text(notification.title || notification.type || t('notification')));
                 if (notification.text || notification.message) item.append($('<div class="yani-notification__text"></div>').text(notification.text || notification.message));
-                if (notification.date || notification.date_seconds) item.append($('<div class="yani-notification__date"></div>').text(formatAccountDate(notification.date || notification.date_seconds)));
+                var notificationDate = notification.date || notification.date_seconds || notification.dateSeconds;
+                if (notificationDate) item.append($('<div class="yani-notification__date"></div>').text(formatNotificationDate(notificationDate)));
                 item.on('hover:focus', function (event) { last = event.target; scroll.update($(event.target), true); });
                 item.on('hover:enter click', function () {
                     if (notification.id && !notification.viewed) LampaYaniApi.markNotificationRead(notification.id).catch(function () {});
-                    var animeId = notification.anime_id || notification.object_id;
+                    var animeId = notification.anime_id || notification.object_id || notification.objectId;
                     if (animeId) openYummyDetail(toCard({anime_id: animeId, title: notification.title || t('anime')}), false);
                 });
                 content.append(item);
@@ -1299,7 +1329,7 @@ function pluginYummyAnime() {
             more.on('hover:enter click', function () {
                 more.remove();
                 offset += items.length;
-                LampaYaniApi.notifications(30, offset).then(function (payload) { renderNotifications(responseData(payload), true); });
+                LampaYaniApi.notifications(30, offset).then(function (payload) { renderNotifications(normalizeNotifications(payload), true); });
             });
             content.append(more);
         }
@@ -1377,6 +1407,19 @@ function pluginYummyAnime() {
         } catch (error) {
             return new Date(Number(timestamp) * 1000).toLocaleDateString();
         }
+    }
+
+    function normalizeNotifications(payload) {
+        var response = payload && payload.response ? payload.response : payload;
+        var values = Array.isArray(response) ? response : response && (response.notifications || response.items || response.data) || [];
+        return Array.isArray(values) ? values : [];
+    }
+
+    function formatNotificationDate(value) {
+        if (!value) return '';
+        if (typeof value === 'number' || /^\d+$/.test(String(value))) return formatAccountDate(value);
+        var parsed = new Date(value);
+        return isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleString(locale(), {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'});
     }
 
     function formatWatchTime(seconds) {
@@ -1812,8 +1855,11 @@ function pluginYummyAnime() {
                 Lampa.Activity.push({url: '', title: t('search') + ': ' + (data.title || ''), component: 'search', search: data.title || '', page: 1});
             });
             bindDetailButtonFocus(searchButton);
+            var subscribeButton = $('<div class="yani-detail__button selector"></div>').text(t('subscribe_episodes'));
+            subscribeButton.on('hover:enter', function () { toggleEpisodeSubscription(data, subscribeButton); });
+            bindDetailButtonFocus(subscribeButton);
             var comments = $('<div class="yani-detail__comments"></div>');
-            actions.append(listButton, button, searchButton);
+            actions.append(listButton, button, searchButton, subscribeButton);
             info.append(actions);
             info.append(comments);
             html.append(poster, info);
@@ -1913,6 +1959,33 @@ function pluginYummyAnime() {
 
         this.render = function (js) { return js ? scroll.render(true) : scroll.render(); };
         this.destroy = function () { scroll.destroy(); html.remove(); };
+    }
+
+    function toggleEpisodeSubscription(card, button) {
+        if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
+        if (!card || !card.yani_id) return;
+        LampaYaniApi.videos(card.yani_id).then(function (payload) {
+            var response = payload && payload.response ? payload.response : payload;
+            var videos = Array.isArray(response) ? response : response && (response.videos || response.items) || [];
+            videos = videos.filter(function (video) { return video && (video.video_id || video.id); });
+            if (!videos.length) throw new Error('No subscribable videos');
+            videos.sort(function (a, b) { return Number(b.number || b.index || 0) - Number(a.number || a.index || 0); });
+            var videoId = videos[0].video_id || videos[0].id;
+            var key = 'yani_subscribed_video_' + card.yani_id;
+            var subscribed = Lampa.Storage && Lampa.Storage.get(key, '');
+            var action = subscribed ? LampaYaniApi.unsubscribeVideo(videoId) : LampaYaniApi.subscribeVideo(videoId);
+            return action.then(function () {
+                if (Lampa.Storage) {
+                    if (subscribed) Lampa.Storage.remove(key);
+                    else Lampa.Storage.set(key, String(videoId));
+                }
+                button.text(subscribed ? t('subscribe_episodes') : t('unsubscribe_episodes'));
+                Lampa.Noty.show(subscribed ? t('subscription_removed') : t('subscription_added'));
+            });
+        }).catch(function (error) {
+            console.error('[YummyAnime] Subscription failed', error);
+            Lampa.Noty.show(t('subscription_error'));
+        });
     }
 
     function openVideos(card, resume) {

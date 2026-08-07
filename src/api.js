@@ -91,6 +91,20 @@
         videos: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/videos', {cache: false});
         },
+        subscribeVideo: function (videoId) {
+            return request('/video/' + encodeURIComponent(videoId) + '/subscribe', {
+                method: 'PUT',
+                auth: true,
+                headers: {'Content-Type': 'application/json'},
+                body: '{}'
+            });
+        },
+        unsubscribeVideo: function (videoId) {
+            return request('/video/' + encodeURIComponent(videoId) + '/subscribe', {
+                method: 'DELETE',
+                auth: true
+            });
+        },
         trailers: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/trailers');
         },
