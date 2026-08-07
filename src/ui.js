@@ -1050,7 +1050,10 @@
             today.setHours(0, 0, 0, 0);
             dayGroups = [];
 
-            for (var dayOffset = 0; dayOffset < 7; dayOffset++) {
+            // Keep a short history as well as upcoming releases. The API
+            // may return no items for a past day, but the date remains
+            // navigable so the user can move backward and forward uniformly.
+            for (var dayOffset = -7; dayOffset <= 7; dayOffset++) {
                 var day = new Date(today.getTime());
                 day.setDate(today.getDate() + dayOffset);
                 var nextDay = new Date(day.getTime());
@@ -1084,7 +1087,7 @@
             content.append(days);
             content.append($('<div class="yani-schedule__selected-title"></div>'));
             content.append($('<div class="yani-schedule__releases"></div>'));
-            selectScheduleDay(0);
+            selectScheduleDay(dayGroups.findIndex(function (group) { return group.offset === 0; }));
         }
 
         function selectScheduleDay(index) {
