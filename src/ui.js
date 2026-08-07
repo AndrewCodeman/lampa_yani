@@ -920,6 +920,17 @@
     }
 
     function Notifications(object) {
+        return LampaYaniNotifications.create(object, {
+            t: t,
+            normalize: normalizeNotifications,
+            formatDate: formatNotificationDate,
+            toCard: toCard,
+            openDetail: openYummyDetail,
+            goBack: goBack
+        });
+    }
+
+    function LegacyNotifications(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
         var html = $('<div class="yani-notifications"></div>');
         var content = $('<div class="yani-notifications__content"></div>');
