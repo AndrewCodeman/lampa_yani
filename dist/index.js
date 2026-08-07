@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.14.4',
+            version: '0.14.5',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.14.4',
+        version: '0.14.5',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -601,12 +601,77 @@ function pluginYummyAnime() {
     function bindYummyCard(element, card) {
         addCardRatings(element, card);
         addCardMediaBadges(element, card);
+        attachPosterFallback(element, card);
         card.onEnter = function () {
             if (element.yani_id) openStandardLampaCard(element);
         };
         card.onMenu = function () {
             if (element.yani_id) showYummyActions(element);
         };
+    }
+
+    var posterFallbackCache = {};
+
+    function attachPosterFallback(element, card) {
+        var render = card && card.render ? $(card.render(true)) : $(element);
+        var image = render.find('img').first();
+        var posterBox = render.find('.card__img').first();
+        var apply = function (poster) {
+            if (!poster) return;
+            if (image.length) image.attr('src', poster);
+            if (posterBox.length) posterBox.css('background-image', 'url("' + poster.replace(/"/g, '%22') + '")');
+        };
+        var alternative = function () { findAlternativePoster(card).then(apply); };
+        if (image.length) image.off('error.yaniPoster').on('error.yaniPoster', alternative);
+        if (!card.poster) return alternative();
+        var probe = new Image();
+        probe.onload = function () {};
+        probe.onerror = alternative;
+        probe.src = card.poster;
+    }
+
+    function findAlternativePoster(card) {
+        var key = String(card.yani_id || card.title || '').toLowerCase();
+        if (!key) return Promise.resolve('');
+        if (posterFallbackCache[key]) return Promise.resolve(posterFallbackCache[key]);
+        if (posterFallbackCache[key] === null) return Promise.resolve('');
+
+        var ids = card.yani_remote_ids || {};
+        var url = ids.mal || ids.myanimelist ? 'https://api.jikan.moe/v4/anime/' + encodeURIComponent(ids.mal || ids.myanimelist) + '/full' : '';
+        if (!url && ids.shikimori) url = 'https://shikimori.one/api/animes/' + encodeURIComponent(ids.shikimori) + '.json';
+        if (!url && card.title) url = 'https://api.jikan.moe/v4/anime?q=' + encodeURIComponent(card.title) + '&limit=1';
+        if (!url) {
+            posterFallbackCache[key] = null;
+            return Promise.resolve('');
+        }
+
+        return fetch(url).then(function (response) {
+            if (!response.ok) throw new Error('poster source ' + response.status);
+            return response.json();
+        }).then(function (payload) {
+            var item = payload && payload.data ? (Array.isArray(payload.data) ? payload.data[0] : payload.data) : payload;
+            var images = item && item.images || {};
+            var poster = images.jpg && (images.jpg.large_image_url || images.jpg.image_url) ||
+                images.webp && (images.webp.large_image_url || images.webp.image_url) ||
+                item && (item.poster || item.image);
+            if (!poster) throw new Error('alternative poster is empty');
+            posterFallbackCache[key] = poster;
+            return poster;
+        }).catch(function () {
+            posterFallbackCache[key] = null;
+            return '';
+        });
+    }
+
+    function bindPosterFallback(image, card) {
+        image.off('error.yaniPoster').on('error.yaniPoster', function () {
+            findAlternativePoster(card).then(function (poster) {
+                if (poster) image.attr('src', poster);
+            });
+        });
+        if (!card.poster && !card.img) findAlternativePoster(card).then(function (poster) {
+            if (poster) image.attr('src', poster);
+        });
     }
 
     function addCardMediaBadges(element, card) {
@@ -1278,6 +1343,7 @@ function pluginYummyAnime() {
             var releaseDate = new Date(Number(episodes.next_date) * 1000);
             var row = $('<div class="yani-schedule__item selector"></div>');
             var poster = $('<img class="yani-schedule__poster" alt="">').attr('src', card.poster || '');
+            bindPosterFallback(poster, card);
             var info = $('<div class="yani-schedule__info"></div>');
             var release = $('<div class="yani-schedule__release"></div>');
 
@@ -1390,6 +1456,7 @@ function pluginYummyAnime() {
         function renderDetail(cardData) {
             data = cardData;
             var poster = $('<img class="yani-detail__poster">').attr('src', data.img || data.poster || '');
+            bindPosterFallback(poster, data);
             var info = $('<div class="yani-detail__info"></div>');
             info.append($('<div class="yani-detail__title"></div>').text(data.title || 'YummyAnime'));
             if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
@@ -1911,8 +1978,12 @@ function pluginYummyAnime() {
 
     function toCard(item) {
         var title = item.title || item.name || item.russian || item.original_title || t('untitled');
-        var poster = item.cover || item.image || item.poster_url || '';
+        var image = item.image && typeof item.image === 'object' ? item.image : {};
+        var cover = item.cover && typeof item.cover === 'object' ? item.cover : {};
+        var poster = typeof item.cover === 'string' ? item.cover : typeof item.image === 'string' ? item.image : item.poster_url ||
+            image.large || image.original || image.url || cover.large || cover.original || cover.url || '';
         if (!poster && item.poster) poster = item.poster.fullsize || item.poster.medium || item.poster.original || '';
+        if (typeof poster !== 'string') poster = '';
         if (poster.indexOf('//') === 0) poster = 'https:' + poster;
         var rating = typeof item.rating === 'object' ? item.rating.average : item.rating;
         var votes = typeof item.rating === 'object' ? item.rating.counters : item.rating_counters;
@@ -1969,7 +2040,9 @@ function pluginYummyAnime() {
             items.forEach(function (item) {
                 var card = toCard(item);
                 var row = $('<div class="yani-detail__recommendation selector"></div>');
-                row.append($('<img class="yani-detail__recommendation-poster" alt="">').attr('src', card.poster || ''));
+                var recommendationPoster = $('<img class="yani-detail__recommendation-poster" alt="">').attr('src', card.poster || '');
+                bindPosterFallback(recommendationPoster, card);
+                row.append(recommendationPoster);
                 row.append($('<div class="yani-detail__recommendation-title"></div>').text(card.title));
                 if (card.release_date) row.append($('<div class="yani-detail__recommendation-year"></div>').text(card.release_date));
                 row.on('hover:enter', function () { openYummyDetail(card, true); });
