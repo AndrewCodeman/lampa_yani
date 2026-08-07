@@ -214,6 +214,14 @@
                 body: JSON.stringify({time: Math.max(0, Number(time) || 0), duration: Math.max(0, Number(duration) || 0), times: []})
             });
         },
+        syncVideoWatches: function (videos) {
+            return request('/video', {
+                method: 'POST',
+                auth: true,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({videos: videos || []})
+            });
+        },
         health: function () {
             return request('/anime?limit=1');
         },

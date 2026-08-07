@@ -707,6 +707,26 @@
             bindAccountFocus(subscriptionsButton);
             subscriptionsButton.on('hover:enter click.yaniSubscriptions', function () { openSubscriptions(profile.id); });
             content.append(subscriptionsButton);
+            var syncButton = $('<div class="yani-account__notification-button selector"></div>');
+            syncButton.append($('<strong></strong>').text(t('sync_history')));
+            syncButton.append($('<span></span>').text(t('sync_history_description')));
+            bindAccountFocus(syncButton);
+            syncButton.on('hover:enter click.yaniSync', function () {
+                var history = playbackHistory();
+                var videos = Object.keys(history).map(function (id) {
+                    var item = history[id] || {};
+                    if (!item.video_id) return null;
+                    return {video_id: Number(item.video_id), time: Number(item.time || 0), date: Math.floor(Number(item.updated_at || Date.now()) / 1000)};
+                }).filter(function (item) { return item && item.video_id; });
+                if (!videos.length) return Lampa.Noty.show(t('history_empty'));
+                LampaYaniApi.syncVideoWatches(videos).then(function () {
+                    Lampa.Noty.show(t('sync_history_ok'));
+                }).catch(function (error) {
+                    console.error('[YummyAnime] History sync failed', error);
+                    Lampa.Noty.show(t('sync_history_error'));
+                });
+            });
+            content.append(syncButton);
 
             var counts = {};
             lists.forEach(function (anime) {
@@ -2141,6 +2161,7 @@
         history[String(card.yani_id)] = {
             number: String(video.number || video.index || ''),
             video_id: video.video_id || '',
+            time: Number(video.watched && video.watched.end_time || 0),
             player: playerKey(group),
             title: card.title || '',
             poster: card.poster || card.img || '',

@@ -37,6 +37,10 @@
     messages.ru.mark_all_read = 'Отметить все прочитанными';
     messages.ru.delete_all_notifications = 'Удалить все уведомления';
     messages.ru.notifications_more = 'Загрузить ещё уведомления';
+    messages.ru.sync_history = 'Синхронизировать просмотр';
+    messages.ru.sync_history_description = 'Отправить локальную историю в аккаунт YummyAnime';
+    messages.ru.sync_history_ok = 'История просмотра синхронизирована';
+    messages.ru.sync_history_error = 'Не удалось синхронизировать историю';
     messages.ru.for_you = 'Для вас';
     messages.ru.collections = 'Коллекции';
     messages.ru.collection = 'Коллекция';
@@ -62,6 +66,10 @@
     messages.en.mark_all_read = 'Mark all as read';
     messages.en.delete_all_notifications = 'Delete all notifications';
     messages.en.notifications_more = 'Load more notifications';
+    messages.en.sync_history = 'Sync watch history';
+    messages.en.sync_history_description = 'Send local history to your YummyAnime account';
+    messages.en.sync_history_ok = 'Watch history synchronized';
+    messages.en.sync_history_error = 'Failed to synchronize history';
     messages.en.for_you = 'For you';
     messages.en.collections = 'Collections';
     messages.en.collection = 'Collection';
@@ -98,6 +106,10 @@
     messages.uk.mark_all_read = 'Позначити всі як прочитані';
     messages.uk.delete_all_notifications = 'Видалити всі сповіщення';
     messages.uk.notifications_more = 'Завантажити ще сповіщення';
+    messages.uk.sync_history = 'Синхронізувати перегляд';
+    messages.uk.sync_history_description = 'Надіслати локальну історію до облікового запису YummyAnime';
+    messages.uk.sync_history_ok = 'Історію перегляду синхронізовано';
+    messages.uk.sync_history_error = 'Не вдалося синхронізувати історію';
     messages.uk.for_you = 'Для вас';
     messages.uk.collections = 'Колекції';
     messages.uk.collection = 'Колекція';

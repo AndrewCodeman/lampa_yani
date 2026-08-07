@@ -68,6 +68,10 @@ function pluginYummyAnime() {
     messages.ru.mark_all_read = 'Отметить все прочитанными';
     messages.ru.delete_all_notifications = 'Удалить все уведомления';
     messages.ru.notifications_more = 'Загрузить ещё уведомления';
+    messages.ru.sync_history = 'Синхронизировать просмотр';
+    messages.ru.sync_history_description = 'Отправить локальную историю в аккаунт YummyAnime';
+    messages.ru.sync_history_ok = 'История просмотра синхронизирована';
+    messages.ru.sync_history_error = 'Не удалось синхронизировать историю';
     messages.ru.for_you = 'Для вас';
     messages.ru.collections = 'Коллекции';
     messages.ru.collection = 'Коллекция';
@@ -93,6 +97,10 @@ function pluginYummyAnime() {
     messages.en.mark_all_read = 'Mark all as read';
     messages.en.delete_all_notifications = 'Delete all notifications';
     messages.en.notifications_more = 'Load more notifications';
+    messages.en.sync_history = 'Sync watch history';
+    messages.en.sync_history_description = 'Send local history to your YummyAnime account';
+    messages.en.sync_history_ok = 'Watch history synchronized';
+    messages.en.sync_history_error = 'Failed to synchronize history';
     messages.en.for_you = 'For you';
     messages.en.collections = 'Collections';
     messages.en.collection = 'Collection';
@@ -129,6 +137,10 @@ function pluginYummyAnime() {
     messages.uk.mark_all_read = 'Позначити всі як прочитані';
     messages.uk.delete_all_notifications = 'Видалити всі сповіщення';
     messages.uk.notifications_more = 'Завантажити ще сповіщення';
+    messages.uk.sync_history = 'Синхронізувати перегляд';
+    messages.uk.sync_history_description = 'Надіслати локальну історію до облікового запису YummyAnime';
+    messages.uk.sync_history_ok = 'Історію перегляду синхронізовано';
+    messages.uk.sync_history_error = 'Не вдалося синхронізувати історію';
     messages.uk.for_you = 'Для вас';
     messages.uk.collections = 'Колекції';
     messages.uk.collection = 'Колекція';
@@ -476,6 +488,14 @@ function pluginYummyAnime() {
                 auth: true,
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({time: Math.max(0, Number(time) || 0), duration: Math.max(0, Number(duration) || 0), times: []})
+            });
+        },
+        syncVideoWatches: function (videos) {
+            return request('/video', {
+                method: 'POST',
+                auth: true,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({videos: videos || []})
             });
         },
         health: function () {
@@ -1209,6 +1229,26 @@ function pluginYummyAnime() {
             bindAccountFocus(subscriptionsButton);
             subscriptionsButton.on('hover:enter click.yaniSubscriptions', function () { openSubscriptions(profile.id); });
             content.append(subscriptionsButton);
+            var syncButton = $('<div class="yani-account__notification-button selector"></div>');
+            syncButton.append($('<strong></strong>').text(t('sync_history')));
+            syncButton.append($('<span></span>').text(t('sync_history_description')));
+            bindAccountFocus(syncButton);
+            syncButton.on('hover:enter click.yaniSync', function () {
+                var history = playbackHistory();
+                var videos = Object.keys(history).map(function (id) {
+                    var item = history[id] || {};
+                    if (!item.video_id) return null;
+                    return {video_id: Number(item.video_id), time: Number(item.time || 0), date: Math.floor(Number(item.updated_at || Date.now()) / 1000)};
+                }).filter(function (item) { return item && item.video_id; });
+                if (!videos.length) return Lampa.Noty.show(t('history_empty'));
+                LampaYaniApi.syncVideoWatches(videos).then(function () {
+                    Lampa.Noty.show(t('sync_history_ok'));
+                }).catch(function (error) {
+                    console.error('[YummyAnime] History sync failed', error);
+                    Lampa.Noty.show(t('sync_history_error'));
+                });
+            });
+            content.append(syncButton);
 
             var counts = {};
             lists.forEach(function (anime) {
@@ -2643,6 +2683,7 @@ function pluginYummyAnime() {
         history[String(card.yani_id)] = {
             number: String(video.number || video.index || ''),
             video_id: video.video_id || '',
+            time: Number(video.watched && video.watched.end_time || 0),
             player: playerKey(group),
             title: card.title || '',
             poster: card.poster || card.img || '',
