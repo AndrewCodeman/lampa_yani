@@ -3,6 +3,33 @@
 
     var config = window.LampaYaniConfig;
 
+    function sleep(milliseconds) {
+        return new Promise(function (resolve) { setTimeout(resolve, milliseconds); });
+    }
+
+    function fetchWithRetry(url, options, canRetry) {
+        var retries = canRetry ? Number(config.requestRetries || 0) : 0;
+        var timeout = Number(config.requestTimeout || 15000);
+        function attempt(number) {
+            var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            var requestOptions = Object.assign({}, options);
+            if (controller) requestOptions.signal = controller.signal;
+            var timer = setTimeout(function () { if (controller) controller.abort(); }, timeout);
+            return fetch(url, requestOptions).then(function (response) {
+                clearTimeout(timer);
+                if (!response.ok && response.status >= 500 && number < retries) {
+                    return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
+                }
+                return response;
+            }).catch(function (error) {
+                clearTimeout(timer);
+                if (number < retries) return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
+                throw error;
+            });
+        }
+        return attempt(0);
+    }
+
     function request(path, options) {
         options = options || {};
         var headers = options.headers || {};
@@ -16,11 +43,11 @@
         headers.Lang = apiLanguage;
         if (options.token) headers.Authorization = 'Bearer ' + options.token;
 
-        return fetch(config.apiBase + path, {
+        return fetchWithRetry(config.apiBase + path, {
             method: options.method || 'GET',
             headers: headers,
             body: options.body
-        }).then(function (response) {
+        }, (options.method || 'GET') === 'GET').then(function (response) {
             if (!response.ok) throw new Error('YummyAnime API: ' + response.status);
             return response.json();
         }).then(function (payload) {
@@ -42,10 +69,10 @@
     function externalRequest(base, path, options) {
         options = options || {};
         var url = base.replace(/\/$/, '') + path;
-        return fetch(url, {
+        return fetchWithRetry(url, {
             method: options.method || 'GET',
             headers: {Accept: 'application/json'}
-        }).then(function (response) {
+        }, true).then(function (response) {
             if (!response.ok) throw new Error('YummyTV API: ' + response.status);
             return response.json();
         });

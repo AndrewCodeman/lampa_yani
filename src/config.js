@@ -7,6 +7,8 @@
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
-        cacheTtl: 300000
+        cacheTtl: 300000,
+        requestTimeout: 15000,
+        requestRetries: 2
     };
 }(window));

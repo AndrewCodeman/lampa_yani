@@ -10,21 +10,20 @@ const output = `function pluginYummyAnime() {
     if (window.plugin_yummy_anime_ready) return;
     window.plugin_yummy_anime_ready = true;
 
-    if (window.Lampa && Lampa.Manifest) {
-        Lampa.Manifest.plugins = {
-            type: 'other',
-            version: '0.16.7',
-            name: 'YummyAnime',
-            description: 'YummyAnime catalog, ratings, lists and account integration',
-            component: 'yani_home'
-        };
-    }
-
     var style = document.createElement('style');
     style.textContent = ${JSON.stringify(css)};
     document.head.appendChild(style);
 
 ${body}
+    if (window.Lampa && Lampa.Manifest && window.LampaYaniConfig) {
+        Lampa.Manifest.plugins = {
+            type: 'other',
+            version: LampaYaniConfig.version,
+            name: 'YummyAnime',
+            description: 'YummyAnime catalog, ratings, lists and account integration',
+            component: 'yani_home'
+        };
+    }
     try {
         window.LampaYani.register();
     } catch (error) {

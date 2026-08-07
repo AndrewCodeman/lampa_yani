@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.17.0 — 2026-08-07
+
+- Added collections, personalized updates, watch synchronization and account reviews.
+- Unified the plugin version source in `src/config.js`.
+
 ## 0.16.1 — 2026-08-07
 
 - standard Lampa card matching now tries alternate YummyAnime titles one by one;

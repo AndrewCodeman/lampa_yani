@@ -429,6 +429,19 @@
     }
 
     var posterFallbackCache = {};
+    var posterFallbackOrder = [];
+    var posterFallbackLimit = 200;
+
+    function rememberPosterFallback(key, value) {
+        if (Object.prototype.hasOwnProperty.call(posterFallbackCache, key)) {
+            posterFallbackOrder = posterFallbackOrder.filter(function (item) { return item !== key; });
+        }
+        posterFallbackCache[key] = value;
+        posterFallbackOrder.push(key);
+        while (posterFallbackOrder.length > posterFallbackLimit) {
+            delete posterFallbackCache[posterFallbackOrder.shift()];
+        }
+    }
 
     function attachPosterFallback(element, card) {
         var render = card && card.render ? $(card.render(true)) : $(element);
@@ -464,13 +477,13 @@
             urls.push({url: 'https://graphql.anilist.co', query: title});
         });
         if (!urls.length) {
-            posterFallbackCache[key] = null;
+            rememberPosterFallback(key, null);
             return Promise.resolve('');
         }
 
         function loadSource(index) {
             if (index >= urls.length) {
-                posterFallbackCache[key] = null;
+                rememberPosterFallback(key, null);
                 return Promise.resolve('');
             }
             var source = urls[index];
@@ -492,7 +505,7 @@
                     images.webp && (images.webp.large_image_url || images.webp.image_url) ||
                     item && (item.poster || item.image);
                 if (!poster) throw new Error('alternative poster is empty');
-                posterFallbackCache[key] = poster;
+                rememberPosterFallback(key, poster);
                 return poster;
             }).catch(function () { return loadSource(index + 1); });
         }
