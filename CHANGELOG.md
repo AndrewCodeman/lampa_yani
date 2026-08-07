@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.18.8 — 2026-08-08
+
+- Restored safe YummyAnime-to-Lampa card matching through the current `Lampa.TMDB` API; all known title variants are checked and native detail is opened only with a valid TMDB id.
+- Fall back to the YummyAnime detail page if no reliable TMDB match is available, rather than requesting `movie/undefined`.
+
 ## 0.18.7 — 2026-08-08
 
 - Restored immediate loading of trailers, recommendations and comments on title details; community statistics and collections remain optional.

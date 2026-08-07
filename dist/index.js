@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.18.7',
+        version: '0.18.8',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -1368,8 +1368,8 @@ function pluginYummyAnime() {
         if (!card || !id || card._yani_opening) return;
         card.yani_id = id;
         card._yani_opening = true;
-        openYummyDetail(card, false);
-        setTimeout(function () { card._yani_opening = false; }, 500);
+        openStandardLampaCard(card);
+        setTimeout(function () { card._yani_opening = false; }, 10000);
     }
 
     function getYummyId(card) {
@@ -2532,7 +2532,7 @@ function pluginYummyAnime() {
             bindDetailButtonFocus(button);
             var searchButton = $('<div class="yani-detail__button selector"></div>').text(t('open_lampa_search'));
             searchButton.on('hover:enter', function () {
-                Lampa.Activity.push({url: '', title: t('search') + ': ' + (data.title || ''), component: 'search', search: data.title || '', page: 1});
+                openStandardLampaCard(data);
             });
             bindDetailButtonFocus(searchButton);
             var subscribeButton = $('<div class="yani-detail__button selector"></div>').text(t('subscribe_episodes'));
@@ -2799,12 +2799,44 @@ function pluginYummyAnime() {
     }
 
     function openStandardLampaCard(card) {
-        // Native Lampa detail resolution is asynchronous and can hand Lampa a
-        // missing TMDB id on older clients.  Always use the known YummyAnime
-        // id here.  The detail screen still provides a separate, explicit
-        // "Open in Lampa search" action for users who need a native card.
-        if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
-        openYummyDetail(card, true);
+        // Resolve a real TMDB card before opening Lampa's native detail page.
+        // Never call `full` with an absent id: some Lampa builds then request
+        // `/movie/undefined` forever.  A YummyAnime detail remains a useful
+        // fallback when TMDB has no equivalent title.
+        var settled = false;
+        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+
+        function finish(match) {
+            if (settled) return;
+            settled = true;
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+
+            if (!match || !match.card || !isValidNativeId(match.card.id) || !match.method) {
+                openYummyDetail(card, true);
+                return;
+            }
+
+            var nativeCard = match.card;
+            nativeCard.source = nativeCard.source || 'tmdb';
+            nativeCard.yani_card = card;
+            Lampa.Activity.push({
+                url: nativeCard.url || '',
+                component: 'full',
+                id: nativeCard.id,
+                method: match.method,
+                card: nativeCard,
+                source: nativeCard.source
+            });
+        }
+
+        // Do not leave the UI blocked if a third-party TMDB proxy silently
+        // drops a request. The normal request callbacks still win when they
+        // finish in time.
+        setTimeout(function () { finish(null); }, 9000);
+        findStandardLampaCard(card).then(finish).catch(function (error) {
+            console.warn('[YummyAnime] Native Lampa card lookup failed', error);
+            finish(null);
+        });
     }
 
     function installUndefinedTmdbGuard() {
@@ -2857,7 +2889,9 @@ function pluginYummyAnime() {
     }
 
     function findStandardLampaCard(card) {
-        var tmdb = Lampa.Api && Lampa.Api.sources && Lampa.Api.sources.tmdb;
+        // `Lampa.Api.sources.tmdb` belonged to older Lampa builds. Current
+        // Lampa exposes the supported request method as `Lampa.TMDB.get`.
+        var tmdb = Lampa.TMDB;
         if (!tmdb || !tmdb.get) return Promise.resolve(null);
         var titles = LampaYaniUiUtils.standardSearchTitles(card).filter(function (title, index, list) {
             return title && list.indexOf(title) === index;
@@ -2887,12 +2921,17 @@ function pluginYummyAnime() {
         })).then(function (rows) { return rows[0].concat(rows[1]); });
     }
 
+    function isValidNativeId(id) {
+        return id !== undefined && id !== null && id !== '' && id !== 'undefined' &&
+            String(id).match(/^\d+$/) !== null;
+    }
+
     function bestStandardCard(items, yaniCard) {
         var expectedTitles = LampaYaniUiUtils.standardSearchTitles(yaniCard).map(LampaYaniUiUtils.normalizeMatchTitle).filter(Boolean);
         var expectedYear = String(yaniCard.release_date || '').slice(0, 4);
         items.forEach(function (entry) {
             var candidate = entry.card || {};
-            var titles = [candidate.title, candidate.name, candidate.original_title, candidate.original_name].map(normalizeMatchTitle).filter(Boolean);
+            var titles = [candidate.title, candidate.name, candidate.original_title, candidate.original_name].map(LampaYaniUiUtils.normalizeMatchTitle).filter(Boolean);
             var exact = titles.some(function (title) { return expectedTitles.indexOf(title) >= 0; });
             var partial = !exact && titles.some(function (title) {
                 return expectedTitles.some(function (expected) { return title.indexOf(expected) >= 0 || expected.indexOf(title) >= 0; });
@@ -2901,8 +2940,8 @@ function pluginYummyAnime() {
             entry.score = (exact ? 100 : partial ? 40 : 0) + (expectedYear && candidateYear === expectedYear ? 30 : 0);
         });
         items.sort(function (a, b) { return b.score - a.score; });
-        if (!items.length || items[0].score < 70) return null;
-        items[0].card.source = 'tmdb';
+        if (!items.length || items[0].score < 70 || !isValidNativeId(items[0].card && items[0].card.id)) return null;
+        items[0].card.source = items[0].card.source || 'tmdb';
         return items[0];
     }
 
@@ -2927,7 +2966,7 @@ function pluginYummyAnime() {
             var cards = Object.keys(cardsById).map(function (key) { return cardsById[key]; });
             var expected = LampaYaniUiUtils.normalizeMatchTitle(title);
             cards.forEach(function (card) {
-                var titles = card.yani_titles.map(normalizeMatchTitle);
+                var titles = card.yani_titles.map(LampaYaniUiUtils.normalizeMatchTitle);
                 card._match_score = (titles.indexOf(expected) >= 0 ? 100 : titles.some(function (value) { return value.indexOf(expected) >= 0 || expected.indexOf(value) >= 0; }) ? 40 : 0) + (year && card.release_date === year ? 30 : 0);
             });
             cards.sort(function (a, b) { return b._match_score - a._match_score; });
