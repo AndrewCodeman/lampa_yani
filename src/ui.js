@@ -290,7 +290,7 @@
         addCardMediaBadges(element, card);
         attachPosterFallback(element, card);
         card.onEnter = function () {
-            if (card.yani_id) openStandardLampaCard(card);
+            if (card.yani_id) openYummyDetail(card, false);
         };
         card.onMenu = function () {
             if (card.yani_id) showYummyActions(card);

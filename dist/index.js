@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.16.8',
+        version: '0.16.9',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -662,7 +662,7 @@ function pluginYummyAnime() {
         addCardMediaBadges(element, card);
         attachPosterFallback(element, card);
         card.onEnter = function () {
-            if (card.yani_id) openStandardLampaCard(card);
+            if (card.yani_id) openYummyDetail(card, false);
         };
         card.onMenu = function () {
             if (card.yani_id) showYummyActions(card);
