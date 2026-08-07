@@ -108,6 +108,8 @@
                         reject(error);
                     });
                 };
+                // Lampa builds use both spellings across releases.
+                comp.nextPageRequest = comp.nextPageReuest;
                 comp.cardRender = function (page, element, card) {
                     bindYummyCard(element, card);
                 };
@@ -183,7 +185,7 @@
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { Navigator.move('down'); },
+                down: function () { movePageDown(scroll); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -1160,7 +1162,7 @@
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
-                down: function () { Navigator.move('down'); },
+                down: function () { movePageDown(scroll); },
                 back: goBack
             });
             Lampa.Controller.toggle('content');
@@ -1398,6 +1400,11 @@
 
     function normalizeMatchTitle(value) {
         return String(value || '').toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9]+/gi, ' ').trim();
+    }
+
+    function movePageDown(scroll) {
+        if (Navigator.canmove('down')) Navigator.move('down');
+        else if (scroll && scroll.isFilled()) scroll.wheel(250);
     }
 
     function chooseEpisode(card, group) {

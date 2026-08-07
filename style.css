@@ -46,6 +46,7 @@
 
 .yani-detail {
     display: flex;
+    flex-wrap: wrap;
     gap: 2.5em;
     padding: 2em;
     max-width: 100%;
