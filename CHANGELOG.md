@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.15.1 — 2026-08-07
+
+- changed action settings to button rows without `Да/Нет` or `undefined` values;
+- moved home-section switches into a visually separated section at the bottom of settings.
+
 ## 0.15.0 — 2026-08-07
 
 - added rating-service logos for card and detail rating badges;

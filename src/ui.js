@@ -1892,7 +1892,7 @@
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
-            param: {name: 'yani_about', type: 'trigger'},
+            param: {name: 'yani_about', type: 'button'},
             field: {
                 name: t('version_name') + ' ' + LampaYaniConfig.version,
                 description: t('unofficial_extension') + ' · ' + t('website_description') + ': ' + yummyWebsiteUrl()
@@ -1911,6 +1911,90 @@
             }
         });
 
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {
+                name: 'yani_player_preference',
+                type: 'select',
+                values: {last: t('player_last'), ask: t('player_ask'), kodik: 'Kodik', alloha: 'Alloha', cvh: 'CVH', sibnet: 'Sibnet', aksor: 'Aksor'},
+                default: 'last'
+            },
+            field: {name: t('player_preference'), description: t('player_preference_description')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_clear_playback_history', type: 'button'},
+            field: {name: t('clear_history'), description: t('clear_history_description')},
+            onChange: function () {
+                if (Lampa.Storage) Lampa.Storage.set('yani_playback_history', '{}');
+                Lampa.Noty.show(t('history_cleared'));
+            }
+        });
+
+        var authorized = Boolean(LampaYaniAuth.token());
+        if (authorized) {
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_state', type: 'button'},
+                field: {name: t('authorized') + ': ' + authDisplayName(), description: t('auth_manage_description')},
+                onChange: openSettingsLogin
+            });
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_refresh', type: 'button'},
+                field: {name: t('refresh_name'), description: t('refresh_description')},
+                onChange: function () {
+                    LampaYaniAuth.refresh().then(function () {
+                        Lampa.Noty.show(t('token_refreshed'));
+                    }).catch(function (error) {
+                        console.error('[YummyAnime]', error);
+                        Lampa.Noty.show(t('token_refresh_error'));
+                    });
+                }
+            });
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_logout', type: 'button'},
+                field: {name: t('logout_name'), description: t('logout_description')},
+                onChange: function () {
+                    LampaYaniAuth.logout().then(function () {
+                        Lampa.Noty.show(t('logged_out'));
+                    }).catch(function (error) {
+                        console.error('[YummyAnime]', error);
+                        Lampa.Noty.show(t('token_removed'));
+                    });
+                }
+            });
+        } else {
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_login', type: 'button'},
+                field: {name: t('login_name'), description: t('login_description')},
+                onChange: openSettingsLogin
+            });
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_api_check', type: 'button'},
+            field: {name: t('api_check_name'), description: t('api_check_description')},
+            onChange: function () {
+                LampaYaniApi.health().then(function () {
+                    Lampa.Noty.show(t('api_ok'));
+                }).catch(function (error) {
+                    console.error('[YummyAnime]', error);
+                    Lampa.Noty.show(t('api_error'));
+                });
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_home_sections_title', type: 'title'},
+            field: {name: t('home_sections')}
+        });
+
         [
             ['catalog', 'catalog'],
             ['genres', 'genres'],
@@ -1926,84 +2010,6 @@
                 param: {name: 'yani_section_' + section[0], type: 'trigger', default: true},
                 field: {name: t(section[1]), description: t('section_visibility_description')}
             });
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'yani',
-            param: {
-                name: 'yani_player_preference',
-                type: 'select',
-                values: {last: t('player_last'), ask: t('player_ask'), kodik: 'Kodik', alloha: 'Alloha', cvh: 'CVH', sibnet: 'Sibnet', aksor: 'Aksor'},
-                default: 'last'
-            },
-            field: {name: t('player_preference'), description: t('player_preference_description')}
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'yani',
-            param: {name: 'yani_clear_playback_history', type: 'trigger'},
-            field: {name: t('clear_history'), description: t('clear_history_description')},
-            onChange: function () {
-                if (Lampa.Storage) Lampa.Storage.set('yani_playback_history', '{}');
-                Lampa.Noty.show(t('history_cleared'));
-            }
-        });
-
-        var authorized = Boolean(LampaYaniAuth.token());
-        if (authorized) {
-            Lampa.SettingsApi.addParam({
-                component: 'yani',
-                param: {name: 'yani_account_state', type: 'trigger'},
-                field: {name: t('authorized') + ': ' + authDisplayName(), description: t('auth_manage_description')},
-                onChange: openSettingsLogin
-            });
-            Lampa.SettingsApi.addParam({
-                component: 'yani',
-                param: {name: 'yani_account_refresh', type: 'trigger'},
-                field: {name: t('refresh_name'), description: t('refresh_description')},
-                onChange: function () {
-                    LampaYaniAuth.refresh().then(function () {
-                        Lampa.Noty.show(t('token_refreshed'));
-                    }).catch(function (error) {
-                        console.error('[YummyAnime]', error);
-                        Lampa.Noty.show(t('token_refresh_error'));
-                    });
-                }
-            });
-            Lampa.SettingsApi.addParam({
-                component: 'yani',
-                param: {name: 'yani_account_logout', type: 'trigger'},
-                field: {name: t('logout_name'), description: t('logout_description')},
-                onChange: function () {
-                    LampaYaniAuth.logout().then(function () {
-                        Lampa.Noty.show(t('logged_out'));
-                    }).catch(function (error) {
-                        console.error('[YummyAnime]', error);
-                        Lampa.Noty.show(t('token_removed'));
-                    });
-                }
-            });
-        } else {
-            Lampa.SettingsApi.addParam({
-                component: 'yani',
-                param: {name: 'yani_account_login', type: 'trigger'},
-                field: {name: t('login_name'), description: t('login_description')},
-                onChange: openSettingsLogin
-            });
-        }
-
-        Lampa.SettingsApi.addParam({
-            component: 'yani',
-            param: {name: 'yani_api_check', type: 'trigger'},
-            field: {name: t('api_check_name'), description: t('api_check_description')},
-            onChange: function () {
-                LampaYaniApi.health().then(function () {
-                    Lampa.Noty.show(t('api_ok'));
-                }).catch(function (error) {
-                    console.error('[YummyAnime]', error);
-                    Lampa.Noty.show(t('api_error'));
-                });
-            }
         });
     }
 

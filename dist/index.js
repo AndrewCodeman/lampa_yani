@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.15.0',
+            version: '0.15.1',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.15.0',
+        version: '0.15.1',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -35,7 +35,7 @@ function pluginYummyAnime() {
     var key = 'yani_language';
     var messages = {
         ru: {
-            catalog: 'Каталог', genres: 'Жанры', search: 'Поиск', schedule: 'Расписание', continue_watching: 'Продолжить просмотр', history_empty: 'История просмотра YummyAnime пуста', history_load_error: 'Не удалось загрузить историю просмотра YummyAnime', status: 'Статус', top_rated: 'Лучшие', account: 'Аккаунт', anime: 'Аниме',
+            catalog: 'Каталог', genres: 'Жанры', search: 'Поиск', schedule: 'Расписание', continue_watching: 'Продолжить просмотр', history_empty: 'История просмотра YummyAnime пуста', history_load_error: 'Не удалось загрузить историю просмотра YummyAnime', status: 'Статус', top_rated: 'Лучшие', account: 'Аккаунт', anime: 'Аниме', home_sections: 'Разделы главного экрана',
             catalog_load_error: 'Не удалось загрузить каталог YummyAnime', next_page_error: 'Не удалось загрузить следующую страницу YummyAnime',
             login_required: 'Войдите в YummyAnime через настройки YummyAnime', actions: 'Действия YummyAnime', actions_short: 'Действия', yummy_details: 'Подробности YummyAnime', favorite: 'Добавить в любимые', watching: 'Смотрю', planned: 'В планах', completed: 'Просмотрено', dropped: 'Брошено', postponed: 'Отложено', comments: 'Комментарии', comments_empty: 'Комментариев пока нет', replies: 'ответов', replies_title: 'Ответы на комментарий', load_more: 'Загрузить ещё', saved: 'Изменения сохранены в YummyAnime', save_error: 'Не удалось сохранить оценку',
             not_logged_in: 'Вход не выполнен', login_hint: 'Откройте Настройки → YummyAnime и выберите «Войти в YummyAnime».', account_load_error: 'Не удалось загрузить аккаунт YummyAnime', account_retry: 'Обновите токен или выполните вход заново в Настройки → YummyAnime.', authorized: 'Авторизован в YummyAnime', banned: 'Аккаунт заблокирован', registration: 'Регистрация', last_visit: 'Последний визит', roles: 'Роли', user: 'Пользователь', messages: 'Сообщения', unread: 'непрочитанных', notifications: 'Уведомления', total_lists: 'Всего в списках', list_stats: 'Статистика списков', list: 'Список', anime_count: 'аниме', total_time: 'Общее время', days_short: 'д', hours_short: 'ч',
@@ -46,7 +46,7 @@ function pluginYummyAnime() {
             login_name: 'Войти в YummyAnime', login_description: 'Вход по никнейму или email и паролю YummyAnime', refresh_name: 'Обновить токен YummyAnime', refresh_description: 'Обновить действующий Bearer-токен аккаунта', login_first: 'Сначала войдите в YummyAnime', token_refreshed: 'Токен YummyAnime обновлён', token_refresh_error: 'Не удалось обновить токен YummyAnime', logout_name: 'Выйти из YummyAnime', logout_description: 'Завершить сессию и удалить локальный токен', not_logged: 'Вход в YummyAnime не выполнен', logged_out: 'Вы вышли из YummyAnime', token_removed: 'Локальный токен YummyAnime удалён', api_check_name: 'Проверить YummyAnime API', api_check_description: 'Проверить доступность API и публичный токен приложения', api_ok: 'YummyAnime API работает', api_error: 'YummyAnime API недоступен или публичный токен неверный', email_prompt: 'Никнейм или Email', email_required: 'Введите никнейм или email YummyAnime', password_prompt: 'Пароль YummyAnime', password_required: 'Введите пароль YummyAnime', login_ok: 'Вход в YummyAnime выполнен', login_error: 'Ошибка входа в YummyAnime', input_unavailable: 'Ввод недоступен в этой версии Lampa', comments_title: 'Комментарии YummyAnime', comments_error: 'Не удалось загрузить комментарии', kinopoisk: 'Кинопоиск'
         },
         en: {
-            catalog: 'Catalog', genres: 'Genres', search: 'Search', schedule: 'Schedule', continue_watching: 'Continue Watching', history_empty: 'YummyAnime playback history is empty', history_load_error: 'Failed to load YummyAnime playback history', status: 'Status', top_rated: 'Top Rated', account: 'Account', anime: 'Anime',
+            catalog: 'Catalog', genres: 'Genres', search: 'Search', schedule: 'Schedule', continue_watching: 'Continue Watching', history_empty: 'YummyAnime playback history is empty', history_load_error: 'Failed to load YummyAnime playback history', status: 'Status', top_rated: 'Top Rated', account: 'Account', anime: 'Anime', home_sections: 'Home screen sections',
             catalog_load_error: 'Failed to load the YummyAnime catalog', next_page_error: 'Failed to load the next YummyAnime page',
             login_required: 'Sign in to YummyAnime in YummyAnime settings', actions: 'YummyAnime actions', actions_short: 'Actions', yummy_details: 'YummyAnime details', favorite: 'Add to favorites', watching: 'Watching', planned: 'Planned', completed: 'Completed', dropped: 'Dropped', postponed: 'On hold', comments: 'Comments', comments_empty: 'There are no comments yet', replies: 'replies', replies_title: 'Comment replies', load_more: 'Load more', saved: 'Changes saved to YummyAnime', save_error: 'Failed to save the rating',
             not_logged_in: 'Not signed in', login_hint: 'Open Settings → YummyAnime and select “Sign in to YummyAnime”.', account_load_error: 'Failed to load the YummyAnime account', account_retry: 'Refresh the token or sign in again under Settings → YummyAnime.', authorized: 'Signed in to YummyAnime', banned: 'Account is banned', registration: 'Registered', last_visit: 'Last visit', roles: 'Roles', user: 'User', messages: 'Messages', unread: 'unread', notifications: 'Notifications', total_lists: 'Total in lists', list_stats: 'List statistics', list: 'List', anime_count: 'anime', total_time: 'Total time', days_short: 'd', hours_short: 'h',
@@ -2259,7 +2259,7 @@ function pluginYummyAnime() {
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
-            param: {name: 'yani_about', type: 'trigger'},
+            param: {name: 'yani_about', type: 'button'},
             field: {
                 name: t('version_name') + ' ' + LampaYaniConfig.version,
                 description: t('unofficial_extension') + ' · ' + t('website_description') + ': ' + yummyWebsiteUrl()
@@ -2278,6 +2278,90 @@ function pluginYummyAnime() {
             }
         });
 
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {
+                name: 'yani_player_preference',
+                type: 'select',
+                values: {last: t('player_last'), ask: t('player_ask'), kodik: 'Kodik', alloha: 'Alloha', cvh: 'CVH', sibnet: 'Sibnet', aksor: 'Aksor'},
+                default: 'last'
+            },
+            field: {name: t('player_preference'), description: t('player_preference_description')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_clear_playback_history', type: 'button'},
+            field: {name: t('clear_history'), description: t('clear_history_description')},
+            onChange: function () {
+                if (Lampa.Storage) Lampa.Storage.set('yani_playback_history', '{}');
+                Lampa.Noty.show(t('history_cleared'));
+            }
+        });
+
+        var authorized = Boolean(LampaYaniAuth.token());
+        if (authorized) {
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_state', type: 'button'},
+                field: {name: t('authorized') + ': ' + authDisplayName(), description: t('auth_manage_description')},
+                onChange: openSettingsLogin
+            });
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_refresh', type: 'button'},
+                field: {name: t('refresh_name'), description: t('refresh_description')},
+                onChange: function () {
+                    LampaYaniAuth.refresh().then(function () {
+                        Lampa.Noty.show(t('token_refreshed'));
+                    }).catch(function (error) {
+                        console.error('[YummyAnime]', error);
+                        Lampa.Noty.show(t('token_refresh_error'));
+                    });
+                }
+            });
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_logout', type: 'button'},
+                field: {name: t('logout_name'), description: t('logout_description')},
+                onChange: function () {
+                    LampaYaniAuth.logout().then(function () {
+                        Lampa.Noty.show(t('logged_out'));
+                    }).catch(function (error) {
+                        console.error('[YummyAnime]', error);
+                        Lampa.Noty.show(t('token_removed'));
+                    });
+                }
+            });
+        } else {
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_account_login', type: 'button'},
+                field: {name: t('login_name'), description: t('login_description')},
+                onChange: openSettingsLogin
+            });
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_api_check', type: 'button'},
+            field: {name: t('api_check_name'), description: t('api_check_description')},
+            onChange: function () {
+                LampaYaniApi.health().then(function () {
+                    Lampa.Noty.show(t('api_ok'));
+                }).catch(function (error) {
+                    console.error('[YummyAnime]', error);
+                    Lampa.Noty.show(t('api_error'));
+                });
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_home_sections_title', type: 'title'},
+            field: {name: t('home_sections')}
+        });
+
         [
             ['catalog', 'catalog'],
             ['genres', 'genres'],
@@ -2293,84 +2377,6 @@ function pluginYummyAnime() {
                 param: {name: 'yani_section_' + section[0], type: 'trigger', default: true},
                 field: {name: t(section[1]), description: t('section_visibility_description')}
             });
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'yani',
-            param: {
-                name: 'yani_player_preference',
-                type: 'select',
-                values: {last: t('player_last'), ask: t('player_ask'), kodik: 'Kodik', alloha: 'Alloha', cvh: 'CVH', sibnet: 'Sibnet', aksor: 'Aksor'},
-                default: 'last'
-            },
-            field: {name: t('player_preference'), description: t('player_preference_description')}
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'yani',
-            param: {name: 'yani_clear_playback_history', type: 'trigger'},
-            field: {name: t('clear_history'), description: t('clear_history_description')},
-            onChange: function () {
-                if (Lampa.Storage) Lampa.Storage.set('yani_playback_history', '{}');
-                Lampa.Noty.show(t('history_cleared'));
-            }
-        });
-
-        var authorized = Boolean(LampaYaniAuth.token());
-        if (authorized) {
-            Lampa.SettingsApi.addParam({
-                component: 'yani',
-                param: {name: 'yani_account_state', type: 'trigger'},
-                field: {name: t('authorized') + ': ' + authDisplayName(), description: t('auth_manage_description')},
-                onChange: openSettingsLogin
-            });
-            Lampa.SettingsApi.addParam({
-                component: 'yani',
-                param: {name: 'yani_account_refresh', type: 'trigger'},
-                field: {name: t('refresh_name'), description: t('refresh_description')},
-                onChange: function () {
-                    LampaYaniAuth.refresh().then(function () {
-                        Lampa.Noty.show(t('token_refreshed'));
-                    }).catch(function (error) {
-                        console.error('[YummyAnime]', error);
-                        Lampa.Noty.show(t('token_refresh_error'));
-                    });
-                }
-            });
-            Lampa.SettingsApi.addParam({
-                component: 'yani',
-                param: {name: 'yani_account_logout', type: 'trigger'},
-                field: {name: t('logout_name'), description: t('logout_description')},
-                onChange: function () {
-                    LampaYaniAuth.logout().then(function () {
-                        Lampa.Noty.show(t('logged_out'));
-                    }).catch(function (error) {
-                        console.error('[YummyAnime]', error);
-                        Lampa.Noty.show(t('token_removed'));
-                    });
-                }
-            });
-        } else {
-            Lampa.SettingsApi.addParam({
-                component: 'yani',
-                param: {name: 'yani_account_login', type: 'trigger'},
-                field: {name: t('login_name'), description: t('login_description')},
-                onChange: openSettingsLogin
-            });
-        }
-
-        Lampa.SettingsApi.addParam({
-            component: 'yani',
-            param: {name: 'yani_api_check', type: 'trigger'},
-            field: {name: t('api_check_name'), description: t('api_check_description')},
-            onChange: function () {
-                LampaYaniApi.health().then(function () {
-                    Lampa.Noty.show(t('api_ok'));
-                }).catch(function (error) {
-                    console.error('[YummyAnime]', error);
-                    Lampa.Noty.show(t('api_error'));
-                });
-            }
         });
     }
 
