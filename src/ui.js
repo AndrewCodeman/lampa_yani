@@ -38,7 +38,7 @@
                 LampaYaniAuth.refresh().catch(function () { console.warn('[YummyAnime] Token refresh failed'); });
             }
 
-            Lampa.Menu.addButton(yummyIcon, 'YummyAnime', function () {
+            Lampa.Menu.addButton(yummyIcon, 'YummyAnime for Lampa', function () {
                 Lampa.Activity.push({
                     url: 'yani',
                     title: 'YummyAnime',
@@ -2001,7 +2001,7 @@
         Lampa.SettingsApi.addComponent({
             component: 'yani',
             icon: '<svg viewBox="0 0 20 20"><path fill="currentColor" d="M18.45 0H1.55A1.55 1.55 0 000 1.55v16.9A1.54 1.54 0 001.55 20h16.9A1.55 1.55 0 0020 18.45V1.55A1.54 1.54 0 0018.45 0Zm-2.83 5.93-2.1 2.66-2.3-5.43a6.95 6.95 0 014.4 2.77Zm-2.9 6.57h-4l2.03-4.8 1.98 4.8Zm-2.37-9.34L7.8 9.06 4.87 5.33c.64-.7 1.4-1.26 2.27-1.65a8.18 8.18 0 013.2-.52ZM3.57 7.39l3.2 4.06-1.56 3.58A6.96 6.96 0 013.57 7.39Zm6.57 9.56c-1.05.01-2.1-.2-3.05-.65l.76-1.8h5.7l.49 1.15a6.93 6.93 0 01-3.9 1.3Zm6.8-7.07a7.8 7.8 0 01-1.17 4L14.55 11l2.17-2.77c.14.54.21 1.1.23 1.65Z"/></svg>',
-            name: 'YummyAnime'
+            name: 'YummyAnime for Lampa'
         });
 
         Lampa.SettingsApi.addParam({
