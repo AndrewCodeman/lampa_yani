@@ -2200,7 +2200,7 @@
 
     function yummyWebsiteUrl() {
         var language = LampaYaniI18n.getLanguage();
-        return language === 'en' ? 'https://en.yummyani.me/' : language === 'uk' ? 'https://uk.yummyani.me/' : 'https://ru.yummyani.me/';
+        return language === 'en' || language === 'uk' ? 'https://en.yummyani.me/' : 'https://ru.yummyani.me/';
     }
 
     function openYummyWebsite() {
