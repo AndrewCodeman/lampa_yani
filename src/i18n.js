@@ -37,6 +37,8 @@
     messages.ru.mark_all_read = 'Отметить все прочитанными';
     messages.ru.delete_all_notifications = 'Удалить все уведомления';
     messages.ru.notifications_more = 'Загрузить ещё уведомления';
+    messages.ru.for_you = 'Для вас';
+    messages.ru.recommendations_empty = 'Рекомендации появятся после просмотра тайтлов';
     messages.ru.subscriptions = 'Подписки на новые серии';
     messages.ru.subscriptions_empty = 'Подписок на новые серии нет';
     messages.ru.subscriptions_error = 'Не удалось загрузить подписки';
@@ -55,6 +57,8 @@
     messages.en.mark_all_read = 'Mark all as read';
     messages.en.delete_all_notifications = 'Delete all notifications';
     messages.en.notifications_more = 'Load more notifications';
+    messages.en.for_you = 'For you';
+    messages.en.recommendations_empty = 'Recommendations will appear after you watch some anime';
     messages.en.subscriptions = 'New episode subscriptions';
     messages.en.subscriptions_empty = 'There are no episode subscriptions';
     messages.en.subscriptions_error = 'Failed to load subscriptions';
@@ -84,6 +88,8 @@
     messages.uk.mark_all_read = 'Позначити всі як прочитані';
     messages.uk.delete_all_notifications = 'Видалити всі сповіщення';
     messages.uk.notifications_more = 'Завантажити ще сповіщення';
+    messages.uk.for_you = 'Для вас';
+    messages.uk.recommendations_empty = 'Рекомендації з’являться після перегляду тайтлів';
     messages.uk.subscriptions = 'Підписки на нові серії';
     messages.uk.subscriptions_empty = 'Підписок на нові серії немає';
     messages.uk.subscriptions_error = 'Не вдалося завантажити підписки';

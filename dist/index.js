@@ -68,6 +68,8 @@ function pluginYummyAnime() {
     messages.ru.mark_all_read = 'Отметить все прочитанными';
     messages.ru.delete_all_notifications = 'Удалить все уведомления';
     messages.ru.notifications_more = 'Загрузить ещё уведомления';
+    messages.ru.for_you = 'Для вас';
+    messages.ru.recommendations_empty = 'Рекомендации появятся после просмотра тайтлов';
     messages.ru.subscriptions = 'Подписки на новые серии';
     messages.ru.subscriptions_empty = 'Подписок на новые серии нет';
     messages.ru.subscriptions_error = 'Не удалось загрузить подписки';
@@ -86,6 +88,8 @@ function pluginYummyAnime() {
     messages.en.mark_all_read = 'Mark all as read';
     messages.en.delete_all_notifications = 'Delete all notifications';
     messages.en.notifications_more = 'Load more notifications';
+    messages.en.for_you = 'For you';
+    messages.en.recommendations_empty = 'Recommendations will appear after you watch some anime';
     messages.en.subscriptions = 'New episode subscriptions';
     messages.en.subscriptions_empty = 'There are no episode subscriptions';
     messages.en.subscriptions_error = 'Failed to load subscriptions';
@@ -115,6 +119,8 @@ function pluginYummyAnime() {
     messages.uk.mark_all_read = 'Позначити всі як прочитані';
     messages.uk.delete_all_notifications = 'Видалити всі сповіщення';
     messages.uk.notifications_more = 'Завантажити ще сповіщення';
+    messages.uk.for_you = 'Для вас';
+    messages.uk.recommendations_empty = 'Рекомендації з’являться після перегляду тайтлів';
     messages.uk.subscriptions = 'Підписки на нові серії';
     messages.uk.subscriptions_empty = 'Підписок на нові серії немає';
     messages.uk.subscriptions_error = 'Не вдалося завантажити підписки';
@@ -592,6 +598,7 @@ function pluginYummyAnime() {
                 return comp;
             });
 
+            Lampa.Component.add('yani_recommended', Recommended);
             Lampa.Component.add('yani_schedule', Schedule);
             Lampa.Component.add('yani_history', History);
 
@@ -634,6 +641,9 @@ function pluginYummyAnime() {
             }},
             {key: 'top_rated', title: t('top_rated'), action: function () {
                 Lampa.Activity.push({url: 'yani/top-rated', title: 'YummyAnime ' + t('top_rated'), component: 'yani_catalog', params: {limit: 30, sort: 'rating', sort_forward: false}});
+            }},
+            {key: 'for_you', title: t('for_you'), action: function () {
+                Lampa.Activity.push({url: 'yani/for-you', title: 'YummyAnime ' + t('for_you'), component: 'yani_recommended'});
             }},
             {key: 'account', title: t('account'), action: openAccount}
         ].filter(function (item) { return homeSectionEnabled(item.key); });
@@ -682,9 +692,48 @@ function pluginYummyAnime() {
             continue_watching: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg>',
             status: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h4l2-6 4 12 2-6h6"/></svg>',
             top_rated: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg>',
+            for_you: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S4 15.7 4 9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5c0 6.2-8 11-8 11Z"/><path d="M12 11v5M9.5 13.5h5"/></svg>',
             account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/></svg>'
         };
         return icons[key] || icons.catalog;
+    }
+
+    function Recommended(object) {
+        var comp = new Lampa.InteractionCategory(object);
+        comp.create = function () {
+            var self = this;
+            var history = playbackHistory();
+            var ids = Object.keys(history).sort(function (a, b) {
+                return Number(history[b].updated_at || 0) - Number(history[a].updated_at || 0);
+            }).slice(0, 3);
+            this.activity.loader(true);
+            if (!ids.length) {
+                Lampa.Noty.show(t('recommendations_empty'));
+                return LampaYaniApi.catalog({limit: 30, sort: 'top', sort_forward: false}).then(function (payload) {
+                    self.build({results: LampaYaniApi.normalize(payload).map(toCard), total_pages: 1, title: t('for_you')});
+                }).catch(function () {
+                    self.build({results: [], total_pages: 1, title: t('for_you')});
+                });
+            }
+            Promise.all(ids.map(function (id) {
+                return LampaYaniApi.recommendations(id).then(LampaYaniApi.normalize).catch(function () { return []; });
+            })).then(function (rows) {
+                var seen = {};
+                var cards = [];
+                rows.forEach(function (items) {
+                    items.forEach(function (item) {
+                        var card = toCard(item);
+                        var key = String(card.yani_id || card.title);
+                        if (!seen[key]) { seen[key] = true; cards.push(card); }
+                    });
+                });
+                self.build({results: cards.slice(0, 40), total_pages: 1, title: t('for_you')});
+            }).catch(function () {
+                self.build({results: [], total_pages: 1, title: t('for_you')});
+            });
+        };
+        comp.cardRender = bindYummyCardRender;
+        return comp;
     }
 
     function History(object) {
