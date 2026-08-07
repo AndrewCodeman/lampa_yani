@@ -41,6 +41,10 @@
     messages.ru.sync_history_description = 'Отправить локальную историю в аккаунт YummyAnime';
     messages.ru.sync_history_ok = 'История просмотра синхронизирована';
     messages.ru.sync_history_error = 'Не удалось синхронизировать историю';
+    messages.ru.my_reviews = 'Мои отзывы';
+    messages.ru.my_reviews_description = 'Отзывы пользователя YummyAnime';
+    messages.ru.reviews_empty = 'Отзывов пока нет';
+    messages.ru.reviews_error = 'Не удалось загрузить отзывы';
     messages.ru.for_you = 'Для вас';
     messages.ru.collections = 'Коллекции';
     messages.ru.collection = 'Коллекция';
@@ -70,6 +74,10 @@
     messages.en.sync_history_description = 'Send local history to your YummyAnime account';
     messages.en.sync_history_ok = 'Watch history synchronized';
     messages.en.sync_history_error = 'Failed to synchronize history';
+    messages.en.my_reviews = 'My reviews';
+    messages.en.my_reviews_description = 'Your YummyAnime reviews';
+    messages.en.reviews_empty = 'There are no reviews yet';
+    messages.en.reviews_error = 'Failed to load reviews';
     messages.en.for_you = 'For you';
     messages.en.collections = 'Collections';
     messages.en.collection = 'Collection';
@@ -110,6 +118,10 @@
     messages.uk.sync_history_description = 'Надіслати локальну історію до облікового запису YummyAnime';
     messages.uk.sync_history_ok = 'Історію перегляду синхронізовано';
     messages.uk.sync_history_error = 'Не вдалося синхронізувати історію';
+    messages.uk.my_reviews = 'Мої відгуки';
+    messages.uk.my_reviews_description = 'Відгуки користувача YummyAnime';
+    messages.uk.reviews_empty = 'Відгуків ще немає';
+    messages.uk.reviews_error = 'Не вдалося завантажити відгуки';
     messages.uk.for_you = 'Для вас';
     messages.uk.collections = 'Колекції';
     messages.uk.collection = 'Колекція';

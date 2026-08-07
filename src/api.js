@@ -188,6 +188,9 @@
         userStatsTypes: function (id) {
             return request('/users/' + encodeURIComponent(id) + '/stats/types-v2', {auth: true, cache: false});
         },
+        userReviews: function (id, limit, offset) {
+            return request('/users/' + encodeURIComponent(id) + '/reviews?type=approved&limit=' + encodeURIComponent(limit || 30) + '&offset=' + encodeURIComponent(offset || 0), {auth: true, cache: false});
+        },
         notifications: function (limit, offset) {
             return request('/profile/notifications?limit=' + encodeURIComponent(limit || 30) + '&offset=' + encodeURIComponent(offset || 0), {auth: true, cache: false});
         },

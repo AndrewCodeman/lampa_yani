@@ -727,6 +727,12 @@
                 });
             });
             content.append(syncButton);
+            var reviewsButton = $('<div class="yani-account__notification-button selector"></div>');
+            reviewsButton.append($('<strong></strong>').text(t('my_reviews')));
+            reviewsButton.append($('<span></span>').text(t('my_reviews_description')));
+            bindAccountFocus(reviewsButton);
+            reviewsButton.on('hover:enter click.yaniReviews', function () { openUserReviews(profile.id); });
+            content.append(reviewsButton);
 
             var counts = {};
             lists.forEach(function (anime) {
@@ -943,6 +949,33 @@
 
     function openSubscriptions(userId) {
         Lampa.Activity.push({url: 'yani/subscriptions', title: t('subscriptions'), component: 'yani_subscriptions', userId: userId});
+    }
+
+    function openUserReviews(userId) {
+        LampaYaniApi.userReviews(userId, 30, 0).then(function (payload) {
+            var response = payload && payload.response ? payload.response : payload;
+            var items = Array.isArray(response) ? response : response && (response.items || response.data || response.reviews) || [];
+            if (!items.length) return Lampa.Noty.show(t('reviews_empty'));
+            Lampa.Select.show({title: t('my_reviews'), items: items.map(function (review) {
+                var anime = review.anime || review.title_data || review.object || {};
+                var title = anime.title || anime.name || review.anime_title || review.title || t('anime');
+                var text = cleanCommentText(review.text || review.body || review.description || '');
+                var score = review.rate || review.rating || review.score;
+                return {
+                    title: title + (score ? ' · ' + score + '/10' : ''),
+                    subtitle: text.slice(0, 180),
+                    review: review,
+                    anime: anime
+                };
+            }), onSelect: function (item) {
+                var anime = item.anime || {};
+                var id = anime.anime_id || anime.id || item.review.anime_id;
+                if (id) openYummyDetail(toCard(anime.anime_id || anime.id ? anime : {anime_id: id, title: item.title}), true);
+            }});
+        }).catch(function (error) {
+            console.error('[YummyAnime Reviews]', error);
+            Lampa.Noty.show(t('reviews_error'));
+        });
     }
 
     function Subscriptions(object) {

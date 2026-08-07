@@ -72,6 +72,10 @@ function pluginYummyAnime() {
     messages.ru.sync_history_description = 'Отправить локальную историю в аккаунт YummyAnime';
     messages.ru.sync_history_ok = 'История просмотра синхронизирована';
     messages.ru.sync_history_error = 'Не удалось синхронизировать историю';
+    messages.ru.my_reviews = 'Мои отзывы';
+    messages.ru.my_reviews_description = 'Отзывы пользователя YummyAnime';
+    messages.ru.reviews_empty = 'Отзывов пока нет';
+    messages.ru.reviews_error = 'Не удалось загрузить отзывы';
     messages.ru.for_you = 'Для вас';
     messages.ru.collections = 'Коллекции';
     messages.ru.collection = 'Коллекция';
@@ -101,6 +105,10 @@ function pluginYummyAnime() {
     messages.en.sync_history_description = 'Send local history to your YummyAnime account';
     messages.en.sync_history_ok = 'Watch history synchronized';
     messages.en.sync_history_error = 'Failed to synchronize history';
+    messages.en.my_reviews = 'My reviews';
+    messages.en.my_reviews_description = 'Your YummyAnime reviews';
+    messages.en.reviews_empty = 'There are no reviews yet';
+    messages.en.reviews_error = 'Failed to load reviews';
     messages.en.for_you = 'For you';
     messages.en.collections = 'Collections';
     messages.en.collection = 'Collection';
@@ -141,6 +149,10 @@ function pluginYummyAnime() {
     messages.uk.sync_history_description = 'Надіслати локальну історію до облікового запису YummyAnime';
     messages.uk.sync_history_ok = 'Історію перегляду синхронізовано';
     messages.uk.sync_history_error = 'Не вдалося синхронізувати історію';
+    messages.uk.my_reviews = 'Мої відгуки';
+    messages.uk.my_reviews_description = 'Відгуки користувача YummyAnime';
+    messages.uk.reviews_empty = 'Відгуків ще немає';
+    messages.uk.reviews_error = 'Не вдалося завантажити відгуки';
     messages.uk.for_you = 'Для вас';
     messages.uk.collections = 'Колекції';
     messages.uk.collection = 'Колекція';
@@ -463,6 +475,9 @@ function pluginYummyAnime() {
         },
         userStatsTypes: function (id) {
             return request('/users/' + encodeURIComponent(id) + '/stats/types-v2', {auth: true, cache: false});
+        },
+        userReviews: function (id, limit, offset) {
+            return request('/users/' + encodeURIComponent(id) + '/reviews?type=approved&limit=' + encodeURIComponent(limit || 30) + '&offset=' + encodeURIComponent(offset || 0), {auth: true, cache: false});
         },
         notifications: function (limit, offset) {
             return request('/profile/notifications?limit=' + encodeURIComponent(limit || 30) + '&offset=' + encodeURIComponent(offset || 0), {auth: true, cache: false});
@@ -1249,6 +1264,12 @@ function pluginYummyAnime() {
                 });
             });
             content.append(syncButton);
+            var reviewsButton = $('<div class="yani-account__notification-button selector"></div>');
+            reviewsButton.append($('<strong></strong>').text(t('my_reviews')));
+            reviewsButton.append($('<span></span>').text(t('my_reviews_description')));
+            bindAccountFocus(reviewsButton);
+            reviewsButton.on('hover:enter click.yaniReviews', function () { openUserReviews(profile.id); });
+            content.append(reviewsButton);
 
             var counts = {};
             lists.forEach(function (anime) {
@@ -1465,6 +1486,33 @@ function pluginYummyAnime() {
 
     function openSubscriptions(userId) {
         Lampa.Activity.push({url: 'yani/subscriptions', title: t('subscriptions'), component: 'yani_subscriptions', userId: userId});
+    }
+
+    function openUserReviews(userId) {
+        LampaYaniApi.userReviews(userId, 30, 0).then(function (payload) {
+            var response = payload && payload.response ? payload.response : payload;
+            var items = Array.isArray(response) ? response : response && (response.items || response.data || response.reviews) || [];
+            if (!items.length) return Lampa.Noty.show(t('reviews_empty'));
+            Lampa.Select.show({title: t('my_reviews'), items: items.map(function (review) {
+                var anime = review.anime || review.title_data || review.object || {};
+                var title = anime.title || anime.name || review.anime_title || review.title || t('anime');
+                var text = cleanCommentText(review.text || review.body || review.description || '');
+                var score = review.rate || review.rating || review.score;
+                return {
+                    title: title + (score ? ' · ' + score + '/10' : ''),
+                    subtitle: text.slice(0, 180),
+                    review: review,
+                    anime: anime
+                };
+            }), onSelect: function (item) {
+                var anime = item.anime || {};
+                var id = anime.anime_id || anime.id || item.review.anime_id;
+                if (id) openYummyDetail(toCard(anime.anime_id || anime.id ? anime : {anime_id: id, title: item.title}), true);
+            }});
+        }).catch(function (error) {
+            console.error('[YummyAnime Reviews]', error);
+            Lampa.Noty.show(t('reviews_error'));
+        });
     }
 
     function Subscriptions(object) {
