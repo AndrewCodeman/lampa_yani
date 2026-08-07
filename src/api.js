@@ -57,10 +57,10 @@
             params = params || {};
             params.q = query || undefined;
             params.limit = params.limit || 20;
-            return request('/anime?' + new URLSearchParams(params));
+            return request('/anime?' + new URLSearchParams(params), {auth: true});
         },
         catalog: function (params) {
-            return request('/anime?' + new URLSearchParams(params || {limit: 20}));
+            return request('/anime?' + new URLSearchParams(params || {limit: 20}), {auth: true});
         },
         normalize: function (payload) {
             var response = payload && payload.response ? payload.response : payload;
@@ -86,7 +86,7 @@
             return externalRequest(config.episodesApiBase, '/anime/mal/' + encodeURIComponent(malId));
         },
         detail: function (id) {
-            return request('/anime/' + encodeURIComponent(id));
+            return request('/anime/' + encodeURIComponent(id), {auth: true});
         },
         videos: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/videos', {cache: false});

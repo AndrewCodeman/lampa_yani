@@ -351,6 +351,7 @@
 
 .yani-card-media__quality { background: #f1c40f; color: #171717; }
 .yani-card-media__voices { background: #3b9bd9; }
+.yani-card-list { position: absolute; left: 0.35em; bottom: 0.35em; z-index: 3; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: #5f43a8; color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .yani-card-rating {
     display: flex;

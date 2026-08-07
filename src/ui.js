@@ -288,6 +288,7 @@
     function bindYummyCard(element, card) {
         addCardRatings(element, card);
         addCardMediaBadges(element, card);
+        addCardListBadge(element, card);
         attachPosterFallback(element, card);
         card.onEnter = function () {
             if (card.yani_id) openYummyDetail(card, false);
@@ -408,6 +409,19 @@
         if (meta.voices) block.append($('<span class="yani-card-media__badge yani-card-media__voices"></span>').text(meta.voices + ' ' + t('voices_short')));
     }
 
+    function addCardListBadge(element, card) {
+        if (!card || (card.yani_list_id === null && !card.yani_is_favorite)) return;
+        var render = card.render ? $(card.render(true)) : $(element);
+        var view = $('.card__view', render).first();
+        if (!view.length) return;
+        var badge = $('.yani-card-list', view);
+        if (!badge.length) badge = $('<span class="yani-card-list"></span>').appendTo(view);
+        var labels = {0: t('watching'), 1: t('planned'), 2: t('completed'), 3: t('dropped'), 5: t('postponed')};
+        var label = labels[card.yani_list_id] || '';
+        if (card.yani_is_favorite) label = label ? label + ' · ♥' : '♥';
+        badge.text(label);
+    }
+
     function showYummyActions(card) {
         if (!card || !card.yani_id) return;
         var items = [
@@ -418,11 +432,11 @@
         if (LampaYaniAuth.token()) {
             items = items.concat([
                 {title: t('favorite'), action: 'favorite'},
-                {title: t('watching'), action: 'watching'},
-                {title: t('planned'), action: 'planned'},
-                {title: t('completed'), action: 'completed'},
-                {title: t('dropped'), action: 'dropped'},
-                {title: t('postponed'), action: 'postponed'}
+                {title: listActionTitle(card, 'watching'), action: 'watching'},
+                {title: listActionTitle(card, 'planned'), action: 'planned'},
+                {title: listActionTitle(card, 'completed'), action: 'completed'},
+                {title: listActionTitle(card, 'dropped'), action: 'dropped'},
+                {title: listActionTitle(card, 'postponed'), action: 'postponed'}
             ], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
                 return {title: value + '/10', value: value};
             }));
@@ -440,12 +454,23 @@
                 if (item.action === 'login') return openSettingsLogin();
                 if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
                 var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(card.yani_id) : item.action ? LampaYaniApi.addToList(card.yani_id, item.action) : LampaYaniApi.rate(card.yani_id, item.value);
-                action.then(function () { Lampa.Noty.show(t('saved')); }).catch(function (error) {
+                action.then(function () {
+                    if (item.action === 'favorite') card.yani_is_favorite = true;
+                    else if (item.action) card.yani_list_id = {watching: 0, planned: 1, completed: 2, dropped: 3, postponed: 5}[item.action];
+                    addCardListBadge(null, card);
+                    Lampa.Noty.show(t('saved'));
+                }).catch(function (error) {
                     console.error('[YummyAnime]', error);
                     Lampa.Noty.show(t('save_error'));
                 });
             }
         });
+    }
+
+    function listActionTitle(card, key) {
+        var ids = {watching: 0, planned: 1, completed: 2, dropped: 3, postponed: 5};
+        var title = t(key);
+        return card && Number(card.yani_list_id) === ids[key] ? '✓ ' + title : title;
     }
 
     function Account(object) {
@@ -1820,6 +1845,8 @@
             yani_id: item.anime_id || item.id,
             yani_url: item.anime_url || item.url,
             yani_comments_count: Number(item.comments_count || 0),
+            yani_list_id: item.user && item.user.list && item.user.list.list ? Number(item.user.list.list.id) : null,
+            yani_is_favorite: Boolean(item.user && item.user.list && item.user.list.is_fav),
             yani_viewing_order: Array.isArray(item.viewing_order) ? item.viewing_order : [],
             yani_type: item.type || null,
             yani_remote_ids: item.remote_ids || {}
