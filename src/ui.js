@@ -400,7 +400,7 @@
         addCardMediaBadges(element, card);
         addCardUpdateBadge(element, card);
         addCardListBadge(element, card);
-        attachPosterFallback(element, card);
+        LampaYaniMedia.attachPosterFallback(element, card);
         // Some Lampa versions clone the card object after cardRender. Keep a
         // DOM-level handler as a fallback so search results remain clickable.
         var rendered = element && element.jquery ? element : $(element);
@@ -1456,7 +1456,7 @@
             var releaseDate = new Date(Number(episodes.next_date) * 1000);
             var row = $('<div class="yani-schedule__item selector"></div>');
             var poster = $('<img class="yani-schedule__poster" alt="">').attr('src', card.poster || '');
-            bindPosterFallback(poster, card);
+            LampaYaniMedia.bindPosterFallback(poster, card);
             var info = $('<div class="yani-schedule__info"></div>');
             var release = $('<div class="yani-schedule__release"></div>');
 
@@ -1577,7 +1577,7 @@
         function renderDetail(cardData) {
             data = cardData;
             var poster = $('<img class="yani-detail__poster">').attr('src', data.img || data.poster || '');
-            bindPosterFallback(poster, data);
+            LampaYaniMedia.bindPosterFallback(poster, data);
             var info = $('<div class="yani-detail__info"></div>');
             info.append($('<div class="yani-detail__title"></div>').text(data.title || 'YummyAnime'));
             var alternativeTitles = (data.yani_titles || []).filter(function (title) { return title && title !== data.title; });
@@ -2369,7 +2369,7 @@
                 var card = toCard(item);
                 var row = $('<div class="yani-detail__recommendation selector"></div>');
                 var recommendationPoster = $('<img class="yani-detail__recommendation-poster" alt="">').attr('src', card.poster || '');
-                bindPosterFallback(recommendationPoster, card);
+                LampaYaniMedia.bindPosterFallback(recommendationPoster, card);
                 row.append(recommendationPoster);
                 row.append($('<div class="yani-detail__recommendation-title"></div>').text(card.title));
                 if (card.release_date) row.append($('<div class="yani-detail__recommendation-year"></div>').text(card.release_date));

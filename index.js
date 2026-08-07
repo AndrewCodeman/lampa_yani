@@ -11,6 +11,7 @@ function pluginYummyAnime() {
         'src/api.js',
         'src/catalog.js',
         'src/ui-utils.js',
+        'src/ui-media.js',
         'src/ui.js'
     ];
     var current = document.currentScript;
