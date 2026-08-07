@@ -1176,8 +1176,8 @@ function pluginYummyAnime() {
             return definition.id === 4 ? Boolean(userList && userList.is_fav) : Boolean(userList && userList.list && Number(userList.list.id) === definition.id);
         });
         var load = definition.id === 4 || !userId ? Promise.resolve(selected) : LampaYaniApi.userList(userId, definition.id).then(function (payload) {
-            var response = payload && payload.response ? payload.response : payload;
-            return Array.isArray(response) ? response : selected;
+            var result = normalizeUserList(payload);
+            return result.length ? result : selected;
         }).catch(function () { return selected; });
         load.then(function (result) {
             Lampa.Activity.push({
@@ -1187,6 +1187,17 @@ function pluginYummyAnime() {
                 items: result
             });
         });
+    }
+
+    function normalizeUserList(payload) {
+        var response = payload && payload.response ? payload.response : payload;
+        var values = Array.isArray(response) ? response : response && (response.anime || response.results || response.items || response.data) || [];
+        return values.map(function (item) {
+            if (!item || !item.anime || typeof item.anime !== 'object') return item;
+            var anime = Object.assign({}, item.anime);
+            if (item.user) anime.user = item.user;
+            return anime;
+        }).filter(Boolean);
     }
 
     function AccountList(object) {
@@ -2243,6 +2254,12 @@ function pluginYummyAnime() {
     }
 
     function toCard(item) {
+        item = item || {};
+        if (item.anime && typeof item.anime === 'object') {
+            var nestedAnime = Object.assign({}, item.anime);
+            if (item.user) nestedAnime.user = item.user;
+            item = nestedAnime;
+        }
         var title = item.title || item.name || item.russian || item.original_title || t('untitled');
         var titles = titleValues(item);
         if (titles.indexOf(title) < 0) titles.unshift(title);
@@ -2269,7 +2286,7 @@ function pluginYummyAnime() {
             yani_ratings: ratings,
             yani_media: mediaMeta(item),
             overview: item.description || item.synopsis || '',
-            yani_id: item.anime_id || item.animeId || item.id || item._id || item.anime && (item.anime.anime_id || item.anime.id),
+            yani_id: item.anime_id || item.animeId || item.id || item._id,
             yani_url: item.anime_url || item.url,
             yani_comments_count: Number(item.comments_count || 0),
             yani_list_id: item.user && item.user.list && item.user.list.list ? Number(item.user.list.list.id) : null,
