@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.18.7 — 2026-08-08
+
+- Restored immediate loading of trailers, recommendations and comments on title details; community statistics and collections remain optional.
+
 ## 0.18.6 — 2026-08-08
 
 - Enabled the native Lampa scroll viewport on every custom YummyAnime page, so focus movement scrolls the visible area instead of escaping below it.

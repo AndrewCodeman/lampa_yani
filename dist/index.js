@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.18.6',
+        version: '0.18.7',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -2519,6 +2519,8 @@ function pluginYummyAnime() {
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
+            loadDetailRecommendations(data, info);
+            loadDetailTrailers(data, info);
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
@@ -2547,9 +2549,6 @@ function pluginYummyAnime() {
                 extrasButton.text('…');
                 loadDetailCommunityStats(data, info);
                 setTimeout(function () { loadDetailCollections(data, info); }, 150);
-                setTimeout(function () { loadDetailRecommendations(data, info); }, 300);
-                setTimeout(function () { loadDetailTrailers(data, info); }, 450);
-                setTimeout(function () { loadInlineComments(data, comments); }, 600);
             });
             bindDetailButtonFocus(extrasButton);
             var comments = $('<div class="yani-detail__comments"></div>');
@@ -2558,6 +2557,7 @@ function pluginYummyAnime() {
             info.append(comments);
             html.append(poster, info);
             scroll.append(html);
+            loadInlineComments(data, comments);
         }
 
         function detailListLabel(cardData) {
