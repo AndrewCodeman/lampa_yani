@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.18.9 — 2026-08-08
+
+- Added YummyAnime as a source in Lampa's global search, with opening through the known YummyAnime title id.
+- Protected Alloha sources now open the official YummyAnime title page in Lampa Browser; this preserves the required referrer and signed-player session instead of failing in a raw iframe.
+
 ## 0.18.8 — 2026-08-08
 
 - Restored safe YummyAnime-to-Lampa card matching through the current `Lampa.TMDB` API; all known title variants are checked and native detail is opened only with a valid TMDB id.

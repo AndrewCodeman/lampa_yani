@@ -30,6 +30,7 @@
             try {
                 addSettings();
                 registerOnlineSource();
+                registerSearchSource();
             } catch (settingsError) {
                 console.error('[YummyAnime] Settings registration failed', settingsError);
             }
@@ -1858,6 +1859,37 @@
         });
     }
 
+    function registerSearchSource() {
+        if (!Lampa.Search || !Lampa.Search.addSource || window.yummyanime_search_source_ready) return;
+        window.yummyanime_search_source_ready = true;
+
+        Lampa.Search.addSource({
+            title: 'YummyAnime',
+            search: function (params, oncomplite) {
+                var query = decodeURIComponent(params && params.query || '').trim();
+                if (!query) return oncomplite([]);
+
+                LampaYaniApi.search(query, {limit: 20}).then(function (payload) {
+                    var results = LampaYaniApi.normalize(payload).map(toCard);
+                    oncomplite(results.length ? [{
+                        title: 'YummyAnime',
+                        type: 'anime',
+                        results: results,
+                        total: results.length,
+                        total_pages: 1
+                    }] : []);
+                }).catch(function (error) {
+                    console.warn('[YummyAnime] Global search failed', error);
+                    oncomplite([]);
+                });
+            },
+            onSelect: function (params, close) {
+                close();
+                openYummyDetail(params && params.element, false);
+            }
+        });
+    }
+
     function openYummyForMovie(movie) {
         if (movie && movie.yani_card) return openVideos(movie.yani_card);
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
@@ -2129,6 +2161,17 @@
             return;
         }
 
+        // Alloha rejects a raw iframe whose parent is Lampa or GitHub Pages
+        // (it requires a YummyAnime referrer and rotates signed HLS headers).
+        // The official title page creates that iframe in the required context.
+        if (isAllohaUrl(url)) {
+            var officialPage = yummyTitleUrl(card);
+            if (officialPage && Lampa.Browser && Lampa.Browser.open) {
+                Lampa.Browser.open(officialPage);
+                return;
+            }
+        }
+
         // Kodik may reject an iframe created from the GitHub Pages origin.
         // Lampa's browser keeps the same playback URL but provides a compatible
         // top-level browsing context, which is also how the Android client opens it.
@@ -2179,6 +2222,10 @@
 
     function isKodikUrl(url) {
         return /(^|\/\/)(?:www\.)?kodik\.(?:info|cc|biz|site|com|tv)(?:[/:]|$)/i.test(url || '');
+    }
+
+    function isAllohaUrl(url) {
+        return /(^|\/\/)(?:www\.)?alloha(?:\.[a-z0-9-]+)+(?::\d+)?(?:[/:]|$)/i.test(url || '');
     }
 
 
@@ -2726,6 +2773,14 @@
     function yummyWebsiteUrl() {
         var language = LampaYaniI18n.getLanguage();
         return language === 'en' || language === 'uk' ? 'https://en.yummyani.me/' : 'https://ru.yummyani.me/';
+    }
+
+    function yummyTitleUrl(card) {
+        var slug = card && card.yani_url;
+        if (!slug || typeof slug !== 'string') return '';
+        if (/^https?:\/\//i.test(slug)) return slug;
+        slug = slug.replace(/^\/+/, '').replace(/^catalog\/item\//i, '');
+        return yummyWebsiteUrl().replace(/\/$/, '') + '/catalog/item/' + encodeURIComponent(slug);
     }
 
     function openYummyWebsite() {
