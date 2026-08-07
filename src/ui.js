@@ -220,6 +220,10 @@
     }
 
     function Recommended(object) {
+        return LampaYaniHomeSections.recommended(object, {t: t, history: playbackHistory, toCard: toCard, cardRender: bindYummyCardRender});
+    }
+
+    function LegacyRecommended(object) {
         var comp = new Lampa.InteractionCategory(object);
         comp.create = function () {
             var self = this;
@@ -258,6 +262,10 @@
     }
 
     function Updates(object) {
+        return LampaYaniHomeSections.updates(object, {t: t, toCard: toCard, normalizeList: normalizeUserList, cardRender: bindYummyCardRender});
+    }
+
+    function LegacyUpdates(object) {
         var comp = new Lampa.InteractionCategory(object);
         comp.create = function () {
             var self = this;
@@ -314,6 +322,10 @@
     }
 
     function History(object) {
+        return LampaYaniHomeSections.history(object, {t: t, history: playbackHistory, toCard: toCard, historyCardRender: bindHistoryCardRender});
+    }
+
+    function LegacyHistory(object) {
         var comp = new Lampa.InteractionCategory(object);
 
         comp.create = function () {
