@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.14.8',
+            version: '0.14.9',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.14.8',
+        version: '0.14.9',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -477,9 +477,7 @@ function pluginYummyAnime() {
                 };
                 // Lampa builds use both spellings across releases.
                 comp.nextPageRequest = comp.nextPageReuest;
-                comp.cardRender = function (page, element, card) {
-                    bindYummyCard(element, card);
-                };
+                comp.cardRender = bindYummyCardRender;
                 return comp;
             });
 
@@ -593,11 +591,24 @@ function pluginYummyAnime() {
             });
         };
 
-        comp.cardRender = function (page, element, card) {
-            bindYummyCard(element, card);
-        };
+        comp.cardRender = bindYummyCardRender;
 
         return comp;
+    }
+
+    function bindYummyCardRender(first, second, third) {
+        var element;
+        var card;
+        [first, second, third].forEach(function (value) {
+            if (!value) return;
+            var isElement = value.jquery || value.nodeType || (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement);
+            if (isElement) element = value;
+            else if (value.render || value.yani_id || value.title) card = value;
+        });
+        if (!element && second && (second.jquery || second.nodeType)) element = second;
+        if (!card && first && (first.render || first.yani_id)) card = first;
+        if (!card || !element) return;
+        bindYummyCard(element, card);
     }
 
     function bindYummyCard(element, card) {
@@ -605,10 +616,10 @@ function pluginYummyAnime() {
         addCardMediaBadges(element, card);
         attachPosterFallback(element, card);
         card.onEnter = function () {
-            if (element.yani_id) openStandardLampaCard(element);
+            if (card.yani_id) openStandardLampaCard(card);
         };
         card.onMenu = function () {
-            if (element.yani_id) showYummyActions(element);
+            if (card.yani_id) showYummyActions(card);
         };
     }
 
@@ -1073,7 +1084,7 @@ function pluginYummyAnime() {
         comp.create = function () {
             this.build({results: (object.items || []).map(toCard), total_pages: 1, title: object.title});
         };
-        comp.cardRender = function (page, element, card) { bindYummyCard(element, card); };
+        comp.cardRender = bindYummyCardRender;
         return comp;
     }
 
