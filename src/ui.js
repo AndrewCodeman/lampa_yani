@@ -2087,7 +2087,7 @@
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
-            param: {name: 'yani_language', type: 'select', values: {ru: 'Русский', en: 'English'}, default: 'ru'},
+            param: {name: 'yani_language', type: 'select', values: {ru: 'Русский', uk: 'Українська', en: 'English'}, default: 'ru'},
             field: {name: t('language_name'), description: t('language_description')},
             onChange: function (value) {
                 if (value && typeof value === 'object') value = value.value;
@@ -2199,7 +2199,8 @@
     }
 
     function yummyWebsiteUrl() {
-        return LampaYaniI18n.getLanguage() === 'en' ? 'https://en.yummyani.me/' : 'https://ru.yummyani.me/';
+        var language = LampaYaniI18n.getLanguage();
+        return language === 'en' ? 'https://en.yummyani.me/' : language === 'uk' ? 'https://uk.yummyani.me/' : 'https://ru.yummyani.me/';
     }
 
     function openYummyWebsite() {
