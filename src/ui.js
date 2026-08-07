@@ -173,8 +173,9 @@
             items.forEach(function (item) {
                 var button = $('<div class="yani-home__item yani-home__item--' + item.key + ' selector"><div class="yani-home__icon">' + homeIcon(item.key) + '</div><div class="yani-home__title">' + item.title + '</div><div class="yani-home__arrow">›</div></div>');
                 button.on('hover:focus', function (event) {
-                    last = event.target;
-                    scroll.update($(event.target), true);
+                    var target = event.currentTarget || event.target;
+                    last = target;
+                    scroll.update($(target), true);
                 });
                 button.on('hover:enter', item.action);
                 grid.append(button);
@@ -738,8 +739,9 @@
 
         function bindAccountFocus(element) {
             element.on('hover:focus', function (event) {
-                last = event.target;
-                scroll.update($(event.target), true);
+                var target = event.currentTarget || event.target;
+                last = target;
+                scroll.update($(target), true);
             });
         }
 
@@ -837,8 +839,9 @@
 
         function bindFocus(element) {
             element.on('hover:focus', function (event) {
-                last = event.target;
-                scroll.update($(event.target), true);
+                var target = event.currentTarget || event.target;
+                last = target;
+                scroll.update($(target), true);
             });
         }
 
@@ -1024,7 +1027,7 @@
                 if (notification.text || notification.message) item.append($('<div class="yani-notification__text"></div>').text(notification.text || notification.message));
                 var notificationDate = notification.date || notification.date_seconds || notification.dateSeconds;
                 if (notificationDate) item.append($('<div class="yani-notification__date"></div>').text(formatNotificationDate(notificationDate)));
-                item.on('hover:focus', function (event) { last = event.target; scroll.update($(event.target), true); });
+                item.on('hover:focus', function (event) { var target = event.currentTarget || event.target; last = target; scroll.update($(target), true); });
                 item.on('hover:enter click', function () {
                     if (notification.id && !notification.viewed) LampaYaniApi.markNotificationRead(notification.id).catch(function () {});
                     var animeId = notification.anime_id || notification.object_id || notification.objectId;
@@ -1305,8 +1308,9 @@
 
         function bindStatusFocus(element) {
             element.on('hover:focus', function (event) {
-                last = event.target;
-                scroll.update($(event.target), true);
+                var target = event.currentTarget || event.target;
+                last = target;
+                scroll.update($(target), true);
             });
         }
 
@@ -1460,10 +1464,11 @@
             }
 
             row.on('hover:focus', function (event) {
+                var target = event.currentTarget || event.target;
                 content.find('.yani-schedule__item.focus').removeClass('focus');
                 row.addClass('focus');
-                last = event.target;
-                scroll.update($(event.target), true);
+                last = target;
+                scroll.update($(target), true);
             });
             row.on('hover:blur', function () { row.removeClass('focus'); });
             row.on('hover:enter click.yaniSchedule', openScheduleCard);
@@ -1530,7 +1535,7 @@
         var button;
 
         html.on('hover:focus', function (event) {
-            var target = $(event.target);
+            var target = $(event.target).closest('.selector');
             if (target.hasClass('selector')) scroll.update(target, true);
         });
 

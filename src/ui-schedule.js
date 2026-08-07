@@ -20,7 +20,7 @@
             release.append($('<div class="yani-schedule__time"></div>').text(timeLabel(releaseDate))); release.append($('<div class="yani-schedule__timezone"></div>').text(t('local_time')));
             row.append(poster, info, release);
             var opened = false, open = function () { if (opened) return; opened = true; card.yani_schedule = episodeLabel(episodes) + ', ' + dateTimeLabel(releaseDate); deps.openStandardLampaCard(card); setTimeout(function () { opened = false; }, 500); };
-            row.on('hover:focus', function (event) { content.find('.yani-schedule__item.focus').removeClass('focus'); row.addClass('focus'); last = event.target; scroll.update($(event.target), true); });
+            row.on('hover:focus', function (event) { var target = event.currentTarget || event.target; content.find('.yani-schedule__item.focus').removeClass('focus'); row.addClass('focus'); last = target; scroll.update($(target), true); });
             row.on('hover:blur', function () { row.removeClass('focus'); }); row.on('hover:enter click.yaniSchedule', open);
             return row;
         }

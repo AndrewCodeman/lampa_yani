@@ -2,7 +2,7 @@
     'use strict';
     function create(object, deps) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250}), html = $('<div class="yani-auth"></div>'), content = $('<div class="yani-auth__content"></div>'), login = (LampaYaniAuth.get().login || '').trim(), password = '', last;
-        function focus(element) { element.on('hover:focus', function (event) { last = event.target; scroll.update($(event.target), true); }); return element; }
+        function focus(element) { element.on('hover:focus', function (event) { var target = event.currentTarget || event.target; last = target; scroll.update($(target), true); }); return element; }
         function render() {
             content.empty(); var account = LampaYaniAuth.get(), authorized = Boolean(LampaYaniAuth.token());
             content.append($('<div class="yani-auth__title"></div>').text(deps.t('auth_title'))).append($('<div class="yani-auth__status ' + (authorized ? 'is-authorized' : '') + '"></div>').text(authorized ? deps.t('auth_authorized') : deps.t('auth_not_authorized')));

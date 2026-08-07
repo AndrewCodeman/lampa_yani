@@ -3,7 +3,7 @@
     function create(object, deps) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250}), html = $('<div class="yani-status"></div>'), content = $('<div class="yani-status__content"></div>'), last, ready = false, period = '3hour', component;
         function date(value) { if (!value) return '—'; try { return new Date(value).toLocaleString(deps.locale(), {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'}); } catch (error) { return new Date(value).toLocaleString(); } }
-        function focus(element) { element.on('hover:focus', function (event) { last = event.target; scroll.update($(event.target), true); }); return element; }
+        function focus(element) { element.on('hover:focus', function (event) { var target = event.currentTarget || event.target; last = target; scroll.update($(target), true); }); return element; }
         function metric(title, value) { return $('<div class="yani-status__metric"></div>').append($('<span></span>').text(title), $('<strong></strong>').text(value)); }
         function domainName(domain) { var names = {'old.yummyani.me': 'domain_old', 'old.yummy-ani.me': 'domain_old_mirror', 'ru.yummyani.me': 'domain_new', 'ru.yummy-ani.me': 'domain_new_mirror', 'api.yani.tv': 'domain_api', 'waf.valtrix.org': 'domain_waf'}; return names[domain.domain] ? deps.t(names[domain.domain]) : (domain.label || domain.domain); }
         function renderError() { content.empty(); var error = focus($('<div class="yani-status__error selector"></div>')); error.append($('<strong></strong>').text(deps.t('status_load_error')), $('<span></span>').text(deps.t('status_error_hint'))); content.append(error); refreshFocus(); }

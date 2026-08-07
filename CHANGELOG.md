@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.18.5 — 2026-08-07
+
+- Kept the focused item visible on every YummyAnime page by scrolling to each selector root instead of an inner text or icon node.
+
 ## 0.18.4 — 2026-08-07
 
 - Added a final activity-level guard that redirects YummyAnime cards with a missing TMDB ID to the YummyAnime detail page before Lampa requests `movie/undefined`.

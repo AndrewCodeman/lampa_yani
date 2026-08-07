@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.18.4',
+        version: '0.18.5',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -707,8 +707,12 @@ function pluginYummyAnime() {
 
     function bindFocus(element, scroll, state) {
         element.on('hover:focus', function (event) {
-            if (state) state.last = event.target;
-            if (scroll) scroll.update($(event.target), true);
+            // `target` can be an icon or a text node inside a selector.  Lampa
+            // Scroll must receive the selector itself, otherwise the focus can
+            // travel below the viewport without moving the visible area.
+            var target = event.currentTarget || event.target;
+            if (state) state.last = target;
+            if (scroll) scroll.update($(target), true);
         });
         return element;
     }
@@ -739,7 +743,7 @@ function pluginYummyAnime() {
             release.append($('<div class="yani-schedule__time"></div>').text(timeLabel(releaseDate))); release.append($('<div class="yani-schedule__timezone"></div>').text(t('local_time')));
             row.append(poster, info, release);
             var opened = false, open = function () { if (opened) return; opened = true; card.yani_schedule = episodeLabel(episodes) + ', ' + dateTimeLabel(releaseDate); deps.openStandardLampaCard(card); setTimeout(function () { opened = false; }, 500); };
-            row.on('hover:focus', function (event) { content.find('.yani-schedule__item.focus').removeClass('focus'); row.addClass('focus'); last = event.target; scroll.update($(event.target), true); });
+            row.on('hover:focus', function (event) { var target = event.currentTarget || event.target; content.find('.yani-schedule__item.focus').removeClass('focus'); row.addClass('focus'); last = target; scroll.update($(target), true); });
             row.on('hover:blur', function () { row.removeClass('focus'); }); row.on('hover:enter click.yaniSchedule', open);
             return row;
         }
@@ -777,7 +781,7 @@ function pluginYummyAnime() {
                 item.append($('<div class="yani-notification__title"></div>').text(notification.title || notification.type || deps.t('notification')));
                 if (notification.text || notification.message) item.append($('<div class="yani-notification__text"></div>').text(notification.text || notification.message));
                 var date = notification.date || notification.date_seconds || notification.dateSeconds; if (date) item.append($('<div class="yani-notification__date"></div>').text(deps.formatDate(date)));
-                item.on('hover:focus', function (event) { last = event.target; scroll.update($(event.target), true); });
+                item.on('hover:focus', function (event) { var target = event.currentTarget || event.target; last = target; scroll.update($(target), true); });
                 item.on('hover:enter click', function () { if (notification.id && !notification.viewed) LampaYaniApi.markNotificationRead(notification.id).catch(function () {}); var animeId = notification.anime_id || notification.object_id || notification.objectId; if (animeId) deps.openDetail(deps.toCard({anime_id: animeId, title: notification.title || deps.t('anime')}), false); });
                 content.append(item);
             });
@@ -794,7 +798,7 @@ function pluginYummyAnime() {
     'use strict';
     function create(object, deps) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250}), html = $('<div class="yani-auth"></div>'), content = $('<div class="yani-auth__content"></div>'), login = (LampaYaniAuth.get().login || '').trim(), password = '', last;
-        function focus(element) { element.on('hover:focus', function (event) { last = event.target; scroll.update($(event.target), true); }); return element; }
+        function focus(element) { element.on('hover:focus', function (event) { var target = event.currentTarget || event.target; last = target; scroll.update($(target), true); }); return element; }
         function render() {
             content.empty(); var account = LampaYaniAuth.get(), authorized = Boolean(LampaYaniAuth.token());
             content.append($('<div class="yani-auth__title"></div>').text(deps.t('auth_title'))).append($('<div class="yani-auth__status ' + (authorized ? 'is-authorized' : '') + '"></div>').text(authorized ? deps.t('auth_authorized') : deps.t('auth_not_authorized')));
@@ -825,7 +829,7 @@ function pluginYummyAnime() {
     function create(object, deps) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250}), html = $('<div class="yani-status"></div>'), content = $('<div class="yani-status__content"></div>'), last, ready = false, period = '3hour', component;
         function date(value) { if (!value) return '—'; try { return new Date(value).toLocaleString(deps.locale(), {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'}); } catch (error) { return new Date(value).toLocaleString(); } }
-        function focus(element) { element.on('hover:focus', function (event) { last = event.target; scroll.update($(event.target), true); }); return element; }
+        function focus(element) { element.on('hover:focus', function (event) { var target = event.currentTarget || event.target; last = target; scroll.update($(target), true); }); return element; }
         function metric(title, value) { return $('<div class="yani-status__metric"></div>').append($('<span></span>').text(title), $('<strong></strong>').text(value)); }
         function domainName(domain) { var names = {'old.yummyani.me': 'domain_old', 'old.yummy-ani.me': 'domain_old_mirror', 'ru.yummyani.me': 'domain_new', 'ru.yummy-ani.me': 'domain_new_mirror', 'api.yani.tv': 'domain_api', 'waf.valtrix.org': 'domain_waf'}; return names[domain.domain] ? deps.t(names[domain.domain]) : (domain.label || domain.domain); }
         function renderError() { content.empty(); var error = focus($('<div class="yani-status__error selector"></div>')); error.append($('<strong></strong>').text(deps.t('status_load_error')), $('<span></span>').text(deps.t('status_error_hint'))); content.append(error); refreshFocus(); }
@@ -1083,8 +1087,9 @@ function pluginYummyAnime() {
             items.forEach(function (item) {
                 var button = $('<div class="yani-home__item yani-home__item--' + item.key + ' selector"><div class="yani-home__icon">' + homeIcon(item.key) + '</div><div class="yani-home__title">' + item.title + '</div><div class="yani-home__arrow">›</div></div>');
                 button.on('hover:focus', function (event) {
-                    last = event.target;
-                    scroll.update($(event.target), true);
+                    var target = event.currentTarget || event.target;
+                    last = target;
+                    scroll.update($(target), true);
                 });
                 button.on('hover:enter', item.action);
                 grid.append(button);
@@ -1648,8 +1653,9 @@ function pluginYummyAnime() {
 
         function bindAccountFocus(element) {
             element.on('hover:focus', function (event) {
-                last = event.target;
-                scroll.update($(event.target), true);
+                var target = event.currentTarget || event.target;
+                last = target;
+                scroll.update($(target), true);
             });
         }
 
@@ -1747,8 +1753,9 @@ function pluginYummyAnime() {
 
         function bindFocus(element) {
             element.on('hover:focus', function (event) {
-                last = event.target;
-                scroll.update($(event.target), true);
+                var target = event.currentTarget || event.target;
+                last = target;
+                scroll.update($(target), true);
             });
         }
 
@@ -1934,7 +1941,7 @@ function pluginYummyAnime() {
                 if (notification.text || notification.message) item.append($('<div class="yani-notification__text"></div>').text(notification.text || notification.message));
                 var notificationDate = notification.date || notification.date_seconds || notification.dateSeconds;
                 if (notificationDate) item.append($('<div class="yani-notification__date"></div>').text(formatNotificationDate(notificationDate)));
-                item.on('hover:focus', function (event) { last = event.target; scroll.update($(event.target), true); });
+                item.on('hover:focus', function (event) { var target = event.currentTarget || event.target; last = target; scroll.update($(target), true); });
                 item.on('hover:enter click', function () {
                     if (notification.id && !notification.viewed) LampaYaniApi.markNotificationRead(notification.id).catch(function () {});
                     var animeId = notification.anime_id || notification.object_id || notification.objectId;
@@ -2215,8 +2222,9 @@ function pluginYummyAnime() {
 
         function bindStatusFocus(element) {
             element.on('hover:focus', function (event) {
-                last = event.target;
-                scroll.update($(event.target), true);
+                var target = event.currentTarget || event.target;
+                last = target;
+                scroll.update($(target), true);
             });
         }
 
@@ -2370,10 +2378,11 @@ function pluginYummyAnime() {
             }
 
             row.on('hover:focus', function (event) {
+                var target = event.currentTarget || event.target;
                 content.find('.yani-schedule__item.focus').removeClass('focus');
                 row.addClass('focus');
-                last = event.target;
-                scroll.update($(event.target), true);
+                last = target;
+                scroll.update($(target), true);
             });
             row.on('hover:blur', function () { row.removeClass('focus'); });
             row.on('hover:enter click.yaniSchedule', openScheduleCard);
@@ -2440,7 +2449,7 @@ function pluginYummyAnime() {
         var button;
 
         html.on('hover:focus', function (event) {
-            var target = $(event.target);
+            var target = $(event.target).closest('.selector');
             if (target.hasClass('selector')) scroll.update(target, true);
         });
 

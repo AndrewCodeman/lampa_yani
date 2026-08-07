@@ -13,8 +13,12 @@
 
     function bindFocus(element, scroll, state) {
         element.on('hover:focus', function (event) {
-            if (state) state.last = event.target;
-            if (scroll) scroll.update($(event.target), true);
+            // `target` can be an icon or a text node inside a selector.  Lampa
+            // Scroll must receive the selector itself, otherwise the focus can
+            // travel below the viewport without moving the visible area.
+            var target = event.currentTarget || event.target;
+            if (state) state.last = target;
+            if (scroll) scroll.update($(target), true);
         });
         return element;
     }
