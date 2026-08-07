@@ -1500,7 +1500,7 @@
                     row.append($('<div class="yani-detail__comment-title"></div>').text(item.title));
                     if (item.subtitle) row.append($('<div class="yani-detail__comment-stats"></div>').text(item.subtitle));
                     row.on('hover:focus', function () { row.addClass('focus'); });
-                    row.on('hover:enter', function () {
+                    row.on('hover:enter click.yaniComment', function () {
                         if (Number(comment.children_count) > 0) commentReplies(comment, 0, [], function () {});
                         else commentsMenu(cardData.yani_id);
                     });
@@ -2166,7 +2166,8 @@
             if (related.release_date) row.append($('<span class="yani-detail__order-year"></span>').text(related.release_date));
             if (relation) row.append($('<span class="yani-detail__order-relation"></span>').text('· ' + relation));
             row.on('hover:focus', function () { row.addClass('focus'); });
-            row.on('hover:enter', function () { openYummyDetail(related, true); });
+            row.on('hover:blur', function () { row.removeClass('focus'); });
+            row.on('hover:enter click.yaniOrder', function () { openYummyDetail(related, true); });
             list.append(row);
         });
         section.append(list);
@@ -2190,7 +2191,9 @@
                 row.append(recommendationPoster);
                 row.append($('<div class="yani-detail__recommendation-title"></div>').text(card.title));
                 if (card.release_date) row.append($('<div class="yani-detail__recommendation-year"></div>').text(card.release_date));
-                row.on('hover:enter', function () { openYummyDetail(card, true); });
+                row.on('hover:focus', function () { row.addClass('focus'); });
+                row.on('hover:blur', function () { row.removeClass('focus'); });
+                row.on('hover:enter click.yaniRecommendation', function () { openYummyDetail(card, true); });
                 list.append(row);
             });
         }).catch(function () { section.remove(); });
@@ -2210,7 +2213,9 @@
                 var title = trailer.title || trailer.name || ('Trailer ' + (index + 1));
                 var url = trailer.iframe_url || trailer.url || trailer.video_url || trailer.link;
                 var row = $('<div class="yani-detail__trailer selector"></div>').text('▶ ' + title);
-                if (url) row.on('hover:enter', function () { openTrailer(url, title); });
+                row.on('hover:focus', function () { row.addClass('focus'); });
+                row.on('hover:blur', function () { row.removeClass('focus'); });
+                if (url) row.on('hover:enter click.yaniTrailer', function () { openTrailer(url, title); });
                 list.append(row);
             });
         }).catch(function () { section.remove(); });
