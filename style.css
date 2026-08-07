@@ -371,6 +371,7 @@
 }
 
 .yani-detail__community { margin: 1em 0 1.2em; }
+.yani-detail__personal-rating { display: inline-block; margin: .5em 0; padding: .45em .7em; border-radius: .45em; background: rgba(240, 175, 84, .22); color: #ffd27a; font-weight: 700; }
 .yani-detail__community-title { margin-bottom: .55em; color: #fff; font-size: 1.15em; font-weight: 700; }
 .yani-detail__community-grid { display: flex; flex-wrap: wrap; gap: .45em; }
 .yani-detail__community-item { padding: .45em .7em; border-radius: .45em; background: rgba(255,255,255,.1); color: #d9e7f2; }

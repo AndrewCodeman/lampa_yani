@@ -1354,6 +1354,7 @@
             if (alternativeTitles.length) info.append($('<div class="yani-detail__alternative-titles"></div>').text(alternativeTitles.join(' · ')));
             if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
+            if (data.yani_user_rating) info.append($('<div class="yani-detail__personal-rating"></div>').text(t('my_rating') + ': ' + data.yani_user_rating + '/10'));
             loadDetailCommunityStats(data, info);
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
@@ -2059,6 +2060,7 @@
             yani_comments_count: Number(item.comments_count || 0),
             yani_list_id: item.user && item.user.list && item.user.list.list ? Number(item.user.list.list.id) : null,
             yani_is_favorite: Boolean(item.user && item.user.list && item.user.list.is_fav),
+            yani_user_rating: Number(item.user && (item.user.rate || item.user.rating || item.user.score) || item.user_rate || 0) || null,
             yani_viewing_order: Array.isArray(item.viewing_order) ? item.viewing_order : [],
             yani_type: item.type || null,
             yani_remote_ids: item.remote_ids || {}
