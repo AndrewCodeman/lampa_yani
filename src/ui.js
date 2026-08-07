@@ -1089,9 +1089,12 @@
             row.append(poster, info, release);
 
             row.on('hover:focus', function (event) {
+                content.find('.yani-schedule__item.focus').removeClass('focus');
+                row.addClass('focus');
                 last = event.target;
                 scroll.update($(event.target), true);
             });
+            row.on('hover:blur', function () { row.removeClass('focus'); });
             row.on('hover:enter', function () {
                 card.yani_schedule = formatEpisode(episodes) + ', ' + formatScheduleDateTime(releaseDate);
                 openStandardLampaCard(card);

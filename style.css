@@ -214,12 +214,12 @@
 
 .yani-schedule__content {
     padding: 1.2em 2em 3em;
-    color: #f4f7fb;
-    opacity: 1;
-    filter: none;
+    color: #f4f7fb !important;
+    opacity: 1 !important;
+    filter: none !important;
 }
 
-.yani-schedule { color: #f4f7fb; opacity: 1; filter: none; }
+.yani-schedule { color: #f4f7fb !important; opacity: 1 !important; filter: none !important; }
 
 .yani-schedule__day {
     margin-bottom: 2em;
@@ -240,12 +240,12 @@
     margin-bottom: 0.65em;
     padding: 0.65em 1em;
     border-radius: 0.65em;
-    color: #f4f7fb;
-    background: linear-gradient(100deg, rgba(25, 34, 45, .96), rgba(49, 60, 72, .9));
+    color: #f4f7fb !important;
+    background: linear-gradient(100deg, #19222d, #313c48) !important;
     border: 0.08em solid rgba(255, 255, 255, .14);
     box-shadow: 0 .35em 1em rgba(0, 0, 0, .2);
-    opacity: 1;
-    filter: none;
+    opacity: 1 !important;
+    filter: none !important;
 }
 
 .yani-schedule__item.focus {
