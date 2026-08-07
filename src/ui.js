@@ -1092,6 +1092,8 @@
             bindPosterFallback(poster, data);
             var info = $('<div class="yani-detail__info"></div>');
             info.append($('<div class="yani-detail__title"></div>').text(data.title || 'YummyAnime'));
+            var alternativeTitles = (data.yani_titles || []).filter(function (title) { return title && title !== data.title; });
+            if (alternativeTitles.length) info.append($('<div class="yani-detail__alternative-titles"></div>').text(alternativeTitles.join(' · ')));
             if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
@@ -1355,11 +1357,22 @@
         var year = String(movie.release_date || movie.first_air_date || movie.year || '').slice(0, 4);
         if (!title) return Promise.resolve([]);
 
-        return LampaYaniApi.search(title, {limit: 10}).then(function (payload) {
-            var cards = LampaYaniApi.normalize(payload).map(toCard);
+        var queries = titleValues(movie);
+        if (queries.indexOf(title) < 0) queries.unshift(title);
+        return Promise.all(queries.slice(0, 8).map(function (query) {
+            return LampaYaniApi.search(query, {limit: 10}).then(function (payload) {
+                return LampaYaniApi.normalize(payload).map(toCard);
+            }).catch(function () { return []; });
+        })).then(function (rows) {
+            var cardsById = {};
+            rows.forEach(function (cards) { cards.forEach(function (card) {
+                var key = String(card.yani_id || card.title);
+                if (!cardsById[key]) cardsById[key] = card;
+            }); });
+            var cards = Object.keys(cardsById).map(function (key) { return cardsById[key]; });
             var expected = normalizeMatchTitle(title);
             cards.forEach(function (card) {
-                var titles = [card.title, card.original_title].map(normalizeMatchTitle);
+                var titles = card.yani_titles.map(normalizeMatchTitle);
                 card._match_score = (titles.indexOf(expected) >= 0 ? 100 : titles.some(function (value) { return value.indexOf(expected) >= 0 || expected.indexOf(value) >= 0; }) ? 40 : 0) + (year && card.release_date === year ? 30 : 0);
             });
             cards.sort(function (a, b) { return b._match_score - a._match_score; });
@@ -1367,6 +1380,20 @@
             var best = cards[0]._match_score;
             return cards.filter(function (card, index) { return index < 5 && (card._match_score === best || card._match_score >= 70); });
         });
+    }
+
+    function titleValues(item) {
+        var values = [];
+        var add = function (value) {
+            if (typeof value === 'string' && value.trim() && values.indexOf(value.trim()) < 0) values.push(value.trim());
+        };
+        ['title', 'name', 'russian', 'english', 'original_title', 'original_name', 'japanese', 'romaji', 'synonym'].forEach(function (key) { add(item[key]); });
+        ['aliases', 'alternative_titles', 'alternative_names', 'titles', 'synonyms', 'names'].forEach(function (key) {
+            var list = item[key];
+            if (!Array.isArray(list)) return;
+            list.forEach(function (value) { add(typeof value === 'string' ? value : value && (value.title || value.name || value.value)); });
+        });
+        return values;
     }
 
     function normalizeMatchTitle(value) {
@@ -1611,6 +1638,8 @@
 
     function toCard(item) {
         var title = item.title || item.name || item.russian || item.original_title || t('untitled');
+        var titles = titleValues(item);
+        if (titles.indexOf(title) < 0) titles.unshift(title);
         var image = item.image && typeof item.image === 'object' ? item.image : {};
         var cover = item.cover && typeof item.cover === 'object' ? item.cover : {};
         var poster = typeof item.cover === 'string' ? item.cover : typeof item.image === 'string' ? item.image : item.poster_url ||
@@ -1624,6 +1653,7 @@
         return {
             title: title,
             original_title: item.original_title || item.japanese || title,
+            yani_titles: titles,
             poster: poster,
             img: poster,
             release_date: String(item.year || item.release_year || ''),

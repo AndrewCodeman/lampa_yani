@@ -61,6 +61,7 @@
 
 .yani-detail__info { min-width: 0; max-width: 48em; flex: 1 1 auto; }
 .yani-detail__title { font-size: 2.2em; font-weight: 600; }
+.yani-detail__alternative-titles { margin-top: 0.35em; color: rgba(255,255,255,.68); line-height: 1.35; overflow-wrap: anywhere; }
 .yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }
 .yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }
 .yani-detail__actions { display: flex; flex-wrap: wrap; gap: 0.7em; max-width: 100%; }
