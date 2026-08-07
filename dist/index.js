@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.16.0',
+            version: '0.16.1',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.16.0',
+        version: '0.16.1',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -1723,16 +1723,19 @@ function pluginYummyAnime() {
     function findStandardLampaCard(card) {
         var tmdb = Lampa.Api && Lampa.Api.sources && Lampa.Api.sources.tmdb;
         if (!tmdb || !tmdb.get) return Promise.resolve(null);
-        var primaryTitle = card.title || '';
-        var originalTitle = card.original_title && card.original_title !== primaryTitle ? card.original_title : '';
-
-        return searchTmdbTitle(tmdb, primaryTitle).then(function (items) {
-            var match = bestStandardCard(items, card);
-            if (match || !originalTitle) return match;
-            return searchTmdbTitle(tmdb, originalTitle).then(function (originalItems) {
-                return bestStandardCard(originalItems, card);
-            });
+        var titles = (card.yani_titles || [card.title, card.original_title]).filter(function (title, index, list) {
+            return title && list.indexOf(title) === index;
         });
+
+        function searchNext(index) {
+            if (index >= titles.length || index >= 8) return Promise.resolve(null);
+            return searchTmdbTitle(tmdb, titles[index]).then(function (items) {
+                var match = bestStandardCard(items, card);
+                return match || searchNext(index + 1);
+            });
+        }
+
+        return searchNext(0);
     }
 
     function searchTmdbTitle(tmdb, title) {
@@ -1749,7 +1752,7 @@ function pluginYummyAnime() {
     }
 
     function bestStandardCard(items, yaniCard) {
-        var expectedTitles = [yaniCard.title, yaniCard.original_title].map(normalizeMatchTitle).filter(Boolean);
+        var expectedTitles = (yaniCard.yani_titles || [yaniCard.title, yaniCard.original_title]).map(normalizeMatchTitle).filter(Boolean);
         var expectedYear = String(yaniCard.release_date || '').slice(0, 4);
         items.forEach(function (entry) {
             var candidate = entry.card || {};

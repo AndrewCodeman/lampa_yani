@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.16.1 — 2026-08-07
+
+- standard Lampa card matching now tries alternate YummyAnime titles one by one;
+- matching still validates title similarity and release year before opening the shared card.
+
 ## 0.16.0 — 2026-08-07
 
 - redesigned the YummyAnime home screen with responsive SVG icons, color accents, depth, arrows and clearer focus styling.
