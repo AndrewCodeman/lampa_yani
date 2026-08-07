@@ -5,7 +5,7 @@ function pluginYummyAnime() {
     if (window.Lampa && Lampa.Manifest) {
         Lampa.Manifest.plugins = {
             type: 'other',
-            version: '0.14.3',
+            version: '0.14.4',
             name: 'YummyAnime',
             description: 'YummyAnime catalog, ratings, lists and account integration',
             component: 'yani_home'
@@ -20,7 +20,7 @@ function pluginYummyAnime() {
     'use strict';
 
     window.LampaYaniConfig = {
-        version: '0.14.3',
+        version: '0.14.4',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -867,13 +867,13 @@ function pluginYummyAnime() {
 
             var form = $('<div class="yani-auth__form"></div>');
             addField(form, t('auth_login'), loginValue || t('auth_login_empty'), function () {
-                showYummyInput({title: t('email_prompt'), value: loginValue}, function (value) {
+                showYummyInput({title: t('email_prompt'), value: loginValue, nosave: true, align: 'center'}, function (value) {
                     loginValue = String(value || '').trim();
                     render();
                 });
             });
             addField(form, t('auth_password'), passwordValue ? '••••••••' : t('auth_password_empty'), function () {
-                showYummyInput({title: t('password_prompt'), value: '', password: true}, function (value) {
+                showYummyInput({title: t('password_prompt'), value: '', password: true, nosave: true, align: 'center'}, function (value) {
                     passwordValue = String(value || '');
                     render();
                 });
@@ -927,7 +927,7 @@ function pluginYummyAnime() {
             }).then(function () {
                 passwordValue = '';
                 Lampa.Noty.show(t('login_ok'));
-                render();
+                goBack();
             }).catch(function (error) {
                 console.error('[YummyAnime Auth]', error);
                 Lampa.Noty.show(t('login_error'));

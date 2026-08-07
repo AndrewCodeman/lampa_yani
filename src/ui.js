@@ -500,13 +500,13 @@
 
             var form = $('<div class="yani-auth__form"></div>');
             addField(form, t('auth_login'), loginValue || t('auth_login_empty'), function () {
-                showYummyInput({title: t('email_prompt'), value: loginValue}, function (value) {
+                showYummyInput({title: t('email_prompt'), value: loginValue, nosave: true, align: 'center'}, function (value) {
                     loginValue = String(value || '').trim();
                     render();
                 });
             });
             addField(form, t('auth_password'), passwordValue ? '••••••••' : t('auth_password_empty'), function () {
-                showYummyInput({title: t('password_prompt'), value: '', password: true}, function (value) {
+                showYummyInput({title: t('password_prompt'), value: '', password: true, nosave: true, align: 'center'}, function (value) {
                     passwordValue = String(value || '');
                     render();
                 });
@@ -560,7 +560,7 @@
             }).then(function () {
                 passwordValue = '';
                 Lampa.Noty.show(t('login_ok'));
-                render();
+                goBack();
             }).catch(function (error) {
                 console.error('[YummyAnime Auth]', error);
                 Lampa.Noty.show(t('login_error'));
