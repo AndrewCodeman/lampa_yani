@@ -1341,6 +1341,7 @@
             if (alternativeTitles.length) info.append($('<div class="yani-detail__alternative-titles"></div>').text(alternativeTitles.join(' · ')));
             if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
+            loadDetailCommunityStats(data, info);
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
@@ -1364,6 +1365,34 @@
             html.append(poster, info);
             scroll.append(html);
             loadInlineComments(data, comments);
+        }
+
+        function loadDetailCommunityStats(cardData, container) {
+            var section = $('<div class="yani-detail__community"><div class="yani-detail__community-title"></div><div class="yani-detail__community-grid"></div></div>');
+            section.find('.yani-detail__community-title').text(t('community_stats'));
+            container.append(section);
+            Promise.all([LampaYaniApi.ratingBuckets(cardData.yani_id), LampaYaniApi.listStats(cardData.yani_id)]).then(function (responses) {
+                var rates = normalizeDetailStats(responses[0]);
+                var lists = normalizeDetailStats(responses[1]);
+                if (!rates.length && !lists.length) return section.remove();
+                var grid = section.find('.yani-detail__community-grid');
+                rates.slice(0, 10).forEach(function (item) {
+                    var label = item.rating || item.value || item.name || item.title;
+                    var count = item.count || item.counters || item.total || 0;
+                    if (label !== undefined) grid.append($('<div class="yani-detail__community-item"></div>').text(String(label) + ': ' + String(count)));
+                });
+                lists.slice(0, 8).forEach(function (item) {
+                    var label = item.list && (item.list.title || item.list.name) || item.title || item.name || item.status;
+                    var count = item.count || item.total || item.counters || 0;
+                    if (label) grid.append($('<div class="yani-detail__community-item"></div>').text(String(label) + ': ' + String(count)));
+                });
+                if (!grid.children().length) section.remove();
+            }).catch(function () { section.remove(); });
+        }
+
+        function normalizeDetailStats(payload) {
+            var response = payload && payload.response ? payload.response : payload;
+            return Array.isArray(response) ? response : response && (response.items || response.data || response.rates || response.lists) || [];
         }
 
         function bindDetailButtonFocus(element) {

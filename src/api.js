@@ -97,6 +97,12 @@
         recommendations: function (id) {
             return request('/anime/' + encodeURIComponent(id) + '/recommendations');
         },
+        ratingBuckets: function (id) {
+            return request('/anime/' + encodeURIComponent(id) + '/rates', {auth: true});
+        },
+        listStats: function (id) {
+            return request('/anime/' + encodeURIComponent(id) + '/lists', {auth: true});
+        },
         rate: function (id, value) {
             return request('/anime/' + encodeURIComponent(id) + '/rate', {
                 method: 'PUT',

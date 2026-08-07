@@ -36,11 +36,13 @@
     messages.ru.notifications_error = 'Не удалось загрузить уведомления';
     messages.ru.mark_all_read = 'Отметить все прочитанными';
     messages.ru.notification = 'Уведомление';
+    messages.ru.community_stats = 'Статистика сообщества';
     messages.en.notifications_title = 'YummyAnime notifications';
     messages.en.notifications_empty = 'There are no notifications';
     messages.en.notifications_error = 'Failed to load notifications';
     messages.en.mark_all_read = 'Mark all as read';
     messages.en.notification = 'Notification';
+    messages.en.community_stats = 'Community statistics';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -57,6 +59,7 @@
     messages.uk.notifications_error = 'Не вдалося завантажити сповіщення';
     messages.uk.mark_all_read = 'Позначити всі як прочитані';
     messages.uk.notification = 'Сповіщення';
+    messages.uk.community_stats = 'Статистика спільноти';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
