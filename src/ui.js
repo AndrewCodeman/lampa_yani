@@ -252,6 +252,11 @@
             if (isElement) element = value;
             else if (value.render || value.yani_id || value.title) card = value;
         });
+        [first, second, third].forEach(function (value) {
+            if (!value || card) return;
+            var candidate = value.card || value.object || value.data;
+            if (candidate && (candidate.render || candidate.yani_id || candidate.title)) card = candidate;
+        });
         if (!element && second && (second.jquery || second.nodeType)) element = second;
         if (!card && first && (first.render || first.yani_id)) card = first;
         if (!element && card && card.render) element = card.render(true);
