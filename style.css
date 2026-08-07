@@ -221,8 +221,59 @@
 
 .yani-schedule { color: #f4f7fb !important; opacity: 1 !important; filter: none !important; }
 
-.yani-schedule__day {
-    margin-bottom: 2em;
+.yani-schedule__days {
+    display: flex;
+    gap: 0.65em;
+    margin-bottom: 1.2em;
+    overflow-x: auto;
+    padding: 0.2em 0.15em 0.5em;
+}
+
+.yani-schedule__day-chip {
+    flex: 0 0 auto;
+    min-width: 5.8em;
+    padding: 0.55em 0.75em;
+    border: 0.1em solid rgba(255, 255, 255, .16);
+    border-radius: 0.7em;
+    background: rgba(20, 31, 43, .9);
+    color: #b9c7d5;
+    text-align: center;
+    transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.yani-schedule__day-chip.selected {
+    background: #287da9;
+    border-color: #72d8ff;
+    color: #ffffff;
+}
+
+.yani-schedule__day-chip.focus {
+    transform: scale(1.05);
+    border-color: #ffffff;
+    box-shadow: 0 0 0 .14em rgba(98, 201, 255, .65);
+}
+
+.yani-schedule__day-name {
+    font-size: 0.95em;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.yani-schedule__day-count {
+    margin-top: 0.25em;
+    color: #72d8ff;
+    font-size: 1.2em;
+    font-weight: 800;
+}
+
+.yani-schedule__day-chip.selected .yani-schedule__day-count { color: #ffffff; }
+
+.yani-schedule__selected-title {
+    margin: 0.3em 0 0.7em;
+    color: #ffffff;
+    font-size: 1.45em;
+    font-weight: 700;
+    text-transform: capitalize;
 }
 
 .yani-schedule__day-title {

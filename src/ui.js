@@ -1024,6 +1024,8 @@
         var html = $('<div class="yani-schedule"></div>');
         var content = $('<div class="yani-schedule__content"></div>');
         var last;
+        var dayGroups = [];
+        var selectedDay = 0;
 
         this.create = function () {
             var self = this;
@@ -1046,6 +1048,7 @@
         function renderSchedule(items) {
             var today = new Date();
             today.setHours(0, 0, 0, 0);
+            dayGroups = [];
 
             for (var dayOffset = 0; dayOffset < 7; dayOffset++) {
                 var day = new Date(today.getTime());
@@ -1062,19 +1065,38 @@
                     return Number(a.episodes.next_date) - Number(b.episodes.next_date);
                 });
 
-                var section = $('<section class="yani-schedule__day"></section>');
-                section.append($('<div class="yani-schedule__day-title"></div>').text(formatScheduleDay(day, dayOffset)));
-
-                if (!releases.length) {
-                    section.append($('<div class="yani-schedule__empty"></div>').text(t('no_releases')));
-                } else {
-                    releases.forEach(function (item) {
-                        section.append(createScheduleItem(item));
-                    });
-                }
-
-                content.append(section);
+                dayGroups.push({day: day, offset: dayOffset, releases: releases});
             }
+
+            var days = $('<div class="yani-schedule__days"></div>');
+            dayGroups.forEach(function (group, index) {
+                var chip = $('<div class="yani-schedule__day-chip selector"></div>');
+                chip.append($('<div class="yani-schedule__day-name"></div>').text(formatScheduleDay(group.day, group.offset)));
+                chip.append($('<div class="yani-schedule__day-count"></div>').text(group.releases.length));
+                chip.on('hover:focus', function () {
+                    content.find('.yani-schedule__day-chip.focus').removeClass('focus');
+                    chip.addClass('focus');
+                });
+                chip.on('hover:blur', function () { chip.removeClass('focus'); });
+                chip.on('hover:enter click.yaniScheduleDay', function () { selectScheduleDay(index); });
+                days.append(chip);
+            });
+            content.append(days);
+            content.append($('<div class="yani-schedule__selected-title"></div>'));
+            content.append($('<div class="yani-schedule__releases"></div>'));
+            selectScheduleDay(0);
+        }
+
+        function selectScheduleDay(index) {
+            selectedDay = Math.max(0, Math.min(index, dayGroups.length - 1));
+            var group = dayGroups[selectedDay];
+            if (!group) return;
+            content.find('.yani-schedule__day-chip').removeClass('selected');
+            content.find('.yani-schedule__day-chip').eq(selectedDay).addClass('selected');
+            content.find('.yani-schedule__selected-title').text(formatScheduleDay(group.day, group.offset));
+            var releases = content.find('.yani-schedule__releases').empty();
+            if (!group.releases.length) releases.append($('<div class="yani-schedule__empty"></div>').text(t('no_releases')));
+            else group.releases.forEach(function (item) { releases.append(createScheduleItem(item)); });
         }
 
         function createScheduleItem(item) {
