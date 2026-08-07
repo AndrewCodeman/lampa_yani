@@ -303,10 +303,18 @@
     }
 
     function openCardOnce(card) {
-        if (!card || !card.yani_id || card._yani_opening) return;
+        var id = getYummyId(card);
+        if (!card || !id || card._yani_opening) return;
+        card.yani_id = id;
         card._yani_opening = true;
         openYummyDetail(card, false);
         setTimeout(function () { card._yani_opening = false; }, 500);
+    }
+
+    function getYummyId(card) {
+        if (!card) return null;
+        return card.yani_id || card.anime_id || card.animeId || card.id || card._id ||
+            card.anime && (card.anime.anime_id || card.anime.id) || null;
     }
 
     var posterFallbackCache = {};
@@ -1467,9 +1475,15 @@
     }
 
     function openYummyDetail(card, notifyFallback) {
+        var id = getYummyId(card);
+        if (!id) {
+            Lampa.Noty.show(t('no_yummy_match'));
+            return;
+        }
+        card.yani_id = id;
         if (notifyFallback && Lampa.Noty) Lampa.Noty.show(t('lampa_card_fallback'));
         Lampa.Activity.push({
-            url: 'yani/detail/' + card.yani_id,
+            url: 'yani/detail/' + encodeURIComponent(id),
             title: card.title,
             component: 'yani_detail',
             card: card
