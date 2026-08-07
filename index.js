@@ -18,6 +18,7 @@ function pluginYummyAnime() {
         'src/ui-auth.js',
         'src/ui-status.js',
         'src/ui-player.js',
+        'src/ui-detail-sections.js',
         'src/ui.js'
     ];
     var current = document.currentScript;

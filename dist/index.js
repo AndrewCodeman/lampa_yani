@@ -862,6 +862,19 @@ function pluginYummyAnime() {
 
 (function (window) {
     'use strict';
+    function create(deps) {
+        function order(data) { var section = $('<div class="yani-detail__order"></div>').append($('<div class="yani-detail__order-title"></div>').text(deps.t('viewing_order'))), list = $('<div class="yani-detail__order-list"></div>'); (data.yani_viewing_order || []).forEach(function (entry, index) { var card = deps.toCard(entry), relation = entry.data && (entry.data.text || entry.data.title) || '', row = $('<div class="yani-detail__order-item selector"></div>').append($('<span class="yani-detail__order-index"></span>').text((index + 1) + '.')).append($('<span class="yani-detail__order-name"></span>').text(card.title)); if (card.release_date) row.append($('<span class="yani-detail__order-year"></span>').text(card.release_date)); if (relation) row.append($('<span class="yani-detail__order-relation"></span>').text('· ' + relation)); row.on('hover:focus', function () { row.addClass('focus'); }).on('hover:blur', function () { row.removeClass('focus'); }).on('hover:enter click.yaniOrder', function () { deps.openDetail(card, true); }); list.append(row); }); return section.append(list); }
+        function recommendations(data, container) { var section = $('<div class="yani-detail__extra yani-detail__recommendations"><div class="yani-detail__extra-title"></div></div>'), list = $('<div class="yani-detail__recommendations-list"></div>'); section.find('.yani-detail__extra-title').text(deps.t('recommendations')); container.append(section.append(list)); LampaYaniApi.recommendations(data.yani_id).then(function (payload) { var items = LampaYaniApi.normalize(payload).slice(0, 12); if (!items.length) return section.remove(); items.forEach(function (item) { var card = deps.toCard(item), row = $('<div class="yani-detail__recommendation selector"></div>'), poster = $('<img class="yani-detail__recommendation-poster" alt="">').attr('src', card.poster || ''); LampaYaniMedia.bindPosterFallback(poster, card); row.append(poster, $('<div class="yani-detail__recommendation-title"></div>').text(card.title)); if (card.release_date) row.append($('<div class="yani-detail__recommendation-year"></div>').text(card.release_date)); row.on('hover:focus', function () { row.addClass('focus'); }).on('hover:blur', function () { row.removeClass('focus'); }).on('hover:enter click.yaniRecommendation', function () { deps.openDetail(card, true); }); list.append(row); }); }).catch(function () { section.remove(); }); }
+        function collections(data, container) { var section = $('<div class="yani-detail__extra yani-detail__collections"><div class="yani-detail__extra-title"></div></div>'), list = $('<div class="yani-detail__collections-list"></div>'); section.find('.yani-detail__extra-title').text(deps.t('collections')); container.append(section.append(list)); LampaYaniApi.collections(data.yani_id, 10, 0).then(function (payload) { var response = payload && payload.response ? payload.response : payload, items = Array.isArray(response) ? response : response && (response.items || response.data || response.collections) || []; if (!items.length) return section.remove(); items.forEach(function (collection) { var animes = Array.isArray(collection.animes) ? collection.animes : [], row = $('<div class="yani-detail__collection selector"></div>').append($('<div class="yani-detail__collection-title"></div>').text(collection.title || collection.name || deps.t('collection'))); if (collection.description) row.append($('<div class="yani-detail__collection-description"></div>').text(deps.clean(collection.description))); if (animes.length) row.append($('<div class="yani-detail__collection-count"></div>').text(animes.length + ' ' + deps.t('anime_count'))); row.on('hover:focus', function () { row.addClass('focus'); }).on('hover:blur', function () { row.removeClass('focus'); }).on('hover:enter click.yaniCollection', function () { if (animes.length) Lampa.Select.show({title: collection.title || deps.t('collection'), items: animes.map(function (item) { var card = deps.toCard(item); return {title: card.title, card: card}; }), onSelect: function (item) { deps.openDetail(item.card, true); }}); }); list.append(row); }); }).catch(function () { section.remove(); }); }
+        function trailers(data, container) { var section = $('<div class="yani-detail__extra yani-detail__trailers"><div class="yani-detail__extra-title"></div></div>'), list = $('<div class="yani-detail__trailers-list"></div>'); section.find('.yani-detail__extra-title').text(deps.t('trailers')); container.append(section.append(list)); LampaYaniApi.trailers(data.yani_id).then(function (payload) { var items = payload && payload.response ? payload.response : payload; if (!Array.isArray(items) || !items.length) return section.remove(); items.forEach(function (trailer, index) { var title = trailer.title || trailer.name || ('Trailer ' + (index + 1)), url = trailer.iframe_url || trailer.url || trailer.video_url || trailer.link, row = $('<div class="yani-detail__trailer selector"></div>').text('▶ ' + title); row.on('hover:focus', function () { row.addClass('focus'); }).on('hover:blur', function () { row.removeClass('focus'); }); if (url) row.on('hover:enter click.yaniTrailer', function () { url = LampaYaniUiUtils.normalizeVideoUrl(url); if (!deps.showIframe(url)) Lampa.Activity.push({url: 'yani/trailer/' + encodeURIComponent(title), title: title, component: 'yani_player', iframe_url: url}); }); list.append(row); }); }).catch(function () { section.remove(); }); }
+        return {order: order, recommendations: recommendations, collections: collections, trailers: trailers};
+    }
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.DetailSections = window.LampaYaniDetailSections = {create: create};
+}(window));
+
+(function (window) {
+    'use strict';
 
     function t(name) {
         return window.LampaYaniI18n ? LampaYaniI18n.t(name) : name;
@@ -2397,10 +2410,10 @@ function pluginYummyAnime() {
             loadDetailCommunityStats(data, info);
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
-            if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
-            loadDetailCollections(data, info);
-            loadDetailRecommendations(data, info);
-            loadDetailTrailers(data, info);
+            if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(detailSections().order(data));
+            detailSections().collections(data, info);
+            detailSections().recommendations(data, info);
+            detailSections().trailers(data, info);
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
@@ -3120,6 +3133,16 @@ function pluginYummyAnime() {
             yani_type: item.type || null,
             yani_remote_ids: item.remote_ids || {}
         };
+    }
+
+    function detailSections() {
+        return LampaYaniDetailSections.create({
+            t: t,
+            toCard: toCard,
+            clean: cleanCommentText,
+            openDetail: openYummyDetail,
+            showIframe: showYummyIframe
+        });
     }
 
     function createViewingOrder(data) {
