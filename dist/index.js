@@ -2276,7 +2276,8 @@ function pluginYummyAnime() {
         }
 
         function loadDetailCommunityStats(cardData, container) {
-            var section = $('<div class="yani-detail__community"><div class="yani-detail__community-title"></div><div class="yani-detail__community-grid"></div></div>');
+            var section = $('<div class="yani-detail__community selector"><div class="yani-detail__community-title"></div><div class="yani-detail__community-grid"></div></div>');
+            section.on('hover:focus', function () { section.addClass('focus'); });
             section.find('.yani-detail__community-title').text(t('community_stats'));
             container.append(section);
             Promise.all([LampaYaniApi.ratingBuckets(cardData.yani_id), LampaYaniApi.listStats(cardData.yani_id)]).then(function (responses) {
@@ -2311,7 +2312,9 @@ function pluginYummyAnime() {
         }
 
         function loadInlineComments(cardData, container) {
-            container.append($('<div class="yani-detail__comments-title"></div>').text(t('comments_title') + (cardData.yani_comments_count ? ' (' + cardData.yani_comments_count + ')' : '')));
+            var commentsTitle = $('<div class="yani-detail__comments-title selector"></div>').text(t('comments_title') + (cardData.yani_comments_count ? ' (' + cardData.yani_comments_count + ')' : ''));
+            commentsTitle.on('hover:focus', function () { commentsTitle.addClass('focus'); });
+            container.append(commentsTitle);
             var list = $('<div class="yani-detail__comments-list"></div>');
             list.append($('<div class="yani-detail__comments-loading"></div>').text('…'));
             container.append(list);
@@ -2319,7 +2322,9 @@ function pluginYummyAnime() {
                 var comments = LampaYaniApi.normalizeComments(payload);
                 list.empty();
                 if (!comments.length) {
-                    list.append($('<div class="yani-detail__comments-empty"></div>').text(t('comments_empty')));
+                    var empty = $('<div class="yani-detail__comments-empty selector"></div>').text(t('comments_empty'));
+                    empty.on('hover:focus', function () { empty.addClass('focus'); });
+                    list.append(empty);
                     return;
                 }
                 comments.forEach(function (comment) {
@@ -2336,7 +2341,9 @@ function pluginYummyAnime() {
                 });
             }).catch(function (error) {
                 console.error('[YummyAnime Comments]', error);
-                list.empty().append($('<div class="yani-detail__comments-error"></div>').text(t('comments_error')));
+                var errorRow = $('<div class="yani-detail__comments-error selector"></div>').text(t('comments_error'));
+                errorRow.on('hover:focus', function () { errorRow.addClass('focus'); });
+                list.empty().append(errorRow);
             });
         }
 
