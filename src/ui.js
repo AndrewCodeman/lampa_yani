@@ -1103,6 +1103,14 @@
     }
 
     function StatusDashboard(object) {
+        return LampaYaniStatus.create(object, {
+            t: t,
+            locale: locale,
+            goBack: goBack
+        });
+    }
+
+    function LegacyStatusDashboard(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
         var html = $('<div class="yani-status"></div>');
         var content = $('<div class="yani-status__content"></div>');

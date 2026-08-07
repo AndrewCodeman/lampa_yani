@@ -16,6 +16,7 @@ function pluginYummyAnime() {
         'src/ui-schedule.js',
         'src/ui-notifications.js',
         'src/ui-auth.js',
+        'src/ui-status.js',
         'src/ui.js'
     ];
     var current = document.currentScript;
