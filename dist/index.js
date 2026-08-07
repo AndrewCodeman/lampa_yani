@@ -557,6 +557,38 @@ function pluginYummyAnime() {
 (function (window) {
     'use strict';
 
+    function videoData(video) {
+        var value = video && video.data;
+        if (!value) return {};
+        if (typeof value === 'object') return value;
+        if (typeof value === 'string') {
+            try { return JSON.parse(value) || {}; } catch (error) { return {}; }
+        }
+        return {};
+    }
+
+    function normalizeVideoUrl(url) {
+        if (!url) return '';
+        url = String(url).trim();
+        if (url.indexOf('//') === 0) url = 'https:' + url;
+        if (/^http:\/\/(?:www\.)?kodik\./i.test(url)) url = 'https://' + url.slice(7);
+        return url;
+    }
+
+    function videoHost(url) {
+        try { return new URL(url).hostname.replace(/^www\./, ''); } catch (error) { return ''; }
+    }
+
+    window.LampaYaniUiUtils = {
+        videoData: videoData,
+        normalizeVideoUrl: normalizeVideoUrl,
+        videoHost: videoHost
+    };
+}(window));
+
+(function (window) {
+    'use strict';
+
     function t(name) {
         return window.LampaYaniI18n ? LampaYaniI18n.t(name) : name;
     }
@@ -2318,11 +2350,11 @@ function pluginYummyAnime() {
 
             var groups = {};
             videos.forEach(function (video) {
-                var data = videoData(video);
+                var data = LampaYaniUiUtils.videoData(video);
                 var title = data.dubbing || data.player || t('player');
                 var quality = videoQualityLabel(video);
                 var key = title + '|' + String(data.player_id || data.player || '') + '|' + quality;
-                if (!groups[key]) groups[key] = {title: title, player: data.player || '', quality: quality, source: videoHost(videoSourceUrl(video)), videos: []};
+                if (!groups[key]) groups[key] = {title: title, player: data.player || '', quality: quality, source: LampaYaniUiUtils.videoHost(videoSourceUrl(video)), videos: []};
                 groups[key].videos.push(video);
             });
 
@@ -2664,23 +2696,9 @@ function pluginYummyAnime() {
 
     function videoSourceUrl(video) {
         if (!video) return '';
-        var data = videoData(video);
-        return normalizeVideoUrl(video.iframe_url || video.url || video.player_url || video.link ||
+        var data = LampaYaniUiUtils.videoData(video);
+        return LampaYaniUiUtils.normalizeVideoUrl(video.iframe_url || video.url || video.player_url || video.link ||
             data.iframe_url || data.url || data.player_url || data.link);
-    }
-
-    function videoData(video) {
-        var value = video && video.data;
-        if (!value) return {};
-        if (typeof value === 'object') return value;
-        if (typeof value === 'string') {
-            try { return JSON.parse(value) || {}; } catch (error) { return {}; }
-        }
-        return {};
-    }
-
-    function videoHost(url) {
-        try { return new URL(url).hostname.replace(/^www\./, ''); } catch (error) { return ''; }
     }
 
     function showYummyIframe(url) {
@@ -2701,16 +2719,9 @@ function pluginYummyAnime() {
         return /(^|\/\/)(?:www\.)?kodik\.(?:info|cc|biz|site|com|tv)(?:[/:]|$)/i.test(url || '');
     }
 
-    function normalizeVideoUrl(url) {
-        if (!url) return '';
-        url = String(url).trim();
-        if (url.indexOf('//') === 0) url = 'https:' + url;
-        if (/^http:\/\/(?:www\.)?kodik\./i.test(url)) url = 'https://' + url.slice(7);
-        return url;
-    }
 
     function videoQualityLabel(video) {
-        var data = videoData(video);
+        var data = LampaYaniUiUtils.videoData(video);
         var values = [video && video.quality, video && video.resolution, data.quality, data.resolution];
         var best = 0;
         values.forEach(function (value) {
@@ -3011,7 +3022,7 @@ function pluginYummyAnime() {
     }
 
     function openTrailer(url, title) {
-        url = normalizeVideoUrl(url);
+        url = LampaYaniUiUtils.normalizeVideoUrl(url);
         if (!url) return;
         if (!showYummyIframe(url)) {
             Lampa.Activity.push({url: 'yani/trailer/' + encodeURIComponent(title), title: title, component: 'yani_player', iframe_url: url});
@@ -3053,7 +3064,7 @@ function pluginYummyAnime() {
         var voices = {};
         var quality = 0;
         videos.forEach(function (video) {
-        var data = videoData(video);
+        var data = LampaYaniUiUtils.videoData(video);
             var voice = data.dubbing || data.translation || data.voice || data.player;
             if (voice) voices[String(voice)] = true;
             [video.quality, video.resolution, data.quality, data.resolution].forEach(function (value) {
