@@ -38,7 +38,7 @@
                 LampaYaniAuth.refresh().catch(function () { console.warn('[YummyAnime] Token refresh failed'); });
             }
 
-            Lampa.Menu.addButton(yummyIcon, 'YummyAnime for Lampa', function () {
+            Lampa.Menu.addButton(yummyIcon, 'YummyAnime', function () {
                 Lampa.Activity.push({
                     url: 'yani',
                     title: 'YummyAnime',
