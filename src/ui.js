@@ -283,30 +283,47 @@
         if (posterFallbackCache[key] === null) return Promise.resolve('');
 
         var ids = card.yani_remote_ids || {};
-        var url = ids.mal || ids.myanimelist ? 'https://api.jikan.moe/v4/anime/' + encodeURIComponent(ids.mal || ids.myanimelist) + '/full' : '';
-        if (!url && ids.shikimori) url = 'https://shikimori.one/api/animes/' + encodeURIComponent(ids.shikimori) + '.json';
-        if (!url && card.title) url = 'https://api.jikan.moe/v4/anime?q=' + encodeURIComponent(card.title) + '&limit=1';
-        if (!url) {
+        var urls = [];
+        if (ids.mal || ids.myanimelist) urls.push('https://api.jikan.moe/v4/anime/' + encodeURIComponent(ids.mal || ids.myanimelist) + '/full');
+        if (ids.shikimori) urls.push('https://shikimori.one/api/animes/' + encodeURIComponent(ids.shikimori) + '.json');
+        if (card.title) {
+            urls.push('https://api.jikan.moe/v4/anime?q=' + encodeURIComponent(card.title) + '&limit=1');
+            urls.push('https://graphql.anilist.co');
+        }
+        if (!urls.length) {
             posterFallbackCache[key] = null;
             return Promise.resolve('');
         }
 
-        return fetch(url).then(function (response) {
-            if (!response.ok) throw new Error('poster source ' + response.status);
-            return response.json();
-        }).then(function (payload) {
-            var item = payload && payload.data ? (Array.isArray(payload.data) ? payload.data[0] : payload.data) : payload;
-            var images = item && item.images || {};
-            var poster = images.jpg && (images.jpg.large_image_url || images.jpg.image_url) ||
-                images.webp && (images.webp.large_image_url || images.webp.image_url) ||
-                item && (item.poster || item.image);
-            if (!poster) throw new Error('alternative poster is empty');
-            posterFallbackCache[key] = poster;
-            return poster;
-        }).catch(function () {
-            posterFallbackCache[key] = null;
-            return '';
-        });
+        function loadSource(index) {
+            if (index >= urls.length) {
+                posterFallbackCache[key] = null;
+                return Promise.resolve('');
+            }
+            var isAniList = urls[index] === 'https://graphql.anilist.co';
+            var request = isAniList ? fetch(urls[index], {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({query: 'query ($search: String) { Page(perPage: 1) { media(search: $search, type: ANIME) { coverImage { extraLarge large } } } }', variables: {search: card.title}})
+            }) : fetch(urls[index]);
+            return request.then(function (response) {
+                if (!response.ok) throw new Error('poster source ' + response.status);
+                return response.json();
+            }).then(function (payload) {
+                var item = isAniList && payload && payload.data && payload.data.Page ? payload.data.Page.media && payload.data.Page.media[0] :
+                    payload && payload.data ? (Array.isArray(payload.data) ? payload.data[0] : payload.data) : payload;
+                var images = item && item.images || {};
+                var poster = isAniList ? item && item.coverImage && (item.coverImage.extraLarge || item.coverImage.large) :
+                    images.jpg && (images.jpg.large_image_url || images.jpg.image_url) ||
+                    images.webp && (images.webp.large_image_url || images.webp.image_url) ||
+                    item && (item.poster || item.image);
+                if (!poster) throw new Error('alternative poster is empty');
+                posterFallbackCache[key] = poster;
+                return poster;
+            }).catch(function () { return loadSource(index + 1); });
+        }
+
+        return loadSource(0);
     }
 
     function bindPosterFallback(image, card) {

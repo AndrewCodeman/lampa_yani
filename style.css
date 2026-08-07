@@ -297,6 +297,24 @@
 .yani-rating-logo--anidub { background: #3b9bd9; color: #fff; }
 .yani-rating-logo--mal { background: #2e5d93; color: #fff; }
 .yani-rating-logo--worldart { background: #f28c28; color: #fff; }
+.yani-rating-logo--yummy,
+.yani-rating-logo--kp,
+.yani-rating-logo--shikimori,
+.yani-rating-logo--anidub,
+.yani-rating-logo--mal,
+.yani-rating-logo--worldart {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 1.25em 1.25em;
+    text-indent: -9999px;
+    overflow: hidden;
+}
+.yani-rating-logo--yummy { background-image: url('https://raw.githubusercontent.com/AndrewCodeman/lampa_yani/main/assets/yummyanime.svg'); }
+.yani-rating-logo--kp { background-image: url('https://cdn.simpleicons.org/kinopoisk/171717'); }
+.yani-rating-logo--shikimori { background-image: url('https://cdn.simpleicons.org/shikimori/ffffff'); }
+.yani-rating-logo--anidub { background-image: url('https://anidub.com/favicon.ico'); }
+.yani-rating-logo--mal { background-image: url('https://cdn.simpleicons.org/myanimelist/ffffff'); }
+.yani-rating-logo--worldart { background-image: url('https://www.world-art.ru/favicon.ico'); }
 
 .yani-card-rating__logo {
     margin-right: 0.25em;

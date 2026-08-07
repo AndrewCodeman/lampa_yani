@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.15.0 — 2026-08-07
+
+- added rating-service logos for card and detail rating badges;
+- added AniList and Shikimori poster fallbacks after the primary/Jikan sources;
+- synchronized the README, bilingual documentation and installation URL with the current release.
+
+## 0.14.9 — 2026-08-07
+
+- restored card focus, opening and action menus across supported Lampa card render signatures;
+- added configurable visibility switches for YummyAnime home sections.
+
+## 0.14.8 — 2026-08-07
+
+- added home section visibility switches;
+- added alternative-title search and poster fallback improvements.
+
 ## 0.12.1 — 2026-08-06
 
 - fixed premature catalog completion when a full API page contains duplicate titles;
