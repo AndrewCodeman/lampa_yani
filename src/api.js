@@ -30,6 +30,20 @@
         return attempt(0);
     }
 
+    function rememberCacheKey(key) {
+        if (!window.Lampa || !Lampa.Storage) return;
+        var indexKey = 'lampa_yummyanime_cache_index';
+        var keys = [];
+        try { keys = JSON.parse(Lampa.Storage.get(indexKey, '[]')) || []; } catch (ignore) {}
+        keys = keys.filter(function (item) { return item !== key; });
+        keys.push(key);
+        while (keys.length > Number(config.cacheEntries || 80)) {
+            var expired = keys.shift();
+            try { Lampa.Storage.remove(expired); } catch (ignoreRemove) {}
+        }
+        Lampa.Storage.set(indexKey, JSON.stringify(keys));
+    }
+
     function request(path, options) {
         options = options || {};
         var headers = options.headers || {};
@@ -53,6 +67,7 @@
         }).then(function (payload) {
             if ((options.method || 'GET') === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
                 Lampa.Storage.set(cacheKey, JSON.stringify({time: Date.now(), data: payload}));
+                rememberCacheKey(cacheKey);
             }
             return payload;
         }).catch(function (error) {
@@ -256,7 +271,7 @@
             return request('/anime?limit=1');
         },
         status: function () {
-            return fetch(config.statusUrl + '?_=' + Date.now(), {cache: 'no-store'}).then(function (response) {
+            return fetchWithRetry(config.statusUrl + '?_=' + Date.now(), {cache: 'no-store'}, true).then(function (response) {
                 if (!response.ok) throw new Error('YummyStatus snapshot: ' + response.status);
                 return response.json();
             })
