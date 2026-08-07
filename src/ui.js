@@ -297,6 +297,7 @@
                     seen[key] = true;
                     var episodeDates = schedule[key] || {};
                     card.yani_update_date = Number(episodeDates.prev_date || episodeDates.next_date || 0);
+                    card.yani_update_episode = Number(episodeDates.aired || 0) || null;
                     return true;
                 }).sort(function (a, b) {
                     return Number(b.yani_update_date || 0) - Number(a.yani_update_date || 0);
@@ -397,6 +398,7 @@
     function bindYummyCard(element, card) {
         addCardRatings(element, card);
         addCardMediaBadges(element, card);
+        addCardUpdateBadge(element, card);
         addCardListBadge(element, card);
         attachPosterFallback(element, card);
         // Some Lampa versions clone the card object after cardRender. Keep a
@@ -537,6 +539,14 @@
         block.empty();
         if (meta.quality) block.append($('<span class="yani-card-media__badge yani-card-media__quality"></span>').text(meta.quality));
         if (meta.voices) block.append($('<span class="yani-card-media__badge yani-card-media__voices"></span>').text(meta.voices + ' ' + t('voices_short')));
+    }
+
+    function addCardUpdateBadge(element, card) {
+        if (!card || !card.yani_update_episode) return;
+        var render = card.render ? $(card.render(true)) : $(element);
+        var view = $('.card__view', render).first();
+        if (!view.length || view.find('.yani-card-update').length) return;
+        view.append($('<span class="yani-card-update"></span>').text(t('episode') + ' ' + card.yani_update_episode));
     }
 
     function addCardListBadge(element, card) {
