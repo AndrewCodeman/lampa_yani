@@ -1390,6 +1390,9 @@
             });
             bindDetailButtonFocus(searchButton);
             var subscribeButton = $('<div class="yani-detail__button selector"></div>').text(t('subscribe_episodes'));
+            if (Lampa.Storage && Lampa.Storage.get('yani_subscribed_video_' + data.yani_id, '')) {
+                subscribeButton.text(t('unsubscribe_episodes'));
+            }
             subscribeButton.on('hover:enter', function () { toggleEpisodeSubscription(data, subscribeButton); });
             bindDetailButtonFocus(subscribeButton);
             var comments = $('<div class="yani-detail__comments"></div>');
@@ -1498,19 +1501,21 @@
     function toggleEpisodeSubscription(card, button) {
         if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
         if (!card || !card.yani_id) return;
-        LampaYaniApi.videos(card.yani_id).then(function (payload) {
+        var key = 'yani_subscribed_video_' + card.yani_id;
+        var subscribed = Lampa.Storage && Lampa.Storage.get(key, '');
+        var videoRequest = subscribed ? Promise.resolve(String(subscribed)) : LampaYaniApi.videos(card.yani_id).then(function (payload) {
             var response = payload && payload.response ? payload.response : payload;
             var videos = Array.isArray(response) ? response : response && (response.videos || response.items) || [];
             videos = videos.filter(function (video) { return video && (video.video_id || video.id); });
             if (!videos.length) throw new Error('No subscribable videos');
             videos.sort(function (a, b) { return Number(b.number || b.index || 0) - Number(a.number || a.index || 0); });
-            var videoId = videos[0].video_id || videos[0].id;
-            var key = 'yani_subscribed_video_' + card.yani_id;
-            var subscribed = Lampa.Storage && Lampa.Storage.get(key, '');
+            return String(videos[0].video_id || videos[0].id);
+        });
+        videoRequest.then(function (videoId) {
             var action = subscribed ? LampaYaniApi.unsubscribeVideo(videoId) : LampaYaniApi.subscribeVideo(videoId);
             return action.then(function () {
                 if (Lampa.Storage) {
-                    if (subscribed) Lampa.Storage.remove(key);
+                    if (subscribed) Lampa.Storage.set(key, '');
                     else Lampa.Storage.set(key, String(videoId));
                 }
                 button.text(subscribed ? t('subscribe_episodes') : t('unsubscribe_episodes'));
