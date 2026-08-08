@@ -1604,7 +1604,12 @@
             var poster = $('<img class="yani-detail__poster">').attr('src', data.img || data.poster || '');
             LampaYaniMedia.bindPosterFallback(poster, data);
             var info = $('<div class="yani-detail__info"></div>');
-            info.append($('<div class="yani-detail__title"></div>').text(data.title || 'YummyAnime'));
+            // The title is deliberately a selector: it is the first focusable
+            // item on the page, so moving up from the actions returns the
+            // viewport to the beginning of the detail card.
+            var title = $('<div class="yani-detail__title selector"></div>').text(data.title || 'YummyAnime');
+            bindDetailButtonFocus(title);
+            info.append(title);
             var alternativeTitles = (data.yani_titles || []).filter(function (title) { return title && title !== data.title; });
             if (alternativeTitles.length) info.append($('<div class="yani-detail__alternative-titles"></div>').text(alternativeTitles.join(' · ')));
             if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
