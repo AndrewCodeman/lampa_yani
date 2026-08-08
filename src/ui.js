@@ -2706,9 +2706,27 @@
     function openTrailer(url, title) {
         url = LampaYaniUiUtils.normalizeVideoUrl(url);
         if (!url) return;
-        if (!showYummyIframe(url)) {
-            Lampa.Activity.push({url: 'yani/trailer/' + encodeURIComponent(title), title: title, component: 'yani_player', iframe_url: url});
+        // Trailers are normally YouTube links. An iframe inside Lampa cannot
+        // reliably play them on Android TV, while External lets Android route
+        // the URL to the installed YouTube (or another matching) application.
+        if (openExternalVideo(url)) return;
+        Lampa.Noty.show(url);
+    }
+
+    function openExternalVideo(url) {
+        try {
+            if (Lampa.External && Lampa.External.open) {
+                Lampa.External.open(url);
+                return true;
+            }
+            if (window.open) {
+                window.open(url, '_blank');
+                return true;
+            }
+        } catch (error) {
+            console.warn('[YummyAnime] Could not open external trailer', error);
         }
+        return false;
     }
 
     function copyParams(params) {
