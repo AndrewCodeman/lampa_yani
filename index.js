@@ -10,6 +10,7 @@ function pluginYummyAnime() {
         'src/auth.js',
         'src/api.js',
         'src/catalog.js',
+        'src/stream-resolver.js',
         'src/ui-utils.js',
         'src/ui-media.js',
         'src/ui-navigation.js',

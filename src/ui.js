@@ -2415,6 +2415,28 @@
     function launchVideo(card, group, videos, selected) {
         var url = videoSourceUrl(selected);
         if (!url) return Lampa.Noty.show(t('no_videos'));
+        if (!isExternalPlayableUrl(url) && window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url)) {
+            setLoading(true);
+            LampaYaniStreamResolver.resolve(url, selected).then(function (result) {
+                setLoading(false);
+                if (result && result.url) {
+                    selected.yani_stream_url = result.url;
+                    selected.yani_stream_quality = result.quality || '';
+                    selected.yani_stream_qualities = result.qualities || null;
+                    selected.yani_stream_source = result.source || '';
+                }
+                launchResolvedVideo(card, group, videos, selected, videoSourceUrl(selected) || url);
+            }).catch(function (error) {
+                setLoading(false);
+                console.warn('[YummyAnime] Stream resolve failed', error);
+                launchResolvedVideo(card, group, videos, selected, url);
+            });
+            return;
+        }
+        launchResolvedVideo(card, group, videos, selected, url);
+    }
+
+    function launchResolvedVideo(card, group, videos, selected, url) {
         var title = (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (selected.number || selected.index || '?') + ' · ' + group.title;
         rememberPlayback(card, group, selected);
         syncServerProgress(selected);
@@ -2440,6 +2462,14 @@
         }
 
         Lampa.Noty.show(url);
+    }
+
+    function setLoading(enabled) {
+        if (!window.Lampa || !Lampa.Loading) return;
+        try {
+            if (enabled && Lampa.Loading.start) Lampa.Loading.start();
+            if (!enabled && Lampa.Loading.stop) Lampa.Loading.stop();
+        } catch (ignore) {}
     }
 
     function buildExternalPlaylist(card, videos) {
@@ -2480,7 +2510,7 @@
     function videoSourceUrl(video) {
         if (!video) return '';
         var data = LampaYaniUiUtils.videoData(video);
-        return LampaYaniUiUtils.normalizeVideoUrl(video.iframe_url || video.url || video.player_url || video.link ||
+        return LampaYaniUiUtils.normalizeVideoUrl(video.yani_stream_url || data.yani_stream_url || video.iframe_url || video.url || video.player_url || video.link ||
             data.iframe_url || data.url || data.player_url || data.link);
     }
 
