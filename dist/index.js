@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.9',
+        version: '0.20.10',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -4613,6 +4613,10 @@ function pluginYummyAnime() {
 
     function openTrailers(card) {
         if (!card || !card.yani_id) return;
+        if (Lampa.Select && Lampa.Select.show) {
+            legacyOpenTrailers(card);
+            return;
+        }
         Lampa.Activity.push({
             url: 'yani/trailers/' + encodeURIComponent(card.yani_id),
             title: t('trailers'),
@@ -4708,23 +4712,27 @@ function pluginYummyAnime() {
         LampaYaniApi.trailers(card.yani_id).then(function (payload) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             var items = payload && payload.response ? payload.response : payload;
-            items = Array.isArray(items) ? items : [];
+            items = Array.isArray(items) ? items.map(function (trailer, index) {
+                var url = trailerUrl(trailer);
+                return {
+                    title: trailer.title || trailer.name || ('Trailer ' + (index + 1)),
+                    url: url,
+                    // Lampa Select renders item icons next to the title.
+                    // Keep it local so the mark is available offline too.
+                    icon: isYouTubeTrailer(url) ? youtubeLogoDataUri() : null
+                };
+            }).filter(function (item) { return item.url; }) : [];
             if (!items.length) {
                 Lampa.Noty.show(t('no_videos'));
                 return;
             }
+            if (items.length === 1) {
+                openTrailer(items[0].url, items[0].title);
+                return;
+            }
             Lampa.Select.show({
                 title: t('trailers'),
-                items: items.map(function (trailer, index) {
-                    var url = trailer.iframe_url || trailer.url || trailer.video_url || trailer.link;
-                    return {
-                        title: trailer.title || trailer.name || ('Trailer ' + (index + 1)),
-                        url: url,
-                        // Lampa Select renders item icons next to the title.
-                        // Keep it local so the mark is available offline too.
-                        icon: isYouTubeTrailer(url) ? youtubeLogoDataUri() : null
-                    };
-                }).filter(function (item) { return item.url; }),
+                items: items,
                 onSelect: function (item) { openTrailer(item.url, item.title); }
             });
         }).catch(function (error) {

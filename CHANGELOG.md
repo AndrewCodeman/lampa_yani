@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.20.10 — 2026-08-09
+
+- Reduce trailer navigation by opening a compact trailer picker over the detail card, and open the trailer directly when only one trailer is available.
+
 ## 0.20.9 — 2026-08-09
 
 - Route YouTube trailer intents through the native Android browser bridge before Lampa external media handlers, so trailers open in YouTube or a browser instead of Kodi-like players.
