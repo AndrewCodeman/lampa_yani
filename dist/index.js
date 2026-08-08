@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.19.6',
+        version: '0.19.7',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -3740,9 +3740,13 @@ function pluginYummyAnime() {
             Lampa.Select.show({
                 title: t('trailers'),
                 items: items.map(function (trailer, index) {
+                    var url = trailer.iframe_url || trailer.url || trailer.video_url || trailer.link;
                     return {
                         title: trailer.title || trailer.name || ('Trailer ' + (index + 1)),
-                        url: trailer.iframe_url || trailer.url || trailer.video_url || trailer.link
+                        url: url,
+                        // Lampa Select renders item icons next to the title.
+                        // Keep it local so the mark is available offline too.
+                        icon: isYouTubeTrailer(url) ? youtubeLogoDataUri() : null
                     };
                 }).filter(function (item) { return item.url; }),
                 onSelect: function (item) { openTrailer(item.url, item.title); }
@@ -3752,6 +3756,14 @@ function pluginYummyAnime() {
             console.error('[YummyAnime] Trailers failed', error);
             Lampa.Noty.show(t('catalog_load_error'));
         });
+    }
+
+    function isYouTubeTrailer(url) {
+        return /(^|\/\/)(?:www\.)?(?:youtube\.com|youtube-nocookie\.com|youtu\.be)\//i.test(String(url || ''));
+    }
+
+    function youtubeLogoDataUri() {
+        return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#ff0033" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8Z"/><path fill="#fff" d="m9.6 15.8 6.3-3.8-6.3-3.8v7.6Z"/></svg>');
     }
 
     function openTrailer(url, title) {
