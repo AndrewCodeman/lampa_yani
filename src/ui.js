@@ -571,7 +571,11 @@
     function listActionTitle(card, key) {
         var ids = {watching: 0, planned: 1, completed: 2, dropped: 3, postponed: 5};
         var title = t(key);
-        return card && Number(card.yani_list_id) === ids[key] ? '✓ ' + title : title;
+        return hasYummyList(card, ids[key]) ? '✓ ' + title : title;
+    }
+
+    function hasYummyList(card, listId) {
+        return Boolean(card) && card.yani_list_id !== null && card.yani_list_id !== undefined && card.yani_list_id !== '' && Number(card.yani_list_id) === listId;
     }
 
     function Account(object) {
@@ -1686,7 +1690,7 @@
                 var action = [
                     {id: 0}, {id: 1}, {id: 2}, {id: 3}, {id: 5}, {favorite: true}
                 ][index];
-                var active = action.favorite ? Boolean(cardData.yani_is_favorite) : Number(cardData.yani_list_id) === action.id;
+                var active = action.favorite ? Boolean(cardData.yani_is_favorite) : hasYummyList(cardData, action.id);
                 $(this).toggleClass('active', active).attr('aria-pressed', active ? 'true' : 'false');
             });
             addCardListBadge(null, cardData);
@@ -1697,7 +1701,7 @@
                 Lampa.Noty.show(t('login_required'));
                 return;
             }
-            var active = action.favorite ? Boolean(cardData.yani_is_favorite) : Number(cardData.yani_list_id) === action.id;
+            var active = action.favorite ? Boolean(cardData.yani_is_favorite) : hasYummyList(cardData, action.id);
             var request = action.favorite
                 ? (active ? LampaYaniApi.removeFavorite(cardData.yani_id) : LampaYaniApi.addFavorite(cardData.yani_id))
                 : (active ? LampaYaniApi.removeFromList(cardData.yani_id) : LampaYaniApi.addToList(cardData.yani_id, action.id));
