@@ -3118,6 +3118,10 @@
                 return true;
             })) return true;
         }
+        if (options.youtubeIntent) {
+            if (openAndroidAppUri(externalUrl)) return true;
+            if (url !== externalUrl && openAndroidAppUri(url)) return true;
+        }
         return openExternalUri(externalUrl);
     }
 

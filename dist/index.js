@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.8',
+        version: '0.20.9',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -4800,6 +4800,10 @@ function pluginYummyAnime() {
                 AndroidJS.openPlayer(url, JSON.stringify(payload));
                 return true;
             })) return true;
+        }
+        if (options.youtubeIntent) {
+            if (openAndroidAppUri(externalUrl)) return true;
+            if (url !== externalUrl && openAndroidAppUri(url)) return true;
         }
         return openExternalUri(externalUrl);
     }

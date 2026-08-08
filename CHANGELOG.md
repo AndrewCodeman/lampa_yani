@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.20.9 — 2026-08-09
+
+- Route YouTube trailer intents through the native Android browser bridge before Lampa external media handlers, so trailers open in YouTube or a browser instead of Kodi-like players.
+
 ## 0.20.8 — 2026-08-09
 
 - Launch YummyTV deep links through Lampa's native Android bridge.
