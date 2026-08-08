@@ -223,8 +223,12 @@
         return icons[key] || icons.catalog;
     }
 
+    function lampaIcon() {
+        return '<svg viewBox="0 0 110 104" aria-hidden="true"><path d="M81.674 103.11C98.568 93.723 110 75.697 110 55 110 24.624 85.376 0 55 0S0 24.624 0 55c0 20.697 11.432 38.723 28.326 48.11C14.887 94.372 6 79.224 6 62 6 34.938 27.938 13 55 13s49 21.938 49 49c0 17.224-8.887 32.373-22.326 41.11Z"/><path d="M92.955 80.008C95.549 74.55 97 68.445 97 62 97 38.804 78.196 20 55 20S13 38.804 13 62c0 6.445 1.452 12.55 4.045 18.008C16.362 77.116 16 74.1 16 71c0-21.539 17.461-39 39-39s39 17.461 39 39c0 3.1-.362 6.116-1.045 9.008Z"/><path d="M55 89c14.359 0 26-11.641 26-26 0-5.071-1.451-9.802-3.961-13.801C82.579 54.799 86 62.5 86 71c0 17.121-13.879 31-31 31S24 88.121 24 71c0-8.5 3.421-16.201 8.961-21.801C30.451 53.198 29 57.929 29 63c0 14.359 11.641 26 26 26Z"/><circle cx="55" cy="63" r="18"/></svg>';
+    }
+
     function Recommended(object) {
-        return LampaYaniHomeSections.recommended(object, {t: t, history: playbackHistory, toCard: toCard, cardRender: bindYummyCardRender});
+        return LampaYaniHomeSections.recommended(object, {t: t, history: playbackHistory, toCard: toCard, cardRender: bindRecommendedCardRender});
     }
 
     function LegacyRecommended(object) {
@@ -386,7 +390,7 @@
         }
     }
 
-    function bindYummyCardRender(first, second, third) {
+    function bindYummyCardRender(first, second, third, options) {
         var element;
         var card;
         [first, second, third].forEach(function (value) {
@@ -404,7 +408,7 @@
         if (!card && first && hasYummyCardData(first)) card = first;
         if (!element && card && card.render) element = card.render(true);
         if (!card || !element) return;
-        bindYummyCard(element, card);
+        bindYummyCard(element, card, options);
     }
 
     function hasYummyCardData(value) {
@@ -415,7 +419,11 @@
             value.anime && (value.anime.yani_id || value.anime.anime_id || value.anime.animeId)));
     }
 
-    function bindYummyCard(element, card) {
+    function bindRecommendedCardRender(first, second, third) {
+        bindYummyCardRender(first, second, third, {openYummyDetail: true});
+    }
+
+    function bindYummyCard(element, card, options) {
         // Keep an explicit marker on the original Lampa card.  Some Lampa
         // versions preserve only custom fields when forwarding a card to the
         // default detail handler.
@@ -432,15 +440,16 @@
         // for our cards: otherwise one Enter can open both the YummyAnime
         // detail and a native TMDB detail with id=undefined.
         rendered.off('hover:enter click');
+        var openCard = options && options.openYummyDetail ? function () { openYummyDetail(card, false); } : function () { openCardOnce(card); };
         rendered.on('hover:enter.yaniOpen click.yaniOpen', function (event) {
             if (event) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
             }
-            openCardOnce(card);
+            openCard();
             return false;
         });
-        card.onEnter = function () { openCardOnce(card); };
+        card.onEnter = openCard;
         card.onMenu = function () {
             if (card.yani_id) showYummyActions(card);
         };
@@ -1613,7 +1622,9 @@
             var trailersButton = $('<div class="yani-detail__button selector"></div>').text(t('trailers'));
             trailersButton.on('hover:enter click.yaniDetailTrailers', function () { openTrailers(data); });
             bindDetailButtonFocus(trailersButton);
-            var searchButton = $('<div class="yani-detail__button selector"></div>').text(t('open_lampa_search'));
+            var searchButton = $('<div class="yani-detail__button yani-detail__button--lampa selector"></div>');
+            searchButton.append($('<span class="yani-detail__button-icon"></span>').html(lampaIcon()));
+            searchButton.append($('<span></span>').text(t('open_lampa_search')));
             searchButton.on('hover:enter', function () {
                 openStandardLampaCard(data);
             });

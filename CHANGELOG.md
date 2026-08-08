@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.18.17 — 2026-08-08
+
+- Open recommended titles directly in YummyAnime instead of showing a transient native Lampa-card lookup failure.
+- Add the Lampa logo to the action that opens a title in the Lampa application.
+
 ## 0.18.16 — 2026-08-08
 
 - Fix TMDB resolution when the proxy-aware Lampa source exposes `get` but not `search`.
