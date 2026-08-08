@@ -201,10 +201,8 @@
     background: #ef6470;
     color: #fff;
     order: -1;
-}
-
-.full-start__button.view--yummyanime-actions {
-    border: 0.12em solid #ef6470;
+    min-width: 3.1em;
+    padding: .45em .6em;
 }
 
 .view--yummyanime__icon {
@@ -213,11 +211,13 @@
     justify-content: center;
     width: 1.8em;
     height: 1.8em;
-    margin-right: 0.45em;
-    border: 0.12em solid currentColor;
-    border-radius: 0.45em;
-    font-size: 0.72em;
-    font-weight: 700;
+    margin: 0;
+}
+
+.view--yummyanime__icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .full-start__rate .yani-full-rating-logo {

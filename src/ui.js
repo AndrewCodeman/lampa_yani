@@ -3109,14 +3109,9 @@
         if (!container.length) return;
 
         if (!$('.view--yummyanime', render).length) {
-            var button = $('<div class="full-start__button selector view--online view--yummyanime"><span class="view--yummyanime__icon">YA</span><span>YummyAnime</span></div>');
-            button.on('hover:enter', function () { openVideos(anime); });
+            var button = $('<div class="full-start__button selector view--yummyanime" title="YummyAnime" aria-label="YummyAnime"><span class="view--yummyanime__icon">' + yummyRatingLogo() + '</span></div>');
+            button.on('hover:enter click.yaniFullDetail', function () { openYummyDetail(anime, false); });
             container.prepend(button);
-        }
-        if (!$('.view--yummyanime-actions', render).length) {
-            var actions = $('<div class="full-start__button selector view--yummyanime-actions"><span>YummyAnime · ' + t('actions_short') + '</span></div>');
-            actions.on('hover:enter', function () { showYummyActions(anime); });
-            container.append(actions);
         }
     }
 }(window));
