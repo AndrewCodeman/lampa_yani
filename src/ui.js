@@ -436,10 +436,12 @@
         // Some Lampa versions clone the card object after cardRender. Keep a
         // DOM-level handler as a fallback so search results remain clickable.
         var rendered = element && element.jquery ? element : $(element);
-        // Lampa cards already have a default `hover:enter` handler.  Remove it
-        // for our cards: otherwise one Enter can open both the YummyAnime
-        // detail and a native TMDB detail with id=undefined.
-        rendered.off('hover:enter click');
+        // Lampa cards already have a default `hover:enter` handler. Some
+        // builds attach it to an inner card element, not the rendered root.
+        // Remove it from the full YummyAnime card tree: otherwise one Enter
+        // can still attempt a native TMDB detail with id=undefined before our
+        // resolver has chosen a real match or the YummyAnime fallback.
+        rendered.add(rendered.find('*')).off('hover:enter click');
         var openCard = options && options.openYummyDetail ? function () { openYummyDetail(card, false); } : function () { openCardOnce(card); };
         rendered.on('hover:enter.yaniOpen click.yaniOpen', function (event) {
             if (event) {
