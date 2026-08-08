@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.20.15 — 2026-08-09
+
+- Open unresolved Alloha sources in the official visible player instead of trying to send iframe URLs to a media player.
+- Add an optional self-hosted Lampac adapter for `/lite/alloha` and direct `/lite/alloha/video.m3u8` playback.
+- Keep direct HLS/DASH/MP4/WebM playback selectable between Lampa and external Android players.
+- Make the private YummyTV application integration disabled by default and configurable in settings.
+- Replace the YummyTV episode metadata dependency with Jikan episode data.
+
 ## 0.20.14 — 2026-08-09
 
 - Add a playback target setting and direct-stream picker for choosing between an external Android player and Lampa's internal player.

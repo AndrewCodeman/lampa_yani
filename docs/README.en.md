@@ -13,7 +13,10 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 - rating anime from 1 to 10;
 - favorites and user lists;
 - viewing comments;
-- dubbing and episode selection with embedded playback;
+- dubbing and episode selection with direct-stream playback in Lampa or an external player;
+- opening the official Alloha player inside Lampa when no direct stream is available;
+- optional self-hosted Lampac resolution of Alloha sources into direct HLS;
+- optional, disabled-by-default YummyTV app integration;
 - YummyAnime button on standard Lampa cards and Online registration when that module is available;
 - all players and dubbings returned by the YummyAnime API;
 - preferred-player setting with the last selected source remembered;
@@ -38,7 +41,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 
 Install the bundled file from GitHub Pages:
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.18.17`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.20.15`
 
 The `YummyAnime → Status` screen shows YummyStatus history for three hours, one day, one week or one month. GitHub Actions refreshes the monitoring snapshot every five minutes.
 
@@ -60,7 +63,17 @@ Search is passed through the `q` parameter. The public token is sent in the `X-A
 - `src/config.js` — configuration;
 - `src/i18n.js` — Russian and English localization;
 - `src/ui.js` — Lampa integration;
+- `src/stream-resolver.js` — direct Kodik, CVH, Aksor, Sibnet, Rutube and VK stream resolution;
+- `src/lampac-resolver.js` — optional self-hosted Lampac adapter for Alloha;
 - `style.css` — styles.
+
+## Playback and Lampac
+
+Direct HLS/DASH/MP4/WebM URLs can be played in Lampa or handed to an external Android player. Choose the behavior under `Settings → YummyAnime → Playback target`.
+
+Without Lampac, an Alloha source opens as its official visible web player. To use your own Lampac instance, enter its complete local or HTTPS URL under `Settings → YummyAnime → Lampac server`. An empty value disables the adapter. The extension contains no Alloha or Lampac credentials.
+
+The private YummyTV application integration is disabled by default and can be enabled separately in the playback sources settings block.
 
 ## License
 

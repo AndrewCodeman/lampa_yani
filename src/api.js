@@ -90,7 +90,7 @@
             method: options.method || 'GET',
             headers: {Accept: 'application/json'}
         }, true).then(function (response) {
-            if (!response.ok) throw new Error('YummyTV API: ' + response.status);
+            if (!response.ok) throw new Error('External API: ' + response.status);
             return response.json();
         });
     }
@@ -146,8 +146,14 @@
             });
         },
         episodeInfo: function (malId) {
-            if (!config.episodesApiBase || !malId) return Promise.reject(new Error('MAL id is missing'));
-            return externalRequest(config.episodesApiBase, '/anime/mal/' + encodeURIComponent(malId));
+            if (!malId) return Promise.reject(new Error('MAL id is missing'));
+            return externalRequest('https://api.jikan.moe/v4', '/anime/' + encodeURIComponent(malId) + '/episodes').then(function (payload) {
+                return {
+                    episodes: (payload && payload.data || []).map(function (item) {
+                        return {episodeNumber: item.mal_id, title: item.title || item.title_romanji || item.title_japanese || ''};
+                    })
+                };
+            });
         },
         malTitles: malTitles,
         detail: function (id) {

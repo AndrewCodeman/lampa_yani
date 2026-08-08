@@ -102,13 +102,12 @@
     messages.en.video_quality = 'Quality';
     messages.en.quality_auto = 'auto';
     messages.ru.open_yummytv = 'Открыть в YummyTV';
-    messages.ru.open_yummytv_description = 'Открыть карточку тайтла в приложении YummyTV';
     messages.ru.yummytv_open_failed = 'Не удалось открыть YummyTV. Убедитесь, что приложение установлено';
     messages.ru.yummytv_id_missing = 'Не удалось определить ID тайтла YummyAnime';
     messages.ru.watch_in_player = 'Смотреть в плеере';
     messages.ru.watch_in_player_description = 'Открыть источник во внешнем плеере или браузере';
     messages.ru.watch_in_yummytv = 'Смотреть в YummyTV';
-    messages.ru.watch_in_yummytv_description = 'Если приложение YummyTV установлено';
+    messages.ru.watch_in_yummytv_description = 'Открыть тайтл в установленном приложении YummyTV';
     messages.ru.choose_playback = 'Выберите способ просмотра';
     messages.ru.watch_external_player = 'Внешний плеер';
     messages.ru.watch_external_player_description = 'Открыть поток во внешнем Android-плеере';
@@ -119,14 +118,25 @@
     messages.ru.playback_target_ask = 'Спрашивать';
     messages.ru.playback_target_external = 'Внешний плеер';
     messages.ru.playback_target_internal = 'Внутренний плеер Lampa';
+    messages.ru.playback_services = 'Источники воспроизведения';
+    messages.ru.yummytv_integration = 'Интеграция с YummyTV';
+    messages.ru.yummytv_integration_description = 'Показывать необязательные кнопки открытия тайтлов в приложении YummyTV';
+    messages.ru.lampac_server = 'Сервер Lampac';
+    messages.ru.lampac_server_description = 'Необязательный собственный сервер для получения прямого потока Alloha';
+    messages.ru.lampac_server_prompt = 'Адрес Lampac, например http://192.168.1.10:9118. Оставьте пустым для отключения';
+    messages.ru.lampac_server_saved = 'Сервер Lampac сохранён';
+    messages.ru.lampac_server_disabled = 'Интеграция Lampac отключена';
+    messages.ru.lampac_server_invalid = 'Укажите полный адрес Lampac с http:// или https://';
+    messages.ru.lampac_unavailable = 'Модуль Lampac недоступен';
+    messages.ru.not_configured = 'не настроен';
+    messages.ru.alloha_embed_unavailable = 'Не удалось открыть официальный плеер Alloha';
     messages.en.open_yummytv = 'Open in YummyTV';
-    messages.en.open_yummytv_description = 'Open this title in the YummyTV app';
     messages.en.yummytv_open_failed = 'Could not open YummyTV. Make sure the app is installed';
     messages.en.yummytv_id_missing = 'Could not determine the YummyAnime title ID';
     messages.en.watch_in_player = 'Watch in player';
     messages.en.watch_in_player_description = 'Open the source in an external player or browser';
     messages.en.watch_in_yummytv = 'Watch in YummyTV';
-    messages.en.watch_in_yummytv_description = 'If the YummyTV app is installed';
+    messages.en.watch_in_yummytv_description = 'Open the title in the installed YummyTV app';
     messages.en.choose_playback = 'Choose how to watch';
     messages.en.watch_external_player = 'External player';
     messages.en.watch_external_player_description = 'Open the stream in an external Android player';
@@ -137,6 +147,18 @@
     messages.en.playback_target_ask = 'Ask every time';
     messages.en.playback_target_external = 'External player';
     messages.en.playback_target_internal = 'Internal Lampa player';
+    messages.en.playback_services = 'Playback sources';
+    messages.en.yummytv_integration = 'YummyTV integration';
+    messages.en.yummytv_integration_description = 'Show optional actions for opening titles in the YummyTV app';
+    messages.en.lampac_server = 'Lampac server';
+    messages.en.lampac_server_description = 'Optional self-hosted server for resolving a direct Alloha stream';
+    messages.en.lampac_server_prompt = 'Lampac URL, for example http://192.168.1.10:9118. Leave empty to disable';
+    messages.en.lampac_server_saved = 'Lampac server saved';
+    messages.en.lampac_server_disabled = 'Lampac integration disabled';
+    messages.en.lampac_server_invalid = 'Enter a complete Lampac URL starting with http:// or https://';
+    messages.en.lampac_unavailable = 'Lampac module is unavailable';
+    messages.en.not_configured = 'not configured';
+    messages.en.alloha_embed_unavailable = 'Could not open the official Alloha player';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -184,13 +206,12 @@
     messages.uk.video_quality = 'Якість';
     messages.uk.quality_auto = 'авто';
     messages.uk.open_yummytv = 'Відкрити в YummyTV';
-    messages.uk.open_yummytv_description = 'Відкрити картку тайтлу в застосунку YummyTV';
     messages.uk.yummytv_open_failed = 'Не вдалося відкрити YummyTV. Переконайтеся, що застосунок установлено';
     messages.uk.yummytv_id_missing = 'Не вдалося визначити ID тайтлу YummyAnime';
     messages.uk.watch_in_player = 'Дивитися в плеєрі';
     messages.uk.watch_in_player_description = 'Відкрити джерело у зовнішньому плеєрі або браузері';
     messages.uk.watch_in_yummytv = 'Дивитися в YummyTV';
-    messages.uk.watch_in_yummytv_description = 'Якщо застосунок YummyTV установлено';
+    messages.uk.watch_in_yummytv_description = 'Відкрити тайтл у встановленому застосунку YummyTV';
     messages.uk.choose_playback = 'Виберіть спосіб перегляду';
     messages.uk.watch_external_player = 'Зовнішній плеєр';
     messages.uk.watch_external_player_description = 'Відкрити потік у зовнішньому Android-плеєрі';
@@ -201,6 +222,18 @@
     messages.uk.playback_target_ask = 'Запитувати';
     messages.uk.playback_target_external = 'Зовнішній плеєр';
     messages.uk.playback_target_internal = 'Внутрішній плеєр Lampa';
+    messages.uk.playback_services = 'Джерела відтворення';
+    messages.uk.yummytv_integration = 'Інтеграція з YummyTV';
+    messages.uk.yummytv_integration_description = 'Показувати необов’язкові дії для відкриття тайтлів у застосунку YummyTV';
+    messages.uk.lampac_server = 'Сервер Lampac';
+    messages.uk.lampac_server_description = 'Необов’язковий власний сервер для отримання прямого потоку Alloha';
+    messages.uk.lampac_server_prompt = 'Адреса Lampac, наприклад http://192.168.1.10:9118. Залиште порожнім для вимкнення';
+    messages.uk.lampac_server_saved = 'Сервер Lampac збережено';
+    messages.uk.lampac_server_disabled = 'Інтеграцію Lampac вимкнено';
+    messages.uk.lampac_server_invalid = 'Вкажіть повну адресу Lampac з http:// або https://';
+    messages.uk.lampac_unavailable = 'Модуль Lampac недоступний';
+    messages.uk.not_configured = 'не налаштовано';
+    messages.uk.alloha_embed_unavailable = 'Не вдалося відкрити офіційний плеєр Alloha';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

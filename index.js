@@ -12,6 +12,7 @@ function pluginYummyAnime() {
         'src/catalog.js',
         'src/stream-resolver.js',
         'src/ui-utils.js',
+        'src/lampac-resolver.js',
         'src/ui-media.js',
         'src/ui-navigation.js',
         'src/ui-schedule.js',

@@ -1653,11 +1653,14 @@
                 openStandardLampaCard(data);
             });
             bindDetailButtonFocus(searchButton);
-            var yummyTvButton = $('<div class="yani-detail__button yani-detail__button--external selector"></div>');
-            yummyTvButton.append($('<span class="yani-detail__button-icon"></span>').html(yummyAnimeIcon()));
-            yummyTvButton.append($('<span></span>').text(t('open_yummytv')));
-            yummyTvButton.on('hover:enter click.yaniYummyTv', function () { openYummyTv(data); });
-            bindDetailButtonFocus(yummyTvButton);
+            var yummyTvButton = null;
+            if (yummyTvEnabled()) {
+                yummyTvButton = $('<div class="yani-detail__button yani-detail__button--external selector"></div>');
+                yummyTvButton.append($('<span class="yani-detail__button-icon"></span>').html(yummyAnimeIcon()));
+                yummyTvButton.append($('<span></span>').text(t('open_yummytv')));
+                yummyTvButton.on('hover:enter click.yaniYummyTv', function () { openYummyTv(data); });
+                bindDetailButtonFocus(yummyTvButton);
+            }
             var subscribeButton = $('<div class="yani-detail__button selector"></div>').text(t('subscribe_episodes'));
             if (Lampa.Storage && Lampa.Storage.get('yani_subscribed_video_' + data.yani_id, '')) {
                 subscribeButton.text(t('unsubscribe_episodes'));
@@ -1666,7 +1669,9 @@
             bindDetailButtonFocus(subscribeButton);
             var comments = $('<div class="yani-detail__comments"></div>');
             var listPanel = createDetailListPanel(data);
-            actions.append(button, trailersButton, searchButton, yummyTvButton, subscribeButton);
+            actions.append(button, trailersButton, searchButton);
+            if (yummyTvButton) actions.append(yummyTvButton);
+            actions.append(subscribeButton);
             // Keep the principal actions next to the synopsis, before the
             // long viewing-order, recommendations and comments sections.
             info.append(actions);
@@ -2469,7 +2474,8 @@
     function launchVideo(card, group, videos, selected) {
         var url = videoSourceUrl(selected);
         if (!url) return Lampa.Noty.show(t('no_videos'));
-        if (!isDirectVideoUrl(url) && isAllohaUrl(url) && !(window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url))) {
+        var allohaSource = isAllohaUrl(url) || /alloha/i.test(String(group && (group.player || group.title) || ''));
+        if (!isDirectVideoUrl(url) && allohaSource && !(window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url))) {
             return launchAllohaPlayer(card, group, selected, url);
         }
         if (!isExternalPlayableUrl(url, selected) && window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url)) {
@@ -2538,14 +2544,32 @@
     function launchAllohaPlayer(card, group, selected, url) {
         rememberPlayback(card, group, selected);
         syncServerProgress(selected);
-        return showExternalPlaybackOptions(card, {
-            url: url,
-            title: (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (selected.number || selected.index || '?'),
-            onPlayer: function () {
-                if (openAndroidAppUri(url)) return true;
-                return openExternalUri(url);
-            }
-        });
+        if (window.LampaYaniLampacResolver && LampaYaniLampacResolver.enabled()) {
+            setLoading(true);
+            LampaYaniLampacResolver.resolveAlloha(card, selected, group, url).then(function (result) {
+                setLoading(false);
+                if (!result || !result.url) return openAllohaEmbed(url);
+                selected.yani_stream_url = result.url;
+                selected.yani_stream_quality = result.quality || '';
+                selected.yani_stream_qualities = result.qualities || null;
+                selected.yani_stream_headers = result.headers || null;
+                selected.yani_stream_source = result.source || 'lampac-alloha';
+                launchResolvedVideo(card, group, group.videos || [selected], selected, result.url);
+            }).catch(function (error) {
+                setLoading(false);
+                console.warn('[YummyAnime] Lampac Alloha resolve failed; opening the official player', error);
+                openAllohaEmbed(url);
+            });
+            return true;
+        }
+        return openAllohaEmbed(url);
+    }
+
+    function openAllohaEmbed(url) {
+        if (showYummyIframe(url)) return true;
+        if (openExternalUri(url)) return true;
+        Lampa.Noty.show(t('alloha_embed_unavailable'));
+        return false;
     }
 
     function setLoading(enabled) {
@@ -3246,19 +3270,23 @@
         return false;
     }
 
+    function yummyTvEnabled() {
+        if (!Lampa.Storage || !Lampa.Storage.get) return false;
+        var value = Lampa.Storage.get('yani_yummytv_enabled', false);
+        return value === true || value === 'true' || value === 1 || value === '1';
+    }
+
     function yummyTvAnimeId(card) {
         return card && (card.yani_id || card.anime_id || card.yummy_id);
     }
 
     function openYummyTv(card) {
+        if (!yummyTvEnabled()) return false;
         var url = LampaYaniUiUtils.yummyTvDetailsUrl(yummyTvAnimeId(card));
         if (!url) {
             Lampa.Noty.show(t('yummytv_id_missing'));
             return false;
         }
-        // A custom URI must go through the native Android bridge. Sending it
-        // to Lampa.Utils.open/window.open navigates the WebView itself and
-        // produces ERR_UNKNOWN_URL_SCHEME instead of launching YummyTV.
         if (openAndroidAppUri(url)) return true;
         Lampa.Noty.show(t('yummytv_open_failed'));
         return false;
@@ -3337,21 +3365,17 @@
         }, delay);
     }
 
-    function offerYummyTv(card) {
-        return showExternalPlaybackOptions(card, {yummyOnly: true});
-    }
-
     function showExternalPlaybackOptions(card, options) {
         options = options || {};
-        var url = LampaYaniUiUtils.yummyTvDetailsUrl(yummyTvAnimeId(card));
         var items = [];
-        if (!options.yummyOnly && (options.url || options.onPlayer)) {
+        var yummyTvUrl = yummyTvEnabled() ? LampaYaniUiUtils.yummyTvDetailsUrl(yummyTvAnimeId(card)) : '';
+        if (options.url || options.onPlayer) {
             items.push({title: t('watch_in_player'), subtitle: t('watch_in_player_description'), action: 'player'});
         }
-        if (url) items.push({title: t('watch_in_yummytv'), subtitle: t('watch_in_yummytv_description'), action: 'yummytv'});
+        if (yummyTvUrl) items.push({title: t('watch_in_yummytv'), subtitle: t('watch_in_yummytv_description'), action: 'yummytv'});
         if (!items.length || !Lampa.Select || !Lampa.Select.show) {
-            if (!options.yummyOnly && options.onPlayer && options.onPlayer()) return true;
-            if (url && openYummyTv(card)) return true;
+            if (options.onPlayer && options.onPlayer()) return true;
+            if (yummyTvUrl && openYummyTv(card)) return true;
             Lampa.Noty.show(t('external_stream_unavailable'));
             return false;
         }
@@ -3562,6 +3586,29 @@
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
+            param: {name: 'yani_playback_services_title', type: 'title'},
+            field: {name: t('playback_services')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_yummytv_enabled', type: 'trigger', default: false},
+            field: {name: t('yummytv_integration'), description: t('yummytv_integration_description')}
+        });
+
+        var lampacUrl = window.LampaYaniLampacResolver ? LampaYaniLampacResolver.baseUrl() : '';
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_lampac_server', type: 'button'},
+            field: {
+                name: t('lampac_server'),
+                description: t('lampac_server_description') + ': ' + (lampacUrl || t('not_configured'))
+            },
+            onChange: editLampacServer
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
             param: {name: 'yani_clear_playback_history', type: 'button'},
             field: {name: t('clear_history'), description: t('clear_history_description')},
             onChange: function () {
@@ -3704,6 +3751,20 @@
     function authDisplayName() {
         var account = LampaYaniAuth.get();
         return account.display_name || account.login || t('user');
+    }
+
+    function editLampacServer() {
+        if (!window.LampaYaniLampacResolver) return Lampa.Noty.show(t('lampac_unavailable'));
+        showYummyInput({
+            title: t('lampac_server_prompt'),
+            value: LampaYaniLampacResolver.baseUrl(),
+            nosave: true
+        }, function (value) {
+            value = String(value || '').trim();
+            var saved = LampaYaniLampacResolver.setBaseUrl(value);
+            if (value && !saved) return Lampa.Noty.show(t('lampac_server_invalid'));
+            Lampa.Noty.show(saved ? t('lampac_server_saved') : t('lampac_server_disabled'));
+        });
     }
 
     function showYummyInput(params, callback) {
