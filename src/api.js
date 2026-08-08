@@ -139,8 +139,8 @@
         genres: function () {
             return request('/anime/genres');
         },
-        schedule: function (params) {
-            return request('/anime/schedule?' + new URLSearchParams(params || {}), {
+        schedule: function () {
+            return request('/anime/schedule', {
                 cacheTtl: 60 * 60 * 1000,
                 staleFallback: true
             });
