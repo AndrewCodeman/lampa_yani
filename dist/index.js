@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.3',
+        version: '0.20.4',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -641,6 +641,10 @@ function pluginYummyAnime() {
         return /(?:^|\.)aksor\.tv(?:[/:]|$)/i.test(String(url || '').replace(/^https?:\/\//i, ''));
     }
 
+    function isSibnetUrl(url) {
+        return /(?:^|\.)video\.sibnet\.ru(?:[/:]|$)/i.test(String(url || '').replace(/^https?:\/\//i, ''));
+    }
+
     function originOf(url) {
         var match = String(url || '').match(/^(https?:\/\/[^/]+)/i);
         return match ? match[1] : '';
@@ -1022,6 +1026,44 @@ function pluginYummyAnime() {
         });
     }
 
+    function decodeHtmlUrl(value) {
+        return String(value || '')
+            .replace(/\\\//g, '/')
+            .replace(/\\u0026/gi, '&')
+            .replace(/&amp;/gi, '&')
+            .replace(/&#0*38;/gi, '&');
+    }
+
+    function resolveSibnet(iframeUrl) {
+        var fullUrl = normalizeUrl(iframeUrl);
+        var hit = cached(fullUrl);
+        if (hit) return Promise.resolve(hit);
+        var requestHeaders = {
+            Referer: 'https://yani.tv/',
+            'User-Agent': CHROME_UA,
+            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        };
+        return requestText(fullUrl, {headers: requestHeaders}).then(function (html) {
+            var text = String(html || '');
+            var streamUrl = extractFirst(/player\.src\s*\(\s*\[\s*\{\s*src\s*:\s*["']([^"']+)["']/i, text) ||
+                extractFirst(/<source[^>]+src\s*=\s*["']([^"']+)["']/i, text);
+            streamUrl = sameOriginPath(originOf(fullUrl), decodeHtmlUrl(streamUrl));
+            if (!streamUrl || !/\.mp4(?:[?#]|$)/i.test(streamUrl)) throw new Error('Sibnet MP4 stream not found');
+            var playbackHeaders = {
+                Referer: fullUrl,
+                Origin: 'https://video.sibnet.ru',
+                'User-Agent': CHROME_UA
+            };
+            return cacheResult(fullUrl, {
+                url: streamUrl,
+                quality: 'auto',
+                source: 'sibnet',
+                direct: true,
+                headers: playbackHeaders
+            });
+        });
+    }
+
     function resolve(url) {
         url = normalizeUrl(url);
         if (!url) return Promise.reject(new Error('Empty stream URL'));
@@ -1029,12 +1071,13 @@ function pluginYummyAnime() {
         if (isKodikUrl(url)) return resolveKodik(url);
         if (isCvhUrl(url)) return resolveCvh(url);
         if (isAksorUrl(url)) return resolveAksor(url);
+        if (isSibnetUrl(url)) return resolveSibnet(url);
         return Promise.reject(new Error('Unsupported player URL'));
     }
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.StreamResolver = window.LampaYaniStreamResolver = {
-        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url); },
+        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url) || isSibnetUrl(url); },
         resolve: resolve,
         isDirectVideoUrl: isDirectVideoUrl
     };
@@ -3441,6 +3484,7 @@ function pluginYummyAnime() {
             probe.yani_stream_quality = result.quality || '';
             probe.yani_stream_qualities = result.qualities || null;
             probe.yani_stream_source = result.source || '';
+            probe.yani_stream_headers = result.headers || null;
             group.quality = result.quality || group.quality;
             item.subtitle = voiceOptionSubtitle(group);
             $(target).find('.selectbox-item__subtitle').text(item.subtitle);
@@ -3912,6 +3956,7 @@ function pluginYummyAnime() {
                     selected.yani_stream_quality = result.quality || '';
                     selected.yani_stream_qualities = result.qualities || null;
                     selected.yani_stream_source = result.source || '';
+                    selected.yani_stream_headers = result.headers || null;
                 }
                 launchResolvedVideo(card, group, videos, selected, videoSourceUrl(selected) || url);
             }).catch(function (error) {
@@ -3934,14 +3979,15 @@ function pluginYummyAnime() {
             title: title,
             url: url,
             time: Number(selected.watched && selected.watched.end_time || 0),
-            source: selected
+            source: selected,
+            headers: videoStreamHeaders(selected)
         };
         if (!isExternalPlayableUrl(current.url, current.source)) {
             Lampa.Noty.show(t('external_stream_unavailable'));
             return;
         }
 
-        if (openExternalVideo(current.url, current.title, {playlist: externalPlayablePlaylist(playlist), time: current.time, poster: card.poster || card.img || '', requireDirect: true, source: current.source})) {
+        if (openExternalVideo(current.url, current.title, {playlist: externalPlayablePlaylist(playlist), time: current.time, poster: card.poster || card.img || '', requireDirect: true, source: current.source, headers: current.headers || videoStreamHeaders(current.source)})) {
             return;
         }
 
@@ -3968,7 +4014,8 @@ function pluginYummyAnime() {
                 title: (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (video.number || video.index || '?'),
                 url: url,
                 time: Number(video.watched && video.watched.end_time || 0),
-                source: video
+                source: video,
+                headers: videoStreamHeaders(video)
             };
         }).filter(Boolean);
     }
@@ -4000,6 +4047,12 @@ function pluginYummyAnime() {
         var data = LampaYaniUiUtils.videoData(video);
         return LampaYaniUiUtils.normalizeVideoUrl(video.yani_stream_url || data.yani_stream_url || video.iframe_url || video.url || video.player_url || video.link ||
             data.iframe_url || data.url || data.player_url || data.link);
+    }
+
+    function videoStreamHeaders(video) {
+        if (!video) return null;
+        var data = LampaYaniUiUtils.videoData(video);
+        return video.yani_stream_headers || data.yani_stream_headers || null;
     }
 
     function isDirectVideoUrl(url) {
@@ -4512,7 +4565,8 @@ function pluginYummyAnime() {
             return {
                 title: cleanPlaybackTitle(item.title),
                 url: item.url,
-                time: Number(item.time || 0)
+                time: Number(item.time || 0),
+                headers: item.headers || null
             };
         }).filter(function (item) { return item.url; }) : [];
         var payload = {
@@ -4520,7 +4574,8 @@ function pluginYummyAnime() {
             url: url,
             poster: options.poster || '',
             time: Number(options.time || 0),
-            playlist: playlist
+            playlist: playlist,
+            headers: options.headers || null
         };
         if (!options.youtubeIntent) {
             if (tryExternalOpen('Lampa.Android.openPlayer', function () {

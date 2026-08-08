@@ -1989,6 +1989,7 @@
             probe.yani_stream_quality = result.quality || '';
             probe.yani_stream_qualities = result.qualities || null;
             probe.yani_stream_source = result.source || '';
+            probe.yani_stream_headers = result.headers || null;
             group.quality = result.quality || group.quality;
             item.subtitle = voiceOptionSubtitle(group);
             $(target).find('.selectbox-item__subtitle').text(item.subtitle);
@@ -2460,6 +2461,7 @@
                     selected.yani_stream_quality = result.quality || '';
                     selected.yani_stream_qualities = result.qualities || null;
                     selected.yani_stream_source = result.source || '';
+                    selected.yani_stream_headers = result.headers || null;
                 }
                 launchResolvedVideo(card, group, videos, selected, videoSourceUrl(selected) || url);
             }).catch(function (error) {
@@ -2482,14 +2484,15 @@
             title: title,
             url: url,
             time: Number(selected.watched && selected.watched.end_time || 0),
-            source: selected
+            source: selected,
+            headers: videoStreamHeaders(selected)
         };
         if (!isExternalPlayableUrl(current.url, current.source)) {
             Lampa.Noty.show(t('external_stream_unavailable'));
             return;
         }
 
-        if (openExternalVideo(current.url, current.title, {playlist: externalPlayablePlaylist(playlist), time: current.time, poster: card.poster || card.img || '', requireDirect: true, source: current.source})) {
+        if (openExternalVideo(current.url, current.title, {playlist: externalPlayablePlaylist(playlist), time: current.time, poster: card.poster || card.img || '', requireDirect: true, source: current.source, headers: current.headers || videoStreamHeaders(current.source)})) {
             return;
         }
 
@@ -2516,7 +2519,8 @@
                 title: (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (video.number || video.index || '?'),
                 url: url,
                 time: Number(video.watched && video.watched.end_time || 0),
-                source: video
+                source: video,
+                headers: videoStreamHeaders(video)
             };
         }).filter(Boolean);
     }
@@ -2548,6 +2552,12 @@
         var data = LampaYaniUiUtils.videoData(video);
         return LampaYaniUiUtils.normalizeVideoUrl(video.yani_stream_url || data.yani_stream_url || video.iframe_url || video.url || video.player_url || video.link ||
             data.iframe_url || data.url || data.player_url || data.link);
+    }
+
+    function videoStreamHeaders(video) {
+        if (!video) return null;
+        var data = LampaYaniUiUtils.videoData(video);
+        return video.yani_stream_headers || data.yani_stream_headers || null;
     }
 
     function isDirectVideoUrl(url) {
@@ -3060,7 +3070,8 @@
             return {
                 title: cleanPlaybackTitle(item.title),
                 url: item.url,
-                time: Number(item.time || 0)
+                time: Number(item.time || 0),
+                headers: item.headers || null
             };
         }).filter(function (item) { return item.url; }) : [];
         var payload = {
@@ -3068,7 +3079,8 @@
             url: url,
             poster: options.poster || '',
             time: Number(options.time || 0),
-            playlist: playlist
+            playlist: playlist,
+            headers: options.headers || null
         };
         if (!options.youtubeIntent) {
             if (tryExternalOpen('Lampa.Android.openPlayer', function () {

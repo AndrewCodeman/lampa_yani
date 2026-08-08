@@ -33,6 +33,10 @@
         return /(?:^|\.)aksor\.tv(?:[/:]|$)/i.test(String(url || '').replace(/^https?:\/\//i, ''));
     }
 
+    function isSibnetUrl(url) {
+        return /(?:^|\.)video\.sibnet\.ru(?:[/:]|$)/i.test(String(url || '').replace(/^https?:\/\//i, ''));
+    }
+
     function originOf(url) {
         var match = String(url || '').match(/^(https?:\/\/[^/]+)/i);
         return match ? match[1] : '';
@@ -414,6 +418,44 @@
         });
     }
 
+    function decodeHtmlUrl(value) {
+        return String(value || '')
+            .replace(/\\\//g, '/')
+            .replace(/\\u0026/gi, '&')
+            .replace(/&amp;/gi, '&')
+            .replace(/&#0*38;/gi, '&');
+    }
+
+    function resolveSibnet(iframeUrl) {
+        var fullUrl = normalizeUrl(iframeUrl);
+        var hit = cached(fullUrl);
+        if (hit) return Promise.resolve(hit);
+        var requestHeaders = {
+            Referer: 'https://yani.tv/',
+            'User-Agent': CHROME_UA,
+            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        };
+        return requestText(fullUrl, {headers: requestHeaders}).then(function (html) {
+            var text = String(html || '');
+            var streamUrl = extractFirst(/player\.src\s*\(\s*\[\s*\{\s*src\s*:\s*["']([^"']+)["']/i, text) ||
+                extractFirst(/<source[^>]+src\s*=\s*["']([^"']+)["']/i, text);
+            streamUrl = sameOriginPath(originOf(fullUrl), decodeHtmlUrl(streamUrl));
+            if (!streamUrl || !/\.mp4(?:[?#]|$)/i.test(streamUrl)) throw new Error('Sibnet MP4 stream not found');
+            var playbackHeaders = {
+                Referer: fullUrl,
+                Origin: 'https://video.sibnet.ru',
+                'User-Agent': CHROME_UA
+            };
+            return cacheResult(fullUrl, {
+                url: streamUrl,
+                quality: 'auto',
+                source: 'sibnet',
+                direct: true,
+                headers: playbackHeaders
+            });
+        });
+    }
+
     function resolve(url) {
         url = normalizeUrl(url);
         if (!url) return Promise.reject(new Error('Empty stream URL'));
@@ -421,12 +463,13 @@
         if (isKodikUrl(url)) return resolveKodik(url);
         if (isCvhUrl(url)) return resolveCvh(url);
         if (isAksorUrl(url)) return resolveAksor(url);
+        if (isSibnetUrl(url)) return resolveSibnet(url);
         return Promise.reject(new Error('Unsupported player URL'));
     }
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.StreamResolver = window.LampaYaniStreamResolver = {
-        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url); },
+        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url) || isSibnetUrl(url); },
         resolve: resolve,
         isDirectVideoUrl: isDirectVideoUrl
     };

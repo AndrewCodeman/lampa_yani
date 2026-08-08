@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.20.4 — 2026-08-09
+
+- Added Sibnet playback by resolving its player page to a direct MP4 stream.
+- Forwarded source-specific HTTP headers to supported Android external players.
+
 ## 0.20.3 — 2026-08-09
 
 - Show video quality, source host and episode count as a compact subtitle under each dubbing option.
