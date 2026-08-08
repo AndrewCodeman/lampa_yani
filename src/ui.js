@@ -1367,7 +1367,7 @@
             t: t,
             locale: locale,
             toCard: toCard,
-            openStandardLampaCard: openStandardLampaCard,
+            openYummyDetail: openYummyDetail,
             goBack: goBack
         });
     }
