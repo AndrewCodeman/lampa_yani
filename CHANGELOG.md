@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.19.18 — 2026-08-08
+
+- Open trailers through a dedicated YummyAnime trailer list with visible YouTube icons.
+- Route trailer playback to external Android/Lampa handlers instead of the internal iframe player.
+
 ## 0.19.17 — 2026-08-08
 
 - Render the native-card YummyAnime action with a standalone logo image.

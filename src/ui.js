@@ -121,6 +121,7 @@
             Lampa.Component.add('yani_history', History);
 
             Lampa.Component.add('yani_detail', Detail);
+            Lampa.Component.add('yani_trailers', TrailerList);
             Lampa.Component.add('yani_account', Account);
             Lampa.Component.add('yani_account_list', AccountList);
             Lampa.Component.add('yani_notifications', Notifications);
@@ -2825,6 +2826,97 @@
 
     function openTrailers(card) {
         if (!card || !card.yani_id) return;
+        Lampa.Activity.push({
+            url: 'yani/trailers/' + encodeURIComponent(card.yani_id),
+            title: t('trailers'),
+            component: 'yani_trailers',
+            card: card
+        });
+    }
+
+    function TrailerList(object) {
+        var card = object.card || {};
+        var html = $('<div class="yani-trailers"></div>');
+        var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        var last;
+
+        scroll.minus();
+
+        this.create = function () {
+            var self = this;
+            this.activity.loader(true);
+            LampaYaniApi.trailers(card.yani_id).then(function (payload) {
+                var items = payload && payload.response ? payload.response : payload;
+                items = Array.isArray(items) ? items.filter(function (trailer) { return trailerUrl(trailer); }) : [];
+                render(items);
+                self.activity.loader(false);
+                self.activity.toggle();
+            }).catch(function (error) {
+                console.error('[YummyAnime] Trailers failed', error);
+                html.append($('<div class="yani-trailers__empty selector"></div>').text(t('catalog_load_error')));
+                scroll.append(html);
+                self.activity.loader(false);
+                self.activity.toggle();
+            });
+        };
+
+        function render(items) {
+            if (!items.length) {
+                html.append($('<div class="yani-trailers__empty selector"></div>').text(t('no_videos')));
+                scroll.append(html);
+                return;
+            }
+            var list = $('<div class="yani-trailers__list"></div>');
+            items.forEach(function (trailer, index) {
+                var url = trailerUrl(trailer);
+                var title = trailer.title || trailer.name || ('Trailer ' + (index + 1));
+                var row = $('<div class="yani-trailers__item selector"></div>');
+                row.append($('<div class="yani-trailers__icon"></div>').html(isYouTubeTrailer(url) ? youtubeLogoSvg() : externalVideoIcon()));
+                row.append($('<div class="yani-trailers__body"></div>').append($('<div class="yani-trailers__title"></div>').text(title)).append($('<div class="yani-trailers__host"></div>').text(trailerHostLabel(url))));
+                row.on('hover:focus', function () {
+                    last = row[0];
+                    row.addClass('focus');
+                    scroll.update(row, true);
+                });
+                row.on('hover:blur', function () { row.removeClass('focus'); });
+                row.on('hover:enter click.yaniTrailer', function () { openTrailer(url, title); });
+                list.append(row);
+            });
+            html.append(list);
+            scroll.append(html);
+        }
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () {
+                    Lampa.Controller.collectionSet(scroll.render());
+                    Lampa.Controller.collectionFocus(last || scroll.render().find('.selector')[0] || false, scroll.render());
+                },
+                left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
+                right: function () { Navigator.move('right'); },
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
+                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); },
+                back: goBack
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? scroll.render()[0] : scroll.render(); };
+        this.destroy = function () { scroll.destroy(); html.remove(); };
+    }
+
+    function trailerUrl(trailer) {
+        return LampaYaniUiUtils.normalizeVideoUrl(trailer && (trailer.iframe_url || trailer.url || trailer.video_url || trailer.link || trailer.src));
+    }
+
+    function trailerHostLabel(url) {
+        var host = LampaYaniUiUtils.videoHost(url);
+        if (!host) return t('trailers');
+        return host.replace(/^m\./, '').replace(/^youtu\.be$/, 'youtube.com');
+    }
+
+    function legacyOpenTrailers(card) {
+        if (!card || !card.yani_id) return;
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
         LampaYaniApi.trailers(card.yani_id).then(function (payload) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
@@ -2863,30 +2955,103 @@
         return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#ff0033" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8Z"/><path fill="#fff" d="m9.6 15.8 6.3-3.8-6.3-3.8v7.6Z"/></svg>');
     }
 
+    function youtubeLogoSvg() {
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ff0033" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8Z"/><path fill="#fff" d="m9.6 15.8 6.3-3.8-6.3-3.8v7.6Z"/></svg>';
+    }
+
+    function externalVideoIcon() {
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z"/></svg>';
+    }
+
     function openTrailer(url, title) {
         url = LampaYaniUiUtils.normalizeVideoUrl(url);
         if (!url) return;
         // Trailers are normally YouTube links. An iframe inside Lampa cannot
         // reliably play them on Android TV, while External lets Android route
         // the URL to the installed YouTube (or another matching) application.
-        if (openExternalVideo(url)) return;
+        if (openExternalVideo(url, title)) return;
         Lampa.Noty.show(url);
     }
 
-    function openExternalVideo(url) {
+    function openExternalVideo(url, title) {
+        url = externalTrailerUrl(url);
+        var intentUrl = youtubeIntentUrl(url);
+        var externalUrl = intentUrl || url;
+        var payload = {
+            title: title || 'Trailer',
+            url: url,
+            poster: ''
+        };
+        if (tryExternalOpen('Android.openPlayer', function () {
+            if (!window.Android || typeof Android.openPlayer !== 'function') return false;
+            Android.openPlayer(url, payload);
+            return true;
+        })) return true;
+        if (tryExternalOpen('AndroidJS.openPlayer', function () {
+            if (!window.AndroidJS || typeof AndroidJS.openPlayer !== 'function') return false;
+            AndroidJS.openPlayer(url, JSON.stringify(payload));
+            return true;
+        })) return true;
+        if (tryExternalOpen('Lampa.External.open', function () {
+            if (!Lampa.External || !Lampa.External.open) return false;
+            Lampa.External.open(externalUrl);
+            return true;
+        })) return true;
+        if (tryExternalOpen('Lampa.Utils.open', function () {
+            if (!Lampa.Utils || !Lampa.Utils.open) return false;
+            Lampa.Utils.open(externalUrl);
+            return true;
+        })) return true;
+        if (tryExternalOpen('navigator.app.loadUrl', function () {
+            if (!window.navigator || !navigator.app || !navigator.app.loadUrl) return false;
+            navigator.app.loadUrl(externalUrl, {openExternal: true});
+            return true;
+        })) return true;
+        if (tryExternalOpen('window.open', function () {
+            if (!window.open) return false;
+            window.open(externalUrl, '_system');
+            return true;
+        })) return true;
+        return false;
+    }
+
+    function tryExternalOpen(name, callback) {
         try {
-            if (Lampa.External && Lampa.External.open) {
-                Lampa.External.open(url);
-                return true;
-            }
-            if (window.open) {
-                window.open(url, '_blank');
-                return true;
+            return !!callback();
+        } catch (error) {
+            console.warn('[YummyAnime] Could not open trailer through ' + name, error);
+            return false;
+        }
+    }
+
+    function externalTrailerUrl(url) {
+        var id = youtubeVideoId(url);
+        return id ? 'https://www.youtube.com/watch?v=' + encodeURIComponent(id) : url;
+    }
+
+    function youtubeVideoId(url) {
+        url = String(url || '');
+        try {
+            var parsed = new URL(url);
+            var host = parsed.hostname.replace(/^www\./, '').replace(/^m\./, '');
+            if (host === 'youtu.be') return parsed.pathname.replace(/^\/+/, '').split('/')[0] || '';
+            if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+                if (parsed.searchParams.get('v')) return parsed.searchParams.get('v');
+                var match = parsed.pathname.match(/\/(?:embed|shorts|v)\/([^/?#]+)/i);
+                if (match) return match[1];
             }
         } catch (error) {
-            console.warn('[YummyAnime] Could not open external trailer', error);
+            var fallback = url.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?.*?[?&]v=|embed\/|shorts\/|v\/))([^&#?/]+)/i);
+            return fallback ? fallback[1] : '';
         }
-        return false;
+        return '';
+    }
+
+    function youtubeIntentUrl(url) {
+        var id = youtubeVideoId(url);
+        if (!id || !Lampa.Platform || !Lampa.Platform.is || !Lampa.Platform.is('android')) return '';
+        var watch = 'https://www.youtube.com/watch?v=' + encodeURIComponent(id);
+        return 'intent://www.youtube.com/watch?v=' + encodeURIComponent(id) + '#Intent;scheme=https;package=com.google.android.youtube;S.browser_fallback_url=' + encodeURIComponent(watch) + ';end';
     }
 
     function copyParams(params) {
