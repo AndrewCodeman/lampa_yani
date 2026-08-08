@@ -2761,7 +2761,10 @@
                 if (card.release_date) row.append($('<div class="yani-detail__recommendation-year"></div>').text(card.release_date));
                 row.on('hover:focus', function () { row.addClass('focus'); });
                 row.on('hover:blur', function () { row.removeClass('focus'); });
-                row.on('hover:enter click.yaniRecommendation', function () { openYummyDetail(card, true); });
+                // Recommendations already originate from YummyAnime. Do not
+                // show a misleading Lampa-card fallback message before their
+                // direct YummyAnime detail page opens.
+                row.on('hover:enter click.yaniRecommendation', function () { openYummyDetail(card, false); });
                 list.append(row);
                 if (bindFocus) bindFocus(row);
             });
