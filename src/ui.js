@@ -2485,14 +2485,15 @@
             url: url,
             time: Number(selected.watched && selected.watched.end_time || 0),
             source: selected,
-            headers: videoStreamHeaders(selected)
+            headers: videoStreamHeaders(selected),
+            quality: videoStreamQualities(selected)
         };
         if (!isExternalPlayableUrl(current.url, current.source)) {
             Lampa.Noty.show(t('external_stream_unavailable'));
             return;
         }
 
-        if (openExternalVideo(current.url, current.title, {playlist: externalPlayablePlaylist(playlist), time: current.time, poster: card.poster || card.img || '', requireDirect: true, source: current.source, headers: current.headers || videoStreamHeaders(current.source)})) {
+        if (openExternalVideo(current.url, current.title, {playlist: externalPlayablePlaylist(playlist), time: current.time, poster: card.poster || card.img || '', requireDirect: true, source: current.source, headers: current.headers || videoStreamHeaders(current.source), quality: current.quality || videoStreamQualities(current.source)})) {
             return;
         }
 
@@ -2520,7 +2521,8 @@
                 url: url,
                 time: Number(video.watched && video.watched.end_time || 0),
                 source: video,
-                headers: videoStreamHeaders(video)
+                headers: videoStreamHeaders(video),
+                quality: videoStreamQualities(video)
             };
         }).filter(Boolean);
     }
@@ -2558,6 +2560,12 @@
         if (!video) return null;
         var data = LampaYaniUiUtils.videoData(video);
         return video.yani_stream_headers || data.yani_stream_headers || null;
+    }
+
+    function videoStreamQualities(video) {
+        if (!video) return null;
+        var data = LampaYaniUiUtils.videoData(video);
+        return video.yani_stream_qualities || data.yani_stream_qualities || null;
     }
 
     function isDirectVideoUrl(url) {
@@ -3071,7 +3079,8 @@
                 title: cleanPlaybackTitle(item.title),
                 url: item.url,
                 time: Number(item.time || 0),
-                headers: item.headers || null
+                headers: item.headers || null,
+                quality: item.quality || null
             };
         }).filter(function (item) { return item.url; }) : [];
         var payload = {
@@ -3080,7 +3089,8 @@
             poster: options.poster || '',
             time: Number(options.time || 0),
             playlist: playlist,
-            headers: options.headers || null
+            headers: options.headers || null,
+            quality: options.quality || null
         };
         if (!options.youtubeIntent) {
             if (tryExternalOpen('Lampa.Android.openPlayer', function () {

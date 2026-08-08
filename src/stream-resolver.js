@@ -37,6 +37,10 @@
         return /(?:^|\.)video\.sibnet\.ru(?:[/:]|$)/i.test(String(url || '').replace(/^https?:\/\//i, ''));
     }
 
+    function isRutubeUrl(url) {
+        return /(?:^|\.)rutube\.ru(?:[/:]|$)/i.test(String(url || '').replace(/^https?:\/\//i, '')) && /[a-f0-9]{32}/i.test(String(url || ''));
+    }
+
     function originOf(url) {
         var match = String(url || '').match(/^(https?:\/\/[^/]+)/i);
         return match ? match[1] : '';
@@ -456,6 +460,80 @@
         });
     }
 
+    function absoluteUrl(url, baseUrl) {
+        url = String(url || '').trim();
+        if (!url) return '';
+        try { return new URL(url, baseUrl).toString(); } catch (ignore) { return sameOriginPath(originOf(baseUrl), url); }
+    }
+
+    function rutubeQualityMap(masterText, masterUrl) {
+        var found = {};
+        var pending = '';
+        String(masterText || '').split(/\r?\n/).forEach(function (line) {
+            line = line.trim();
+            if (!line) return;
+            if (/^#EXT-X-STREAM-INF/i.test(line)) {
+                var resolution = /RESOLUTION=\d+x(\d+)/i.exec(line);
+                pending = resolution ? resolution[1] + 'p' : '';
+                return;
+            }
+            if (pending && line.charAt(0) !== '#') {
+                found[pending] = absoluteUrl(line, masterUrl);
+                pending = '';
+            }
+        });
+        var ordered = {};
+        [144, 240, 360, 480, 720, 1080, 1440, 2160].forEach(function (quality) {
+            var label = quality + 'p';
+            if (found[label]) ordered[label] = found[label];
+        });
+        return ordered;
+    }
+
+    function resolveRutube(iframeUrl) {
+        var fullUrl = normalizeUrl(iframeUrl);
+        var hit = cached(fullUrl);
+        if (hit) return Promise.resolve(hit);
+        var idMatch = /([a-f0-9]{32})/i.exec(fullUrl);
+        if (!idMatch) return Promise.reject(new Error('Rutube video id not found'));
+        var playbackHeaders = {
+            Referer: fullUrl,
+            Origin: 'https://rutube.ru',
+            'User-Agent': CHROME_UA
+        };
+        var requestHeaders = Object.assign({Accept: '*/*'}, playbackHeaders);
+        var optionsUrl = 'https://rutube.ru/api/play/options/' + idMatch[1] + '/?no_404=true';
+        return requestJson(optionsUrl, {headers: requestHeaders}).then(function (payload) {
+            var balancer = payload && payload.video_balancer || {};
+            var streamUrl = String(balancer.m3u8 || balancer.default || '').trim();
+            if (!streamUrl) throw new Error('Rutube HLS stream not found');
+            return requestText(streamUrl, {headers: requestHeaders}).then(function (master) {
+                var qualities = rutubeQualityMap(master, streamUrl);
+                var labels = Object.keys(qualities);
+                if (!labels.length) qualities.auto = streamUrl;
+                labels = Object.keys(qualities);
+                var label = labels[labels.length - 1];
+                return cacheResult(fullUrl, {
+                    url: qualities[label],
+                    quality: label,
+                    qualities: qualities,
+                    source: 'rutube',
+                    direct: true,
+                    headers: playbackHeaders
+                });
+            }).catch(function () {
+                return cacheResult(fullUrl, {
+                    url: streamUrl,
+                    quality: 'auto',
+                    qualities: {auto: streamUrl},
+                    source: 'rutube',
+                    direct: true,
+                    headers: playbackHeaders
+                });
+            });
+        });
+    }
+
     function resolve(url) {
         url = normalizeUrl(url);
         if (!url) return Promise.reject(new Error('Empty stream URL'));
@@ -464,12 +542,13 @@
         if (isCvhUrl(url)) return resolveCvh(url);
         if (isAksorUrl(url)) return resolveAksor(url);
         if (isSibnetUrl(url)) return resolveSibnet(url);
+        if (isRutubeUrl(url)) return resolveRutube(url);
         return Promise.reject(new Error('Unsupported player URL'));
     }
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.StreamResolver = window.LampaYaniStreamResolver = {
-        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url) || isSibnetUrl(url); },
+        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url) || isSibnetUrl(url) || isRutubeUrl(url); },
         resolve: resolve,
         isDirectVideoUrl: isDirectVideoUrl
     };

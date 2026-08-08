@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.20.5 — 2026-08-09
+
+- Added Rutube HLS playback with master-playlist quality discovery.
+- Forwarded resolved quality maps to Android players instead of keeping them only in the YummyAnime UI.
+
 ## 0.20.4 — 2026-08-09
 
 - Added Sibnet playback by resolving its player page to a direct MP4 stream.
