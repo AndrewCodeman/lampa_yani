@@ -2426,7 +2426,12 @@
             time: Number(selected.watched && selected.watched.end_time || 0),
             source: selected
         };
-        if (openExternalVideo(current.url, current.title, {playlist: playlist, time: current.time, poster: card.poster || card.img || ''})) {
+        if (!isExternalPlayableUrl(current.url)) {
+            Lampa.Noty.show(t('external_stream_unavailable'));
+            return;
+        }
+
+        if (openExternalVideo(current.url, current.title, {playlist: externalPlayablePlaylist(playlist), time: current.time, poster: card.poster || card.img || '', requireDirect: true})) {
             return;
         }
 
@@ -2461,6 +2466,10 @@
         return true;
     }
 
+    function externalPlayablePlaylist(playlist) {
+        return (playlist || []).filter(function (item) { return isExternalPlayableUrl(item.url); });
+    }
+
     function syncServerProgress(video) {
         if (!LampaYaniAuth.token() || !video || !video.video_id) return;
         LampaYaniApi.syncVideoProgress(video.video_id, video.watched && video.watched.end_time, video.duration).catch(function (error) {
@@ -2477,6 +2486,10 @@
 
     function isDirectVideoUrl(url) {
         return /\.(m3u8|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
+    }
+
+    function isExternalPlayableUrl(url) {
+        return isDirectVideoUrl(url);
     }
 
     function showYummyIframe(url) {
@@ -2974,6 +2987,7 @@
     function openExternalVideo(url, title, options) {
         options = options || {};
         url = options.youtubeIntent ? externalTrailerUrl(url) : LampaYaniUiUtils.normalizeVideoUrl(url);
+        if (options.requireDirect && !isExternalPlayableUrl(url)) return false;
         var intentUrl = options.youtubeIntent ? youtubeIntentUrl(url) : '';
         var externalUrl = intentUrl || url;
         var playlist = Array.isArray(options.playlist) ? options.playlist.map(function (item) {
@@ -2990,16 +3004,23 @@
             time: Number(options.time || 0),
             playlist: playlist
         };
-        if (tryExternalOpen('Android.openPlayer', function () {
-            if (!window.Android || typeof Android.openPlayer !== 'function') return false;
-            Android.openPlayer(url, payload);
-            return true;
-        })) return true;
-        if (tryExternalOpen('AndroidJS.openPlayer', function () {
-            if (!window.AndroidJS || typeof AndroidJS.openPlayer !== 'function') return false;
-            AndroidJS.openPlayer(url, JSON.stringify(payload));
-            return true;
-        })) return true;
+        if (!options.youtubeIntent) {
+            if (tryExternalOpen('Lampa.Android.openPlayer', function () {
+                if (!Lampa.Android || !Lampa.Android.openPlayer) return false;
+                Lampa.Android.openPlayer(url, payload);
+                return true;
+            })) return true;
+            if (tryExternalOpen('Android.openPlayer', function () {
+                if (!window.Android || typeof Android.openPlayer !== 'function') return false;
+                Android.openPlayer(url, JSON.stringify(payload));
+                return true;
+            })) return true;
+            if (tryExternalOpen('AndroidJS.openPlayer', function () {
+                if (!window.AndroidJS || typeof AndroidJS.openPlayer !== 'function') return false;
+                AndroidJS.openPlayer(url, JSON.stringify(payload));
+                return true;
+            })) return true;
+        }
         if (tryExternalOpen('Lampa.External.open', function () {
             if (!Lampa.External || !Lampa.External.open) return false;
             Lampa.External.open(externalUrl);

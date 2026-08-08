@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.19.20 — 2026-08-08
+
+- Send episode playback to external players only when the selected source exposes a direct media stream URL.
+- Use Lampa's Android player bridge before raw Android bridge fallbacks and avoid sending iframe/player pages to VLC/MX-style players.
+
 ## 0.19.19 — 2026-08-08
 
 - Route YummyAnime episode playback to external Android/Lampa player handlers instead of iframe or in-app browser pages.
