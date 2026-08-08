@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.20.13 — 2026-08-09
+
+- Restore Lampa controller focus after returning from external players, browsers, YouTube, or YummyTV deep links.
+
 ## 0.20.12 — 2026-08-09
 
 - Replace unsupported-player fallback with a two-action playback picker: watch in player or watch in YummyTV when the app is installed.

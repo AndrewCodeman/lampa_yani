@@ -9,6 +9,14 @@
         return window.LampaYaniI18n ? LampaYaniI18n.locale() : 'ru-RU';
     }
 
+    var externalRestoreState = {
+        pending: false,
+        installed: false,
+        openedAt: 0,
+        controller: 'content',
+        element: null
+    };
+
     function goBack() {
         if (window.Lampa && Lampa.Activity && Lampa.Activity.backward) {
             Lampa.Activity.backward();
@@ -3135,16 +3143,19 @@
         if (!options.youtubeIntent) {
             if (tryExternalOpen('Lampa.Android.openPlayer', function () {
                 if (!Lampa.Android || !Lampa.Android.openPlayer) return false;
+                prepareExternalRestore();
                 Lampa.Android.openPlayer(url, payload);
                 return true;
             })) return true;
             if (tryExternalOpen('Android.openPlayer', function () {
                 if (!window.Android || typeof Android.openPlayer !== 'function') return false;
+                prepareExternalRestore();
                 Android.openPlayer(url, JSON.stringify(payload));
                 return true;
             })) return true;
             if (tryExternalOpen('AndroidJS.openPlayer', function () {
                 if (!window.AndroidJS || typeof AndroidJS.openPlayer !== 'function') return false;
+                prepareExternalRestore();
                 AndroidJS.openPlayer(url, JSON.stringify(payload));
                 return true;
             })) return true;
@@ -3160,21 +3171,25 @@
         if (!externalUrl) return false;
         if (tryExternalOpen('Lampa.External.open', function () {
             if (!Lampa.External || !Lampa.External.open) return false;
+            prepareExternalRestore();
             Lampa.External.open(externalUrl);
             return true;
         })) return true;
         if (tryExternalOpen('Lampa.Utils.open', function () {
             if (!Lampa.Utils || !Lampa.Utils.open) return false;
+            prepareExternalRestore();
             Lampa.Utils.open(externalUrl);
             return true;
         })) return true;
         if (tryExternalOpen('navigator.app.loadUrl', function () {
             if (!window.navigator || !navigator.app || !navigator.app.loadUrl) return false;
+            prepareExternalRestore();
             navigator.app.loadUrl(externalUrl, {openExternal: true});
             return true;
         })) return true;
         if (tryExternalOpen('window.open', function () {
             if (!window.open) return false;
+            prepareExternalRestore();
             window.open(externalUrl, '_system');
             return true;
         })) return true;
@@ -3203,20 +3218,73 @@
         if (!url) return false;
         if (tryExternalOpen('Lampa.Android.openBrowser', function () {
             if (!Lampa.Android || typeof Lampa.Android.openBrowser !== 'function') return false;
+            prepareExternalRestore();
             Lampa.Android.openBrowser(url);
             return true;
         })) return true;
         if (tryExternalOpen('AndroidJS.openBrowser', function () {
             if (!window.AndroidJS || typeof AndroidJS.openBrowser !== 'function') return false;
+            prepareExternalRestore();
             AndroidJS.openBrowser(url);
             return true;
         })) return true;
         if (tryExternalOpen('Android.openBrowser', function () {
             if (!window.Android || typeof Android.openBrowser !== 'function') return false;
+            prepareExternalRestore();
             Android.openBrowser(url);
             return true;
         })) return true;
         return false;
+    }
+
+    function prepareExternalRestore() {
+        installExternalRestoreHooks();
+        externalRestoreState.pending = true;
+        externalRestoreState.openedAt = Date.now();
+        externalRestoreState.controller = currentControllerName() || 'content';
+        externalRestoreState.element = document.querySelector('.selector.focus') || document.querySelector('.selector');
+    }
+
+    function installExternalRestoreHooks() {
+        if (externalRestoreState.installed) return;
+        externalRestoreState.installed = true;
+        window.addEventListener('focus', restoreExternalFocus, false);
+        window.addEventListener('pageshow', restoreExternalFocus, false);
+        document.addEventListener('resume', restoreExternalFocus, false);
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) restoreExternalFocus();
+        }, false);
+    }
+
+    function currentControllerName() {
+        try {
+            var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
+            return enabled && enabled.name || '';
+        } catch (ignore) {
+            return '';
+        }
+    }
+
+    function restoreExternalFocus() {
+        if (!externalRestoreState.pending) return;
+        var delay = Math.max(0, 600 - (Date.now() - externalRestoreState.openedAt));
+        setTimeout(function () {
+            if (!externalRestoreState.pending) return;
+            externalRestoreState.pending = false;
+            try {
+                var controller = externalRestoreState.controller || 'content';
+                if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle(controller);
+                var element = externalRestoreState.element;
+                if (!element || !document.documentElement.contains(element)) {
+                    element = document.querySelector('.selector.focus') || document.querySelector('.selector');
+                }
+                if (element && Lampa.Controller && Lampa.Controller.collectionFocus) {
+                    Lampa.Controller.collectionFocus(element, $(element).closest('.scroll, .yani-detail, .yani-home, body'));
+                }
+            } catch (error) {
+                console.warn('[YummyAnime] Could not restore Lampa focus after external player', error);
+            }
+        }, delay);
     }
 
     function offerYummyTv(card) {
