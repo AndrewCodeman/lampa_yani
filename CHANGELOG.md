@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.20.17 — 2026-08-09
+
+- Merge player and YummyTV actions into one "Watch" button on the YummyAnime title card.
+- Show the destination picker only when the optional YummyTV integration is enabled and a title ID is available.
+
 ## 0.20.16 — 2026-08-09
 
 - Rename the title-card playback actions to "Watch in player" and "Watch in YummyTV".

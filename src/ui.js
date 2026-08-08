@@ -1637,11 +1637,11 @@
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             var actions = $('<div class="yani-detail__actions"></div>');
-            button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(t('watch_in_player'));
-            // The detail-card action always opens the dubbing/source and
-            // episode selectors. Automatic resume belongs only to the
-            // dedicated Continue Watching section.
-            button.on('hover:enter', function () { openVideos(data, false); });
+            button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(t('watch'));
+            // Keep playback behind one action. When YummyTV is enabled the
+            // destination is selected first; regular playback then opens the
+            // dubbing/source and episode selectors as before.
+            button.on('hover:enter click.yaniWatch', function () { openTitlePlaybackOptions(data); });
             bindDetailButtonFocus(button);
             var trailersButton = $('<div class="yani-detail__button selector"></div>').text(t('trailers'));
             trailersButton.on('hover:enter click.yaniDetailTrailers', function () { openTrailers(data); });
@@ -1653,14 +1653,6 @@
                 openStandardLampaCard(data);
             });
             bindDetailButtonFocus(searchButton);
-            var yummyTvButton = null;
-            if (yummyTvEnabled()) {
-                yummyTvButton = $('<div class="yani-detail__button yani-detail__button--external selector"></div>');
-                yummyTvButton.append($('<span class="yani-detail__button-icon"></span>').html(yummyAnimeIcon()));
-                yummyTvButton.append($('<span></span>').text(t('watch_in_yummytv')));
-                yummyTvButton.on('hover:enter click.yaniYummyTv', function () { openYummyTv(data); });
-                bindDetailButtonFocus(yummyTvButton);
-            }
             var subscribeButton = $('<div class="yani-detail__button selector"></div>').text(t('subscribe_episodes'));
             if (Lampa.Storage && Lampa.Storage.get('yani_subscribed_video_' + data.yani_id, '')) {
                 subscribeButton.text(t('unsubscribe_episodes'));
@@ -1670,7 +1662,6 @@
             var comments = $('<div class="yani-detail__comments"></div>');
             var listPanel = createDetailListPanel(data);
             actions.append(button, trailersButton, searchButton);
-            if (yummyTvButton) actions.append(yummyTvButton);
             actions.append(subscribeButton);
             // Keep the principal actions next to the synopsis, before the
             // long viewing-order, recommendations and comments sections.
@@ -3393,6 +3384,29 @@
             }
         });
         return true;
+    }
+
+    function openTitlePlaybackOptions(card) {
+        var yummyTvUrl = yummyTvEnabled() ? LampaYaniUiUtils.yummyTvDetailsUrl(yummyTvAnimeId(card)) : '';
+        if (!yummyTvUrl || !Lampa.Select || !Lampa.Select.show) {
+            openVideos(card, false);
+            return;
+        }
+
+        Lampa.Select.show({
+            title: t('choose_playback'),
+            items: [
+                {title: t('watch_in_player'), subtitle: t('watch_in_player_description'), action: 'player'},
+                {title: t('watch_in_yummytv'), subtitle: t('watch_in_yummytv_description'), action: 'yummytv'}
+            ],
+            onSelect: function (item) {
+                if (item && item.action === 'yummytv') {
+                    openYummyTv(card);
+                    return;
+                }
+                openVideos(card, false);
+            }
+        });
     }
 
     function tryExternalOpen(name, callback) {
