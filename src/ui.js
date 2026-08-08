@@ -1616,6 +1616,8 @@
             info.append(title);
             var alternativeTitles = (data.yani_titles || []).filter(function (title) { return title && title !== data.title; });
             if (alternativeTitles.length) info.append($('<div class="yani-detail__alternative-titles"></div>').text(alternativeTitles.join(' · ')));
+            var genres = detailGenres(data);
+            if (genres.length) info.append(createDetailGenres(genres));
             if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             if (data.yani_user_rating) info.append($('<div class="yani-detail__personal-rating"></div>').text(t('my_rating') + ': ' + data.yani_user_rating + '/10'));
@@ -1683,6 +1685,20 @@
             });
             updateDetailListPanel(panel, cardData);
             return panel;
+        }
+
+        function createDetailGenres(genres) {
+            var block = $('<div class="yani-detail__genres"></div>');
+            genres.forEach(function (genre) {
+                var title = genreTitle(genre);
+                var value = genreValue(genre);
+                if (!title || value === null) return;
+                var chip = $('<div class="yani-detail__genre selector"></div>').text(title);
+                chip.on('hover:enter click.yaniDetailGenre', function () { openGenreCatalog(title, value); });
+                bindDetailButtonFocus(chip);
+                block.append(chip);
+            });
+            return block;
         }
 
         function updateDetailListPanel(panel, cardData) {
@@ -2611,10 +2627,41 @@
                     };
                 }).filter(function (genre) { return genre.title && genre.value; }),
                 onSelect: function (item) {
-                    Lampa.Activity.push({url: 'yani/genre/' + item.value, title: item.title, component: 'yani_catalog', params: {limit: 30, genres: item.value}});
+                    openGenreCatalog(item.title, item.value);
                 }
             });
         }).catch(function () { Lampa.Noty.show(t('genres_load_error')); });
+    }
+
+    function genreTitle(genre) {
+        return typeof genre === 'string' ? genre : genre && (genre.title || genre.name || genre.label || genre.alias) || '';
+    }
+
+    function genreValue(genre) {
+        if (typeof genre === 'string') return genre;
+        if (!genre) return null;
+        var value = genre.value;
+        if (value === undefined || value === null || value === '') value = genre.id;
+        if (value === undefined || value === null || value === '') value = genre.href;
+        if (value === undefined || value === null || value === '') value = genre.alias;
+        if (value === undefined || value === null || value === '') value = genre.slug;
+        return value === undefined || value === null || value === '' ? null : value;
+    }
+
+    function detailGenres(card) {
+        var raw = card && (card.yani_genres || card.genres || card.genre) || [];
+        if (!Array.isArray(raw)) raw = raw && (raw.items || raw.data || raw.genres) || [];
+        var seen = {};
+        return raw.filter(function (genre) {
+            var title = genreTitle(genre), value = genreValue(genre), key = String(value === null ? title : value);
+            if (!title || value === null || seen[key]) return false;
+            seen[key] = true;
+            return true;
+        });
+    }
+
+    function openGenreCatalog(title, value) {
+        Lampa.Activity.push({url: 'yani/genre/' + encodeURIComponent(value), title: title, component: 'yani_catalog', params: {limit: 30, genres: value}});
     }
 
     function openSearch() {
@@ -2668,6 +2715,7 @@
             yani_is_favorite: Boolean(item.user && item.user.list && item.user.list.is_fav),
             yani_user_rating: Number(item.user && (item.user.rate || item.user.rating || item.user.score) || item.user_rate || 0) || null,
             yani_viewing_order: Array.isArray(item.viewing_order) ? item.viewing_order : [],
+            yani_genres: item.genres || item.genre || [],
             yani_type: item.type || null,
             yani_remote_ids: item.remote_ids || {}
         };
