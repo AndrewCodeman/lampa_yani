@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.19.21 — 2026-08-08
+## 0.20.0 — 2026-08-08
 
 - Resolve Kodik iframe/player URLs into direct HLS streams before handing playback to an external Android player.
 - Keep non-direct unsupported player pages blocked from external playback instead of passing iframe URLs as media files.
