@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.19.14',
+        version: '0.19.15',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -825,13 +825,21 @@ function pluginYummyAnime() {
             scheduled.forEach(function (entry) {
                 var key = startOfDay(entry.date).getTime();
                 if (!releasesByDay[key]) releasesByDay[key] = [];
-                releasesByDay[key].push(entry.item);
+                // Keep the release wrapper here, rather than only the anime.
+                // The wrapper carries the concrete date and whether this is a
+                // previous or upcoming episode; losing it made the following
+                // sort call access `undefined.date` and aborted the page.
+                releasesByDay[key].push(entry);
             });
             dayGroups = [];
             for (var offset = 0; offset < 28; offset++) {
                 var day = new Date(rangeStart.getTime()); day.setDate(rangeStart.getDate() + offset);
                 var releases = releasesByDay[day.getTime()] || [];
-                releases.sort(function (a, b) { return a.date.getTime() - b.date.getTime(); });
+                releases.sort(function (a, b) {
+                    var first = a && a.date instanceof Date ? a.date.getTime() : 0;
+                    var second = b && b.date instanceof Date ? b.date.getTime() : 0;
+                    return first - second;
+                });
                 dayGroups.push({day: day, relativeOffset: Math.round((day.getTime() - today.getTime()) / 86400000), releases: releases});
             }
             var days = $('<div class="yani-schedule__days"></div>'); dayGroups.forEach(function (group, index) { var chip = $('<div class="yani-schedule__day-chip selector"></div>'); chip.append($('<div class="yani-schedule__day-name"></div>').text(dayLabel(group.day, group.relativeOffset))); chip.append($('<div class="yani-schedule__day-count"></div>').text(group.releases.length)); chip.on('hover:focus', function (event) { content.find('.yani-schedule__day-chip.focus').removeClass('focus'); chip.addClass('focus'); last = event.currentTarget || chip[0]; revealDayChip(chip); }); chip.on('hover:blur', function () { chip.removeClass('focus'); }); chip.on('hover:enter click.yaniScheduleDay', function () { select(index, true); }); days.append(chip); });

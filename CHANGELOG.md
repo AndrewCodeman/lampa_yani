@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.15 — 2026-08-08
+
+- Fix schedule rendering: preserve release metadata while grouping items by day, preventing the page from failing during time sorting.
+
 ## 0.18.17 — 2026-08-08
 
 - Open recommended titles directly in YummyAnime instead of showing a transient native Lampa-card lookup failure.
