@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.20.11 — 2026-08-09
+
+- Shorten Alloha playback handling by opening unsupported Alloha iframe players through Android's external browser bridge instead of first sending them through video-player resolution.
+
 ## 0.20.10 — 2026-08-09
 
 - Reduce trailer navigation by opening a compact trailer picker over the detail card, and open the trailer directly when only one trailer is available.

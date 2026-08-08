@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.10',
+        version: '0.20.11',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -4144,6 +4144,9 @@ function pluginYummyAnime() {
     function launchVideo(card, group, videos, selected) {
         var url = videoSourceUrl(selected);
         if (!url) return Lampa.Noty.show(t('no_videos'));
+        if (!isDirectVideoUrl(url) && isAllohaUrl(url) && !(window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url))) {
+            return launchAllohaPlayer(card, group, selected, url);
+        }
         if (!isExternalPlayableUrl(url, selected) && window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url)) {
             setLoading(true);
             LampaYaniStreamResolver.resolve(url, selected).then(function (result) {
@@ -4194,6 +4197,15 @@ function pluginYummyAnime() {
         }
 
         Lampa.Noty.show(url);
+    }
+
+    function launchAllohaPlayer(card, group, selected, url) {
+        rememberPlayback(card, group, selected);
+        syncServerProgress(selected);
+        if (openAndroidAppUri(url)) return true;
+        if (openExternalUri(url)) return true;
+        offerYummyTv(card);
+        return false;
     }
 
     function setLoading(enabled) {
