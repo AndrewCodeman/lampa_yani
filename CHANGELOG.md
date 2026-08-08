@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.20.14 — 2026-08-09
+
+- Add a playback target setting and direct-stream picker for choosing between an external Android player and Lampa's internal player.
+
 ## 0.20.13 — 2026-08-09
 
 - Restore Lampa controller focus after returning from external players, browsers, YouTube, or YummyTV deep links.

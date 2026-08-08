@@ -110,6 +110,15 @@
     messages.ru.watch_in_yummytv = 'Смотреть в YummyTV';
     messages.ru.watch_in_yummytv_description = 'Если приложение YummyTV установлено';
     messages.ru.choose_playback = 'Выберите способ просмотра';
+    messages.ru.watch_external_player = 'Внешний плеер';
+    messages.ru.watch_external_player_description = 'Открыть поток во внешнем Android-плеере';
+    messages.ru.watch_internal_lampa = 'Внутренний плеер Lampa';
+    messages.ru.watch_internal_lampa_description = 'Проигрывать прямой поток внутри Lampa';
+    messages.ru.playback_target = 'Способ просмотра';
+    messages.ru.playback_target_description = 'Как открывать прямые видеопотоки YummyAnime';
+    messages.ru.playback_target_ask = 'Спрашивать';
+    messages.ru.playback_target_external = 'Внешний плеер';
+    messages.ru.playback_target_internal = 'Внутренний плеер Lampa';
     messages.en.open_yummytv = 'Open in YummyTV';
     messages.en.open_yummytv_description = 'Open this title in the YummyTV app';
     messages.en.yummytv_open_failed = 'Could not open YummyTV. Make sure the app is installed';
@@ -119,6 +128,15 @@
     messages.en.watch_in_yummytv = 'Watch in YummyTV';
     messages.en.watch_in_yummytv_description = 'If the YummyTV app is installed';
     messages.en.choose_playback = 'Choose how to watch';
+    messages.en.watch_external_player = 'External player';
+    messages.en.watch_external_player_description = 'Open the stream in an external Android player';
+    messages.en.watch_internal_lampa = 'Internal Lampa player';
+    messages.en.watch_internal_lampa_description = 'Play the direct stream inside Lampa';
+    messages.en.playback_target = 'Playback target';
+    messages.en.playback_target_description = 'How YummyAnime should open direct video streams';
+    messages.en.playback_target_ask = 'Ask every time';
+    messages.en.playback_target_external = 'External player';
+    messages.en.playback_target_internal = 'Internal Lampa player';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -174,6 +192,15 @@
     messages.uk.watch_in_yummytv = 'Дивитися в YummyTV';
     messages.uk.watch_in_yummytv_description = 'Якщо застосунок YummyTV установлено';
     messages.uk.choose_playback = 'Виберіть спосіб перегляду';
+    messages.uk.watch_external_player = 'Зовнішній плеєр';
+    messages.uk.watch_external_player_description = 'Відкрити потік у зовнішньому Android-плеєрі';
+    messages.uk.watch_internal_lampa = 'Внутрішній плеєр Lampa';
+    messages.uk.watch_internal_lampa_description = 'Програвати прямий потік усередині Lampa';
+    messages.uk.playback_target = 'Спосіб перегляду';
+    messages.uk.playback_target_description = 'Як відкривати прямі відеопотоки YummyAnime';
+    messages.uk.playback_target_ask = 'Запитувати';
+    messages.uk.playback_target_external = 'Зовнішній плеєр';
+    messages.uk.playback_target_internal = 'Внутрішній плеєр Lampa';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

@@ -2520,11 +2520,15 @@
             return;
         }
 
-        if (openExternalVideo(current.url, current.title, {playlist: externalPlayablePlaylist(playlist), time: current.time, poster: card.poster || card.img || '', requireDirect: true, source: current.source, headers: current.headers || videoStreamHeaders(current.source), quality: current.quality || videoStreamQualities(current.source)})) {
+        if (showDirectPlaybackOptions(card, current, playlist)) {
             return;
         }
 
-        if (isDirectVideoUrl(url) && playInternalDirectVideo(current, playlist)) {
+        if (openExternalPlayer(current, playlist, card)) {
+            return;
+        }
+
+        if (playInternalPlayer(current, playlist)) {
             return;
         }
 
@@ -2576,6 +2580,52 @@
         Lampa.Player.play(directCurrent);
         if (Lampa.Player.playlist) Lampa.Player.playlist(directPlaylist.length ? directPlaylist : [directCurrent]);
         return true;
+    }
+
+    function showDirectPlaybackOptions(card, current, playlist) {
+        var target = playbackTargetPreference();
+        if (target === 'external') return openExternalPlayer(current, playlist, card);
+        if (target === 'internal') return playInternalPlayer(current, playlist) || openExternalPlayer(current, playlist, card);
+        if (!Lampa.Select || !Lampa.Select.show) return false;
+        Lampa.Select.show({
+            title: t('choose_playback'),
+            items: [
+                {title: t('watch_external_player'), subtitle: t('watch_external_player_description'), action: 'external'},
+                {title: t('watch_internal_lampa'), subtitle: t('watch_internal_lampa_description'), action: 'internal'}
+            ],
+            onSelect: function (item) {
+                if (item && item.action === 'internal') {
+                    if (playInternalPlayer(current, playlist)) return;
+                    Lampa.Noty.show(t('external_stream_unavailable'));
+                    return;
+                }
+                if (openExternalPlayer(current, playlist, card)) return;
+                if (playInternalPlayer(current, playlist)) return;
+                Lampa.Noty.show(current.url);
+            }
+        });
+        return true;
+    }
+
+    function playbackTargetPreference() {
+        var value = Lampa.Storage && Lampa.Storage.get ? Lampa.Storage.get('yani_playback_target', 'ask') : 'ask';
+        return value === 'internal' || value === 'external' ? value : 'ask';
+    }
+
+    function openExternalPlayer(current, playlist, card) {
+        return openExternalVideo(current.url, current.title, {
+            playlist: externalPlayablePlaylist(playlist),
+            time: current.time,
+            poster: card.poster || card.img || '',
+            requireDirect: true,
+            source: current.source,
+            headers: current.headers || videoStreamHeaders(current.source),
+            quality: current.quality || videoStreamQualities(current.source)
+        });
+    }
+
+    function playInternalPlayer(current, playlist) {
+        return isDirectVideoUrl(current && current.url) && playInternalDirectVideo(current, playlist);
     }
 
     function externalPlayablePlaylist(playlist) {
@@ -3497,6 +3547,17 @@
                 default: 'last'
             },
             field: {name: t('player_preference'), description: t('player_preference_description')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {
+                name: 'yani_playback_target',
+                type: 'select',
+                values: {ask: t('playback_target_ask'), external: t('playback_target_external'), internal: t('playback_target_internal')},
+                default: 'ask'
+            },
+            field: {name: t('playback_target'), description: t('playback_target_description')}
         });
 
         Lampa.SettingsApi.addParam({
