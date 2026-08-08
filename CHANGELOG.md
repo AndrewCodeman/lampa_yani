@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.19.17 — 2026-08-08
+
+- Render the native-card YummyAnime action with a standalone logo image.
+- Show that action only for cards identified as animation/anime and with a high-confidence YummyAnime title match.
+
 ## 0.19.16 — 2026-08-08
 
 - Render the YummyAnime mark in the native Lampa-card action with an embedded SVG fallback that is independent of Lampa's button typography.

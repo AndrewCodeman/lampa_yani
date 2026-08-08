@@ -2337,10 +2337,31 @@
                 card._match_score = (titles.indexOf(expected) >= 0 ? 100 : titles.some(function (value) { return value.indexOf(expected) >= 0 || expected.indexOf(value) >= 0; }) ? 40 : 0) + (year && card.release_date === year ? 30 : 0);
             });
             cards.sort(function (a, b) { return b._match_score - a._match_score; });
-            if (!cards.length || cards[0]._match_score < 40) return [];
+            // A partial title without a matching year is not sufficient for
+            // the native-card integration: it produces false YummyAnime
+            // buttons on unrelated live-action titles.
+            if (!cards.length || cards[0]._match_score < 70) return [];
             var best = cards[0]._match_score;
             return cards.filter(function (card, index) { return index < 5 && (card._match_score === best || card._match_score >= 70); });
         });
+    }
+
+    function isNativeAnimeCard(movie) {
+        var ids = movie && (movie.genre_ids || movie.genres_ids || movie.genre_id);
+        if (Array.isArray(ids) && ids.some(function (id) { return Number(id) === 16; })) return true; // TMDB: Animation
+
+        var source = movie && (movie.genres || movie.genre || movie.category || movie.categories);
+        var values = Array.isArray(source) ? source : source ? [source] : [];
+        var names = values.map(function (genre) {
+            if (typeof genre === 'string') return genre;
+            return genre && (genre.name || genre.title || genre.label) || '';
+        }).join(' ').toLowerCase();
+        if (/(?:animation|animated|anime|аниме|мультфильм|мультипликац)/.test(names)) return true;
+
+        // Some Lampa builds expose only the numeric TMDB genre ids after the
+        // detail is rendered. In that case keep the exact-title resolver as
+        // the fallback instead of rejecting an otherwise valid anime.
+        return !source && !Array.isArray(ids);
     }
 
     function movePageDown(scroll) { LampaYaniNavigation.moveDown(scroll); }
@@ -3246,6 +3267,10 @@
             if (event.type !== 'complite') return;
             var movie = event.data && event.data.movie ? event.data.movie : event.object && event.object.card_data;
             if (!movie) return;
+            // A native Lampa card may be a film or a live-action series with
+            // an accidentally similar title. Do not decorate those cards
+            // with a YummyAnime action.
+            if (!isNativeAnimeCard(movie)) return;
 
             var matchRequest = movie.yani_card ? Promise.resolve([movie.yani_card]) : findYummyMatches(movie);
             matchRequest.then(function (matches) {
@@ -3292,7 +3317,7 @@
         if (!container.length) return;
 
         if (!$('.view--yummyanime', render).length) {
-            var button = $('<div class="full-start__button selector view--yummyanime" title="YummyAnime" aria-label="YummyAnime"><span class="view--yummyanime__icon">' + yummyRatingLogo() + '</span></div>');
+            var button = $('<div class="full-start__button selector view--yummyanime" title="YummyAnime" aria-label="YummyAnime"><img class="view--yummyanime__icon" alt="YummyAnime" src="https://andrewcodeman.github.io/lampa_yani/assets/yummyanime.svg"></div>');
             button.on('hover:enter click.yaniFullDetail', function () { openYummyDetail(anime, false); });
             container.prepend(button);
         }
