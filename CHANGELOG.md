@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.20.12 — 2026-08-09
+
+- Replace unsupported-player fallback with a two-action playback picker: watch in player or watch in YummyTV when the app is installed.
+
 ## 0.20.11 — 2026-08-09
 
 - Shorten Alloha playback handling by opening unsupported Alloha iframe players through Android's external browser bridge instead of first sending them through video-player resolution.

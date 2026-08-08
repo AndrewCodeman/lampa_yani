@@ -105,10 +105,20 @@
     messages.ru.open_yummytv_description = 'Открыть карточку тайтла в приложении YummyTV';
     messages.ru.yummytv_open_failed = 'Не удалось открыть YummyTV. Убедитесь, что приложение установлено';
     messages.ru.yummytv_id_missing = 'Не удалось определить ID тайтла YummyAnime';
+    messages.ru.watch_in_player = 'Смотреть в плеере';
+    messages.ru.watch_in_player_description = 'Открыть источник во внешнем плеере или браузере';
+    messages.ru.watch_in_yummytv = 'Смотреть в YummyTV';
+    messages.ru.watch_in_yummytv_description = 'Если приложение YummyTV установлено';
+    messages.ru.choose_playback = 'Выберите способ просмотра';
     messages.en.open_yummytv = 'Open in YummyTV';
     messages.en.open_yummytv_description = 'Open this title in the YummyTV app';
     messages.en.yummytv_open_failed = 'Could not open YummyTV. Make sure the app is installed';
     messages.en.yummytv_id_missing = 'Could not determine the YummyAnime title ID';
+    messages.en.watch_in_player = 'Watch in player';
+    messages.en.watch_in_player_description = 'Open the source in an external player or browser';
+    messages.en.watch_in_yummytv = 'Watch in YummyTV';
+    messages.en.watch_in_yummytv_description = 'If the YummyTV app is installed';
+    messages.en.choose_playback = 'Choose how to watch';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -159,6 +169,11 @@
     messages.uk.open_yummytv_description = 'Відкрити картку тайтлу в застосунку YummyTV';
     messages.uk.yummytv_open_failed = 'Не вдалося відкрити YummyTV. Переконайтеся, що застосунок установлено';
     messages.uk.yummytv_id_missing = 'Не вдалося визначити ID тайтлу YummyAnime';
+    messages.uk.watch_in_player = 'Дивитися в плеєрі';
+    messages.uk.watch_in_player_description = 'Відкрити джерело у зовнішньому плеєрі або браузері';
+    messages.uk.watch_in_yummytv = 'Дивитися в YummyTV';
+    messages.uk.watch_in_yummytv_description = 'Якщо застосунок YummyTV установлено';
+    messages.uk.choose_playback = 'Виберіть спосіб перегляду';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

@@ -2501,7 +2501,14 @@
             quality: videoStreamQualities(selected)
         };
         if (!isExternalPlayableUrl(current.url, current.source)) {
-            offerYummyTv(card);
+            showExternalPlaybackOptions(card, {
+                url: current.url,
+                title: current.title,
+                onPlayer: function () {
+                    if (openAndroidAppUri(current.url)) return true;
+                    return openExternalUri(current.url);
+                }
+            });
             return;
         }
 
@@ -2519,10 +2526,14 @@
     function launchAllohaPlayer(card, group, selected, url) {
         rememberPlayback(card, group, selected);
         syncServerProgress(selected);
-        if (openAndroidAppUri(url)) return true;
-        if (openExternalUri(url)) return true;
-        offerYummyTv(card);
-        return false;
+        return showExternalPlaybackOptions(card, {
+            url: url,
+            title: (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (selected.number || selected.index || '?'),
+            onPlayer: function () {
+                if (openAndroidAppUri(url)) return true;
+                return openExternalUri(url);
+            }
+        });
     }
 
     function setLoading(enabled) {
@@ -3209,18 +3220,37 @@
     }
 
     function offerYummyTv(card) {
+        return showExternalPlaybackOptions(card, {yummyOnly: true});
+    }
+
+    function showExternalPlaybackOptions(card, options) {
+        options = options || {};
         var url = LampaYaniUiUtils.yummyTvDetailsUrl(yummyTvAnimeId(card));
-        if (!url || !Lampa.Select || !Lampa.Select.show) {
+        var items = [];
+        if (!options.yummyOnly && (options.url || options.onPlayer)) {
+            items.push({title: t('watch_in_player'), subtitle: t('watch_in_player_description'), action: 'player'});
+        }
+        if (url) items.push({title: t('watch_in_yummytv'), subtitle: t('watch_in_yummytv_description'), action: 'yummytv'});
+        if (!items.length || !Lampa.Select || !Lampa.Select.show) {
+            if (!options.yummyOnly && options.onPlayer && options.onPlayer()) return true;
+            if (url && openYummyTv(card)) return true;
             Lampa.Noty.show(t('external_stream_unavailable'));
-            return;
+            return false;
         }
         Lampa.Select.show({
-            title: t('external_stream_unavailable'),
-            items: [{title: t('open_yummytv'), subtitle: t('open_yummytv_description'), action: 'yummytv'}],
+            title: t('choose_playback'),
+            items: items,
             onSelect: function (item) {
+                if (item && item.action === 'player') {
+                    if (options.onPlayer && options.onPlayer()) return;
+                    if (options.url && openExternalUri(options.url)) return;
+                    Lampa.Noty.show(t('external_stream_unavailable'));
+                    return;
+                }
                 if (item && item.action === 'yummytv') openYummyTv(card);
             }
         });
+        return true;
     }
 
     function tryExternalOpen(name, callback) {
