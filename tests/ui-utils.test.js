@@ -10,5 +10,9 @@ assert.deepStrictEqual(Array.from(utils.titleValues({title: 'Покемон', al
 assert.deepStrictEqual(Array.from(utils.titleValues({title: 'Наруто', other_titles: ['NARUTO', 'ナルト']})), ['Наруто', 'NARUTO', 'ナルト']);
 assert.strictEqual(utils.normalizeMatchTitle('Ёжик: 2026'), 'ежик 2026');
 assert.deepStrictEqual(Array.from(utils.standardSearchTitles({title: 'Anime (2026)', yani_titles: ['Anime']})), ['Anime (2026)', 'Anime']);
+assert.strictEqual(utils.yummyTvDetailsUrl(10551), 'yummytv://details/10551');
+assert.strictEqual(utils.yummyTvDetailsUrl('23365'), 'yummytv://details/23365');
+assert.strictEqual(utils.yummyTvDetailsUrl(''), '');
+assert.strictEqual(utils.yummyTvDetailsUrl(-1), '');
 
 console.log('ui-utils tests passed');

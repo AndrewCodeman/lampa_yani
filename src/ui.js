@@ -228,6 +228,10 @@
         return '<svg viewBox="0 0 110 104" aria-hidden="true"><path d="M81.674 103.11C98.568 93.723 110 75.697 110 55 110 24.624 85.376 0 55 0S0 24.624 0 55c0 20.697 11.432 38.723 28.326 48.11C14.887 94.372 6 79.224 6 62 6 34.938 27.938 13 55 13s49 21.938 49 49c0 17.224-8.887 32.373-22.326 41.11Z"/><path d="M92.955 80.008C95.549 74.55 97 68.445 97 62 97 38.804 78.196 20 55 20S13 38.804 13 62c0 6.445 1.452 12.55 4.045 18.008C16.362 77.116 16 74.1 16 71c0-21.539 17.461-39 39-39s39 17.461 39 39c0 3.1-.362 6.116-1.045 9.008Z"/><path d="M55 89c14.359 0 26-11.641 26-26 0-5.071-1.451-9.802-3.961-13.801C82.579 54.799 86 62.5 86 71c0 17.121-13.879 31-31 31S24 88.121 24 71c0-8.5 3.421-16.201 8.961-21.801C30.451 53.198 29 57.929 29 63c0 14.359 11.641 26 26 26Z"/><circle cx="55" cy="63" r="18"/></svg>';
     }
 
+    function yummyAnimeIcon() {
+        return '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M18.45 0H1.55A1.55 1.55 0 0 0 0 1.55v16.9A1.54 1.54 0 0 0 1.55 20h16.9A1.55 1.55 0 0 0 20 18.45V1.55A1.54 1.54 0 0 0 18.45 0Zm-2.83 5.93-2.1 2.66-2.3-5.43a6.95 6.95 0 0 1 4.4 2.77Zm-2.9 6.57h-4l2.03-4.8 1.98 4.8Zm-2.37-9.34L7.8 9.06 4.87 5.33c.64-.7 1.4-1.26 2.27-1.65a8.18 8.18 0 0 1 3.2-.52ZM3.57 7.39l3.2 4.06-1.56 3.58A6.96 6.96 0 0 1 3.57 7.39Zm6.57 9.56c-1.05.01-2.1-.2-3.05-.65l.76-1.8h5.7l.49 1.15a6.93 6.93 0 0 1-3.9 1.3Zm6.8-7.07a7.8 7.8 0 0 1-1.17 4L14.55 11l2.17-2.77c.14.54.21 1.1.23 1.65Z"/></svg>';
+    }
+
     function Recommended(object) {
         return LampaYaniHomeSections.recommended(object, {t: t, history: playbackHistory, toCard: toCard, cardRender: bindRecommendedCardRender});
     }
@@ -1641,6 +1645,11 @@
                 openStandardLampaCard(data);
             });
             bindDetailButtonFocus(searchButton);
+            var yummyTvButton = $('<div class="yani-detail__button yani-detail__button--external selector"></div>');
+            yummyTvButton.append($('<span class="yani-detail__button-icon"></span>').html(yummyAnimeIcon()));
+            yummyTvButton.append($('<span></span>').text(t('open_yummytv')));
+            yummyTvButton.on('hover:enter click.yaniYummyTv', function () { openYummyTv(data); });
+            bindDetailButtonFocus(yummyTvButton);
             var subscribeButton = $('<div class="yani-detail__button selector"></div>').text(t('subscribe_episodes'));
             if (Lampa.Storage && Lampa.Storage.get('yani_subscribed_video_' + data.yani_id, '')) {
                 subscribeButton.text(t('unsubscribe_episodes'));
@@ -1649,7 +1658,7 @@
             bindDetailButtonFocus(subscribeButton);
             var comments = $('<div class="yani-detail__comments"></div>');
             var listPanel = createDetailListPanel(data);
-            actions.append(button, trailersButton, searchButton, subscribeButton);
+            actions.append(button, trailersButton, searchButton, yummyTvButton, subscribeButton);
             // Keep the principal actions next to the synopsis, before the
             // long viewing-order, recommendations and comments sections.
             info.append(actions);
@@ -2489,7 +2498,7 @@
             quality: videoStreamQualities(selected)
         };
         if (!isExternalPlayableUrl(current.url, current.source)) {
-            Lampa.Noty.show(t('external_stream_unavailable'));
+            offerYummyTv(card);
             return;
         }
 
@@ -3109,6 +3118,11 @@
                 return true;
             })) return true;
         }
+        return openExternalUri(externalUrl);
+    }
+
+    function openExternalUri(externalUrl) {
+        if (!externalUrl) return false;
         if (tryExternalOpen('Lampa.External.open', function () {
             if (!Lampa.External || !Lampa.External.open) return false;
             Lampa.External.open(externalUrl);
@@ -3130,6 +3144,36 @@
             return true;
         })) return true;
         return false;
+    }
+
+    function yummyTvAnimeId(card) {
+        return card && (card.yani_id || card.anime_id || card.yummy_id);
+    }
+
+    function openYummyTv(card) {
+        var url = LampaYaniUiUtils.yummyTvDetailsUrl(yummyTvAnimeId(card));
+        if (!url) {
+            Lampa.Noty.show(t('yummytv_id_missing'));
+            return false;
+        }
+        if (openExternalUri(url)) return true;
+        Lampa.Noty.show(t('yummytv_open_failed'));
+        return false;
+    }
+
+    function offerYummyTv(card) {
+        var url = LampaYaniUiUtils.yummyTvDetailsUrl(yummyTvAnimeId(card));
+        if (!url || !Lampa.Select || !Lampa.Select.show) {
+            Lampa.Noty.show(t('external_stream_unavailable'));
+            return;
+        }
+        Lampa.Select.show({
+            title: t('external_stream_unavailable'),
+            items: [{title: t('open_yummytv'), subtitle: t('open_yummytv_description'), action: 'yummytv'}],
+            onSelect: function (item) {
+                if (item && item.action === 'yummytv') openYummyTv(card);
+            }
+        });
     }
 
     function tryExternalOpen(name, callback) {

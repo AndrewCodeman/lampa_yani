@@ -51,6 +51,12 @@
         return result;
     }
 
+    function yummyTvDetailsUrl(animeId) {
+        var id = Number(animeId);
+        if (!isFinite(id) || id <= 0) return '';
+        return 'yummytv://details/' + Math.floor(id);
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.UiUtils = window.LampaYaniUiUtils = {
         videoData: videoData,
@@ -58,6 +64,7 @@
         videoHost: videoHost,
         titleValues: titleValues,
         normalizeMatchTitle: normalizeMatchTitle,
-        standardSearchTitles: standardSearchTitles
+        standardSearchTitles: standardSearchTitles,
+        yummyTvDetailsUrl: yummyTvDetailsUrl
     };
 }(window));

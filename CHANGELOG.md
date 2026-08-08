@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.20.7 — 2026-08-09
+
+- Added an Open in YummyTV action using the native `yummytv://details/{animeId}` deep link.
+- Offer YummyTV when a selected source cannot be converted to a direct external-player stream.
+
 ## 0.20.6 — 2026-08-09
 
 - Added VK playback by resolving active embeds to direct MP4 or HLS streams with quality selection.

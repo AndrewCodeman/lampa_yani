@@ -101,6 +101,14 @@
     messages.en.subscription_error = 'Could not update subscription';
     messages.en.video_quality = 'Quality';
     messages.en.quality_auto = 'auto';
+    messages.ru.open_yummytv = 'Открыть в YummyTV';
+    messages.ru.open_yummytv_description = 'Открыть карточку тайтла в приложении YummyTV';
+    messages.ru.yummytv_open_failed = 'Не удалось открыть YummyTV. Убедитесь, что приложение установлено';
+    messages.ru.yummytv_id_missing = 'Не удалось определить ID тайтла YummyAnime';
+    messages.en.open_yummytv = 'Open in YummyTV';
+    messages.en.open_yummytv_description = 'Open this title in the YummyTV app';
+    messages.en.yummytv_open_failed = 'Could not open YummyTV. Make sure the app is installed';
+    messages.en.yummytv_id_missing = 'Could not determine the YummyAnime title ID';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -147,6 +155,10 @@
     messages.uk.subscription_error = 'Не вдалося змінити підписку';
     messages.uk.video_quality = 'Якість';
     messages.uk.quality_auto = 'авто';
+    messages.uk.open_yummytv = 'Відкрити в YummyTV';
+    messages.uk.open_yummytv_description = 'Відкрити картку тайтлу в застосунку YummyTV';
+    messages.uk.yummytv_open_failed = 'Не вдалося відкрити YummyTV. Переконайтеся, що застосунок установлено';
+    messages.uk.yummytv_id_missing = 'Не вдалося визначити ID тайтлу YummyAnime';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
