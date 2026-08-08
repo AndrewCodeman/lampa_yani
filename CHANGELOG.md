@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.20.6 — 2026-08-09
+
+- Added VK playback by resolving active embeds to direct MP4 or HLS streams with quality selection.
+- Reject unavailable or deleted VK videos before opening an external player.
+
 ## 0.20.5 — 2026-08-09
 
 - Added Rutube HLS playback with master-playlist quality discovery.

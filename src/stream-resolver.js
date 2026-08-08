@@ -41,6 +41,11 @@
         return /(?:^|\.)rutube\.ru(?:[/:]|$)/i.test(String(url || '').replace(/^https?:\/\//i, '')) && /[a-f0-9]{32}/i.test(String(url || ''));
     }
 
+    function isVkUrl(url) {
+        url = String(url || '');
+        return /iframeVK\.html/i.test(url) || /(?:^|\.)(?:vk\.com|vkvideo\.ru)(?:[/:]|$)/i.test(url.replace(/^https?:\/\//i, ''));
+    }
+
     function originOf(url) {
         var match = String(url || '').match(/^(https?:\/\/[^/]+)/i);
         return match ? match[1] : '';
@@ -534,6 +539,90 @@
         });
     }
 
+    function vkVideoPair(url) {
+        var params = queryParams(url);
+        var combined = String(params.id || '');
+        var combinedMatch = /^(-?\d+)_(\d+)$/.exec(combined);
+        if (combinedMatch) return {owner: combinedMatch[1], video: combinedMatch[2]};
+        if (/^-?\d+$/.test(String(params.oid || '')) && /^\d+$/.test(String(params.id || ''))) {
+            return {owner: String(params.oid), video: String(params.id)};
+        }
+        var pathMatch = /(?:video|clip)(-?\d+)_(\d+)/i.exec(String(url || ''));
+        return pathMatch ? {owner: pathMatch[1], video: pathMatch[2]} : null;
+    }
+
+    function decodeVkPayload(value) {
+        return decodeHtmlUrl(value)
+            .replace(/\\u003a/gi, ':')
+            .replace(/\\u003d/gi, '=')
+            .replace(/\\u002f/gi, '/')
+            .replace(/\\x26/gi, '&');
+    }
+
+    function addVkQuality(qualities, label, value, baseUrl) {
+        var streamUrl = absoluteUrl(decodeVkPayload(value), baseUrl);
+        if (!streamUrl || !/^https?:\/\//i.test(streamUrl) || !/\.(?:m3u8|mp4)(?:[?#]|$)/i.test(streamUrl)) return;
+        if (!qualities[label]) qualities[label] = streamUrl;
+    }
+
+    function vkQualityMap(html, baseUrl) {
+        var text = decodeVkPayload(String(html || ''));
+        var qualities = {};
+        var match;
+        var qualityPattern = /["'](?:url|mp4_)(2160|1440|1080|720|480|360|240)["']\s*:\s*["']([^"']+)["']/gi;
+        while ((match = qualityPattern.exec(text))) addVkQuality(qualities, match[1] + 'p', match[2], baseUrl);
+
+        var hlsPattern = /["'](?:hls_fmp4|hls|url_hls)["']\s*:\s*["']([^"']+)["']/gi;
+        while ((match = hlsPattern.exec(text))) addVkQuality(qualities, 'auto', match[1], baseUrl);
+
+        if (!Object.keys(qualities).length) {
+            var directPattern = /(https?:\/\/[^\s"'<>\\]+\.(?:m3u8|mp4)(?:\?[^\s"'<>\\]*)?)/gi;
+            while ((match = directPattern.exec(text))) addVkQuality(qualities, 'auto', match[1], baseUrl);
+        }
+
+        var ordered = {};
+        [240, 360, 480, 720, 1080, 1440, 2160].forEach(function (quality) {
+            var label = quality + 'p';
+            if (qualities[label]) ordered[label] = qualities[label];
+        });
+        if (qualities.auto) ordered.auto = qualities.auto;
+        return ordered;
+    }
+
+    function resolveVk(iframeUrl) {
+        var fullUrl = normalizeUrl(iframeUrl);
+        var hit = cached(fullUrl);
+        if (hit) return Promise.resolve(hit);
+        var pair = vkVideoPair(fullUrl);
+        if (!pair) return Promise.reject(new Error('VK video id not found'));
+        var playerUrl = 'https://vk.com/video_ext.php?oid=' + encodeURIComponent(pair.owner) + '&id=' + encodeURIComponent(pair.video) + '&hd=1';
+        var requestHeaders = {
+            Referer: fullUrl,
+            'User-Agent': CHROME_UA,
+            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        };
+        return requestText(playerUrl, {headers: requestHeaders}).then(function (html) {
+            if (/embedErrorCallback\s*\?\.?\s*\(\s*8\s*\)/i.test(String(html || ''))) throw new Error('VK video unavailable');
+            var qualities = vkQualityMap(html, playerUrl);
+            var labels = Object.keys(qualities);
+            if (!labels.length) throw new Error('VK stream links not found');
+            var playableLabels = labels.filter(function (label) { return label !== 'auto'; });
+            var label = playableLabels.length ? playableLabels[playableLabels.length - 1] : labels[labels.length - 1];
+            return cacheResult(fullUrl, {
+                url: qualities[label],
+                quality: label,
+                qualities: qualities,
+                source: 'vk',
+                direct: true,
+                headers: {
+                    Referer: playerUrl,
+                    Origin: 'https://vk.com',
+                    'User-Agent': CHROME_UA
+                }
+            });
+        });
+    }
+
     function resolve(url) {
         url = normalizeUrl(url);
         if (!url) return Promise.reject(new Error('Empty stream URL'));
@@ -543,12 +632,13 @@
         if (isAksorUrl(url)) return resolveAksor(url);
         if (isSibnetUrl(url)) return resolveSibnet(url);
         if (isRutubeUrl(url)) return resolveRutube(url);
+        if (isVkUrl(url)) return resolveVk(url);
         return Promise.reject(new Error('Unsupported player URL'));
     }
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.StreamResolver = window.LampaYaniStreamResolver = {
-        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url) || isSibnetUrl(url) || isRutubeUrl(url); },
+        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url) || isSibnetUrl(url) || isRutubeUrl(url) || isVkUrl(url); },
         resolve: resolve,
         isDirectVideoUrl: isDirectVideoUrl
     };
