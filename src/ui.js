@@ -2419,52 +2419,46 @@
         rememberPlayback(card, group, selected);
         syncServerProgress(selected);
 
-        if (/\.(m3u8|mp4|webm)(?:\?|$)/i.test(url) && Lampa.Player && Lampa.Player.play) {
-            var directVideos = videos.filter(function (video) {
-                return /\.(m3u8|mp4|webm)(?:\?|$)/i.test(videoSourceUrl(video));
-            });
-            var playlist = directVideos.map(function (video) {
-                return {
-                    title: (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (video.number || video.index || '?'),
-                    url: videoSourceUrl(video),
-                    time: Number(video.watched && video.watched.end_time || 0)
-                };
-            });
-            var current = playlist[directVideos.indexOf(selected)] || playlist[0];
-            Lampa.Player.play(current);
-            if (Lampa.Player.playlist) Lampa.Player.playlist(playlist);
-            return;
-        }
-
-        // Alloha rejects a raw iframe whose parent is Lampa or GitHub Pages
-        // (it requires a YummyAnime referrer and rotates signed HLS headers).
-        // The official title page creates that iframe in the required context.
-        if (isAllohaUrl(url)) {
-            var officialPage = yummyTitleUrl(card);
-            if (officialPage && Lampa.Browser && Lampa.Browser.open) {
-                Lampa.Browser.open(officialPage);
-                return;
-            }
-        }
-
-        // Kodik may reject an iframe created from the GitHub Pages origin.
-        // Lampa's browser keeps the same playback URL but provides a compatible
-        // top-level browsing context, which is also how the Android client opens it.
-        if (isKodikUrl(url) && Lampa.Browser && Lampa.Browser.open) {
-            Lampa.Browser.open(url);
-            return;
-        }
-
-        if (showYummyIframe(url)) {
-            return;
-        }
-
-        Lampa.Activity.push({
-            url: 'yani/player/' + (selected.video_id || selected.index || selected.number),
+        var playlist = buildExternalPlaylist(card, videos);
+        var current = playlist.filter(function (item) { return item.source === selected; })[0] || {
             title: title,
-            component: 'yani_player',
-            iframe_url: url
+            url: url,
+            time: Number(selected.watched && selected.watched.end_time || 0),
+            source: selected
+        };
+        if (openExternalVideo(current.url, current.title, {playlist: playlist, time: current.time, poster: card.poster || card.img || ''})) {
+            return;
+        }
+
+        if (isDirectVideoUrl(url) && playInternalDirectVideo(current, playlist)) {
+            return;
+        }
+
+        Lampa.Noty.show(url);
+    }
+
+    function buildExternalPlaylist(card, videos) {
+        return (videos || []).map(function (video) {
+            var url = videoSourceUrl(video);
+            if (!url) return null;
+            return {
+                title: (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (video.number || video.index || '?'),
+                url: url,
+                time: Number(video.watched && video.watched.end_time || 0),
+                source: video
+            };
+        }).filter(Boolean);
+    }
+
+    function playInternalDirectVideo(current, playlist) {
+        if (!Lampa.Player || !Lampa.Player.play) return false;
+        var directPlaylist = (playlist || []).filter(function (item) { return isDirectVideoUrl(item.url); }).map(function (item) {
+            return {title: item.title, url: item.url, time: item.time};
         });
+        var directCurrent = directPlaylist.filter(function (item) { return item.url === current.url; })[0] || {title: current.title, url: current.url, time: current.time};
+        Lampa.Player.play(directCurrent);
+        if (Lampa.Player.playlist) Lampa.Player.playlist(directPlaylist.length ? directPlaylist : [directCurrent]);
+        return true;
     }
 
     function syncServerProgress(video) {
@@ -2479,6 +2473,10 @@
         var data = LampaYaniUiUtils.videoData(video);
         return LampaYaniUiUtils.normalizeVideoUrl(video.iframe_url || video.url || video.player_url || video.link ||
             data.iframe_url || data.url || data.player_url || data.link);
+    }
+
+    function isDirectVideoUrl(url) {
+        return /\.(m3u8|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
     }
 
     function showYummyIframe(url) {
@@ -2969,18 +2967,28 @@
         // Trailers are normally YouTube links. An iframe inside Lampa cannot
         // reliably play them on Android TV, while External lets Android route
         // the URL to the installed YouTube (or another matching) application.
-        if (openExternalVideo(url, title)) return;
+        if (openExternalVideo(url, title, {youtubeIntent: true})) return;
         Lampa.Noty.show(url);
     }
 
-    function openExternalVideo(url, title) {
-        url = externalTrailerUrl(url);
-        var intentUrl = youtubeIntentUrl(url);
+    function openExternalVideo(url, title, options) {
+        options = options || {};
+        url = options.youtubeIntent ? externalTrailerUrl(url) : LampaYaniUiUtils.normalizeVideoUrl(url);
+        var intentUrl = options.youtubeIntent ? youtubeIntentUrl(url) : '';
         var externalUrl = intentUrl || url;
+        var playlist = Array.isArray(options.playlist) ? options.playlist.map(function (item) {
+            return {
+                title: cleanPlaybackTitle(item.title),
+                url: item.url,
+                time: Number(item.time || 0)
+            };
+        }).filter(function (item) { return item.url; }) : [];
         var payload = {
-            title: title || 'Trailer',
+            title: cleanPlaybackTitle(title || 'YummyAnime'),
             url: url,
-            poster: ''
+            poster: options.poster || '',
+            time: Number(options.time || 0),
+            playlist: playlist
         };
         if (tryExternalOpen('Android.openPlayer', function () {
             if (!window.Android || typeof Android.openPlayer !== 'function') return false;
@@ -3022,6 +3030,10 @@
             console.warn('[YummyAnime] Could not open trailer through ' + name, error);
             return false;
         }
+    }
+
+    function cleanPlaybackTitle(value) {
+        return String(value || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
     }
 
     function externalTrailerUrl(url) {

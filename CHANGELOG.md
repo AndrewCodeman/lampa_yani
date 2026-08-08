@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.19.19 — 2026-08-08
+
+- Route YummyAnime episode playback to external Android/Lampa player handlers instead of iframe or in-app browser pages.
+- Pass episode playlist, resume time and poster metadata to the external player handoff.
+
 ## 0.19.18 — 2026-08-08
 
 - Open trailers through a dedicated YummyAnime trailer list with visible YouTube icons.
