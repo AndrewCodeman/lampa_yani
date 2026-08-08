@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.20.1 — 2026-08-08
+
+- Resolve player pages through Lampa's native Android request bridge to avoid WebView CORS failures.
+- Add CVH iframe resolution with direct signed MP4 qualities up to 1080p.
+- Accept extensionless signed media URLs only after a trusted stream resolver has produced them.
+
 ## 0.20.0 — 2026-08-08
 
 - Resolve Kodik iframe/player URLs into direct HLS streams before handing playback to an external Android player.

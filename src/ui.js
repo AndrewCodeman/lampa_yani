@@ -2415,7 +2415,7 @@
     function launchVideo(card, group, videos, selected) {
         var url = videoSourceUrl(selected);
         if (!url) return Lampa.Noty.show(t('no_videos'));
-        if (!isExternalPlayableUrl(url) && window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url)) {
+        if (!isExternalPlayableUrl(url, selected) && window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url)) {
             setLoading(true);
             LampaYaniStreamResolver.resolve(url, selected).then(function (result) {
                 setLoading(false);
@@ -2448,12 +2448,12 @@
             time: Number(selected.watched && selected.watched.end_time || 0),
             source: selected
         };
-        if (!isExternalPlayableUrl(current.url)) {
+        if (!isExternalPlayableUrl(current.url, current.source)) {
             Lampa.Noty.show(t('external_stream_unavailable'));
             return;
         }
 
-        if (openExternalVideo(current.url, current.title, {playlist: externalPlayablePlaylist(playlist), time: current.time, poster: card.poster || card.img || '', requireDirect: true})) {
+        if (openExternalVideo(current.url, current.title, {playlist: externalPlayablePlaylist(playlist), time: current.time, poster: card.poster || card.img || '', requireDirect: true, source: current.source})) {
             return;
         }
 
@@ -2497,7 +2497,7 @@
     }
 
     function externalPlayablePlaylist(playlist) {
-        return (playlist || []).filter(function (item) { return isExternalPlayableUrl(item.url); });
+        return (playlist || []).filter(function (item) { return isExternalPlayableUrl(item.url, item.source); });
     }
 
     function syncServerProgress(video) {
@@ -2518,8 +2518,8 @@
         return /\.(m3u8|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
     }
 
-    function isExternalPlayableUrl(url) {
-        return isDirectVideoUrl(url);
+    function isExternalPlayableUrl(url, source) {
+        return isDirectVideoUrl(url) || !!(source && source.yani_stream_url && source.yani_stream_url === url);
     }
 
     function showYummyIframe(url) {
@@ -3017,7 +3017,7 @@
     function openExternalVideo(url, title, options) {
         options = options || {};
         url = options.youtubeIntent ? externalTrailerUrl(url) : LampaYaniUiUtils.normalizeVideoUrl(url);
-        if (options.requireDirect && !isExternalPlayableUrl(url)) return false;
+        if (options.requireDirect && !isExternalPlayableUrl(url, options.source)) return false;
         var intentUrl = options.youtubeIntent ? youtubeIntentUrl(url) : '';
         var externalUrl = intentUrl || url;
         var playlist = Array.isArray(options.playlist) ? options.playlist.map(function (item) {
