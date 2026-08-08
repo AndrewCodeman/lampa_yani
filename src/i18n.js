@@ -113,6 +113,7 @@
     messages.ru.watch_external_player_description = 'Открыть поток во внешнем Android-плеере';
     messages.ru.watch_internal_lampa = 'Внутренний плеер Lampa';
     messages.ru.watch_internal_lampa_description = 'Проигрывать прямой поток внутри Lampa';
+    messages.ru.internal_player_unavailable = 'Не удалось запустить внутренний плеер Lampa';
     messages.ru.playback_target = 'Способ просмотра';
     messages.ru.playback_target_description = 'Как открывать прямые видеопотоки YummyAnime';
     messages.ru.playback_target_ask = 'Спрашивать';
@@ -142,6 +143,7 @@
     messages.en.watch_external_player_description = 'Open the stream in an external Android player';
     messages.en.watch_internal_lampa = 'Internal Lampa player';
     messages.en.watch_internal_lampa_description = 'Play the direct stream inside Lampa';
+    messages.en.internal_player_unavailable = 'Could not start the internal Lampa player';
     messages.en.playback_target = 'Playback target';
     messages.en.playback_target_description = 'How YummyAnime should open direct video streams';
     messages.en.playback_target_ask = 'Ask every time';
@@ -217,6 +219,7 @@
     messages.uk.watch_external_player_description = 'Відкрити потік у зовнішньому Android-плеєрі';
     messages.uk.watch_internal_lampa = 'Внутрішній плеєр Lampa';
     messages.uk.watch_internal_lampa_description = 'Програвати прямий потік усередині Lampa';
+    messages.uk.internal_player_unavailable = 'Не вдалося запустити внутрішній плеєр Lampa';
     messages.uk.playback_target = 'Спосіб перегляду';
     messages.uk.playback_target_description = 'Як відкривати прямі відеопотоки YummyAnime';
     messages.uk.playback_target_ask = 'Запитувати';

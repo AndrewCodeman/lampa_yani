@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.20.18 — 2026-08-09
+
+- Force the built-in Lampa engine with `Lampa.Player.runas('lampa')` when internal playback is selected.
+- Preserve online-stream, quality, header and poster metadata in the internal player playlist.
+- Stop silently falling back to an external Android player when internal playback cannot start.
+
 ## 0.20.17 — 2026-08-09
 
 - Merge player and YummyTV actions into one "Watch" button on the YummyAnime title card.

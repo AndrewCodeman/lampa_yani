@@ -14,5 +14,20 @@ assert.strictEqual(utils.yummyTvDetailsUrl(10551), 'yummytv://details/10551');
 assert.strictEqual(utils.yummyTvDetailsUrl('23365'), 'yummytv://details/23365');
 assert.strictEqual(utils.yummyTvDetailsUrl(''), '');
 assert.strictEqual(utils.yummyTvDetailsUrl(-1), '');
+const internalItem = utils.internalPlayerItem({
+    title: 'Episode 1',
+    url: '//media.example/episode.m3u8',
+    time: 12,
+    quality: {'720p': 'https://media.example/720.m3u8'},
+    headers: {Referer: 'https://example.test/'},
+    poster: 'poster.jpg'
+});
+assert.strictEqual(internalItem.url, 'https://media.example/episode.m3u8');
+assert.strictEqual(internalItem.isonline, true);
+assert.strictEqual(internalItem.time, 12);
+assert.strictEqual(internalItem.quality['720p'], 'https://media.example/720.m3u8');
+assert.strictEqual(internalItem.headers.Referer, 'https://example.test/');
+assert.strictEqual(internalItem.poster, 'poster.jpg');
+assert.strictEqual(utils.internalPlayerItem({url: ''}), null);
 
 console.log('ui-utils tests passed');

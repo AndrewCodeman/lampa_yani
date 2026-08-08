@@ -2503,7 +2503,8 @@
             time: Number(selected.watched && selected.watched.end_time || 0),
             source: selected,
             headers: videoStreamHeaders(selected),
-            quality: videoStreamQualities(selected)
+            quality: videoStreamQualities(selected),
+            poster: card.poster || card.img || ''
         };
         if (!isExternalPlayableUrl(current.url, current.source)) {
             showExternalPlaybackOptions(card, {
@@ -2581,26 +2582,55 @@
                 time: Number(video.watched && video.watched.end_time || 0),
                 source: video,
                 headers: videoStreamHeaders(video),
-                quality: videoStreamQualities(video)
+                quality: videoStreamQualities(video),
+                poster: card.poster || card.img || ''
             };
         }).filter(Boolean);
     }
 
     function playInternalDirectVideo(current, playlist) {
-        if (!Lampa.Player || !Lampa.Player.play) return false;
+        if (!Lampa.Player || !Lampa.Player.play || !Lampa.Player.runas) return false;
         var directPlaylist = (playlist || []).filter(function (item) { return isDirectVideoUrl(item.url); }).map(function (item) {
-            return {title: item.title, url: item.url, time: item.time};
+            return LampaYaniUiUtils.internalPlayerItem({
+                title: item.title,
+                url: item.url,
+                time: item.time,
+                quality: item.quality || videoStreamQualities(item.source),
+                headers: item.headers || videoStreamHeaders(item.source),
+                poster: item.poster || ''
+            });
+        }).filter(Boolean);
+        var directCurrent = directPlaylist.filter(function (item) { return item.url === current.url; })[0] || LampaYaniUiUtils.internalPlayerItem({
+            title: current.title,
+            url: current.url,
+            time: current.time,
+            quality: current.quality || videoStreamQualities(current.source),
+            headers: current.headers || videoStreamHeaders(current.source),
+            poster: current.poster || ''
         });
-        var directCurrent = directPlaylist.filter(function (item) { return item.url === current.url; })[0] || {title: current.title, url: current.url, time: current.time};
-        Lampa.Player.play(directCurrent);
-        if (Lampa.Player.playlist) Lampa.Player.playlist(directPlaylist.length ? directPlaylist : [directCurrent]);
-        return true;
+        if (!directCurrent) return false;
+        if (!directPlaylist.length) directPlaylist = [directCurrent];
+        try {
+            // Lampa.Player.play follows the globally configured player unless
+            // the caller explicitly selects the built-in Lampa engine.
+            Lampa.Player.runas('lampa');
+            Lampa.Player.play(directCurrent);
+            if (Lampa.Player.playlist) Lampa.Player.playlist(directPlaylist);
+            return true;
+        } catch (error) {
+            console.warn('[YummyAnime] Internal Lampa player failed to start', error);
+            return false;
+        }
     }
 
     function showDirectPlaybackOptions(card, current, playlist) {
         var target = playbackTargetPreference();
         if (target === 'external') return openExternalPlayer(current, playlist, card);
-        if (target === 'internal') return playInternalPlayer(current, playlist) || openExternalPlayer(current, playlist, card);
+        if (target === 'internal') {
+            if (playInternalPlayer(current, playlist)) return true;
+            Lampa.Noty.show(t('internal_player_unavailable'));
+            return true;
+        }
         if (!Lampa.Select || !Lampa.Select.show) return false;
         Lampa.Select.show({
             title: t('choose_playback'),
@@ -2611,7 +2641,7 @@
             onSelect: function (item) {
                 if (item && item.action === 'internal') {
                     if (playInternalPlayer(current, playlist)) return;
-                    Lampa.Noty.show(t('external_stream_unavailable'));
+                    Lampa.Noty.show(t('internal_player_unavailable'));
                     return;
                 }
                 if (openExternalPlayer(current, playlist, card)) return;

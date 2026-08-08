@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.17',
+        version: '0.20.18',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
@@ -137,6 +137,7 @@ function pluginYummyAnime() {
     messages.ru.watch_external_player_description = 'Открыть поток во внешнем Android-плеере';
     messages.ru.watch_internal_lampa = 'Внутренний плеер Lampa';
     messages.ru.watch_internal_lampa_description = 'Проигрывать прямой поток внутри Lampa';
+    messages.ru.internal_player_unavailable = 'Не удалось запустить внутренний плеер Lampa';
     messages.ru.playback_target = 'Способ просмотра';
     messages.ru.playback_target_description = 'Как открывать прямые видеопотоки YummyAnime';
     messages.ru.playback_target_ask = 'Спрашивать';
@@ -166,6 +167,7 @@ function pluginYummyAnime() {
     messages.en.watch_external_player_description = 'Open the stream in an external Android player';
     messages.en.watch_internal_lampa = 'Internal Lampa player';
     messages.en.watch_internal_lampa_description = 'Play the direct stream inside Lampa';
+    messages.en.internal_player_unavailable = 'Could not start the internal Lampa player';
     messages.en.playback_target = 'Playback target';
     messages.en.playback_target_description = 'How YummyAnime should open direct video streams';
     messages.en.playback_target_ask = 'Ask every time';
@@ -241,6 +243,7 @@ function pluginYummyAnime() {
     messages.uk.watch_external_player_description = 'Відкрити потік у зовнішньому Android-плеєрі';
     messages.uk.watch_internal_lampa = 'Внутрішній плеєр Lampa';
     messages.uk.watch_internal_lampa_description = 'Програвати прямий потік усередині Lampa';
+    messages.uk.internal_player_unavailable = 'Не вдалося запустити внутрішній плеєр Lampa';
     messages.uk.playback_target = 'Спосіб перегляду';
     messages.uk.playback_target_description = 'Як відкривати прямі відеопотоки YummyAnime';
     messages.uk.playback_target_ask = 'Запитувати';
@@ -1403,6 +1406,22 @@ function pluginYummyAnime() {
         return 'yummytv://details/' + Math.floor(id);
     }
 
+    function internalPlayerItem(item) {
+        item = item || {};
+        var url = normalizeVideoUrl(item.url);
+        if (!url) return null;
+        var result = {
+            title: String(item.title || 'YummyAnime'),
+            url: url,
+            time: Math.max(0, Number(item.time || 0)),
+            isonline: true
+        };
+        if (item.quality && typeof item.quality === 'object') result.quality = item.quality;
+        if (item.headers && typeof item.headers === 'object') result.headers = item.headers;
+        if (item.poster) result.poster = item.poster;
+        return result;
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.UiUtils = window.LampaYaniUiUtils = {
         videoData: videoData,
@@ -1411,7 +1430,8 @@ function pluginYummyAnime() {
         titleValues: titleValues,
         normalizeMatchTitle: normalizeMatchTitle,
         standardSearchTitles: standardSearchTitles,
-        yummyTvDetailsUrl: yummyTvDetailsUrl
+        yummyTvDetailsUrl: yummyTvDetailsUrl,
+        internalPlayerItem: internalPlayerItem
     };
 }(window));
 
@@ -4535,7 +4555,8 @@ function pluginYummyAnime() {
             time: Number(selected.watched && selected.watched.end_time || 0),
             source: selected,
             headers: videoStreamHeaders(selected),
-            quality: videoStreamQualities(selected)
+            quality: videoStreamQualities(selected),
+            poster: card.poster || card.img || ''
         };
         if (!isExternalPlayableUrl(current.url, current.source)) {
             showExternalPlaybackOptions(card, {
@@ -4613,26 +4634,55 @@ function pluginYummyAnime() {
                 time: Number(video.watched && video.watched.end_time || 0),
                 source: video,
                 headers: videoStreamHeaders(video),
-                quality: videoStreamQualities(video)
+                quality: videoStreamQualities(video),
+                poster: card.poster || card.img || ''
             };
         }).filter(Boolean);
     }
 
     function playInternalDirectVideo(current, playlist) {
-        if (!Lampa.Player || !Lampa.Player.play) return false;
+        if (!Lampa.Player || !Lampa.Player.play || !Lampa.Player.runas) return false;
         var directPlaylist = (playlist || []).filter(function (item) { return isDirectVideoUrl(item.url); }).map(function (item) {
-            return {title: item.title, url: item.url, time: item.time};
+            return LampaYaniUiUtils.internalPlayerItem({
+                title: item.title,
+                url: item.url,
+                time: item.time,
+                quality: item.quality || videoStreamQualities(item.source),
+                headers: item.headers || videoStreamHeaders(item.source),
+                poster: item.poster || ''
+            });
+        }).filter(Boolean);
+        var directCurrent = directPlaylist.filter(function (item) { return item.url === current.url; })[0] || LampaYaniUiUtils.internalPlayerItem({
+            title: current.title,
+            url: current.url,
+            time: current.time,
+            quality: current.quality || videoStreamQualities(current.source),
+            headers: current.headers || videoStreamHeaders(current.source),
+            poster: current.poster || ''
         });
-        var directCurrent = directPlaylist.filter(function (item) { return item.url === current.url; })[0] || {title: current.title, url: current.url, time: current.time};
-        Lampa.Player.play(directCurrent);
-        if (Lampa.Player.playlist) Lampa.Player.playlist(directPlaylist.length ? directPlaylist : [directCurrent]);
-        return true;
+        if (!directCurrent) return false;
+        if (!directPlaylist.length) directPlaylist = [directCurrent];
+        try {
+            // Lampa.Player.play follows the globally configured player unless
+            // the caller explicitly selects the built-in Lampa engine.
+            Lampa.Player.runas('lampa');
+            Lampa.Player.play(directCurrent);
+            if (Lampa.Player.playlist) Lampa.Player.playlist(directPlaylist);
+            return true;
+        } catch (error) {
+            console.warn('[YummyAnime] Internal Lampa player failed to start', error);
+            return false;
+        }
     }
 
     function showDirectPlaybackOptions(card, current, playlist) {
         var target = playbackTargetPreference();
         if (target === 'external') return openExternalPlayer(current, playlist, card);
-        if (target === 'internal') return playInternalPlayer(current, playlist) || openExternalPlayer(current, playlist, card);
+        if (target === 'internal') {
+            if (playInternalPlayer(current, playlist)) return true;
+            Lampa.Noty.show(t('internal_player_unavailable'));
+            return true;
+        }
         if (!Lampa.Select || !Lampa.Select.show) return false;
         Lampa.Select.show({
             title: t('choose_playback'),
@@ -4643,7 +4693,7 @@ function pluginYummyAnime() {
             onSelect: function (item) {
                 if (item && item.action === 'internal') {
                     if (playInternalPlayer(current, playlist)) return;
-                    Lampa.Noty.show(t('external_stream_unavailable'));
+                    Lampa.Noty.show(t('internal_player_unavailable'));
                     return;
                 }
                 if (openExternalPlayer(current, playlist, card)) return;

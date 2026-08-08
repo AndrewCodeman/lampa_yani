@@ -57,6 +57,22 @@
         return 'yummytv://details/' + Math.floor(id);
     }
 
+    function internalPlayerItem(item) {
+        item = item || {};
+        var url = normalizeVideoUrl(item.url);
+        if (!url) return null;
+        var result = {
+            title: String(item.title || 'YummyAnime'),
+            url: url,
+            time: Math.max(0, Number(item.time || 0)),
+            isonline: true
+        };
+        if (item.quality && typeof item.quality === 'object') result.quality = item.quality;
+        if (item.headers && typeof item.headers === 'object') result.headers = item.headers;
+        if (item.poster) result.poster = item.poster;
+        return result;
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.UiUtils = window.LampaYaniUiUtils = {
         videoData: videoData,
@@ -65,6 +81,7 @@
         titleValues: titleValues,
         normalizeMatchTitle: normalizeMatchTitle,
         standardSearchTitles: standardSearchTitles,
-        yummyTvDetailsUrl: yummyTvDetailsUrl
+        yummyTvDetailsUrl: yummyTvDetailsUrl,
+        internalPlayerItem: internalPlayerItem
     };
 }(window));
