@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.20.8 — 2026-08-09
+
+- Launch YummyTV deep links through Lampa's native Android bridge.
+- Prevent custom `yummytv://` links from opening inside Lampa's WebView.
+
 ## 0.20.7 — 2026-08-09
 
 - Added an Open in YummyTV action using the native `yummytv://details/{animeId}` deep link.

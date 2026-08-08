@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.7',
+        version: '0.20.8',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -4839,8 +4839,31 @@ function pluginYummyAnime() {
             Lampa.Noty.show(t('yummytv_id_missing'));
             return false;
         }
-        if (openExternalUri(url)) return true;
+        // A custom URI must go through the native Android bridge. Sending it
+        // to Lampa.Utils.open/window.open navigates the WebView itself and
+        // produces ERR_UNKNOWN_URL_SCHEME instead of launching YummyTV.
+        if (openAndroidAppUri(url)) return true;
         Lampa.Noty.show(t('yummytv_open_failed'));
+        return false;
+    }
+
+    function openAndroidAppUri(url) {
+        if (!url) return false;
+        if (tryExternalOpen('Lampa.Android.openBrowser', function () {
+            if (!Lampa.Android || typeof Lampa.Android.openBrowser !== 'function') return false;
+            Lampa.Android.openBrowser(url);
+            return true;
+        })) return true;
+        if (tryExternalOpen('AndroidJS.openBrowser', function () {
+            if (!window.AndroidJS || typeof AndroidJS.openBrowser !== 'function') return false;
+            AndroidJS.openBrowser(url);
+            return true;
+        })) return true;
+        if (tryExternalOpen('Android.openBrowser', function () {
+            if (!window.Android || typeof Android.openBrowser !== 'function') return false;
+            Android.openBrowser(url);
+            return true;
+        })) return true;
         return false;
     }
 
