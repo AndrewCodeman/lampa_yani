@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.1',
+        version: '0.20.2',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -3027,11 +3027,12 @@ function pluginYummyAnime() {
             if (data.yani_user_rating) info.append($('<div class="yani-detail__personal-rating"></div>').text(t('my_rating') + ': ' + data.yani_user_rating + '/10'));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
-            var playback = getPlayback(data.yani_id);
-            var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
-            button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(watchTitle);
-            button.on('hover:enter', function () { openVideos(data, !!playback); });
+            button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(t('watch'));
+            // The detail-card action always opens the dubbing/source and
+            // episode selectors. Automatic resume belongs only to the
+            // dedicated Continue Watching section.
+            button.on('hover:enter', function () { openVideos(data, false); });
             bindDetailButtonFocus(button);
             var trailersButton = $('<div class="yani-detail__button selector"></div>').text(t('trailers'));
             trailersButton.on('hover:enter click.yaniDetailTrailers', function () { openTrailers(data); });

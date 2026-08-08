@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.20.2 — 2026-08-08
+
+- Always open dubbing/source and episode selection from the detail-card Watch action.
+- Keep automatic episode resume exclusive to the dedicated Continue Watching section.
+
 ## 0.20.1 — 2026-08-08
 
 - Resolve player pages through Lampa's native Android request bridge to avoid WebView CORS failures.
