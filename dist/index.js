@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.18.18',
+        version: '0.18.19',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -4054,7 +4054,11 @@ function pluginYummyAnime() {
                 if (!anime) return;
                 var render = event.object.activity.render();
                 var line = $('.full-start-new__rate-line, .full-start__rate-line', render).first();
-                (anime.yani_ratings || []).forEach(function (rating) {
+                // Lampa already owns the usual TMDB/IMDb/Kinopoisk rating
+                // line, and rating plugins may add MAL/Shikimori too.  The
+                // native card needs one clear YummyAnime marker, not a second
+                // competing list of the same services.
+                nativeLampaRatings(anime.yani_ratings || []).forEach(function (rating) {
                     var className = 'rate--yummyanime-' + rating.key;
                     if ($('.' + className, render).length) return;
                     var block = $('<div class="full-start__rate ' + className + '"><div>' + formatRating(rating.value) + '</div><div>' + rating.title + '</div></div>');
@@ -4062,6 +4066,12 @@ function pluginYummyAnime() {
                 });
                 addYummyFullButton(render, movie, anime);
             }).catch(function () {});
+        });
+    }
+
+    function nativeLampaRatings(ratings) {
+        return (ratings || []).filter(function (rating) {
+            return rating && rating.key === 'yummy' && Number(rating.value) > 0;
         });
     }
 
