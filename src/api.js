@@ -218,6 +218,9 @@
                 body: JSON.stringify({list: listId, date: Math.floor(Date.now() / 1000)})
             });
         },
+        removeFromList: function (id) {
+            return request('/anime/' + encodeURIComponent(id) + '/list', {method: 'DELETE', auth: true});
+        },
         comments: function (id, skip) {
             return request('/comments/anime/' + encodeURIComponent(id) + '?limit=20&sort=new&skip=' + encodeURIComponent(skip || 0));
         },

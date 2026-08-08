@@ -136,6 +136,13 @@
 .yani-detail__button-icon { display: inline-flex; width: 1.25em; height: 1.25em; flex: 0 0 1.25em; }
 .yani-detail__button-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }
 .yani-detail__button.focus { background: #fff; color: #111; border-color: #fff; box-shadow: 0 0 0 0.2em rgba(239, 100, 112, .95), 0 0 1.2em rgba(255, 255, 255, .55); transform: scale(1.02); }
+.yani-detail__list-panel { display: inline-flex; margin-top: .8em; overflow: hidden; border: .1em solid rgba(255,255,255,.18); border-radius: .45em; background: rgba(0,0,0,.24); }
+.yani-detail__list-action { display: flex; align-items: center; justify-content: center; width: 2.7em; height: 2.35em; border-right: .08em solid rgba(255,255,255,.15); color: rgba(255,255,255,.72); background: transparent; }
+.yani-detail__list-action:last-child { border-right: 0; }
+.yani-detail__list-action.active { color: #fff; background: #ef6470; }
+.yani-detail__list-action.focus { color: #111; background: #fff; box-shadow: inset 0 0 0 .18em #ef6470; transform: scale(1.06); position: relative; z-index: 1; }
+.yani-detail__list-icon { width: 1.25em; height: 1.25em; }
+.yani-detail__list-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }
 
 .yani-detail__comments { margin-top: 1.5em; padding-top: 1em; border-top: 0.08em solid rgba(255, 255, 255, .18); }
 .yani-detail__comments-title { margin-bottom: 0.7em; font-size: 1.35em; font-weight: 600; }

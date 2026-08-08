@@ -1620,9 +1620,6 @@
             var playback = getPlayback(data.yani_id);
             var watchTitle = playback && playback.number ? t('continue_episode') + ' ' + playback.number : t('watch');
             var actions = $('<div class="yani-detail__actions"></div>');
-            var listButton = $('<div class="yani-detail__button selector"></div>').text(detailListLabel(data));
-            listButton.on('hover:enter click.yaniDetailList', function () { showYummyActions(data); });
-            bindDetailButtonFocus(listButton);
             button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(watchTitle);
             button.on('hover:enter', function () { openVideos(data, !!playback); });
             bindDetailButtonFocus(button);
@@ -1643,10 +1640,12 @@
             subscribeButton.on('hover:enter', function () { toggleEpisodeSubscription(data, subscribeButton); });
             bindDetailButtonFocus(subscribeButton);
             var comments = $('<div class="yani-detail__comments"></div>');
-            actions.append(listButton, button, trailersButton, searchButton, subscribeButton);
+            var listPanel = createDetailListPanel(data);
+            actions.append(button, trailersButton, searchButton, subscribeButton);
             // Keep the principal actions next to the synopsis, before the
             // long viewing-order, recommendations and comments sections.
             info.append(actions);
+            info.append(listPanel);
             if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
             loadDetailRecommendations(data, info, bindDetailScrollTargets);
             info.append(comments);
@@ -1656,10 +1655,73 @@
             loadInlineComments(data, comments);
         }
 
-        function detailListLabel(cardData) {
-            var ids = {0: 'watching', 1: 'planned', 2: 'completed', 3: 'dropped', 5: 'postponed'};
-            var label = ids[Number(cardData.yani_list_id)] ? t(ids[Number(cardData.yani_list_id)]) : t('manage_list');
-            return cardData.yani_is_favorite ? '♥ ' + label : label;
+        function createDetailListPanel(cardData) {
+            var panel = $('<div class="yani-detail__list-panel"></div>');
+            var actions = [
+                {key: 'watching', id: 0, icon: 'eye'},
+                {key: 'planned', id: 1, icon: 'cloud'},
+                {key: 'completed', id: 2, icon: 'flag'},
+                {key: 'dropped', id: 3, icon: 'eye-off'},
+                {key: 'postponed', id: 5, icon: 'hourglass'},
+                {key: 'favorite', favorite: true, icon: 'heart'}
+            ];
+
+            actions.forEach(function (action) {
+                var item = $('<div class="yani-detail__list-action selector"></div>')
+                    .attr('title', t(action.key))
+                    .attr('aria-label', t(action.key))
+                    .append($('<span class="yani-detail__list-icon"></span>').html(detailListIcon(action.icon)));
+                item.on('hover:enter click.yaniDetailList', function () {
+                    toggleDetailListState(cardData, action, panel);
+                });
+                bindDetailButtonFocus(item);
+                panel.append(item);
+            });
+            updateDetailListPanel(panel, cardData);
+            return panel;
+        }
+
+        function updateDetailListPanel(panel, cardData) {
+            panel.children('.yani-detail__list-action').each(function (index) {
+                var action = [
+                    {id: 0}, {id: 1}, {id: 2}, {id: 3}, {id: 5}, {favorite: true}
+                ][index];
+                var active = action.favorite ? Boolean(cardData.yani_is_favorite) : Number(cardData.yani_list_id) === action.id;
+                $(this).toggleClass('active', active).attr('aria-pressed', active ? 'true' : 'false');
+            });
+            addCardListBadge(null, cardData);
+        }
+
+        function toggleDetailListState(cardData, action, panel) {
+            if (!LampaYaniAuth.token()) {
+                Lampa.Noty.show(t('login_required'));
+                return;
+            }
+            var active = action.favorite ? Boolean(cardData.yani_is_favorite) : Number(cardData.yani_list_id) === action.id;
+            var request = action.favorite
+                ? (active ? LampaYaniApi.removeFavorite(cardData.yani_id) : LampaYaniApi.addFavorite(cardData.yani_id))
+                : (active ? LampaYaniApi.removeFromList(cardData.yani_id) : LampaYaniApi.addToList(cardData.yani_id, action.id));
+            request.then(function () {
+                if (action.favorite) cardData.yani_is_favorite = !active;
+                else cardData.yani_list_id = active ? null : action.id;
+                updateDetailListPanel(panel, cardData);
+                Lampa.Noty.show(t('saved'));
+            }).catch(function (error) {
+                console.error('[YummyAnime]', error);
+                Lampa.Noty.show(t('save_error'));
+            });
+        }
+
+        function detailListIcon(name) {
+            var icons = {
+                eye: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5.2 0-9.4 3.4-11 7 1.6 3.6 5.8 7 11 7s9.4-3.4 11-7c-1.6-3.6-5.8-7-11-7Zm0 11.2A4.2 4.2 0 1 1 12 7.8a4.2 4.2 0 0 1 0 8.4Zm0-2A2.2 2.2 0 1 0 12 9.8a2.2 2.2 0 0 0 0 4.4Z"/></svg>',
+                cloud: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 19H6.2A4.2 4.2 0 1 1 7 10.7 5.5 5.5 0 0 1 17.5 12 3.5 3.5 0 0 1 18.5 19Zm-12.3-2h12.3a1.5 1.5 0 0 0 0-3c-.4 0-.8.1-1.1.3l-1.6.8.1-1.8A3.5 3.5 0 0 0 9 12.5l.1 1.4-1.3-1A2.2 2.2 0 1 0 6.2 17Z"/></svg>',
+                flag: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h2v2h9.2l-1 3 1 3H8v10H6V3Zm2 6h6.3l-.3-1 .3-1H8v2Z"/></svg>',
+                'eye-off': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.3 2 18.7 18.7-1.4 1.4-3.1-3.1a11.7 11.7 0 0 1-5.5 1.5c-5.2 0-9.4-3.4-11-7a12.7 12.7 0 0 1 4.5-5.1L1.9 3.4 3.3 2ZM12 8.5a3.5 3.5 0 0 0-1.3.2l4.6 4.6A3.5 3.5 0 0 0 12 8.5Zm0-3.5c5.2 0 9.4 3.4 11 7a12.8 12.8 0 0 1-4.1 4.8l-1.5-1.5A10.8 10.8 0 0 0 20.8 12c-1.8-3-5.2-5-8.8-5-1 0-1.9.1-2.8.4L7.6 5.8C9 5.3 10.5 5 12 5ZM3.2 12c.6 1.1 1.5 2.1 2.5 2.9l-1.4-1.4A9.7 9.7 0 0 1 3.2 12Z"/></svg>',
+                hourglass: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h12v2c0 3-1.2 5.2-3.5 7 2.3 1.8 3.5 4 3.5 7v2H6v-2c0-3 1.2-5.2 3.5-7C7.2 9.2 6 7 6 4V2Zm2 2c0 2.6 1.2 4.5 4 6.3C14.8 8.5 16 6.6 16 4H8Zm0 16h8c0-2.6-1.2-4.5-4-6.3C9.2 15.5 8 17.4 8 20Z"/></svg>',
+                heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.2 3.7 13A5.6 5.6 0 0 1 11.6 5L12 5.5l.4-.5a5.6 5.6 0 0 1 7.9 8l-8.3 8.2ZM7.6 6.4A3.6 3.6 0 0 0 5.1 12L12 18.3l6.9-6.8a3.6 3.6 0 0 0-5.1-5.1L12 8l-1.4-1.6a3.6 3.6 0 0 0-3-1Z"/></svg>'
+            };
+            return icons[name] || '';
         }
 
         function loadDetailCommunityStats(cardData, container) {
