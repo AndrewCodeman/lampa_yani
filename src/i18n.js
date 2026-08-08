@@ -64,6 +64,8 @@
     messages.ru.subscription_added = 'Подписка на новые серии включена';
     messages.ru.subscription_removed = 'Подписка на новые серии отключена';
     messages.ru.subscription_error = 'Не удалось изменить подписку';
+    messages.ru.video_quality = 'Качество';
+    messages.ru.quality_auto = 'авто';
     messages.en.notifications_title = 'YummyAnime notifications';
     messages.en.notifications_empty = 'There are no notifications';
     messages.en.notifications_error = 'Failed to load notifications';
@@ -97,6 +99,8 @@
     messages.en.subscription_added = 'New episode subscription enabled';
     messages.en.subscription_removed = 'New episode subscription disabled';
     messages.en.subscription_error = 'Could not update subscription';
+    messages.en.video_quality = 'Quality';
+    messages.en.quality_auto = 'auto';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -141,6 +145,8 @@
     messages.uk.subscription_added = 'Підписку на нові серії увімкнено';
     messages.uk.subscription_removed = 'Підписку на нові серії вимкнено';
     messages.uk.subscription_error = 'Не вдалося змінити підписку';
+    messages.uk.video_quality = 'Якість';
+    messages.uk.quality_auto = 'авто';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

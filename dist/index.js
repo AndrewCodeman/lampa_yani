@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.2',
+        version: '0.20.3',
         apiBase: 'https://api.yani.tv',
         episodesApiBase: 'https://yummytv.kemonos.win/api',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
@@ -89,6 +89,8 @@ function pluginYummyAnime() {
     messages.ru.subscription_added = 'Подписка на новые серии включена';
     messages.ru.subscription_removed = 'Подписка на новые серии отключена';
     messages.ru.subscription_error = 'Не удалось изменить подписку';
+    messages.ru.video_quality = 'Качество';
+    messages.ru.quality_auto = 'авто';
     messages.en.notifications_title = 'YummyAnime notifications';
     messages.en.notifications_empty = 'There are no notifications';
     messages.en.notifications_error = 'Failed to load notifications';
@@ -122,6 +124,8 @@ function pluginYummyAnime() {
     messages.en.subscription_added = 'New episode subscription enabled';
     messages.en.subscription_removed = 'New episode subscription disabled';
     messages.en.subscription_error = 'Could not update subscription';
+    messages.en.video_quality = 'Quality';
+    messages.en.quality_auto = 'auto';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -166,6 +170,8 @@ function pluginYummyAnime() {
     messages.uk.subscription_added = 'Підписку на нові серії увімкнено';
     messages.uk.subscription_removed = 'Підписку на нові серії вимкнено';
     messages.uk.subscription_error = 'Не вдалося змінити підписку';
+    messages.uk.video_quality = 'Якість';
+    messages.uk.quality_auto = 'авто';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
@@ -619,7 +625,7 @@ function pluginYummyAnime() {
     }
 
     function isDirectVideoUrl(url) {
-        return /\.(m3u8|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
+        return /\.(m3u8|mpd|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
     }
 
     function isKodikUrl(url) {
@@ -629,6 +635,10 @@ function pluginYummyAnime() {
     function isCvhUrl(url) {
         url = String(url || '');
         return /iframeCVH\.html/i.test(url) || /cdnvideohub/i.test(url);
+    }
+
+    function isAksorUrl(url) {
+        return /(?:^|\.)aksor\.tv(?:[/:]|$)/i.test(String(url || '').replace(/^https?:\/\//i, ''));
     }
 
     function originOf(url) {
@@ -974,18 +984,57 @@ function pluginYummyAnime() {
         });
     }
 
+    function resolveAksor(iframeUrl) {
+        var fullUrl = normalizeUrl(iframeUrl);
+        var hit = cached(fullUrl);
+        if (hit) return Promise.resolve(hit);
+        var hash = '';
+        try {
+            var parts = new URL(fullUrl).pathname.split('/').filter(Boolean);
+            var videoIndex = parts.indexOf('video');
+            hash = videoIndex >= 0 ? parts[videoIndex + 1] : parts[parts.length - 1];
+        } catch (ignore) {}
+        if (!hash) return Promise.reject(new Error('Aksor video hash not found'));
+
+        var headers = {
+            Referer: fullUrl,
+            'User-Agent': CHROME_UA,
+            Accept: 'application/json'
+        };
+        return requestJson('https://player.aksor.tv/api/video/' + encodeURIComponent(hash), {headers: headers}).then(function (payload) {
+            var raw = payload && payload.qualities || {};
+            var qualities = {};
+            [
+                ['360p', 'q360'],
+                ['480p', 'q480'],
+                ['720p', 'q720'],
+                ['1080p', 'q1080'],
+                ['2K', 'q2k'],
+                ['4K', 'q4k']
+            ].forEach(function (item) {
+                var streamUrl = String(raw[item[1]] || '').trim().replace(/ /g, '%20');
+                if (streamUrl && streamUrl.toLowerCase() !== 'null') qualities[item[0]] = streamUrl;
+            });
+            var labels = Object.keys(qualities);
+            if (!labels.length) throw new Error('Aksor stream links not found');
+            var label = labels[labels.length - 1];
+            return cacheResult(fullUrl, {url: qualities[label], quality: label, qualities: qualities, source: 'aksor', direct: true});
+        });
+    }
+
     function resolve(url) {
         url = normalizeUrl(url);
         if (!url) return Promise.reject(new Error('Empty stream URL'));
         if (isDirectVideoUrl(url)) return Promise.resolve({url: url, source: 'direct'});
         if (isKodikUrl(url)) return resolveKodik(url);
         if (isCvhUrl(url)) return resolveCvh(url);
+        if (isAksorUrl(url)) return resolveAksor(url);
         return Promise.reject(new Error('Unsupported player URL'));
     }
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.StreamResolver = window.LampaYaniStreamResolver = {
-        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url); },
+        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url); },
         resolve: resolve,
         isDirectVideoUrl: isDirectVideoUrl
     };
@@ -3322,7 +3371,11 @@ function pluginYummyAnime() {
 
             var voices = Object.keys(groups).map(function (key) {
                 var group = groups[key];
-                return {title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : '') + (group.quality ? ' · ' + group.quality : '') + (group.source ? ' · ' + group.source : '') + ' · ' + group.videos.length + ' ' + t('episodes_short'), group: group};
+                return {
+                    title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : ''),
+                    subtitle: voiceOptionSubtitle(group),
+                    group: group
+                };
             });
             var preferredPlayer = getPreferredPlayer();
             voices.sort(function (a, b) {
@@ -3353,6 +3406,7 @@ function pluginYummyAnime() {
             Lampa.Select.show({
                 title: t('choose_voice'),
                 items: voices,
+                onFocus: enrichVoiceOptionQuality,
                 onSelect: function (item) {
                     rememberPlayer(item.group);
                     enrichEpisodeTitles(card, item.group).then(function () {
@@ -3364,6 +3418,36 @@ function pluginYummyAnime() {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             console.error('[YummyAnime Videos]', error);
             Lampa.Noty.show(t('videos_load_error'));
+        });
+    }
+
+    function voiceOptionSubtitle(group) {
+        return t('video_quality') + ': ' + (group.quality || t('quality_auto')) +
+            (group.source ? ' · ' + group.source : '') + ' · ' + group.videos.length + ' ' + t('episodes_short');
+    }
+
+    function enrichVoiceOptionQuality(item, target) {
+        var group = item && item.group;
+        if (!group || group.quality || group.qualityLoading || group.qualityLoaded || !group.videos.length) return;
+        var probe = group.videos[0];
+        var url = videoSourceUrl(probe);
+        if (!url || !window.LampaYaniStreamResolver || !LampaYaniStreamResolver.canResolve(url)) return;
+        group.qualityLoading = true;
+        LampaYaniStreamResolver.resolve(url, probe).then(function (result) {
+            group.qualityLoading = false;
+            group.qualityLoaded = true;
+            if (!result || !result.url) return;
+            probe.yani_stream_url = result.url;
+            probe.yani_stream_quality = result.quality || '';
+            probe.yani_stream_qualities = result.qualities || null;
+            probe.yani_stream_source = result.source || '';
+            group.quality = result.quality || group.quality;
+            item.subtitle = voiceOptionSubtitle(group);
+            $(target).find('.selectbox-item__subtitle').text(item.subtitle);
+        }).catch(function (error) {
+            group.qualityLoading = false;
+            group.qualityLoaded = true;
+            console.warn('[YummyAnime] Could not inspect voice quality', error);
         });
     }
 
@@ -3919,7 +4003,7 @@ function pluginYummyAnime() {
     }
 
     function isDirectVideoUrl(url) {
-        return /\.(m3u8|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
+        return /\.(m3u8|mpd|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
     }
 
     function isExternalPlayableUrl(url, source) {
@@ -3951,7 +4035,7 @@ function pluginYummyAnime() {
 
     function videoQualityLabel(video) {
         var data = LampaYaniUiUtils.videoData(video);
-        var values = [video && video.quality, video && video.resolution, data.quality, data.resolution];
+        var values = [video && video.yani_stream_quality, video && video.quality, video && video.resolution, data.quality, data.resolution, videoSourceUrl(video)];
         var best = 0;
         values.forEach(function (value) {
             var text = String(value || '');

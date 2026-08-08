@@ -1919,7 +1919,11 @@
 
             var voices = Object.keys(groups).map(function (key) {
                 var group = groups[key];
-                return {title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : '') + (group.quality ? ' · ' + group.quality : '') + (group.source ? ' · ' + group.source : '') + ' · ' + group.videos.length + ' ' + t('episodes_short'), group: group};
+                return {
+                    title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : ''),
+                    subtitle: voiceOptionSubtitle(group),
+                    group: group
+                };
             });
             var preferredPlayer = getPreferredPlayer();
             voices.sort(function (a, b) {
@@ -1950,6 +1954,7 @@
             Lampa.Select.show({
                 title: t('choose_voice'),
                 items: voices,
+                onFocus: enrichVoiceOptionQuality,
                 onSelect: function (item) {
                     rememberPlayer(item.group);
                     enrichEpisodeTitles(card, item.group).then(function () {
@@ -1961,6 +1966,36 @@
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             console.error('[YummyAnime Videos]', error);
             Lampa.Noty.show(t('videos_load_error'));
+        });
+    }
+
+    function voiceOptionSubtitle(group) {
+        return t('video_quality') + ': ' + (group.quality || t('quality_auto')) +
+            (group.source ? ' · ' + group.source : '') + ' · ' + group.videos.length + ' ' + t('episodes_short');
+    }
+
+    function enrichVoiceOptionQuality(item, target) {
+        var group = item && item.group;
+        if (!group || group.quality || group.qualityLoading || group.qualityLoaded || !group.videos.length) return;
+        var probe = group.videos[0];
+        var url = videoSourceUrl(probe);
+        if (!url || !window.LampaYaniStreamResolver || !LampaYaniStreamResolver.canResolve(url)) return;
+        group.qualityLoading = true;
+        LampaYaniStreamResolver.resolve(url, probe).then(function (result) {
+            group.qualityLoading = false;
+            group.qualityLoaded = true;
+            if (!result || !result.url) return;
+            probe.yani_stream_url = result.url;
+            probe.yani_stream_quality = result.quality || '';
+            probe.yani_stream_qualities = result.qualities || null;
+            probe.yani_stream_source = result.source || '';
+            group.quality = result.quality || group.quality;
+            item.subtitle = voiceOptionSubtitle(group);
+            $(target).find('.selectbox-item__subtitle').text(item.subtitle);
+        }).catch(function (error) {
+            group.qualityLoading = false;
+            group.qualityLoaded = true;
+            console.warn('[YummyAnime] Could not inspect voice quality', error);
         });
     }
 
@@ -2516,7 +2551,7 @@
     }
 
     function isDirectVideoUrl(url) {
-        return /\.(m3u8|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
+        return /\.(m3u8|mpd|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
     }
 
     function isExternalPlayableUrl(url, source) {
@@ -2548,7 +2583,7 @@
 
     function videoQualityLabel(video) {
         var data = LampaYaniUiUtils.videoData(video);
-        var values = [video && video.quality, video && video.resolution, data.quality, data.resolution];
+        var values = [video && video.yani_stream_quality, video && video.quality, video && video.resolution, data.quality, data.resolution, videoSourceUrl(video)];
         var best = 0;
         values.forEach(function (value) {
             var text = String(value || '');

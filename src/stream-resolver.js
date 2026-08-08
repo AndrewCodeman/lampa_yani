@@ -17,7 +17,7 @@
     }
 
     function isDirectVideoUrl(url) {
-        return /\.(m3u8|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
+        return /\.(m3u8|mpd|mp4|webm)(?:[?#].*)?$/i.test(String(url || ''));
     }
 
     function isKodikUrl(url) {
@@ -27,6 +27,10 @@
     function isCvhUrl(url) {
         url = String(url || '');
         return /iframeCVH\.html/i.test(url) || /cdnvideohub/i.test(url);
+    }
+
+    function isAksorUrl(url) {
+        return /(?:^|\.)aksor\.tv(?:[/:]|$)/i.test(String(url || '').replace(/^https?:\/\//i, ''));
     }
 
     function originOf(url) {
@@ -372,18 +376,57 @@
         });
     }
 
+    function resolveAksor(iframeUrl) {
+        var fullUrl = normalizeUrl(iframeUrl);
+        var hit = cached(fullUrl);
+        if (hit) return Promise.resolve(hit);
+        var hash = '';
+        try {
+            var parts = new URL(fullUrl).pathname.split('/').filter(Boolean);
+            var videoIndex = parts.indexOf('video');
+            hash = videoIndex >= 0 ? parts[videoIndex + 1] : parts[parts.length - 1];
+        } catch (ignore) {}
+        if (!hash) return Promise.reject(new Error('Aksor video hash not found'));
+
+        var headers = {
+            Referer: fullUrl,
+            'User-Agent': CHROME_UA,
+            Accept: 'application/json'
+        };
+        return requestJson('https://player.aksor.tv/api/video/' + encodeURIComponent(hash), {headers: headers}).then(function (payload) {
+            var raw = payload && payload.qualities || {};
+            var qualities = {};
+            [
+                ['360p', 'q360'],
+                ['480p', 'q480'],
+                ['720p', 'q720'],
+                ['1080p', 'q1080'],
+                ['2K', 'q2k'],
+                ['4K', 'q4k']
+            ].forEach(function (item) {
+                var streamUrl = String(raw[item[1]] || '').trim().replace(/ /g, '%20');
+                if (streamUrl && streamUrl.toLowerCase() !== 'null') qualities[item[0]] = streamUrl;
+            });
+            var labels = Object.keys(qualities);
+            if (!labels.length) throw new Error('Aksor stream links not found');
+            var label = labels[labels.length - 1];
+            return cacheResult(fullUrl, {url: qualities[label], quality: label, qualities: qualities, source: 'aksor', direct: true});
+        });
+    }
+
     function resolve(url) {
         url = normalizeUrl(url);
         if (!url) return Promise.reject(new Error('Empty stream URL'));
         if (isDirectVideoUrl(url)) return Promise.resolve({url: url, source: 'direct'});
         if (isKodikUrl(url)) return resolveKodik(url);
         if (isCvhUrl(url)) return resolveCvh(url);
+        if (isAksorUrl(url)) return resolveAksor(url);
         return Promise.reject(new Error('Unsupported player URL'));
     }
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.StreamResolver = window.LampaYaniStreamResolver = {
-        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url); },
+        canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url); },
         resolve: resolve,
         isDirectVideoUrl: isDirectVideoUrl
     };

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.20.3 — 2026-08-09
+
+- Show video quality, source host and episode count as a compact subtitle under each dubbing option.
+- Detect quality information embedded in player URLs.
+- Add Aksor player resolution and external DASH (`.mpd`) playback support.
+
 ## 0.20.2 — 2026-08-08
 
 - Always open dubbing/source and episode selection from the detail-card Watch action.
