@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.20.16 — 2026-08-09
+
+- Rename the title-card playback actions to "Watch in player" and "Watch in YummyTV".
+- Keep the YummyTV action hidden unless its optional integration is enabled in settings.
+
 ## 0.20.15 — 2026-08-09
 
 - Open unresolved Alloha sources in the official visible player instead of trying to send iframe URLs to a media player.

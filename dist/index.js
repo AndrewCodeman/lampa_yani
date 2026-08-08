@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.15',
+        version: '0.20.16',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
@@ -3669,7 +3669,7 @@ function pluginYummyAnime() {
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             var actions = $('<div class="yani-detail__actions"></div>');
-            button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(t('watch'));
+            button = $('<div class="yani-detail__button yani-detail__button--watch selector"></div>').text(t('watch_in_player'));
             // The detail-card action always opens the dubbing/source and
             // episode selectors. Automatic resume belongs only to the
             // dedicated Continue Watching section.
@@ -3689,7 +3689,7 @@ function pluginYummyAnime() {
             if (yummyTvEnabled()) {
                 yummyTvButton = $('<div class="yani-detail__button yani-detail__button--external selector"></div>');
                 yummyTvButton.append($('<span class="yani-detail__button-icon"></span>').html(yummyAnimeIcon()));
-                yummyTvButton.append($('<span></span>').text(t('open_yummytv')));
+                yummyTvButton.append($('<span></span>').text(t('watch_in_yummytv')));
                 yummyTvButton.on('hover:enter click.yaniYummyTv', function () { openYummyTv(data); });
                 bindDetailButtonFocus(yummyTvButton);
             }
