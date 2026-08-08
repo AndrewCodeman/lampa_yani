@@ -2938,6 +2938,24 @@
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
+            param: {name: 'yani_lampa_card_title', type: 'title'},
+            field: {name: t('lampa_card_integration')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_lampa_card_rating', type: 'trigger', default: true},
+            field: {name: t('lampa_card_rating'), description: t('lampa_card_rating_description')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_lampa_card_button', type: 'trigger', default: true},
+            field: {name: t('lampa_card_button'), description: t('lampa_card_button_description')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
             param: {name: 'yani_home_sections_title', type: 'title'},
             field: {name: t('home_sections')}
         });
@@ -3117,9 +3135,16 @@
     }
 
     function nativeLampaRatings(ratings) {
+        if (!lampaCardIntegrationEnabled('rating')) return [];
         return (ratings || []).filter(function (rating) {
             return rating && rating.key === 'yummy' && Number(rating.value) > 0;
         });
+    }
+
+    function lampaCardIntegrationEnabled(feature) {
+        if (!Lampa.Storage || !Lampa.Storage.get) return true;
+        var value = Lampa.Storage.get('yani_lampa_card_' + feature, true);
+        return value !== false && value !== 'false';
     }
 
     function yummyRatingLogo() {
@@ -3127,6 +3152,7 @@
     }
 
     function addYummyFullButton(render, movie, anime) {
+        if (!lampaCardIntegrationEnabled('button')) return;
         var container = $('.full-start-new__buttons', render);
         if (!container.length) container = $('.full-start__buttons', render);
         if (!container.length) return;
