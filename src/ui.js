@@ -2074,14 +2074,17 @@
         console.info('[YummyAnime] Native TMDB resolve started', {yaniId: getYummyId(card), titles: titles});
 
         function resolveTitles(searchTitles) {
-            function searchNext(index) {
-                if (index >= searchTitles.length || index >= 8) return Promise.resolve(null);
-                return searchTmdbTitle(tmdb, searchTitles[index]).then(function (items) {
-                    var match = bestStandardCard(items, card);
-                    return match || searchNext(index + 1);
-                });
-            }
-            return searchNext(0);
+            // The native-card watchdog is intentionally short. Searching a
+            // long alias list one by one meant a slow first alias could keep
+            // an exact English/Japanese title from ever being queried. Run
+            // the bounded title set together and score the combined results.
+            return Promise.all((searchTitles || []).slice(0, 8).map(function (title) {
+                return searchTmdbTitle(tmdb, title).catch(function () { return []; });
+            })).then(function (rows) {
+                var items = [];
+                rows.forEach(function (row) { items = items.concat(Array.isArray(row) ? row : []); });
+                return bestStandardCard(items, card);
+            });
         }
 
         return resolveTitles(titles).then(function (match) {
