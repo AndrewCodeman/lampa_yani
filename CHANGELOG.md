@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.16 — 2026-08-08
+
+- Render the YummyAnime mark in the native Lampa-card action with an embedded SVG fallback that is independent of Lampa's button typography.
+
 ## 0.19.15 — 2026-08-08
 
 - Fix schedule rendering: preserve release metadata while grouping items by day, preventing the page from failing during time sorting.
