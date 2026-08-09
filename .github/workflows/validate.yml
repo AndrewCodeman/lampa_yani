@@ -22,7 +22,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          find . -name '*.js' -not -path './node_modules/*' -print0 | xargs -0 -n1 node --check
+          find . -name '*.js' -not -path '*/node_modules/*' -print0 | xargs -0 -n1 node --check
 
       - name: Rebuild bundled plugin
         run: node build.js
@@ -30,8 +30,14 @@ jobs:
       - name: Check bundled plugin
         run: node --check dist/index.js
 
-      - name: Run utility tests
-        run: node tests/ui-utils.test.js
+      - name: Run tests
+        shell: bash
+        run: |
+          set -e
+          for test in tests/*.test.js; do
+            echo "-- $test"
+            node "$test"
+          done
 
       - name: Verify bundle is committed
         shell: bash

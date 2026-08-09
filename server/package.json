@@ -1,0 +1,18 @@
+{
+  "name": "yani-resolver",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Self-hosted resolver that turns YummyAnime Alloha player pages into plain HLS streams",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "postinstall": "playwright install chromium"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0"
+  }
+}

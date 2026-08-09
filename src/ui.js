@@ -2616,11 +2616,15 @@
         });
     }
 
+    // Stream sources that already carry a direct Alloha stream and must not be
+    // routed through the Alloha policy a second time.
+    var ALLOHA_RESOLVED_SOURCES = ['lampac-alloha', 'yani-resolver'];
+
     function launchVideo(card, group, videos, selected) {
         var url = videoSourceUrl(selected);
         if (!url) return Lampa.Noty.show(t('no_videos'));
         var allohaSource = isAllohaUrl(url) || /alloha/i.test(String(group && (group.player || group.title) || ''));
-        var resolvedAlloha = String(selected.yani_stream_source || '').toLowerCase() === 'lampac-alloha';
+        var resolvedAlloha = ALLOHA_RESOLVED_SOURCES.indexOf(String(selected.yani_stream_source || '').toLowerCase()) >= 0;
         if (allohaSource && !resolvedAlloha) {
             return launchAllohaPlayer(card, group, selected, url);
         }
@@ -2688,26 +2692,53 @@
         Lampa.Noty.show(url);
     }
 
-    function launchAllohaPlayer(card, group, selected, url) {
-        if (window.LampaYaniLampacResolver && LampaYaniLampacResolver.enabled()) {
-            setLoading(true);
-            LampaYaniLampacResolver.resolveAlloha(card, selected, group, url).then(function (result) {
-                setLoading(false);
-                if (!result || !result.url) return blockAllohaPlayback(card, group, selected, url);
-                selected.yani_stream_url = result.url;
-                selected.yani_stream_quality = result.quality || '';
-                selected.yani_stream_qualities = result.qualities || null;
-                selected.yani_stream_headers = result.headers || null;
-                selected.yani_stream_source = result.source || 'lampac-alloha';
-                launchResolvedVideo(card, group, group.videos || [selected], selected, result.url);
-            }).catch(function (error) {
-                setLoading(false);
-                console.warn('[YummyAnime] Lampac Alloha resolve failed; playback blocked', error);
-                blockAllohaPlayback(card, group, selected, url);
-            });
-            return true;
+    // Both services answer the same question - "give me a direct stream for this
+    // Alloha page" - so they are tried in order and the first usable answer
+    // wins. The self-hosted resolver goes first because it drives the real
+    // player page and therefore matches the exact episode and dubbing, while
+    // Lampac has to find the title again by its external ids.
+    function allohaResolvers(card, group, selected, url) {
+        var chain = [];
+        if (window.LampaYaniResolver && LampaYaniResolver.enabled()) {
+            chain.push(function () { return LampaYaniResolver.resolve(url); });
         }
-        return blockAllohaPlayback(card, group, selected, url);
+        if (window.LampaYaniLampacResolver && LampaYaniLampacResolver.enabled()) {
+            chain.push(function () { return LampaYaniLampacResolver.resolveAlloha(card, selected, group, url); });
+        }
+        return chain;
+    }
+
+    function resolveInOrder(chain, index) {
+        index = index || 0;
+        if (index >= chain.length) return Promise.reject(new Error('No Alloha resolver produced a stream'));
+        return chain[index]().then(function (result) {
+            if (result && result.url) return result;
+            throw new Error('Empty resolver result');
+        }).catch(function (error) {
+            if (index + 1 >= chain.length) throw error;
+            console.warn('[YummyAnime] Alloha resolver failed, trying the next one', error);
+            return resolveInOrder(chain, index + 1);
+        });
+    }
+
+    function launchAllohaPlayer(card, group, selected, url) {
+        var chain = allohaResolvers(card, group, selected, url);
+        if (!chain.length) return blockAllohaPlayback(card, group, selected, url);
+        setLoading(true);
+        resolveInOrder(chain).then(function (result) {
+            setLoading(false);
+            selected.yani_stream_url = result.url;
+            selected.yani_stream_quality = result.quality || '';
+            selected.yani_stream_qualities = result.qualities || null;
+            selected.yani_stream_headers = result.headers || null;
+            selected.yani_stream_source = result.source || 'lampac-alloha';
+            launchResolvedVideo(card, group, group.videos || [selected], selected, result.url);
+        }).catch(function (error) {
+            setLoading(false);
+            console.warn('[YummyAnime] Alloha resolve failed; playback blocked', error);
+            blockAllohaPlayback(card, group, selected, url);
+        });
+        return true;
     }
 
     // Alloha streams only from inside its own signed player page: the page
@@ -3813,6 +3844,33 @@
             field: {name: t('yummytv_integration'), description: t('yummytv_integration_description')}
         });
 
+        var resolverUrl = window.LampaYaniResolver ? LampaYaniResolver.baseUrl() : '';
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_resolver_server', type: 'button'},
+            field: {
+                name: t('resolver_server'),
+                description: t('resolver_server_description') + ': ' + (resolverUrl || t('not_configured'))
+            },
+            onChange: editResolverServer
+        });
+
+        if (resolverUrl) {
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_resolver_check', type: 'button'},
+                field: {name: t('resolver_check'), description: t('resolver_check_description')},
+                onChange: function () {
+                    LampaYaniResolver.health().then(function (payload) {
+                        Lampa.Noty.show(t('resolver_ok') + (payload && payload.version ? ' · v' + payload.version : ''));
+                    }).catch(function (error) {
+                        console.error('[YummyAnime]', error);
+                        Lampa.Noty.show(t('resolver_error'));
+                    });
+                }
+            });
+        }
+
         var lampacUrl = window.LampaYaniLampacResolver ? LampaYaniLampacResolver.baseUrl() : '';
         Lampa.SettingsApi.addParam({
             component: 'yani',
@@ -4004,6 +4062,20 @@
             var saved = LampaYaniLampacResolver.setBaseUrl(value);
             if (value && !saved) return Lampa.Noty.show(t('lampac_server_invalid'));
             Lampa.Noty.show(saved ? t('lampac_server_saved') : t('lampac_server_disabled'));
+        });
+    }
+
+    function editResolverServer() {
+        if (!window.LampaYaniResolver) return Lampa.Noty.show(t('resolver_unavailable'));
+        showYummyInput({
+            title: t('resolver_server_prompt'),
+            value: LampaYaniResolver.baseUrl(),
+            nosave: true
+        }, function (value) {
+            value = String(value || '').trim();
+            var saved = LampaYaniResolver.setBaseUrl(value);
+            if (value && !saved) return Lampa.Noty.show(t('resolver_server_invalid'));
+            Lampa.Noty.show(saved ? t('resolver_server_saved') : t('resolver_server_disabled'));
         });
     }
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.23.0 — 2026-08-09
+
+- Add a self-hosted resolver service in `server/` that opens a live Alloha session in a headless browser and proxies its HLS stream with the rotating headers the CDN requires.
+- Add a resolver client and settings entry, and try the resolver before Lampac when both are configured.
+- Treat every resolved Alloha source as direct, whichever service produced it.
+- Run the whole test suite in CI instead of a single test file.
+
 ## 0.22.0 — 2026-08-09
 
 - Allow unresolved Alloha sources to fall back to the original embedded site player behind a new opt-in setting.

@@ -1,4 +1,9 @@
 src/config.local.js
 .env
 
-CUsersGGPCAppDataLocalTemplampa-yani-known-hosts
+node_modules/
+server/node_modules/
+package-lock.json
+server/package-lock.json
+
+CUsersGGPCAppDataLocalTemplampa-yani-known-hosts
