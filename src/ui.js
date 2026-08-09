@@ -174,7 +174,7 @@
                 Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime ' + t('schedule'), component: 'yani_schedule'});
             }},
             {key: 'continue_watching', title: t('continue_watching'), action: function () {
-                Lampa.Activity.push({url: 'yani/history', title: 'YummyAnime ' + t('continue_watching'), component: 'yani_history'});
+                openWatchHistory();
             }},
             {key: 'status', title: t('status'), action: function () {
                 Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime ' + t('status'), component: 'yani_status'});
@@ -1022,6 +1022,14 @@
         });
     }
 
+    function openWatchHistory() {
+        Lampa.Activity.push({
+            url: 'yani/history',
+            title: 'YummyAnime · ' + t('watch_history'),
+            component: 'yani_history'
+        });
+    }
+
     function openSubscriptions(userId) {
         Lampa.Activity.push({url: 'yani/subscriptions', title: t('subscriptions'), component: 'yani_subscriptions', userId: userId});
     }
@@ -1273,6 +1281,7 @@
             t: t,
             definitions: accountListDefinitions,
             openList: openUserListShortcut,
+            openHistory: openWatchHistory,
             goBack: goBack
         });
     }

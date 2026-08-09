@@ -40,13 +40,16 @@
             content.append($('<div class="yani-user-lists__heading"></div>').text(deps.t('user_lists')));
             content.append($('<div class="yani-user-lists__description"></div>').text(deps.t('user_lists_description')));
             var grid = $('<div class="yani-account__lists"></div>');
-            deps.definitions().forEach(function (definition) {
+            var definitions = deps.definitions().slice();
+            if (deps.openHistory) definitions.push({key: 'history', title: deps.t('watch_history'), history: true});
+            definitions.forEach(function (definition) {
                 var tile = $('<div class="yani-account__list selector"></div>');
                 tile.append($('<div class="yani-account__list-title"></div>').text(definition.title));
                 tile.append($('<div class="yani-account__list-time"></div>').text(deps.t('open_list')));
                 focus(tile);
                 tile.on('hover:enter click.yaniUserList', function () {
-                    deps.openList(definition);
+                    if (definition.history) deps.openHistory();
+                    else deps.openList(definition);
                 });
                 grid.append(tile);
             });

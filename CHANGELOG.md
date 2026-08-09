@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.29.3 — 2026-08-10
+
+- Add Watch History to the Your Lists shortcut screen and reuse the existing Continue Watching component.
+
 ## 0.29.2 — 2026-08-10
 
 - Replace the eager Your Lists API dashboard with a reliable shortcut menu for Watching, Planned, Completed, Dropped, Postponed and Favorites.

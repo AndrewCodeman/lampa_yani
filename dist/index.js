@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.29.2',
+        version: '0.29.3',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -98,6 +98,7 @@ function pluginYummyAnime() {
     messages.ru.user_lists_description = 'Списки вашего аккаунта YummyAnime';
     messages.ru.user_lists_error = 'Не удалось загрузить ваши списки YummyAnime';
     messages.ru.open_list = 'Открыть список';
+    messages.ru.watch_history = 'История просмотра';
     messages.ru.favorites = 'Любимое';
     messages.ru.license_notice = 'Расширение распространяется по свободной лицензии MIT · https://github.com/AndrewCodeman/lampa_yani';
     messages.ru.my_reviews = 'Мои отзывы';
@@ -141,6 +142,7 @@ function pluginYummyAnime() {
     messages.en.user_lists_description = 'Lists from your YummyAnime account';
     messages.en.user_lists_error = 'Failed to load your YummyAnime lists';
     messages.en.open_list = 'Open list';
+    messages.en.watch_history = 'Watch history';
     messages.en.favorites = 'Favorites';
     messages.en.license_notice = 'This extension is distributed under the free MIT License · https://github.com/AndrewCodeman/lampa_yani';
     messages.en.my_reviews = 'My reviews';
@@ -335,6 +337,7 @@ function pluginYummyAnime() {
     messages.uk.user_lists_description = 'Списки вашого облікового запису YummyAnime';
     messages.uk.user_lists_error = 'Не вдалося завантажити ваші списки YummyAnime';
     messages.uk.open_list = 'Відкрити список';
+    messages.uk.watch_history = 'Історія перегляду';
     messages.uk.favorites = 'Улюблене';
     messages.uk.license_notice = 'Розширення поширюється за вільною ліцензією MIT · https://github.com/AndrewCodeman/lampa_yani';
     messages.uk.my_reviews = 'Мої відгуки';
@@ -2692,13 +2695,16 @@ function pluginYummyAnime() {
             content.append($('<div class="yani-user-lists__heading"></div>').text(deps.t('user_lists')));
             content.append($('<div class="yani-user-lists__description"></div>').text(deps.t('user_lists_description')));
             var grid = $('<div class="yani-account__lists"></div>');
-            deps.definitions().forEach(function (definition) {
+            var definitions = deps.definitions().slice();
+            if (deps.openHistory) definitions.push({key: 'history', title: deps.t('watch_history'), history: true});
+            definitions.forEach(function (definition) {
                 var tile = $('<div class="yani-account__list selector"></div>');
                 tile.append($('<div class="yani-account__list-title"></div>').text(definition.title));
                 tile.append($('<div class="yani-account__list-time"></div>').text(deps.t('open_list')));
                 focus(tile);
                 tile.on('hover:enter click.yaniUserList', function () {
-                    deps.openList(definition);
+                    if (definition.history) deps.openHistory();
+                    else deps.openList(definition);
                 });
                 grid.append(tile);
             });
@@ -2930,7 +2936,7 @@ function pluginYummyAnime() {
                 Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime ' + t('schedule'), component: 'yani_schedule'});
             }},
             {key: 'continue_watching', title: t('continue_watching'), action: function () {
-                Lampa.Activity.push({url: 'yani/history', title: 'YummyAnime ' + t('continue_watching'), component: 'yani_history'});
+                openWatchHistory();
             }},
             {key: 'status', title: t('status'), action: function () {
                 Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime ' + t('status'), component: 'yani_status'});
@@ -3778,6 +3784,14 @@ function pluginYummyAnime() {
         });
     }
 
+    function openWatchHistory() {
+        Lampa.Activity.push({
+            url: 'yani/history',
+            title: 'YummyAnime · ' + t('watch_history'),
+            component: 'yani_history'
+        });
+    }
+
     function openSubscriptions(userId) {
         Lampa.Activity.push({url: 'yani/subscriptions', title: t('subscriptions'), component: 'yani_subscriptions', userId: userId});
     }
@@ -4029,6 +4043,7 @@ function pluginYummyAnime() {
             t: t,
             definitions: accountListDefinitions,
             openList: openUserListShortcut,
+            openHistory: openWatchHistory,
             goBack: goBack
         });
     }
