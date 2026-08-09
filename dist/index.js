@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.23.0',
+        version: '0.24.0',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -1875,12 +1875,29 @@ function pluginYummyAnime() {
         return pathMatch ? pathMatch[1] : '';
     }
 
+    // The YummyAnime player URL already states which season, episode and
+    // dubbing were picked: `?token_movie=…&translation=128&season=1&episode=2`.
+    // Lampac has to rediscover the title from scratch, so feeding these back is
+    // the difference between landing on the requested episode and landing on
+    // whatever the balancer happens to list first.
+    function sourceHints(sourceUrl) {
+        var hints = {season: 0, episode: 0, translation: ''};
+        try {
+            var query = new URL(String(sourceUrl || '')).searchParams;
+            hints.season = Number(query.get('season')) || 0;
+            hints.episode = Number(query.get('episode')) || 0;
+            hints.translation = String(query.get('translation') || '');
+        } catch (ignore) {}
+        return hints;
+    }
+
     function buildRootUrl(card, sourceUrl) {
         var base = baseUrl();
         if (!base) return '';
         card = card || {};
         var ids = externalIds(card);
         var params = new URLSearchParams();
+        var hints = sourceHints(sourceUrl);
         var orid = extractOrid(sourceUrl);
         var imdb = firstValue([ids.imdb_id, ids.imdb, card.imdb_id]);
         var kinopoisk = firstValue([ids.kinopoisk_id, ids.kp_id, ids.kp, card.kinopoisk_id]);
@@ -1895,9 +1912,14 @@ function pluginYummyAnime() {
         if (title) params.set('title', title);
         if (originalTitle) params.set('original_title', originalTitle);
         if (year) params.set('year', year[0]);
+        if (hints.season) params.set('s', String(hints.season));
         params.set('serial', '1');
         params.set('original_language', 'ja');
-        if (!orid && !imdb && !kinopoisk) params.set('similar', 'true');
+        // `orid` is an Alloha-internal movie token, not something Lampac can
+        // look a title up by, so it does not count as an identifier here: for
+        // anime without an IMDb or Kinopoisk id, title matching is all Lampac
+        // has to work with.
+        if (!imdb && !kinopoisk) params.set('similar', 'true');
         return base + '/lite/alloha?' + params.toString();
     }
 
@@ -1919,9 +1941,9 @@ function pluginYummyAnime() {
         return best || items[0];
     }
 
-    function chooseSeason(items, selected) {
+    function chooseSeason(items, selected, hints) {
         var data = window.LampaYaniUiUtils ? LampaYaniUiUtils.videoData(selected || {}) : {};
-        var season = Number(firstValue([selected && selected.season, data.season, 1]));
+        var season = Number(firstValue([selected && selected.season, data.season, hints && hints.season, 1]));
         return items.filter(function (item) { return Number(item.season || item.text || 0) === season; })[0] || items[0];
     }
 
@@ -1933,8 +1955,8 @@ function pluginYummyAnime() {
         })[0] || buttons.filter(function (item) { return item.active; })[0] || buttons[0];
     }
 
-    function chooseEpisode(items, selected) {
-        var number = Number(firstValue([selected && selected.number, selected && selected.episode, selected && selected.index]));
+    function chooseEpisode(items, selected, hints) {
+        var number = Number(firstValue([selected && selected.number, selected && selected.episode, selected && selected.index, hints && hints.episode]));
         return items.filter(function (item) { return Number(item.episode || item.e || 0) === number; })[0] || items[0];
     }
 
@@ -1963,7 +1985,7 @@ function pluginYummyAnime() {
         }
     }
 
-    function resolvePage(markup, card, selected, group, visited, depth) {
+    function resolvePage(markup, card, selected, group, hints, visited, depth) {
         var base = baseUrl();
         var jsonResult = parseJsonResult(markup, base);
         if (jsonResult) return Promise.resolve(jsonResult);
@@ -1975,39 +1997,39 @@ function pluginYummyAnime() {
 
         if (buttons.length) {
             var voice = chooseVoice(buttons, group);
-            if (voice && voice.url && !voice.active) return follow(voice.url, card, selected, group, visited, depth);
+            if (voice && voice.url && !voice.active) return follow(voice.url, card, selected, group, hints, visited, depth);
         }
 
         var playable = items.filter(function (item) { return item.method === 'play' || item.method === 'call' || item.stream; });
         if (playable.length) {
-            var episode = chooseEpisode(playable, selected);
+            var episode = chooseEpisode(playable, selected, hints);
             var direct = directResult(episode, base);
             if (direct) return Promise.resolve(direct);
-            if (episode.url) return follow(episode.url, card, selected, group, visited, depth);
+            if (episode.url) return follow(episode.url, card, selected, group, hints, visited, depth);
         }
 
         var links = items.filter(function (item) { return item.url; });
         if (links.length) {
-            var target = links.some(function (item) { return item.similar; }) ? chooseByTitle(links, card) : chooseSeason(links, selected);
-            if (target && target.url) return follow(target.url, card, selected, group, visited, depth);
+            var target = links.some(function (item) { return item.similar; }) ? chooseByTitle(links, card) : chooseSeason(links, selected, hints);
+            if (target && target.url) return follow(target.url, card, selected, group, hints, visited, depth);
         }
         return Promise.reject(new Error('Lampac did not expose a direct stream'));
     }
 
-    function follow(url, card, selected, group, visited, depth) {
+    function follow(url, card, selected, group, hints, visited, depth) {
         var base = baseUrl();
         url = absoluteUrl(base, url);
         if (!url || visited[url]) return Promise.reject(new Error('Lampac returned a repeated URL'));
         visited[url] = true;
         return requestText(url).then(function (markup) {
-            return resolvePage(markup, card, selected, group, visited, depth + 1);
+            return resolvePage(markup, card, selected, group, hints, visited, depth + 1);
         });
     }
 
     function resolveAlloha(card, selected, group, sourceUrl) {
         var root = buildRootUrl(card, sourceUrl);
         if (!root) return Promise.reject(new Error('Lampac server is not configured'));
-        return follow(root, card, selected, group, {}, 0);
+        return follow(root, card, selected, group, sourceHints(sourceUrl), {}, 0);
     }
 
     window.LampaYani = window.LampaYani || {};
@@ -2017,6 +2039,7 @@ function pluginYummyAnime() {
         enabled: function () { return Boolean(baseUrl()); },
         normalizeBaseUrl: normalizeBaseUrl,
         extractOrid: extractOrid,
+        sourceHints: sourceHints,
         buildRootUrl: buildRootUrl,
         parseDataItems: parseDataItems,
         resolveAlloha: resolveAlloha

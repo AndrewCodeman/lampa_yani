@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.24.0 — 2026-08-09
+
+- Pass the season, episode and dubbing stated in the YummyAnime player URL into the Lampac Alloha request and its season/episode selection.
+- Ask Lampac to match by title whenever the title has no IMDb or Kinopoisk id, which is the common case for anime.
+
 ## 0.23.0 — 2026-08-09
 
 - Add a self-hosted resolver service in `server/` that opens a live Alloha session in a headless browser and proxies its HLS stream with the rotating headers the CDN requires.
