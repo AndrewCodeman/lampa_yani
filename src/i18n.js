@@ -131,6 +131,7 @@
     messages.ru.lampac_unavailable = 'Модуль Lampac недоступен';
     messages.ru.not_configured = 'не настроен';
     messages.ru.alloha_direct_required = 'Alloha недоступен во внутреннем и внешнем плеере без прямого потока. Настройте сервер Lampac или выберите другой источник';
+    messages.ru.detail_load_error = 'Не удалось загрузить данные YummyAnime';
     messages.ru.aniskip = 'Пропуск опенинга и эндинга';
     messages.ru.aniskip_description = 'Тайминги берутся из AniSkip по идентификатору MyAnimeList. Работает только во внутреннем плеере Lampa';
     messages.ru.aniskip_off = 'Выключено';
@@ -200,6 +201,7 @@
     messages.en.lampac_unavailable = 'Lampac module is unavailable';
     messages.en.not_configured = 'not configured';
     messages.en.alloha_direct_required = 'Alloha cannot use the internal or external player without a direct stream. Configure a Lampac server or choose another source';
+    messages.en.detail_load_error = 'Failed to load YummyAnime details';
     messages.en.aniskip = 'Skip openings and endings';
     messages.en.aniskip_description = 'Timestamps come from AniSkip by MyAnimeList id. Works in the internal Lampa player only';
     messages.en.aniskip_off = 'Disabled';
@@ -315,6 +317,7 @@
     messages.uk.lampac_unavailable = 'Модуль Lampac недоступний';
     messages.uk.not_configured = 'не налаштовано';
     messages.uk.alloha_direct_required = 'Alloha недоступний у внутрішньому та зовнішньому плеєрі без прямого потоку. Налаштуйте сервер Lampac або виберіть інше джерело';
+    messages.uk.detail_load_error = 'Не вдалося завантажити дані YummyAnime';
     messages.uk.aniskip = 'Пропуск опенінга та ендінга';
     messages.uk.aniskip_description = 'Тайминги беруться з AniSkip за ідентифікатором MyAnimeList. Працює лише у внутрішньому плеєрі Lampa';
     messages.uk.aniskip_off = 'Вимкнено';

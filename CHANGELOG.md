@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.27.1 — 2026-08-09
+
+- Translate the detail-loading error, which used to render its own key name to the user.
+- Add a test asserting that every key the UI asks for is translated and that all locales cover the Russian reference.
+
 ## 0.27.0 — 2026-08-09
 
 - Capture the Alloha session from the browser driver rather than from injected page code, so it is in place before the player issues its first request; this is what makes the resolver actually return a stream.
