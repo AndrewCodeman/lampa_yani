@@ -2693,7 +2693,7 @@
             setLoading(true);
             LampaYaniLampacResolver.resolveAlloha(card, selected, group, url).then(function (result) {
                 setLoading(false);
-                if (!result || !result.url) return blockAllohaPlayback();
+                if (!result || !result.url) return blockAllohaPlayback(card, group, selected, url);
                 selected.yani_stream_url = result.url;
                 selected.yani_stream_quality = result.quality || '';
                 selected.yani_stream_qualities = result.qualities || null;
@@ -2703,16 +2703,45 @@
             }).catch(function (error) {
                 setLoading(false);
                 console.warn('[YummyAnime] Lampac Alloha resolve failed; playback blocked', error);
-                blockAllohaPlayback();
+                blockAllohaPlayback(card, group, selected, url);
             });
             return true;
         }
-        return blockAllohaPlayback();
+        return blockAllohaPlayback(card, group, selected, url);
     }
 
-    function blockAllohaPlayback() {
+    // Alloha streams only from inside its own signed player page: the page
+    // refuses to run outside an iframe and its CDN requires rotating headers a
+    // media player cannot supply. Without a direct stream the embedded page is
+    // therefore the last remaining playback path, and it stays opt-in because
+    // it has no Lampa timeline and cannot be handed to an external player.
+    function allohaIframeEnabled() {
+        if (!Lampa.Storage || !Lampa.Storage.get) return false;
+        var value = Lampa.Storage.get('yani_alloha_iframe', false);
+        return value === true || value === 'true';
+    }
+
+    function blockAllohaPlayback(card, group, selected, url) {
+        if (url && allohaIframeEnabled() && openAllohaEmbed(card, group, selected, url)) return true;
         Lampa.Noty.show(t('alloha_direct_required'));
         return true;
+    }
+
+    function openAllohaEmbed(card, group, selected, url) {
+        if (!Lampa.Activity || !Lampa.Activity.push) return false;
+        try {
+            rememberPlayback(card, group, selected);
+            Lampa.Activity.push({
+                url: 'yani/player',
+                title: (card && card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + ((selected && (selected.number || selected.index)) || '?'),
+                component: 'yani_player',
+                iframe_url: url
+            });
+            return true;
+        } catch (error) {
+            console.warn('[YummyAnime] Alloha embedded player failed to open', error);
+            return false;
+        }
     }
 
     function setLoading(enabled) {
@@ -3793,6 +3822,12 @@
                 description: t('lampac_server_description') + ': ' + (lampacUrl || t('not_configured'))
             },
             onChange: editLampacServer
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_alloha_iframe', type: 'trigger', default: false},
+            field: {name: t('alloha_iframe'), description: t('alloha_iframe_description')}
         });
 
         Lampa.SettingsApi.addParam({

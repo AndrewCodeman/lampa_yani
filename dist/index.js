@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.21.0',
+        version: '0.22.0',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -182,6 +182,8 @@ function pluginYummyAnime() {
     messages.ru.lampac_unavailable = 'Модуль Lampac недоступен';
     messages.ru.not_configured = 'не настроен';
     messages.ru.alloha_direct_required = 'Alloha недоступен во внутреннем и внешнем плеере без прямого потока. Настройте сервер Lampac или выберите другой источник';
+    messages.ru.alloha_iframe = 'Alloha: встроенный плеер сайта';
+    messages.ru.alloha_iframe_description = 'Если прямой поток получить не удалось, открывать оригинальный плеер Alloha внутри Lampa. Таймлайн Lampa и внешний плеер при этом недоступны';
     messages.ru.usage_policy_title = 'Политика использования';
     messages.ru.usage_policy_as_is = 'Расширение YummyAnime предоставляется «как есть», без каких-либо явных или подразумеваемых гарантий.';
     messages.ru.usage_policy_information = 'Расширение предназначено исключительно для ознакомительных и информационных целей.';
@@ -228,6 +230,8 @@ function pluginYummyAnime() {
     messages.en.lampac_unavailable = 'Lampac module is unavailable';
     messages.en.not_configured = 'not configured';
     messages.en.alloha_direct_required = 'Alloha cannot use the internal or external player without a direct stream. Configure a Lampac server or choose another source';
+    messages.en.alloha_iframe = 'Alloha: embedded site player';
+    messages.en.alloha_iframe_description = 'When no direct stream can be resolved, open the original Alloha player inside Lampa. The Lampa timeline and external players stay unavailable';
     messages.en.usage_policy_title = 'Usage policy';
     messages.en.usage_policy_as_is = 'The YummyAnime extension is provided “as is”, without warranties of any kind, express or implied.';
     messages.en.usage_policy_information = 'The extension is intended solely for informational and introductory purposes.';
@@ -320,6 +324,8 @@ function pluginYummyAnime() {
     messages.uk.lampac_unavailable = 'Модуль Lampac недоступний';
     messages.uk.not_configured = 'не налаштовано';
     messages.uk.alloha_direct_required = 'Alloha недоступний у внутрішньому та зовнішньому плеєрі без прямого потоку. Налаштуйте сервер Lampac або виберіть інше джерело';
+    messages.uk.alloha_iframe = 'Alloha: вбудований плеєр сайту';
+    messages.uk.alloha_iframe_description = 'Якщо прямий потік отримати не вдалося, відкривати оригінальний плеєр Alloha всередині Lampa. Таймлайн Lampa та зовнішній плеєр при цьому недоступні';
     messages.uk.usage_policy_title = 'Політика використання';
     messages.uk.usage_policy_as_is = 'Розширення YummyAnime надається «як є», без будь-яких прямих або непрямих гарантій.';
     messages.uk.usage_policy_information = 'Розширення призначене виключно для ознайомлювальних та інформаційних цілей.';
@@ -4988,7 +4994,7 @@ function pluginYummyAnime() {
             setLoading(true);
             LampaYaniLampacResolver.resolveAlloha(card, selected, group, url).then(function (result) {
                 setLoading(false);
-                if (!result || !result.url) return blockAllohaPlayback();
+                if (!result || !result.url) return blockAllohaPlayback(card, group, selected, url);
                 selected.yani_stream_url = result.url;
                 selected.yani_stream_quality = result.quality || '';
                 selected.yani_stream_qualities = result.qualities || null;
@@ -4998,16 +5004,45 @@ function pluginYummyAnime() {
             }).catch(function (error) {
                 setLoading(false);
                 console.warn('[YummyAnime] Lampac Alloha resolve failed; playback blocked', error);
-                blockAllohaPlayback();
+                blockAllohaPlayback(card, group, selected, url);
             });
             return true;
         }
-        return blockAllohaPlayback();
+        return blockAllohaPlayback(card, group, selected, url);
     }
 
-    function blockAllohaPlayback() {
+    // Alloha streams only from inside its own signed player page: the page
+    // refuses to run outside an iframe and its CDN requires rotating headers a
+    // media player cannot supply. Without a direct stream the embedded page is
+    // therefore the last remaining playback path, and it stays opt-in because
+    // it has no Lampa timeline and cannot be handed to an external player.
+    function allohaIframeEnabled() {
+        if (!Lampa.Storage || !Lampa.Storage.get) return false;
+        var value = Lampa.Storage.get('yani_alloha_iframe', false);
+        return value === true || value === 'true';
+    }
+
+    function blockAllohaPlayback(card, group, selected, url) {
+        if (url && allohaIframeEnabled() && openAllohaEmbed(card, group, selected, url)) return true;
         Lampa.Noty.show(t('alloha_direct_required'));
         return true;
+    }
+
+    function openAllohaEmbed(card, group, selected, url) {
+        if (!Lampa.Activity || !Lampa.Activity.push) return false;
+        try {
+            rememberPlayback(card, group, selected);
+            Lampa.Activity.push({
+                url: 'yani/player',
+                title: (card && card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + ((selected && (selected.number || selected.index)) || '?'),
+                component: 'yani_player',
+                iframe_url: url
+            });
+            return true;
+        } catch (error) {
+            console.warn('[YummyAnime] Alloha embedded player failed to open', error);
+            return false;
+        }
     }
 
     function setLoading(enabled) {
@@ -6088,6 +6123,12 @@ function pluginYummyAnime() {
                 description: t('lampac_server_description') + ': ' + (lampacUrl || t('not_configured'))
             },
             onChange: editLampacServer
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_alloha_iframe', type: 'trigger', default: false},
+            field: {name: t('alloha_iframe'), description: t('alloha_iframe_description')}
         });
 
         Lampa.SettingsApi.addParam({

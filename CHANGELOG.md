@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.0 — 2026-08-09
+
+- Allow unresolved Alloha sources to fall back to the original embedded site player behind a new opt-in setting.
+- Keep the embed disabled by default and keep the explicit warning when it is off, because it offers no Lampa timeline and no external player.
+- Record playback history when the embedded Alloha player actually opens.
+
 ## 0.21.0 — 2026-08-09
 
 - Reduce poster memory pressure by removing duplicate hidden image decoding and preferring medium-size artwork.
