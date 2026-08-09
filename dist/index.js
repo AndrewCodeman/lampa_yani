@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.19',
+        version: '0.20.20',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
@@ -1422,6 +1422,35 @@ function pluginYummyAnime() {
         return result;
     }
 
+    function detailRouteId(activity) {
+        activity = activity || {};
+        var candidates = [activity, activity.card, activity.object, activity.data, activity.movie];
+        var result = '';
+
+        candidates.some(function (candidate) {
+            if (!candidate || typeof candidate !== 'object') return false;
+            var anime = candidate.anime && typeof candidate.anime === 'object' ? candidate.anime : {};
+            var value = candidate.yani_id || candidate.anime_id || candidate.animeId ||
+                anime.yani_id || anime.anime_id || anime.animeId;
+            if (value === undefined || value === null || value === '' || value === 'undefined') return false;
+            result = String(value);
+            return true;
+        });
+
+        if (result) return result;
+
+        var route = String(activity.url || activity.route || '');
+        var match = route.match(/(?:^|\/)yani\/detail\/([^/?#]+)/i);
+        if (match && match[1]) {
+            try { result = decodeURIComponent(match[1]); } catch (error) { result = match[1]; }
+        }
+
+        if (!result && activity.component === 'yani_detail' && activity.id !== undefined && activity.id !== null && activity.id !== '' && activity.id !== 'undefined') {
+            result = String(activity.id);
+        }
+        return result;
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.UiUtils = window.LampaYaniUiUtils = {
         videoData: videoData,
@@ -1431,7 +1460,8 @@ function pluginYummyAnime() {
         normalizeMatchTitle: normalizeMatchTitle,
         standardSearchTitles: standardSearchTitles,
         yummyTvDetailsUrl: yummyTvDetailsUrl,
-        internalPlayerItem: internalPlayerItem
+        internalPlayerItem: internalPlayerItem,
+        detailRouteId: detailRouteId
     };
 }(window));
 
@@ -3616,7 +3646,12 @@ function pluginYummyAnime() {
     }
 
     function Detail(object) {
-        var data = object.card || {};
+        object = object || {};
+        var restoredActivity = !object.card || typeof object.card !== 'object' || !getYummyId(object.card);
+        var data = object.card || object.object || object.data || {};
+        var routeId = LampaYaniUiUtils.detailRouteId(object);
+        if (routeId && !getYummyId(data)) data = Object.assign({}, data, {yani_id: routeId});
+        if (!data.title && object.title) data.title = object.title;
         var html = $('<div class="yani-detail"></div>');
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
         scroll.minus();
@@ -3648,23 +3683,59 @@ function pluginYummyAnime() {
                 }
             }
 
+            function canRenderSnapshot(card) {
+                return Boolean(card && (card.img || card.poster || card.overview ||
+                    card.yani_titles && card.yani_titles.length || card.yani_ratings && card.yani_ratings.length));
+            }
+
+            function fail(error) {
+                if (settled) return;
+                settled = true;
+                if (timeoutId) clearTimeout(timeoutId);
+                if (error) console.error('[YummyAnime Detail restore]', error);
+                self.activity.loader(false);
+
+                // Plugin cache resets can restore the route but discard its
+                // transient card object. If the route can no longer be
+                // hydrated, replace the broken activity with YummyAnime Home
+                // instead of leaving an unusable partial title page onscreen.
+                if (restoredActivity && Lampa.Activity && Lampa.Activity.replace) {
+                    setTimeout(function () {
+                        Lampa.Activity.replace({url: 'yani', title: 'YummyAnime', component: 'yani_home'});
+                    }, 0);
+                    return;
+                }
+                html.empty();
+                button = $('<div class="yani-detail__error selector"></div>').text(t('detail_load_error'));
+                bindDetailButtonFocus(button);
+                html.append(button);
+                scroll.append(html);
+                self.activity.toggle();
+            }
+
             timeoutId = setTimeout(function () {
                 console.error('[YummyAnime Detail] timeout');
-                finish(data);
+                if (canRenderSnapshot(data)) finish(data);
+                else fail(new Error('Detail restore timed out'));
             }, 20000);
 
-            if (data.yani_id) {
-                LampaYaniApi.detail(data.yani_id).then(function (payload) {
+            if (routeId || data.yani_id) {
+                var detailId = routeId || data.yani_id;
+                data.yani_id = detailId;
+                LampaYaniApi.detail(detailId).then(function (payload) {
                     var item = payload && payload.response ? payload.response : payload;
                     var detailed = item ? toCard(item) : data;
+                    if (!detailed.yani_id) detailed.yani_id = detailId;
                     detailed.yani_schedule = data.yani_schedule;
                     finish(detailed);
                 }).catch(function (error) {
                     console.error('[YummyAnime]', error);
-                    finish(data);
+                    if (canRenderSnapshot(data)) finish(data);
+                    else fail(error);
                 });
             } else {
-                finish(data);
+                if (canRenderSnapshot(data)) finish(data);
+                else fail(new Error('YummyAnime detail id is missing'));
             }
         };
 
@@ -4221,6 +4292,8 @@ function pluginYummyAnime() {
                         url: 'yani/detail/' + encodeURIComponent(yaniId),
                         title: card.title || card.name || 'YummyAnime',
                         component: 'yani_detail',
+                        id: yaniId,
+                        yani_id: yaniId,
                         card: card
                     });
                 }
@@ -4245,6 +4318,8 @@ function pluginYummyAnime() {
             url: 'yani/detail/' + encodeURIComponent(id),
             title: card.title,
             component: 'yani_detail',
+            id: id,
+            yani_id: id,
             card: card
         });
     }

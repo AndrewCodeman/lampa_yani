@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.20.20 — 2026-08-09
+
+- Restore an open YummyAnime title after Lampa clears its plugin cache or reloads extensions.
+- Persist the YummyAnime title id outside the transient card object and recover legacy saved activities from their detail URL.
+- Return to YummyAnime Home instead of leaving a broken partial card when a restored activity can no longer be loaded.
+
 ## 0.20.19 — 2026-08-09
 
 - Block unresolved Alloha sources from both internal and external media players.

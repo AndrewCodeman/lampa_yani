@@ -29,5 +29,11 @@ assert.strictEqual(internalItem.quality['720p'], 'https://media.example/720.m3u8
 assert.strictEqual(internalItem.headers.Referer, 'https://example.test/');
 assert.strictEqual(internalItem.poster, 'poster.jpg');
 assert.strictEqual(utils.internalPlayerItem({url: ''}), null);
+assert.strictEqual(utils.detailRouteId({yani_id: 10551}), '10551');
+assert.strictEqual(utils.detailRouteId({component: 'yani_detail', card: {anime_id: 23365}}), '23365');
+assert.strictEqual(utils.detailRouteId({component: 'yani_detail', url: 'yani/detail/4912'}), '4912');
+assert.strictEqual(utils.detailRouteId({component: 'yani_detail', url: '/yani/detail/title%2042?restore=1'}), 'title 42');
+assert.strictEqual(utils.detailRouteId({component: 'yani_detail', id: 77}), '77');
+assert.strictEqual(utils.detailRouteId({component: 'full', id: 77}), '');
 
 console.log('ui-utils tests passed');

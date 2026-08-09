@@ -73,6 +73,35 @@
         return result;
     }
 
+    function detailRouteId(activity) {
+        activity = activity || {};
+        var candidates = [activity, activity.card, activity.object, activity.data, activity.movie];
+        var result = '';
+
+        candidates.some(function (candidate) {
+            if (!candidate || typeof candidate !== 'object') return false;
+            var anime = candidate.anime && typeof candidate.anime === 'object' ? candidate.anime : {};
+            var value = candidate.yani_id || candidate.anime_id || candidate.animeId ||
+                anime.yani_id || anime.anime_id || anime.animeId;
+            if (value === undefined || value === null || value === '' || value === 'undefined') return false;
+            result = String(value);
+            return true;
+        });
+
+        if (result) return result;
+
+        var route = String(activity.url || activity.route || '');
+        var match = route.match(/(?:^|\/)yani\/detail\/([^/?#]+)/i);
+        if (match && match[1]) {
+            try { result = decodeURIComponent(match[1]); } catch (error) { result = match[1]; }
+        }
+
+        if (!result && activity.component === 'yani_detail' && activity.id !== undefined && activity.id !== null && activity.id !== '' && activity.id !== 'undefined') {
+            result = String(activity.id);
+        }
+        return result;
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.UiUtils = window.LampaYaniUiUtils = {
         videoData: videoData,
@@ -82,6 +111,7 @@
         normalizeMatchTitle: normalizeMatchTitle,
         standardSearchTitles: standardSearchTitles,
         yummyTvDetailsUrl: yummyTvDetailsUrl,
-        internalPlayerItem: internalPlayerItem
+        internalPlayerItem: internalPlayerItem,
+        detailRouteId: detailRouteId
     };
 }(window));
