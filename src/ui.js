@@ -500,6 +500,12 @@
         bindYummyCardRender(first, second, third, {openYummyDetail: true});
     }
 
+    function cardRenderElement(element, card) {
+        var render = element && element.jquery ? element : element ? $(element) : $();
+        if (!render.length && card && card.render) render = $(card.render(true));
+        return render;
+    }
+
     function bindYummyCard(element, card, options) {
         // Keep an explicit marker on the original Lampa card.  Some Lampa
         // versions preserve only custom fields when forwarding a card to the
@@ -512,7 +518,7 @@
         LampaYaniMedia.attachPosterFallback(element, card);
         // Some Lampa versions clone the card object after cardRender. Keep a
         // DOM-level handler as a fallback so search results remain clickable.
-        var rendered = element && element.jquery ? element : $(element);
+        var rendered = cardRenderElement(element, card);
         // Lampa cards already have a default `hover:enter` handler. Some
         // builds attach it to an inner card element, not the rendered root.
         // Remove it from the full YummyAnime card tree: otherwise one Enter
@@ -551,11 +557,11 @@
 
     function addCardMediaBadges(element, card) {
         var requested = false;
-        var cardRender = card && card.render ? $(card.render(true)) : $(element);
+        var cardRender = cardRenderElement(element, card);
         renderCardMediaBadges(element, card, card.yani_media || mediaMeta(card));
         if (!card.yani_id || (card.yani_media && card.yani_media.loaded)) return;
 
-        cardRender.on('hover:focus', function () {
+        cardRender.off('hover:focus.yaniMedia').one('hover:focus.yaniMedia', function () {
             if (requested) return;
             requested = true;
             LampaYaniApi.videos(card.yani_id).then(function (payload) {
@@ -569,7 +575,7 @@
 
     function renderCardMediaBadges(element, card, meta) {
         if (!meta || (!meta.quality && !meta.voices)) return;
-        var render = card && card.render ? $(card.render(true)) : $(element);
+        var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length) return;
         var block = $('.yani-card-media', view);
@@ -581,7 +587,7 @@
 
     function addCardUpdateBadge(element, card) {
         if (!card || !card.yani_update_episode) return;
-        var render = card.render ? $(card.render(true)) : $(element);
+        var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length || view.find('.yani-card-update').length) return;
         view.append($('<span class="yani-card-update"></span>').text(t('episode') + ' ' + card.yani_update_episode));
@@ -589,7 +595,7 @@
 
     function addCardListBadge(element, card) {
         if (!card || (card.yani_list_id === null && !card.yani_is_favorite)) return;
-        var render = card.render ? $(card.render(true)) : $(element);
+        var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length) return;
         var badge = $('.yani-card-list', view);
@@ -2321,17 +2327,22 @@
         console.info('[YummyAnime] Native TMDB resolve started', {yaniId: getYummyId(card), titles: titles});
 
         function resolveTitles(searchTitles) {
-            // The native-card watchdog is intentionally short. Searching a
-            // long alias list one by one meant a slow first alias could keep
-            // an exact English/Japanese title from ever being queried. Run
-            // the bounded title set together and score the combined results.
-            return Promise.all((searchTitles || []).slice(0, 8).map(function (title) {
-                return searchTmdbTitle(tmdb, title).catch(function () { return []; });
-            })).then(function (rows) {
-                var items = [];
-                rows.forEach(function (row) { items = items.concat(Array.isArray(row) ? row : []); });
-                return bestStandardCard(items, card);
-            });
+            // Search aliases in small batches. Eight aliases multiplied by
+            // movie and TV endpoints created a large simultaneous request
+            // burst that could terminate low-memory Android WebViews.
+            var titlesToSearch = (searchTitles || []).slice(0, 8);
+            var collected = [];
+            function next(offset) {
+                if (offset >= titlesToSearch.length) return Promise.resolve(bestStandardCard(collected, card));
+                return Promise.all(titlesToSearch.slice(offset, offset + 2).map(function (title) {
+                    return searchTmdbTitle(tmdb, title).catch(function () { return []; });
+                })).then(function (rows) {
+                    rows.forEach(function (row) { collected = collected.concat(Array.isArray(row) ? row : []); });
+                    var match = bestStandardCard(collected, card);
+                    return match || next(offset + 2);
+                });
+            }
+            return next(0);
         }
 
         return resolveTitles(titles).then(function (match) {
@@ -2472,15 +2483,36 @@
         return items[0];
     }
 
+    var nativeMatchCache = {};
+    var nativeMatchPending = {};
+    var nativeMatchOrder = [];
+
+    function nativeMatchKey(movie) {
+        return [movie && (movie.source || ''), movie && (movie.id || ''), movie && (movie.title || movie.name || ''), movie && (movie.release_date || movie.first_air_date || '')].join('|').toLowerCase();
+    }
+
+    function rememberNativeMatch(key, cards) {
+        nativeMatchCache[key] = cards;
+        nativeMatchOrder = nativeMatchOrder.filter(function (item) { return item !== key; });
+        nativeMatchOrder.push(key);
+        while (nativeMatchOrder.length > 50) delete nativeMatchCache[nativeMatchOrder.shift()];
+    }
+
     function findYummyMatches(movie) {
         movie = movie || {};
         var title = movie.title || movie.name || movie.original_title || movie.original_name || '';
         var year = String(movie.release_date || movie.first_air_date || movie.year || '').slice(0, 4);
         if (!title) return Promise.resolve([]);
+        var cacheKey = nativeMatchKey(movie);
+        if (Object.prototype.hasOwnProperty.call(nativeMatchCache, cacheKey)) return Promise.resolve(nativeMatchCache[cacheKey]);
+        if (nativeMatchPending[cacheKey]) return nativeMatchPending[cacheKey];
 
         var queries = LampaYaniUiUtils.titleValues(movie);
         if (queries.indexOf(title) < 0) queries.unshift(title);
-        return Promise.all(queries.slice(0, 8).map(function (query) {
+        // Native cards usually expose a localized and an original title. Two
+        // queries are enough for matching and avoid an eight-request burst on
+        // low-memory TVs whenever Lampa emits the full-card event twice.
+        nativeMatchPending[cacheKey] = Promise.all(queries.slice(0, 2).map(function (query) {
             return LampaYaniApi.search(query, {limit: 10}).then(function (payload) {
                 return LampaYaniApi.normalize(payload).map(toCard);
             }).catch(function () { return []; });
@@ -2503,7 +2535,15 @@
             if (!cards.length || cards[0]._match_score < 70) return [];
             var best = cards[0]._match_score;
             return cards.filter(function (card, index) { return index < 5 && (card._match_score === best || card._match_score >= 70); });
+        }).then(function (cards) {
+            delete nativeMatchPending[cacheKey];
+            rememberNativeMatch(cacheKey, cards);
+            return cards;
+        }, function (error) {
+            delete nativeMatchPending[cacheKey];
+            throw error;
         });
+        return nativeMatchPending[cacheKey];
     }
 
     function isNativeAnimeCard(movie) {
@@ -2518,10 +2558,15 @@
         }).join(' ').toLowerCase();
         if (/(?:animation|animated|anime|аниме|мультфильм|мультипликац)/.test(names)) return true;
 
-        // Some Lampa builds expose only the numeric TMDB genre ids after the
-        // detail is rendered. In that case keep the exact-title resolver as
-        // the fallback instead of rejecting an otherwise valid anime.
-        return !source && !Array.isArray(ids);
+        // Missing genres used to classify every film and series as anime,
+        // causing background YummyAnime searches on every native detail page.
+        // A Japanese origin is a safer fallback when genre metadata is absent.
+        var language = String(movie && (movie.original_language || movie.language) || '').toLowerCase();
+        var countries = movie && (movie.origin_country || movie.production_countries) || [];
+        var japaneseOrigin = Array.isArray(countries) && countries.some(function (country) {
+            return String(typeof country === 'string' ? country : country && (country.iso_3166_1 || country.code) || '').toUpperCase() === 'JP';
+        });
+        return language === 'ja' && japaneseOrigin;
     }
 
     function movePageDown(scroll) { LampaYaniNavigation.moveDown(scroll); }
@@ -3032,8 +3077,8 @@
         var image = item.image && typeof item.image === 'object' ? item.image : {};
         var cover = item.cover && typeof item.cover === 'object' ? item.cover : {};
         var poster = typeof item.cover === 'string' ? item.cover : typeof item.image === 'string' ? item.image : item.poster_url ||
-            image.large || image.original || image.url || cover.large || cover.original || cover.url || '';
-        if (!poster && item.poster) poster = item.poster.fullsize || item.poster.medium || item.poster.original || '';
+            image.medium || image.large || image.url || image.original || cover.medium || cover.large || cover.url || cover.original || '';
+        if (!poster && item.poster) poster = item.poster.medium || item.poster.fullsize || item.poster.original || '';
         if (typeof poster !== 'string') poster = '';
         if (poster.indexOf('//') === 0) poster = 'https:' + poster;
         var rating = typeof item.rating === 'object' ? item.rating.average : item.rating;
@@ -3630,9 +3675,9 @@
     }
 
     function addCardRatings(element, card) {
-        var ratings = element.yani_ratings || [];
-        if (!ratings.length || !card || !card.render) return;
-        var render = $(card.render(true));
+        var ratings = card && card.yani_ratings || [];
+        if (!ratings.length || !card) return;
+        var render = cardRenderElement(element, card);
         if ($('.yani-card-ratings', render).length) return;
 
         $('.card__vote', render).hide();
@@ -4038,11 +4083,12 @@
         Lampa.Listener.follow('full', function (event) {
             if (event.type !== 'complite') return;
             var movie = event.data && event.data.movie ? event.data.movie : event.object && event.object.card_data;
-            if (!movie) return;
+            if (!movie || !event.object || !event.object.activity) return;
+            if (!lampaCardIntegrationEnabled('rating') && !lampaCardIntegrationEnabled('button')) return;
             // A native Lampa card may be a film or a live-action series with
             // an accidentally similar title. Do not decorate those cards
             // with a YummyAnime action.
-            if (!isNativeAnimeCard(movie)) return;
+            if (!movie.yani_card && !isNativeAnimeCard(movie)) return;
 
             var matchRequest = movie.yani_card ? Promise.resolve([movie.yani_card]) : findYummyMatches(movie);
             matchRequest.then(function (matches) {
@@ -4089,7 +4135,7 @@
         if (!container.length) return;
 
         if (!$('.view--yummyanime', render).length) {
-            var button = $('<div class="full-start__button selector view--yummyanime" title="YummyAnime" aria-label="YummyAnime"><img class="view--yummyanime__icon" alt="YummyAnime" src="https://andrewcodeman.github.io/lampa_yani/assets/yummyanime.svg"></div>');
+            var button = $('<div class="full-start__button selector view--yummyanime" title="YummyAnime" aria-label="YummyAnime"><span class="view--yummyanime__icon" aria-hidden="true">' + yummyRatingLogo() + '</span></div>');
             button.on('hover:enter click.yaniFullDetail', function () { openYummyDetail(anime, false); });
             container.prepend(button);
         }

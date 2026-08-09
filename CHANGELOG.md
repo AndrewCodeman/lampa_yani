@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.21.0 — 2026-08-09
+
+- Reduce poster memory pressure by removing duplicate hidden image decoding and preferring medium-size artwork.
+- Limit and deduplicate fallback-poster, YummyAnime and TMDB requests to avoid network bursts on low-memory devices.
+- Stop treating every native Lampa title without genre metadata as anime.
+- Remove an unused duplicate detail-sections module from the production bundle.
+- Inline and restore the YummyAnime logo on the native Lampa title-card button.
+
 ## 0.20.23 — 2026-08-09
 
 - Keep the YummyAnime for Lampa public application key as the default API identity.

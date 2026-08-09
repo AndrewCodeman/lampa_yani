@@ -2,6 +2,7 @@
     'use strict';
 
     var config = window.LampaYaniConfig;
+    var pendingRequests = {};
 
     function sleep(milliseconds) {
         return new Promise(function (resolve) { setTimeout(resolve, milliseconds); });
@@ -14,8 +15,14 @@
             var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
             var requestOptions = Object.assign({}, options);
             if (controller) requestOptions.signal = controller.signal;
-            var timer = setTimeout(function () { if (controller) controller.abort(); }, timeout);
-            return fetch(url, requestOptions).then(function (response) {
+            var timer;
+            var timeoutPromise = new Promise(function (resolve, reject) {
+                timer = setTimeout(function () {
+                    if (controller) controller.abort();
+                    reject(new Error('YummyAnime request timeout'));
+                }, timeout);
+            });
+            return Promise.race([fetch(url, requestOptions), timeoutPromise]).then(function (response) {
                 clearTimeout(timer);
                 var retryableStatus = response.status === 408 || response.status === 425 || response.status === 429 || response.status >= 500;
                 if (!response.ok && retryableStatus && number < retries) {
@@ -48,10 +55,11 @@
 
     function request(path, options) {
         options = options || {};
-        var headers = options.headers || {};
+        var headers = Object.assign({}, options.headers || {});
         var apiLanguage = window.LampaYaniI18n ? LampaYaniI18n.getLanguage() : 'ru';
         var cacheKey = 'lampa_yummyanime_cache_' + apiLanguage + '_' + path;
         var cacheTtl = options.cacheTtl || config.cacheTtl || 300000;
+        var method = options.method || 'GET';
 
         var applicationToken = config.applicationToken ? config.applicationToken() : config.applicationHeader;
         if (applicationToken) headers['X-Application'] = applicationToken;
@@ -60,21 +68,26 @@
         headers.Lang = apiLanguage;
         if (options.token) headers.Authorization = 'Bearer ' + options.token;
 
-        return fetchWithRetry(config.apiBase + path, {
-            method: options.method || 'GET',
+        var pendingKey = method === 'GET' && options.dedupe !== false
+            ? [apiLanguage, path, options.auth ? 'auth' : 'public', options.token ? 'token' : ''].join('|')
+            : '';
+        if (pendingKey && pendingRequests[pendingKey]) return pendingRequests[pendingKey];
+
+        var operation = fetchWithRetry(config.apiBase + path, {
+            method: method,
             headers: headers,
             body: options.body
-        }, (options.method || 'GET') === 'GET').then(function (response) {
+        }, method === 'GET').then(function (response) {
             if (!response.ok) throw new Error('YummyAnime API: ' + response.status);
             return response.json();
         }).then(function (payload) {
-            if ((options.method || 'GET') === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
+            if (method === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
                 Lampa.Storage.set(cacheKey, JSON.stringify({time: Date.now(), data: payload}));
                 rememberCacheKey(cacheKey);
             }
             return payload;
         }).catch(function (error) {
-            if ((options.method || 'GET') === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
+            if (method === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
                 try {
                     var cached = JSON.parse(Lampa.Storage.get(cacheKey, 'null'));
                     if (cached && (options.staleFallback || Date.now() - cached.time < cacheTtl)) return cached.data;
@@ -82,6 +95,16 @@
             }
             throw error;
         });
+
+        if (!pendingKey) return operation;
+        pendingRequests[pendingKey] = operation.then(function (payload) {
+            delete pendingRequests[pendingKey];
+            return payload;
+        }, function (error) {
+            delete pendingRequests[pendingKey];
+            throw error;
+        });
+        return pendingRequests[pendingKey];
     }
 
     function externalRequest(base, path, options) {

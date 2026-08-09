@@ -3,7 +3,7 @@ function pluginYummyAnime() {
     window.plugin_yummy_anime_ready = true;
 
     var style = document.createElement('style');
-    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.05em;\n    padding: 2.2em;\n    max-width: 94em;\n    margin: 0 auto;\n}\n\n.yani-home__item {\n    position: relative;\n    min-height: 8.3em;\n    padding: 1.35em 1.5em;\n    border: 0.08em solid rgba(255, 255, 255, 0.12);\n    border-radius: 1em;\n    background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));\n    box-shadow: 0 0.7em 1.8em rgba(0, 0, 0, .12), inset 0 0.08em 0 rgba(255,255,255,.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n    overflow: hidden;\n    transition: transform .18s ease, background .18s ease, border-color .18s ease;\n}\n\n.yani-home__item.focus {\n    background: linear-gradient(135deg, #fff, rgba(255,255,255,.82));\n    color: #16151b;\n    border-color: rgba(255,255,255,.95);\n    box-shadow: 0 0 0 .18em rgba(255,255,255,.22), 0 1em 2.4em rgba(0,0,0,.25);\n    transform: translateY(-.12em) scale(1.015);\n}\n\n.yani-home__icon {\n    flex: 0 0 3.35em;\n    width: 3.35em;\n    height: 3.35em;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    border-radius: .85em;\n    background: rgba(0,0,0,.18);\n    color: #fff;\n    box-shadow: inset 0 0 0 .08em rgba(255,255,255,.12);\n}\n\n.yani-home__icon svg {\n    width: 1.65em;\n    height: 1.65em;\n    fill: none;\n    stroke: currentColor;\n    stroke-width: 1.8;\n    stroke-linecap: round;\n    stroke-linejoin: round;\n}\n\n.yani-home__title {\n    min-width: 0;\n    font-size: 1.3em;\n    font-weight: 600;\n    line-height: 1.2;\n}\n\n.yani-home__arrow {\n    margin-left: auto;\n    color: rgba(255,255,255,.55);\n    font-size: 2em;\n    line-height: 1;\n}\n\n.yani-home__item.focus .yani-home__arrow {\n    color: #ef6470;\n    transform: translateX(.15em);\n}\n\n.yani-home__item--catalog .yani-home__icon { background: linear-gradient(135deg, #ef6470, #b84068); }\n.yani-home__item--genres .yani-home__icon { background: linear-gradient(135deg, #9b75e8, #6548b7); }\n.yani-home__item--search .yani-home__icon { background: linear-gradient(135deg, #43b6d8, #2679c2); }\n.yani-home__item--schedule .yani-home__icon { background: linear-gradient(135deg, #42c68a, #218d78); }\n.yani-home__item--continue_watching .yani-home__icon { background: linear-gradient(135deg, #f0af54, #d87742); }\n.yani-home__item--status .yani-home__icon { background: linear-gradient(135deg, #48c7a0, #238d8d); }\n.yani-home__item--top_rated .yani-home__icon { background: linear-gradient(135deg, #f5c95e, #d97939); }\n.yani-home__item--account .yani-home__icon { background: linear-gradient(135deg, #e77ab3, #9d4b9c); }\n\n.yani-home__item.focus .yani-home__icon {\n    color: #fff;\n    box-shadow: 0 .35em .8em rgba(0,0,0,.2);\n}\n\n.yani-policy {\n    width: min(54em, calc(100% - 3em));\n    margin: 2.5em auto;\n    padding: 2.2em 2.5em;\n    box-sizing: border-box;\n    border: .08em solid rgba(255,255,255,.16);\n    border-radius: 1.2em;\n    background: linear-gradient(145deg, rgba(35,35,42,.96), rgba(18,18,23,.94));\n    box-shadow: 0 1.4em 4em rgba(0,0,0,.35);\n    color: #f7f7fa;\n}\n\n.yani-policy__mark {\n    width: 4.5em;\n    height: 4.5em;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    margin-bottom: 1.2em;\n    padding: .9em;\n    box-sizing: border-box;\n    border-radius: 1.1em;\n    background: linear-gradient(135deg, #ff6871, #c74766);\n    color: #24242a;\n}\n\n.yani-policy__mark svg { width: 100%; height: 100%; fill: currentColor; }\n.yani-policy__title { width: fit-content; max-width: 100%; padding: .12em .25em; margin: 0 0 .75em -.25em; border-radius: .25em; font-size: 2.25em; font-weight: 700; }\n.yani-policy__title.focus { box-shadow: 0 0 0 .1em rgba(255,104,113,.9); background: rgba(255,104,113,.16); }\n.yani-policy__content { color: rgba(255,255,255,.82); font-size: 1.12em; line-height: 1.55; }\n.yani-policy__paragraph + .yani-policy__paragraph { margin-top: .8em; }\n.yani-policy__accept { width: fit-content; margin-top: 1.6em; padding: .78em 1.35em; border-radius: .55em; background: #ef6470; color: #fff; font-weight: 600; }\n.yani-policy__accept.focus { background: #fff; color: #17171b; box-shadow: 0 0 0 .16em #ef6470; transform: scale(1.035); }\n\n@media (max-width: 700px) {\n    .yani-policy { width: calc(100% - 1.4em); margin: 1em auto; padding: 1.4em; }\n    .yani-policy__title { font-size: 1.75em; }\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); padding: 1.2em; }\n    .yani-home__item { min-height: 7em; padding: 1em; }\n    .yani-home__icon { flex-basis: 2.8em; width: 2.8em; height: 2.8em; }\n}\n\n.yani-detail {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 2.5em;\n    padding: 2em;\n    max-width: 100%;\n    box-sizing: border-box;\n    color: #f4f7fb;\n    opacity: 1;\n    filter: none;\n}\n\n.yani-detail__poster {\n    width: 16em;\n    max-height: 24em;\n    object-fit: cover;\n    border-radius: 0.8em;\n}\n\n.yani-detail__info { min-width: 0; max-width: 48em; flex: 1 1 auto; }\n.yani-detail__title { font-size: 2.2em; font-weight: 600; border-radius: .22em; padding: .08em .16em; margin: -.08em -.16em; width: fit-content; max-width: 100%; }\n.yani-detail__title.focus { background: rgba(239,100,112,.22); box-shadow: 0 0 0 .12em #ef6470; color: #fff; }\n.yani-detail__alternative-titles { margin-top: 0.35em; color: rgba(255,255,255,.68); line-height: 1.35; overflow-wrap: anywhere; }\n.yani-detail__genres { display: flex; flex-wrap: wrap; gap: .36em; margin-top: .55em; }\n.yani-detail__genre { padding: .24em .5em; border: .08em solid rgba(255,255,255,.28); border-radius: .35em; color: rgba(255,255,255,.82); font-size: .78em; line-height: 1.2; }\n.yani-detail__genre.focus { background: #fff; border-color: #fff; box-shadow: 0 0 0 .14em #ef6470; color: #111; transform: scale(1.04); }\n.yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }\n.yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }\n.yani-detail__actions { display: flex; flex-wrap: wrap; gap: 0.7em; max-width: 100%; }\n.yani-detail__button { display: block; max-width: 100%; box-sizing: border-box; padding: 0.8em 1.2em; border: 0.12em solid transparent; border-radius: 0.5em; background: rgba(255,255,255,.15); overflow-wrap: anywhere; }\n.yani-detail__button--watch { background: #ef6470; color: #fff; }\n.yani-detail__button--lampa, .yani-detail__button--external { display: inline-flex; align-items: center; gap: .58em; }\n.yani-detail__button-icon { display: inline-flex; width: 1.25em; height: 1.25em; flex: 0 0 1.25em; }\n.yani-detail__button-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }\n.yani-detail__button.focus { background: #fff; color: #111; border-color: #fff; box-shadow: 0 0 0 0.2em rgba(239, 100, 112, .95), 0 0 1.2em rgba(255, 255, 255, .55); transform: scale(1.02); }\n.yani-detail__list-panel { display: inline-flex; margin-top: .8em; overflow: hidden; border: .1em solid rgba(255,255,255,.18); border-radius: .45em; background: rgba(0,0,0,.24); }\n.yani-detail__list-action { display: flex; align-items: center; justify-content: center; width: 2.7em; height: 2.35em; border-right: .08em solid rgba(255,255,255,.15); color: rgba(255,255,255,.72); background: transparent; }\n.yani-detail__list-action:last-child { border-right: 0; }\n.yani-detail__list-action.active { color: #fff; background: #ef6470; }\n.yani-detail__list-action.focus { color: #111; background: #fff; box-shadow: inset 0 0 0 .18em #ef6470; transform: scale(1.06); position: relative; z-index: 1; }\n.yani-detail__list-icon { width: 1.25em; height: 1.25em; }\n.yani-detail__list-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }\n\n.yani-detail__comments { margin-top: 1.5em; padding-top: 1em; border-top: 0.08em solid rgba(255, 255, 255, .18); }\n.yani-detail__comments-title { margin-bottom: 0.7em; font-size: 1.35em; font-weight: 600; }\n.yani-detail__comments-list { display: grid; gap: 0.55em; }\n.yani-detail__comment, .yani-detail__comments-loading, .yani-detail__comments-empty, .yani-detail__comments-error { padding: 0.7em 0.85em; border-radius: 0.45em; background: rgba(255, 255, 255, .08); }\n.yani-detail__comment.focus { background: #fff; color: #111; outline: 0.18em solid #ef6470; }\n.yani-detail__comment-title { line-height: 1.35; }\n.yani-detail__comment-stats { margin-top: 0.25em; opacity: .6; font-size: .82em; }\n.yani-detail__comments-loading, .yani-detail__comments-empty, .yani-detail__comments-error { opacity: .7; }\n\n.yani-detail__order { margin-top: 1.5em; padding: 1em 0; border-top: 0.08em solid rgba(255, 255, 255, .18); border-bottom: 0.08em solid rgba(255, 255, 255, .18); }\n.yani-detail__order-title { margin-bottom: 0.65em; font-size: 1.35em; font-weight: 600; }\n.yani-detail__order-list { display: grid; gap: 0.4em; }\n.yani-detail__order-item { display: flex; align-items: baseline; gap: 0.45em; padding: 0.55em 0.7em; border-radius: 0.4em; background: rgba(255, 255, 255, .07); }\n.yani-detail__order-item.focus { background: #fff; color: #111; outline: 0.16em solid #ef6470; }\n.yani-detail__order-index { opacity: .65; }\n.yani-detail__order-name { font-weight: 600; }\n.yani-detail__order-year, .yani-detail__order-relation { opacity: .7; }\n\n.yani-detail__extra { margin-top: 1.5em; }\n.yani-detail__extra-title { margin-bottom: .65em; font-size: 1.35em; font-weight: 600; }\n.yani-detail__recommendations-list { display: flex; gap: .65em; max-width: 100%; overflow-x: auto; padding: .25em .1em .7em; }\n.yani-detail__recommendation { flex: 0 0 8em; padding-bottom: .45em; border-radius: .45em; background: rgba(255, 255, 255, .08); overflow: hidden; }\n.yani-detail__recommendation.focus { outline: .16em solid #ef6470; background: #fff; color: #111; }\n.yani-detail__recommendation-poster { display: block; width: 8em; height: 11em; object-fit: cover; }\n.yani-detail__recommendation-title { padding: .35em .45em 0; font-size: .82em; font-weight: 600; line-height: 1.2; }\n.yani-detail__recommendation-year { padding: .2em .45em 0; font-size: .75em; opacity: .65; }\n.yani-detail__trailers-list { display: grid; gap: .45em; }\n.yani-detail__trailer { padding: .7em .85em; border-radius: .45em; background: rgba(255, 255, 255, .08); }\n.yani-detail__trailer.focus { background: #fff; color: #111; outline: .16em solid #ef6470; }\n.yani-detail__collection { padding: .7em .85em; border-radius: .45em; background: rgba(255, 255, 255, .08); }\n.yani-detail__collection.focus { background: #fff; color: #111; outline: .16em solid #ef6470; }\n.yani-detail__collection-title { font-weight: 700; }\n.yani-detail__collection-description { margin-top: .25em; opacity: .72; font-size: .85em; white-space: pre-wrap; }\n.yani-detail__collection-count { margin-top: .3em; opacity: .7; font-size: .78em; }\n.yani-detail__order-item.selector:focus,\n.yani-detail__comment.selector:focus,\n.yani-detail__recommendation.selector:focus,\n.yani-detail__trailer.selector:focus { outline: .16em solid #ef6470; }\n\n.yani-trailers {\n    min-height: 100%;\n    padding: 7em 2em 2em;\n    box-sizing: border-box;\n}\n\n.yani-trailers__list {\n    display: grid;\n    gap: .7em;\n    max-width: 62em;\n}\n\n.yani-trailers__item,\n.yani-trailers__empty {\n    display: flex;\n    align-items: center;\n    gap: .9em;\n    min-height: 4.2em;\n    padding: .8em 1em;\n    border-radius: .45em;\n    background: rgba(15, 22, 31, .78);\n    color: #fff;\n    box-sizing: border-box;\n}\n\n.yani-trailers__item.focus,\n.yani-trailers__empty.focus {\n    background: #fff;\n    color: #111;\n    box-shadow: 0 0 0 .16em #ef6470;\n}\n\n.yani-trailers__icon {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    width: 2.4em;\n    height: 2.4em;\n    flex: 0 0 2.4em;\n}\n\n.yani-trailers__icon svg {\n    display: block;\n    width: 100%;\n    height: 100%;\n}\n\n.yani-trailers__body {\n    min-width: 0;\n}\n\n.yani-trailers__title {\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n    font-size: 1.18em;\n    font-weight: 600;\n}\n\n.yani-trailers__host {\n    margin-top: .18em;\n    color: rgba(255, 255, 255, .62);\n    font-size: .86em;\n}\n\n.yani-trailers__item.focus .yani-trailers__host {\n    color: rgba(0, 0, 0, .56);\n}\n\n@media (max-width: 700px) {\n    .yani-detail { gap: 1em; padding: 1em; }\n    .yani-detail__poster { width: 10em; }\n}\n\n.yani-player {\n    position: fixed;\n    z-index: 1000;\n    inset: 0;\n    width: 100vw;\n    height: 100vh;\n    background: #000;\n}\n\n.yani-player__iframe {\n    display: block;\n    width: 100%;\n    height: 100%;\n    border: 0;\n    background: #000;\n}\n\n.full-start__button.view--yummyanime {\n    background: #ef6470;\n    color: #fff;\n    order: -1;\n    min-width: 3.1em;\n    padding: .45em .6em;\n}\n\n.view--yummyanime__icon {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 1.8em;\n    height: 1.8em;\n    margin: 0;\n}\n\n.view--yummyanime__icon svg {\n    display: block;\n    width: 100%;\n    height: 100%;\n}\n\n.full-start__rate .yani-full-rating-logo {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 1.15em;\n    height: 1.15em;\n    margin: 0.12em auto 0;\n    color: #ef6470;\n}\n\n.full-start__rate .yani-full-rating-logo svg {\n    display: block;\n    width: 100%;\n    height: 100%;\n}\n\n/* Native Lampa title card: the YummyAnime action has no text, only its mark. */\n.full-start__button.view--yummyanime {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 1rem !important;\n    line-height: 1 !important;\n}\n\n.view--yummyanime__icon {\n    box-sizing: border-box;\n    display: block !important;\n    width: 2.25rem !important;\n    height: 2.25rem !important;\n    min-width: 2.25rem;\n    min-height: 2.25rem;\n    font-size: 1rem !important;\n    margin: 0 !important;\n    object-fit: contain;\n    filter: brightness(0) invert(1);\n}\n\n.view--yummyanime__icon svg {\n    display: none;\n}\n\n.yani-schedule__content {\n    padding: 1.2em 2em 3em;\n    color: #f4f7fb !important;\n    opacity: 1 !important;\n    filter: none !important;\n}\n\n.yani-schedule { color: #f4f7fb !important; opacity: 1 !important; filter: none !important; }\n\n.yani-schedule__days {\n    display: flex;\n    gap: 0.65em;\n    margin-bottom: 1.2em;\n    overflow-x: auto;\n    padding: 0.2em 0.15em 0.5em;\n}\n\n.yani-schedule__day-chip {\n    flex: 0 0 auto;\n    min-width: 5.8em;\n    padding: 0.55em 0.75em;\n    border: 0.1em solid rgba(255, 255, 255, .16);\n    border-radius: 0.7em;\n    background: rgba(20, 31, 43, .9);\n    color: #b9c7d5;\n    text-align: center;\n    transition: transform .15s ease, background .15s ease, border-color .15s ease;\n}\n\n.yani-schedule__day-chip.selected {\n    background: #287da9;\n    border-color: #72d8ff;\n    color: #ffffff;\n}\n\n.yani-schedule__day-chip.focus {\n    transform: scale(1.05);\n    border-color: #ffffff;\n    box-shadow: 0 0 0 .14em rgba(98, 201, 255, .65);\n}\n\n.yani-schedule__day-name {\n    font-size: 0.95em;\n    font-weight: 700;\n    white-space: nowrap;\n}\n\n.yani-schedule__day-count {\n    margin-top: 0.25em;\n    color: #72d8ff;\n    font-size: 1.2em;\n    font-weight: 800;\n}\n\n.yani-schedule__day-chip.selected .yani-schedule__day-count { color: #ffffff; }\n\n.yani-schedule__selected-title {\n    margin: 0.3em 0 0.7em;\n    color: #ffffff;\n    font-size: 1.45em;\n    font-weight: 700;\n    text-transform: capitalize;\n}\n\n.yani-schedule__day-title {\n    margin-bottom: 0.7em;\n    font-size: 1.55em;\n    font-weight: 600;\n    color: #ffffff;\n    text-transform: capitalize;\n}\n\n.yani-schedule__item {\n    display: flex;\n    align-items: center;\n    min-height: 6.2em;\n    margin-bottom: 0.65em;\n    padding: 0.65em 1em;\n    border-radius: 0.65em;\n    color: #f4f7fb !important;\n    background: linear-gradient(100deg, #19222d, #313c48) !important;\n    border: 0.08em solid rgba(255, 255, 255, .14);\n    box-shadow: 0 .35em 1em rgba(0, 0, 0, .2);\n    opacity: 1 !important;\n    filter: none !important;\n}\n\n.yani-schedule__item.focus {\n    background: linear-gradient(100deg, #ffffff, #eaf5ff);\n    color: #101820;\n    border-color: #62c9ff;\n    box-shadow: 0 0 0 .14em rgba(98, 201, 255, .75), 0 .5em 1.4em rgba(0, 0, 0, .35);\n}\n\n.yani-schedule__poster {\n    width: 4em;\n    height: 5.5em;\n    margin-right: 1em;\n    border-radius: 0.35em;\n    object-fit: cover;\n    background: rgba(255, 255, 255, 0.08);\n}\n\n.yani-schedule__info {\n    flex: 1;\n    min-width: 0;\n}\n\n.yani-schedule__title {\n    overflow: hidden;\n    font-size: 1.15em;\n    font-weight: 500;\n    color: inherit;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n.yani-schedule__episode {\n    margin-top: 0.4em;\n    color: #cbd8e5;\n    opacity: 1;\n}\n\n.yani-schedule__item.focus .yani-schedule__episode,\n.yani-schedule__item.focus .yani-schedule__timezone { color: #41566b; }\n\n.yani-schedule__release {\n    min-width: 8em;\n    margin-left: 1em;\n    text-align: right;\n}\n\n.yani-schedule__time {\n    font-size: 1.25em;\n    font-weight: 600;\n    color: #72d8ff;\n}\n\n.yani-schedule__item.focus .yani-schedule__time { color: #1675a5; }\n\n.yani-schedule__timezone,\n.yani-schedule__empty {\n    color: #b9c7d5;\n    opacity: 1;\n}\n\n.yani-schedule__empty {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.06);\n}\n\n.yani-detail__schedule {\n    margin-bottom: 1.2em;\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-detail__community { margin: 1em 0 1.2em; }\n.yani-detail__personal-rating { display: inline-block; margin: .5em 0; padding: .45em .7em; border-radius: .45em; background: rgba(240, 175, 84, .22); color: #ffd27a; font-weight: 700; }\n.yani-detail__community-title { margin-bottom: .55em; color: #fff; font-size: 1.15em; font-weight: 700; }\n.yani-detail__community-grid { display: flex; flex-wrap: wrap; gap: .45em; }\n.yani-detail__community-item { padding: .45em .7em; border-radius: .45em; background: rgba(255,255,255,.1); color: #d9e7f2; }\n\n.yani-card-ratings {\n    position: absolute;\n    right: 0.35em;\n    bottom: 0.35em;\n    left: 0.35em;\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    gap: 0.2em;\n    pointer-events: none;\n}\n\n.yani-card-media {\n    position: absolute;\n    top: 0.35em;\n    left: 0.35em;\n    display: flex;\n    gap: 0.25em;\n    pointer-events: none;\n}\n\n.yani-card-media__badge {\n    padding: 0.22em 0.38em;\n    border-radius: 0.25em;\n    background: rgba(0, 0, 0, 0.82);\n    color: #fff;\n    font-size: 0.62em;\n    font-weight: 700;\n    line-height: 1.1;\n}\n\n.yani-card-media__quality { background: #f1c40f; color: #171717; }\n.yani-card-media__voices { background: #3b9bd9; }\n.yani-card-update { position: absolute; top: 0.35em; right: 0.35em; z-index: 2; padding: 0.22em 0.38em; border-radius: 0.25em; background: #ef6470; color: #fff; font-size: 0.62em; font-weight: 700; line-height: 1.1; }\n.yani-card-list { position: absolute; left: 0.35em; bottom: 0.35em; z-index: 3; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: #5f43a8; color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n\n.yani-card-rating {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 0.2em 0.3em;\n    border-radius: 0.25em;\n    background: rgba(0, 0, 0, 0.78);\n    color: #fff;\n    font-size: 0.62em;\n}\n\n.yani-rating-logo {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    min-width: 2.1em;\n    height: 1.45em;\n    padding: 0 0.3em;\n    box-sizing: border-box;\n    border-radius: 0.28em;\n    background: #fff;\n    color: #111;\n    font-size: 0.78em;\n    font-weight: 800;\n    letter-spacing: -0.04em;\n    line-height: 1;\n}\n\n.yani-rating-logo--yummy { background: #ef6470; color: #fff; }\n.yani-rating-logo--kp { background: #f2c94c; color: #171717; }\n.yani-rating-logo--shikimori { background: #8b6fc9; color: #fff; }\n.yani-rating-logo--anidub { background: #3b9bd9; color: #fff; }\n.yani-rating-logo--mal { background: #2e5d93; color: #fff; }\n.yani-rating-logo--worldart { background: #f28c28; color: #fff; }\n.yani-rating-logo--yummy,\n.yani-rating-logo--kp,\n.yani-rating-logo--shikimori,\n.yani-rating-logo--anidub,\n.yani-rating-logo--mal,\n.yani-rating-logo--worldart {\n    overflow: hidden;\n}\n\n.yani-card-rating__logo {\n    margin-right: 0.25em;\n}\n\n.yani-card-rating__value {\n    font-weight: 600;\n}\n\n.yani-ratings {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(8em, 1fr));\n    gap: 0.6em;\n    margin: 1em 0 1.4em;\n}\n\n.yani-ratings__item {\n    padding: 0.65em 0.8em;\n    border-radius: 0.5em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-ratings__header { display: flex; align-items: center; gap: 0.55em; }\n.yani-ratings__logo { min-width: 2.5em; height: 1.7em; font-size: 0.85em; }\n.yani-ratings__value {\n    font-size: 1.35em;\n    font-weight: 600;\n}\n\n.yani-ratings__source {\n    margin-top: 0.15em;\n    opacity: 0.78;\n}\n\n.yani-ratings__votes {\n    margin-top: 0.2em;\n    font-size: 0.75em;\n    opacity: 0.55;\n}\n\n.yani-account__content {\n    padding: 1.5em 2em 3em;\n}\n\n.yani-account__notification-button {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    margin: 1em 0;\n    padding: 1em 1.2em;\n    border: 0.08em solid rgba(255,255,255,.16);\n    border-radius: .7em;\n    background: rgba(36, 58, 78, .85);\n}\n\n.yani-account__notification-button.focus { background: #287da9; box-shadow: 0 0 0 .14em rgba(98,201,255,.65); }\n.yani-account__notification-button span { color: #72d8ff; }\n.yani-notifications__content { padding: 1.5em 2em 3em; }\n.yani-notifications__title { margin-bottom: .8em; color: #fff; font-size: 1.6em; font-weight: 700; }\n.yani-notification { margin: .7em 0; padding: 1em 1.2em; border-radius: .65em; background: rgba(255,255,255,.08); border: .08em solid rgba(255,255,255,.1); }\n.yani-notification.unread { border-color: #72d8ff; background: rgba(40,125,169,.3); }\n.yani-notification.focus { background: #fff; color: #17222e; box-shadow: 0 0 0 .14em rgba(98,201,255,.75); }\n.yani-notification__title { font-size: 1.15em; font-weight: 700; }\n.yani-notification__text { margin-top: .35em; color: #cbd8e5; }\n.yani-notification.focus .yani-notification__text { color: #41566b; }\n.yani-notification__date { margin-top: .45em; color: #8ea4b8; font-size: .82em; }\n\n.yani-account__profile {\n    display: flex;\n    align-items: center;\n    padding: 1.2em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-account__profile.focus,\n.yani-account__info.focus,\n.yani-account__list.focus,\n.yani-account__notice.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-account__avatar {\n    width: 7em;\n    height: 7em;\n    margin-right: 1.2em;\n    border-radius: 50%;\n    object-fit: cover;\n}\n\n.yani-account__name {\n    font-size: 1.8em;\n    font-weight: 600;\n}\n\n.yani-account__id,\n.yani-account__about {\n    margin-top: 0.35em;\n    opacity: 0.7;\n}\n\n.yani-account__warning {\n    margin-top: 0.5em;\n    color: #ff6868;\n    font-weight: 600;\n}\n\n.yani-account__grid,\n.yani-account__lists {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(10em, 1fr));\n    gap: 0.7em;\n    margin-top: 1em;\n}\n\n.yani-account__info,\n.yani-account__list,\n.yani-account__notice {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-account__info-title,\n.yani-account__list-time,\n.yani-account__notice-text {\n    opacity: 0.65;\n}\n\n.yani-account__info-value,\n.yani-account__list-count,\n.yani-account__notice-title {\n    margin-top: 0.3em;\n    font-size: 1.2em;\n    font-weight: 600;\n}\n\n.yani-account__list-title {\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-account__list-time {\n    margin-top: 0.35em;\n}\n\n.yani-account__section-title {\n    margin-top: 1.5em;\n    font-size: 1.45em;\n    font-weight: 600;\n}\n\n.yani-account__stats {\n    display: inline-flex;\n    flex-direction: column;\n    width: min(100%, 34em);\n    margin: 0.7em 0.7em 0 0;\n    padding: 0.8em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.08);\n    vertical-align: top;\n}\n\n.yani-account__stats-title {\n    margin-bottom: 0.45em;\n    font-size: 1.1em;\n    font-weight: 600;\n}\n\n.yani-account__stats-row {\n    display: flex;\n    justify-content: space-between;\n    gap: 1em;\n    padding: 0.4em 0.55em;\n    border-radius: 0.35em;\n}\n\n.yani-account__stats-row.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-auth__content {\n    width: min(100%, 42em);\n    margin: 0 auto;\n    padding: 2em;\n}\n\n.yani-auth__title {\n    margin-bottom: 0.35em;\n    font-size: 2em;\n    font-weight: 600;\n}\n\n.yani-auth__status {\n    margin-bottom: 1.4em;\n    color: #f0a33b;\n    opacity: 0.9;\n}\n\n.yani-auth__status.is-authorized {\n    color: #4caf50;\n}\n\n.yani-auth__form,\n.yani-auth__actions {\n    display: grid;\n    gap: 0.7em;\n}\n\n.yani-auth__field,\n.yani-auth__button {\n    padding: 1em 1.2em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-auth__field.focus,\n.yani-auth__button.focus {\n    background: #fff;\n    color: #111;\n    outline: 0.16em solid #ef6470;\n}\n\n.yani-auth__field-title {\n    margin-bottom: 0.3em;\n    opacity: 0.65;\n}\n\n.yani-auth__field-value {\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-auth__button {\n    text-align: center;\n    font-weight: 600;\n}\n\n.yani-auth__button--primary {\n    background: #ef6470;\n    color: #fff;\n}\n\n.yani-auth__account,\n.yani-auth__hint {\n    margin-top: 1em;\n    opacity: 0.65;\n}\n\n.yani-status__content {\n    padding: 1.4em 2em 3em;\n}\n\n.yani-status__periods {\n    display: flex;\n    gap: 0.65em;\n    margin-bottom: 1em;\n}\n\n.yani-status__period {\n    padding: 0.65em 1.15em;\n    border-radius: 0.55em;\n    background: rgba(255, 255, 255, 0.14);\n}\n\n.yani-status__period.active {\n    background: #ef6470;\n    color: #fff;\n}\n\n.yani-status__period.focus {\n    box-shadow: 0 0 0 0.16em #fff;\n}\n\n.yani-status__summary {\n    display: flex;\n    align-items: center;\n    gap: 2em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-status__summary.focus,\n.yani-status__domain.focus,\n.yani-status__refresh.focus,\n.yani-status__error.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-status__ring {\n    display: flex;\n    flex: 0 0 10em;\n    align-items: center;\n    justify-content: center;\n    width: 10em;\n    height: 10em;\n    border-radius: 50%;\n}\n\n.yani-status__ring-center {\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    justify-content: center;\n    width: 7em;\n    height: 7em;\n    border-radius: 50%;\n    background: #292929;\n    color: #fff;\n}\n\n.yani-status__ring-center strong {\n    font-size: 1.65em;\n}\n\n.yani-status__ring-center span {\n    margin-top: 0.2em;\n    opacity: 0.7;\n}\n\n.yani-status__summary-info {\n    flex: 1;\n}\n\n.yani-status__headline {\n    margin-bottom: 0.7em;\n    font-size: 1.8em;\n    font-weight: 700;\n}\n\n.yani-status__metrics {\n    display: grid;\n    grid-template-columns: repeat(4, minmax(8em, 1fr));\n    gap: 0.6em;\n}\n\n.yani-status__metric {\n    padding: 0.65em;\n    border-radius: 0.45em;\n    background: rgba(0, 0, 0, 0.18);\n}\n\n.yani-status__metric span,\n.yani-status__metric strong {\n    display: block;\n}\n\n.yani-status__metric span {\n    margin-bottom: 0.25em;\n    opacity: 0.65;\n}\n\n.yani-status__metric strong {\n    font-size: 1.1em;\n}\n\n.yani-status__legend {\n    display: flex;\n    align-items: center;\n    gap: 0.45em;\n    margin: 1.1em 0 0.7em;\n    opacity: 0.75;\n}\n\n.yani-status__dot,\n.yani-status__state {\n    display: inline-block;\n    width: 0.7em;\n    height: 0.7em;\n    border-radius: 50%;\n}\n\n.yani-status__dot--up,\n.yani-status--up .yani-status__state,\n.yani-status__bar--up { background: #4caf50; }\n.yani-status__dot--degraded,\n.yani-status--degraded .yani-status__state,\n.yani-status__bar--degraded { background: #f0a33b; }\n.yani-status__dot--down,\n.yani-status--down .yani-status__state,\n.yani-status__bar--down { background: #db4455; }\n.yani-status__bar--unknown { background: #777; }\n\n.yani-status__domain {\n    margin-bottom: 0.65em;\n    padding: 0.85em 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-status__domain-head,\n.yani-status__domain-name,\n.yani-status__domain-values {\n    display: flex;\n    align-items: center;\n}\n\n.yani-status__domain-head {\n    justify-content: space-between;\n    margin-bottom: 0.6em;\n}\n\n.yani-status__domain-name {\n    gap: 0.55em;\n}\n\n.yani-status__domain-name strong {\n    font-size: 1.1em;\n}\n\n.yani-status__domain-name small {\n    opacity: 0.5;\n}\n\n.yani-status__domain-values {\n    gap: 1em;\n    opacity: 0.7;\n}\n\n.yani-status__history {\n    display: flex;\n    gap: 0.12em;\n    width: 100%;\n    height: 1.35em;\n}\n\n.yani-status__bar {\n    flex: 1 1 0;\n    min-width: 0.18em;\n    border-radius: 0.15em;\n}\n\n.yani-status__refresh,\n.yani-status__error {\n    margin-top: 1em;\n    padding: 0.9em 1.1em;\n    border-radius: 0.6em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-status__source {\n    margin-top: 0.8em;\n    opacity: 0.55;\n}\n\n.yani-status__refresh {\n    display: inline-block;\n}\n\n.yani-status__error strong,\n.yani-status__error span {\n    display: block;\n}\n\n.yani-status__error span {\n    margin-top: 0.4em;\n    opacity: 0.65;\n}\n\n@media (max-width: 700px) {\n    .yani-schedule__content { padding: 1em; }\n    .yani-schedule__release { min-width: 5em; }\n    .yani-schedule__timezone { display: none; }\n    .yani-ratings { grid-template-columns: repeat(2, minmax(7em, 1fr)); }\n    .yani-account__content { padding: 1em; }\n    .yani-account__grid,\n    .yani-account__lists { grid-template-columns: repeat(2, minmax(8em, 1fr)); }\n    .yani-status__content { padding: 1em; }\n    .yani-status__summary { align-items: flex-start; gap: 1em; }\n    .yani-status__ring { flex-basis: 7em; width: 7em; height: 7em; }\n    .yani-status__ring-center { width: 5em; height: 5em; }\n    .yani-status__metrics { grid-template-columns: repeat(2, minmax(7em, 1fr)); }\n    .yani-status__domain-name small { display: none; }\n}\n";
+    style.textContent = ".yani-catalog {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 1rem;\n}\n\n.icon-yani {\n    width: 2.4em;\n    height: 2.4em;\n    background: center / contain no-repeat url('./assets/yummyanime.svg');\n}\n\n.yani-home__grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(12em, 1fr));\n    gap: 1.05em;\n    padding: 2.2em;\n    max-width: 94em;\n    margin: 0 auto;\n}\n\n.yani-home__item {\n    position: relative;\n    min-height: 8.3em;\n    padding: 1.35em 1.5em;\n    border: 0.08em solid rgba(255, 255, 255, 0.12);\n    border-radius: 1em;\n    background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));\n    box-shadow: 0 0.7em 1.8em rgba(0, 0, 0, .12), inset 0 0.08em 0 rgba(255,255,255,.12);\n    display: flex;\n    align-items: center;\n    gap: 1em;\n    overflow: hidden;\n    transition: transform .18s ease, background .18s ease, border-color .18s ease;\n}\n\n.yani-home__item.focus {\n    background: linear-gradient(135deg, #fff, rgba(255,255,255,.82));\n    color: #16151b;\n    border-color: rgba(255,255,255,.95);\n    box-shadow: 0 0 0 .18em rgba(255,255,255,.22), 0 1em 2.4em rgba(0,0,0,.25);\n    transform: translateY(-.12em) scale(1.015);\n}\n\n.yani-home__icon {\n    flex: 0 0 3.35em;\n    width: 3.35em;\n    height: 3.35em;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    border-radius: .85em;\n    background: rgba(0,0,0,.18);\n    color: #fff;\n    box-shadow: inset 0 0 0 .08em rgba(255,255,255,.12);\n}\n\n.yani-home__icon svg {\n    width: 1.65em;\n    height: 1.65em;\n    fill: none;\n    stroke: currentColor;\n    stroke-width: 1.8;\n    stroke-linecap: round;\n    stroke-linejoin: round;\n}\n\n.yani-home__title {\n    min-width: 0;\n    font-size: 1.3em;\n    font-weight: 600;\n    line-height: 1.2;\n}\n\n.yani-home__arrow {\n    margin-left: auto;\n    color: rgba(255,255,255,.55);\n    font-size: 2em;\n    line-height: 1;\n}\n\n.yani-home__item.focus .yani-home__arrow {\n    color: #ef6470;\n    transform: translateX(.15em);\n}\n\n.yani-home__item--catalog .yani-home__icon { background: linear-gradient(135deg, #ef6470, #b84068); }\n.yani-home__item--genres .yani-home__icon { background: linear-gradient(135deg, #9b75e8, #6548b7); }\n.yani-home__item--search .yani-home__icon { background: linear-gradient(135deg, #43b6d8, #2679c2); }\n.yani-home__item--schedule .yani-home__icon { background: linear-gradient(135deg, #42c68a, #218d78); }\n.yani-home__item--continue_watching .yani-home__icon { background: linear-gradient(135deg, #f0af54, #d87742); }\n.yani-home__item--status .yani-home__icon { background: linear-gradient(135deg, #48c7a0, #238d8d); }\n.yani-home__item--top_rated .yani-home__icon { background: linear-gradient(135deg, #f5c95e, #d97939); }\n.yani-home__item--account .yani-home__icon { background: linear-gradient(135deg, #e77ab3, #9d4b9c); }\n\n.yani-home__item.focus .yani-home__icon {\n    color: #fff;\n    box-shadow: 0 .35em .8em rgba(0,0,0,.2);\n}\n\n.yani-policy {\n    width: min(54em, calc(100% - 3em));\n    margin: 2.5em auto;\n    padding: 2.2em 2.5em;\n    box-sizing: border-box;\n    border: .08em solid rgba(255,255,255,.16);\n    border-radius: 1.2em;\n    background: linear-gradient(145deg, rgba(35,35,42,.96), rgba(18,18,23,.94));\n    box-shadow: 0 1.4em 4em rgba(0,0,0,.35);\n    color: #f7f7fa;\n}\n\n.yani-policy__mark {\n    width: 4.5em;\n    height: 4.5em;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    margin-bottom: 1.2em;\n    padding: .9em;\n    box-sizing: border-box;\n    border-radius: 1.1em;\n    background: linear-gradient(135deg, #ff6871, #c74766);\n    color: #24242a;\n}\n\n.yani-policy__mark svg { width: 100%; height: 100%; fill: currentColor; }\n.yani-policy__title { width: fit-content; max-width: 100%; padding: .12em .25em; margin: 0 0 .75em -.25em; border-radius: .25em; font-size: 2.25em; font-weight: 700; }\n.yani-policy__title.focus { box-shadow: 0 0 0 .1em rgba(255,104,113,.9); background: rgba(255,104,113,.16); }\n.yani-policy__content { color: rgba(255,255,255,.82); font-size: 1.12em; line-height: 1.55; }\n.yani-policy__paragraph + .yani-policy__paragraph { margin-top: .8em; }\n.yani-policy__accept { width: fit-content; margin-top: 1.6em; padding: .78em 1.35em; border-radius: .55em; background: #ef6470; color: #fff; font-weight: 600; }\n.yani-policy__accept.focus { background: #fff; color: #17171b; box-shadow: 0 0 0 .16em #ef6470; transform: scale(1.035); }\n\n@media (max-width: 700px) {\n    .yani-policy { width: calc(100% - 1.4em); margin: 1em auto; padding: 1.4em; }\n    .yani-policy__title { font-size: 1.75em; }\n}\n\n@media (max-width: 700px) {\n    .yani-home__grid { grid-template-columns: repeat(2, minmax(10em, 1fr)); padding: 1.2em; }\n    .yani-home__item { min-height: 7em; padding: 1em; }\n    .yani-home__icon { flex-basis: 2.8em; width: 2.8em; height: 2.8em; }\n}\n\n.yani-detail {\n    display: flex;\n    flex-wrap: wrap;\n    gap: 2.5em;\n    padding: 2em;\n    max-width: 100%;\n    box-sizing: border-box;\n    color: #f4f7fb;\n    opacity: 1;\n    filter: none;\n}\n\n.yani-detail__poster {\n    width: 16em;\n    max-height: 24em;\n    object-fit: cover;\n    border-radius: 0.8em;\n}\n\n.yani-detail__info { min-width: 0; max-width: 48em; flex: 1 1 auto; }\n.yani-detail__title { font-size: 2.2em; font-weight: 600; border-radius: .22em; padding: .08em .16em; margin: -.08em -.16em; width: fit-content; max-width: 100%; }\n.yani-detail__title.focus { background: rgba(239,100,112,.22); box-shadow: 0 0 0 .12em #ef6470; color: #fff; }\n.yani-detail__alternative-titles { margin-top: 0.35em; color: rgba(255,255,255,.68); line-height: 1.35; overflow-wrap: anywhere; }\n.yani-detail__genres { display: flex; flex-wrap: wrap; gap: .36em; margin-top: .55em; }\n.yani-detail__genre { padding: .24em .5em; border: .08em solid rgba(255,255,255,.28); border-radius: .35em; color: rgba(255,255,255,.82); font-size: .78em; line-height: 1.2; }\n.yani-detail__genre.focus { background: #fff; border-color: #fff; box-shadow: 0 0 0 .14em #ef6470; color: #111; transform: scale(1.04); }\n.yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }\n.yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }\n.yani-detail__actions { display: flex; flex-wrap: wrap; gap: 0.7em; max-width: 100%; }\n.yani-detail__button { display: block; max-width: 100%; box-sizing: border-box; padding: 0.8em 1.2em; border: 0.12em solid transparent; border-radius: 0.5em; background: rgba(255,255,255,.15); overflow-wrap: anywhere; }\n.yani-detail__button--watch { background: #ef6470; color: #fff; }\n.yani-detail__button--lampa, .yani-detail__button--external { display: inline-flex; align-items: center; gap: .58em; }\n.yani-detail__button-icon { display: inline-flex; width: 1.25em; height: 1.25em; flex: 0 0 1.25em; }\n.yani-detail__button-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }\n.yani-detail__button.focus { background: #fff; color: #111; border-color: #fff; box-shadow: 0 0 0 0.2em rgba(239, 100, 112, .95), 0 0 1.2em rgba(255, 255, 255, .55); transform: scale(1.02); }\n.yani-detail__list-panel { display: inline-flex; margin-top: .8em; overflow: hidden; border: .1em solid rgba(255,255,255,.18); border-radius: .45em; background: rgba(0,0,0,.24); }\n.yani-detail__list-action { display: flex; align-items: center; justify-content: center; width: 2.7em; height: 2.35em; border-right: .08em solid rgba(255,255,255,.15); color: rgba(255,255,255,.72); background: transparent; }\n.yani-detail__list-action:last-child { border-right: 0; }\n.yani-detail__list-action.active { color: #fff; background: #ef6470; }\n.yani-detail__list-action.focus { color: #111; background: #fff; box-shadow: inset 0 0 0 .18em #ef6470; transform: scale(1.06); position: relative; z-index: 1; }\n.yani-detail__list-icon { width: 1.25em; height: 1.25em; }\n.yani-detail__list-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }\n\n.yani-detail__comments { margin-top: 1.5em; padding-top: 1em; border-top: 0.08em solid rgba(255, 255, 255, .18); }\n.yani-detail__comments-title { margin-bottom: 0.7em; font-size: 1.35em; font-weight: 600; }\n.yani-detail__comments-list { display: grid; gap: 0.55em; }\n.yani-detail__comment, .yani-detail__comments-loading, .yani-detail__comments-empty, .yani-detail__comments-error { padding: 0.7em 0.85em; border-radius: 0.45em; background: rgba(255, 255, 255, .08); }\n.yani-detail__comment.focus { background: #fff; color: #111; outline: 0.18em solid #ef6470; }\n.yani-detail__comment-title { line-height: 1.35; }\n.yani-detail__comment-stats { margin-top: 0.25em; opacity: .6; font-size: .82em; }\n.yani-detail__comments-loading, .yani-detail__comments-empty, .yani-detail__comments-error { opacity: .7; }\n\n.yani-detail__order { margin-top: 1.5em; padding: 1em 0; border-top: 0.08em solid rgba(255, 255, 255, .18); border-bottom: 0.08em solid rgba(255, 255, 255, .18); }\n.yani-detail__order-title { margin-bottom: 0.65em; font-size: 1.35em; font-weight: 600; }\n.yani-detail__order-list { display: grid; gap: 0.4em; }\n.yani-detail__order-item { display: flex; align-items: baseline; gap: 0.45em; padding: 0.55em 0.7em; border-radius: 0.4em; background: rgba(255, 255, 255, .07); }\n.yani-detail__order-item.focus { background: #fff; color: #111; outline: 0.16em solid #ef6470; }\n.yani-detail__order-index { opacity: .65; }\n.yani-detail__order-name { font-weight: 600; }\n.yani-detail__order-year, .yani-detail__order-relation { opacity: .7; }\n\n.yani-detail__extra { margin-top: 1.5em; }\n.yani-detail__extra-title { margin-bottom: .65em; font-size: 1.35em; font-weight: 600; }\n.yani-detail__recommendations-list { display: flex; gap: .65em; max-width: 100%; overflow-x: auto; padding: .25em .1em .7em; }\n.yani-detail__recommendation { flex: 0 0 8em; padding-bottom: .45em; border-radius: .45em; background: rgba(255, 255, 255, .08); overflow: hidden; }\n.yani-detail__recommendation.focus { outline: .16em solid #ef6470; background: #fff; color: #111; }\n.yani-detail__recommendation-poster { display: block; width: 8em; height: 11em; object-fit: cover; }\n.yani-detail__recommendation-title { padding: .35em .45em 0; font-size: .82em; font-weight: 600; line-height: 1.2; }\n.yani-detail__recommendation-year { padding: .2em .45em 0; font-size: .75em; opacity: .65; }\n.yani-detail__trailers-list { display: grid; gap: .45em; }\n.yani-detail__trailer { padding: .7em .85em; border-radius: .45em; background: rgba(255, 255, 255, .08); }\n.yani-detail__trailer.focus { background: #fff; color: #111; outline: .16em solid #ef6470; }\n.yani-detail__collection { padding: .7em .85em; border-radius: .45em; background: rgba(255, 255, 255, .08); }\n.yani-detail__collection.focus { background: #fff; color: #111; outline: .16em solid #ef6470; }\n.yani-detail__collection-title { font-weight: 700; }\n.yani-detail__collection-description { margin-top: .25em; opacity: .72; font-size: .85em; white-space: pre-wrap; }\n.yani-detail__collection-count { margin-top: .3em; opacity: .7; font-size: .78em; }\n.yani-detail__order-item.selector:focus,\n.yani-detail__comment.selector:focus,\n.yani-detail__recommendation.selector:focus,\n.yani-detail__trailer.selector:focus { outline: .16em solid #ef6470; }\n\n.yani-trailers {\n    min-height: 100%;\n    padding: 7em 2em 2em;\n    box-sizing: border-box;\n}\n\n.yani-trailers__list {\n    display: grid;\n    gap: .7em;\n    max-width: 62em;\n}\n\n.yani-trailers__item,\n.yani-trailers__empty {\n    display: flex;\n    align-items: center;\n    gap: .9em;\n    min-height: 4.2em;\n    padding: .8em 1em;\n    border-radius: .45em;\n    background: rgba(15, 22, 31, .78);\n    color: #fff;\n    box-sizing: border-box;\n}\n\n.yani-trailers__item.focus,\n.yani-trailers__empty.focus {\n    background: #fff;\n    color: #111;\n    box-shadow: 0 0 0 .16em #ef6470;\n}\n\n.yani-trailers__icon {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    width: 2.4em;\n    height: 2.4em;\n    flex: 0 0 2.4em;\n}\n\n.yani-trailers__icon svg {\n    display: block;\n    width: 100%;\n    height: 100%;\n}\n\n.yani-trailers__body {\n    min-width: 0;\n}\n\n.yani-trailers__title {\n    overflow: hidden;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n    font-size: 1.18em;\n    font-weight: 600;\n}\n\n.yani-trailers__host {\n    margin-top: .18em;\n    color: rgba(255, 255, 255, .62);\n    font-size: .86em;\n}\n\n.yani-trailers__item.focus .yani-trailers__host {\n    color: rgba(0, 0, 0, .56);\n}\n\n@media (max-width: 700px) {\n    .yani-detail { gap: 1em; padding: 1em; }\n    .yani-detail__poster { width: 10em; }\n}\n\n.yani-player {\n    position: fixed;\n    z-index: 1000;\n    inset: 0;\n    width: 100vw;\n    height: 100vh;\n    background: #000;\n}\n\n.yani-player__iframe {\n    display: block;\n    width: 100%;\n    height: 100%;\n    border: 0;\n    background: #000;\n}\n\n.full-start__button.view--yummyanime {\n    background: #ef6470;\n    color: #fff;\n    order: -1;\n    min-width: 3.1em;\n    padding: .45em .6em;\n}\n\n.view--yummyanime__icon {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 1.8em;\n    height: 1.8em;\n    margin: 0;\n}\n\n.view--yummyanime__icon svg {\n    display: block;\n    width: 100%;\n    height: 100%;\n}\n\n.full-start__rate .yani-full-rating-logo {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 1.15em;\n    height: 1.15em;\n    margin: 0.12em auto 0;\n    color: #ef6470;\n}\n\n.full-start__rate .yani-full-rating-logo svg {\n    display: block;\n    width: 100%;\n    height: 100%;\n}\n\n/* Native Lampa title card: the YummyAnime action has no text, only its mark. */\n.full-start__button.view--yummyanime {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 1rem !important;\n    line-height: 1 !important;\n}\n\n.view--yummyanime__icon {\n    box-sizing: border-box;\n    display: inline-flex !important;\n    align-items: center;\n    justify-content: center;\n    width: 2.25rem !important;\n    height: 2.25rem !important;\n    min-width: 2.25rem;\n    min-height: 2.25rem;\n    font-size: 1rem !important;\n    margin: 0 !important;\n    color: #fff;\n}\n\n.view--yummyanime__icon svg {\n    display: block;\n    width: 100%;\n    height: 100%;\n}\n\n.yani-schedule__content {\n    padding: 1.2em 2em 3em;\n    color: #f4f7fb !important;\n    opacity: 1 !important;\n    filter: none !important;\n}\n\n.yani-schedule { color: #f4f7fb !important; opacity: 1 !important; filter: none !important; }\n\n.yani-schedule__days {\n    display: flex;\n    gap: 0.65em;\n    margin-bottom: 1.2em;\n    overflow-x: auto;\n    padding: 0.2em 0.15em 0.5em;\n}\n\n.yani-schedule__day-chip {\n    flex: 0 0 auto;\n    min-width: 5.8em;\n    padding: 0.55em 0.75em;\n    border: 0.1em solid rgba(255, 255, 255, .16);\n    border-radius: 0.7em;\n    background: rgba(20, 31, 43, .9);\n    color: #b9c7d5;\n    text-align: center;\n    transition: transform .15s ease, background .15s ease, border-color .15s ease;\n}\n\n.yani-schedule__day-chip.selected {\n    background: #287da9;\n    border-color: #72d8ff;\n    color: #ffffff;\n}\n\n.yani-schedule__day-chip.focus {\n    transform: scale(1.05);\n    border-color: #ffffff;\n    box-shadow: 0 0 0 .14em rgba(98, 201, 255, .65);\n}\n\n.yani-schedule__day-name {\n    font-size: 0.95em;\n    font-weight: 700;\n    white-space: nowrap;\n}\n\n.yani-schedule__day-count {\n    margin-top: 0.25em;\n    color: #72d8ff;\n    font-size: 1.2em;\n    font-weight: 800;\n}\n\n.yani-schedule__day-chip.selected .yani-schedule__day-count { color: #ffffff; }\n\n.yani-schedule__selected-title {\n    margin: 0.3em 0 0.7em;\n    color: #ffffff;\n    font-size: 1.45em;\n    font-weight: 700;\n    text-transform: capitalize;\n}\n\n.yani-schedule__day-title {\n    margin-bottom: 0.7em;\n    font-size: 1.55em;\n    font-weight: 600;\n    color: #ffffff;\n    text-transform: capitalize;\n}\n\n.yani-schedule__item {\n    display: flex;\n    align-items: center;\n    min-height: 6.2em;\n    margin-bottom: 0.65em;\n    padding: 0.65em 1em;\n    border-radius: 0.65em;\n    color: #f4f7fb !important;\n    background: linear-gradient(100deg, #19222d, #313c48) !important;\n    border: 0.08em solid rgba(255, 255, 255, .14);\n    box-shadow: 0 .35em 1em rgba(0, 0, 0, .2);\n    opacity: 1 !important;\n    filter: none !important;\n}\n\n.yani-schedule__item.focus {\n    background: linear-gradient(100deg, #ffffff, #eaf5ff);\n    color: #101820;\n    border-color: #62c9ff;\n    box-shadow: 0 0 0 .14em rgba(98, 201, 255, .75), 0 .5em 1.4em rgba(0, 0, 0, .35);\n}\n\n.yani-schedule__poster {\n    width: 4em;\n    height: 5.5em;\n    margin-right: 1em;\n    border-radius: 0.35em;\n    object-fit: cover;\n    background: rgba(255, 255, 255, 0.08);\n}\n\n.yani-schedule__info {\n    flex: 1;\n    min-width: 0;\n}\n\n.yani-schedule__title {\n    overflow: hidden;\n    font-size: 1.15em;\n    font-weight: 500;\n    color: inherit;\n    text-overflow: ellipsis;\n    white-space: nowrap;\n}\n\n.yani-schedule__episode {\n    margin-top: 0.4em;\n    color: #cbd8e5;\n    opacity: 1;\n}\n\n.yani-schedule__item.focus .yani-schedule__episode,\n.yani-schedule__item.focus .yani-schedule__timezone { color: #41566b; }\n\n.yani-schedule__release {\n    min-width: 8em;\n    margin-left: 1em;\n    text-align: right;\n}\n\n.yani-schedule__time {\n    font-size: 1.25em;\n    font-weight: 600;\n    color: #72d8ff;\n}\n\n.yani-schedule__item.focus .yani-schedule__time { color: #1675a5; }\n\n.yani-schedule__timezone,\n.yani-schedule__empty {\n    color: #b9c7d5;\n    opacity: 1;\n}\n\n.yani-schedule__empty {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.06);\n}\n\n.yani-detail__schedule {\n    margin-bottom: 1.2em;\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-detail__community { margin: 1em 0 1.2em; }\n.yani-detail__personal-rating { display: inline-block; margin: .5em 0; padding: .45em .7em; border-radius: .45em; background: rgba(240, 175, 84, .22); color: #ffd27a; font-weight: 700; }\n.yani-detail__community-title { margin-bottom: .55em; color: #fff; font-size: 1.15em; font-weight: 700; }\n.yani-detail__community-grid { display: flex; flex-wrap: wrap; gap: .45em; }\n.yani-detail__community-item { padding: .45em .7em; border-radius: .45em; background: rgba(255,255,255,.1); color: #d9e7f2; }\n\n.yani-card-ratings {\n    position: absolute;\n    right: 0.35em;\n    bottom: 0.35em;\n    left: 0.35em;\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    gap: 0.2em;\n    pointer-events: none;\n}\n\n.yani-card-media {\n    position: absolute;\n    top: 0.35em;\n    left: 0.35em;\n    display: flex;\n    gap: 0.25em;\n    pointer-events: none;\n}\n\n.yani-card-media__badge {\n    padding: 0.22em 0.38em;\n    border-radius: 0.25em;\n    background: rgba(0, 0, 0, 0.82);\n    color: #fff;\n    font-size: 0.62em;\n    font-weight: 700;\n    line-height: 1.1;\n}\n\n.yani-card-media__quality { background: #f1c40f; color: #171717; }\n.yani-card-media__voices { background: #3b9bd9; }\n.yani-card-update { position: absolute; top: 0.35em; right: 0.35em; z-index: 2; padding: 0.22em 0.38em; border-radius: 0.25em; background: #ef6470; color: #fff; font-size: 0.62em; font-weight: 700; line-height: 1.1; }\n.yani-card-list { position: absolute; left: 0.35em; bottom: 0.35em; z-index: 3; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: #5f43a8; color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n\n.yani-card-rating {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    padding: 0.2em 0.3em;\n    border-radius: 0.25em;\n    background: rgba(0, 0, 0, 0.78);\n    color: #fff;\n    font-size: 0.62em;\n}\n\n.yani-rating-logo {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    min-width: 2.1em;\n    height: 1.45em;\n    padding: 0 0.3em;\n    box-sizing: border-box;\n    border-radius: 0.28em;\n    background: #fff;\n    color: #111;\n    font-size: 0.78em;\n    font-weight: 800;\n    letter-spacing: -0.04em;\n    line-height: 1;\n}\n\n.yani-rating-logo--yummy { background: #ef6470; color: #fff; }\n.yani-rating-logo--kp { background: #f2c94c; color: #171717; }\n.yani-rating-logo--shikimori { background: #8b6fc9; color: #fff; }\n.yani-rating-logo--anidub { background: #3b9bd9; color: #fff; }\n.yani-rating-logo--mal { background: #2e5d93; color: #fff; }\n.yani-rating-logo--worldart { background: #f28c28; color: #fff; }\n.yani-rating-logo--yummy,\n.yani-rating-logo--kp,\n.yani-rating-logo--shikimori,\n.yani-rating-logo--anidub,\n.yani-rating-logo--mal,\n.yani-rating-logo--worldart {\n    overflow: hidden;\n}\n\n.yani-card-rating__logo {\n    margin-right: 0.25em;\n}\n\n.yani-card-rating__value {\n    font-weight: 600;\n}\n\n.yani-ratings {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(8em, 1fr));\n    gap: 0.6em;\n    margin: 1em 0 1.4em;\n}\n\n.yani-ratings__item {\n    padding: 0.65em 0.8em;\n    border-radius: 0.5em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-ratings__header { display: flex; align-items: center; gap: 0.55em; }\n.yani-ratings__logo { min-width: 2.5em; height: 1.7em; font-size: 0.85em; }\n.yani-ratings__value {\n    font-size: 1.35em;\n    font-weight: 600;\n}\n\n.yani-ratings__source {\n    margin-top: 0.15em;\n    opacity: 0.78;\n}\n\n.yani-ratings__votes {\n    margin-top: 0.2em;\n    font-size: 0.75em;\n    opacity: 0.55;\n}\n\n.yani-account__content {\n    padding: 1.5em 2em 3em;\n}\n\n.yani-account__notification-button {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    margin: 1em 0;\n    padding: 1em 1.2em;\n    border: 0.08em solid rgba(255,255,255,.16);\n    border-radius: .7em;\n    background: rgba(36, 58, 78, .85);\n}\n\n.yani-account__notification-button.focus { background: #287da9; box-shadow: 0 0 0 .14em rgba(98,201,255,.65); }\n.yani-account__notification-button span { color: #72d8ff; }\n.yani-notifications__content { padding: 1.5em 2em 3em; }\n.yani-notifications__title { margin-bottom: .8em; color: #fff; font-size: 1.6em; font-weight: 700; }\n.yani-notification { margin: .7em 0; padding: 1em 1.2em; border-radius: .65em; background: rgba(255,255,255,.08); border: .08em solid rgba(255,255,255,.1); }\n.yani-notification.unread { border-color: #72d8ff; background: rgba(40,125,169,.3); }\n.yani-notification.focus { background: #fff; color: #17222e; box-shadow: 0 0 0 .14em rgba(98,201,255,.75); }\n.yani-notification__title { font-size: 1.15em; font-weight: 700; }\n.yani-notification__text { margin-top: .35em; color: #cbd8e5; }\n.yani-notification.focus .yani-notification__text { color: #41566b; }\n.yani-notification__date { margin-top: .45em; color: #8ea4b8; font-size: .82em; }\n\n.yani-account__profile {\n    display: flex;\n    align-items: center;\n    padding: 1.2em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-account__profile.focus,\n.yani-account__info.focus,\n.yani-account__list.focus,\n.yani-account__notice.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-account__avatar {\n    width: 7em;\n    height: 7em;\n    margin-right: 1.2em;\n    border-radius: 50%;\n    object-fit: cover;\n}\n\n.yani-account__name {\n    font-size: 1.8em;\n    font-weight: 600;\n}\n\n.yani-account__id,\n.yani-account__about {\n    margin-top: 0.35em;\n    opacity: 0.7;\n}\n\n.yani-account__warning {\n    margin-top: 0.5em;\n    color: #ff6868;\n    font-weight: 600;\n}\n\n.yani-account__grid,\n.yani-account__lists {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(10em, 1fr));\n    gap: 0.7em;\n    margin-top: 1em;\n}\n\n.yani-account__info,\n.yani-account__list,\n.yani-account__notice {\n    padding: 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-account__info-title,\n.yani-account__list-time,\n.yani-account__notice-text {\n    opacity: 0.65;\n}\n\n.yani-account__info-value,\n.yani-account__list-count,\n.yani-account__notice-title {\n    margin-top: 0.3em;\n    font-size: 1.2em;\n    font-weight: 600;\n}\n\n.yani-account__list-title {\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-account__list-time {\n    margin-top: 0.35em;\n}\n\n.yani-account__section-title {\n    margin-top: 1.5em;\n    font-size: 1.45em;\n    font-weight: 600;\n}\n\n.yani-account__stats {\n    display: inline-flex;\n    flex-direction: column;\n    width: min(100%, 34em);\n    margin: 0.7em 0.7em 0 0;\n    padding: 0.8em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.08);\n    vertical-align: top;\n}\n\n.yani-account__stats-title {\n    margin-bottom: 0.45em;\n    font-size: 1.1em;\n    font-weight: 600;\n}\n\n.yani-account__stats-row {\n    display: flex;\n    justify-content: space-between;\n    gap: 1em;\n    padding: 0.4em 0.55em;\n    border-radius: 0.35em;\n}\n\n.yani-account__stats-row.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-auth__content {\n    width: min(100%, 42em);\n    margin: 0 auto;\n    padding: 2em;\n}\n\n.yani-auth__title {\n    margin-bottom: 0.35em;\n    font-size: 2em;\n    font-weight: 600;\n}\n\n.yani-auth__status {\n    margin-bottom: 1.4em;\n    color: #f0a33b;\n    opacity: 0.9;\n}\n\n.yani-auth__status.is-authorized {\n    color: #4caf50;\n}\n\n.yani-auth__form,\n.yani-auth__actions {\n    display: grid;\n    gap: 0.7em;\n}\n\n.yani-auth__field,\n.yani-auth__button {\n    padding: 1em 1.2em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-auth__field.focus,\n.yani-auth__button.focus {\n    background: #fff;\n    color: #111;\n    outline: 0.16em solid #ef6470;\n}\n\n.yani-auth__field-title {\n    margin-bottom: 0.3em;\n    opacity: 0.65;\n}\n\n.yani-auth__field-value {\n    font-size: 1.15em;\n    font-weight: 600;\n}\n\n.yani-auth__button {\n    text-align: center;\n    font-weight: 600;\n}\n\n.yani-auth__button--primary {\n    background: #ef6470;\n    color: #fff;\n}\n\n.yani-auth__account,\n.yani-auth__hint {\n    margin-top: 1em;\n    opacity: 0.65;\n}\n\n.yani-status__content {\n    padding: 1.4em 2em 3em;\n}\n\n.yani-status__periods {\n    display: flex;\n    gap: 0.65em;\n    margin-bottom: 1em;\n}\n\n.yani-status__period {\n    padding: 0.65em 1.15em;\n    border-radius: 0.55em;\n    background: rgba(255, 255, 255, 0.14);\n}\n\n.yani-status__period.active {\n    background: #ef6470;\n    color: #fff;\n}\n\n.yani-status__period.focus {\n    box-shadow: 0 0 0 0.16em #fff;\n}\n\n.yani-status__summary {\n    display: flex;\n    align-items: center;\n    gap: 2em;\n    padding: 1.4em;\n    border-radius: 0.8em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-status__summary.focus,\n.yani-status__domain.focus,\n.yani-status__refresh.focus,\n.yani-status__error.focus {\n    background: #fff;\n    color: #111;\n}\n\n.yani-status__ring {\n    display: flex;\n    flex: 0 0 10em;\n    align-items: center;\n    justify-content: center;\n    width: 10em;\n    height: 10em;\n    border-radius: 50%;\n}\n\n.yani-status__ring-center {\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    justify-content: center;\n    width: 7em;\n    height: 7em;\n    border-radius: 50%;\n    background: #292929;\n    color: #fff;\n}\n\n.yani-status__ring-center strong {\n    font-size: 1.65em;\n}\n\n.yani-status__ring-center span {\n    margin-top: 0.2em;\n    opacity: 0.7;\n}\n\n.yani-status__summary-info {\n    flex: 1;\n}\n\n.yani-status__headline {\n    margin-bottom: 0.7em;\n    font-size: 1.8em;\n    font-weight: 700;\n}\n\n.yani-status__metrics {\n    display: grid;\n    grid-template-columns: repeat(4, minmax(8em, 1fr));\n    gap: 0.6em;\n}\n\n.yani-status__metric {\n    padding: 0.65em;\n    border-radius: 0.45em;\n    background: rgba(0, 0, 0, 0.18);\n}\n\n.yani-status__metric span,\n.yani-status__metric strong {\n    display: block;\n}\n\n.yani-status__metric span {\n    margin-bottom: 0.25em;\n    opacity: 0.65;\n}\n\n.yani-status__metric strong {\n    font-size: 1.1em;\n}\n\n.yani-status__legend {\n    display: flex;\n    align-items: center;\n    gap: 0.45em;\n    margin: 1.1em 0 0.7em;\n    opacity: 0.75;\n}\n\n.yani-status__dot,\n.yani-status__state {\n    display: inline-block;\n    width: 0.7em;\n    height: 0.7em;\n    border-radius: 50%;\n}\n\n.yani-status__dot--up,\n.yani-status--up .yani-status__state,\n.yani-status__bar--up { background: #4caf50; }\n.yani-status__dot--degraded,\n.yani-status--degraded .yani-status__state,\n.yani-status__bar--degraded { background: #f0a33b; }\n.yani-status__dot--down,\n.yani-status--down .yani-status__state,\n.yani-status__bar--down { background: #db4455; }\n.yani-status__bar--unknown { background: #777; }\n\n.yani-status__domain {\n    margin-bottom: 0.65em;\n    padding: 0.85em 1em;\n    border-radius: 0.65em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-status__domain-head,\n.yani-status__domain-name,\n.yani-status__domain-values {\n    display: flex;\n    align-items: center;\n}\n\n.yani-status__domain-head {\n    justify-content: space-between;\n    margin-bottom: 0.6em;\n}\n\n.yani-status__domain-name {\n    gap: 0.55em;\n}\n\n.yani-status__domain-name strong {\n    font-size: 1.1em;\n}\n\n.yani-status__domain-name small {\n    opacity: 0.5;\n}\n\n.yani-status__domain-values {\n    gap: 1em;\n    opacity: 0.7;\n}\n\n.yani-status__history {\n    display: flex;\n    gap: 0.12em;\n    width: 100%;\n    height: 1.35em;\n}\n\n.yani-status__bar {\n    flex: 1 1 0;\n    min-width: 0.18em;\n    border-radius: 0.15em;\n}\n\n.yani-status__refresh,\n.yani-status__error {\n    margin-top: 1em;\n    padding: 0.9em 1.1em;\n    border-radius: 0.6em;\n    background: rgba(255, 255, 255, 0.1);\n}\n\n.yani-status__source {\n    margin-top: 0.8em;\n    opacity: 0.55;\n}\n\n.yani-status__refresh {\n    display: inline-block;\n}\n\n.yani-status__error strong,\n.yani-status__error span {\n    display: block;\n}\n\n.yani-status__error span {\n    margin-top: 0.4em;\n    opacity: 0.65;\n}\n\n@media (max-width: 700px) {\n    .yani-schedule__content { padding: 1em; }\n    .yani-schedule__release { min-width: 5em; }\n    .yani-schedule__timezone { display: none; }\n    .yani-ratings { grid-template-columns: repeat(2, minmax(7em, 1fr)); }\n    .yani-account__content { padding: 1em; }\n    .yani-account__grid,\n    .yani-account__lists { grid-template-columns: repeat(2, minmax(8em, 1fr)); }\n    .yani-status__content { padding: 1em; }\n    .yani-status__summary { align-items: flex-start; gap: 1em; }\n    .yani-status__ring { flex-basis: 7em; width: 7em; height: 7em; }\n    .yani-status__ring-center { width: 5em; height: 5em; }\n    .yani-status__metrics { grid-template-columns: repeat(2, minmax(7em, 1fr)); }\n    .yani-status__domain-name small { display: none; }\n}\n";
     document.head.appendChild(style);
 
 (function (window) {
@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.23',
+        version: '0.21.0',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -460,6 +460,7 @@ function pluginYummyAnime() {
     'use strict';
 
     var config = window.LampaYaniConfig;
+    var pendingRequests = {};
 
     function sleep(milliseconds) {
         return new Promise(function (resolve) { setTimeout(resolve, milliseconds); });
@@ -472,8 +473,14 @@ function pluginYummyAnime() {
             var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
             var requestOptions = Object.assign({}, options);
             if (controller) requestOptions.signal = controller.signal;
-            var timer = setTimeout(function () { if (controller) controller.abort(); }, timeout);
-            return fetch(url, requestOptions).then(function (response) {
+            var timer;
+            var timeoutPromise = new Promise(function (resolve, reject) {
+                timer = setTimeout(function () {
+                    if (controller) controller.abort();
+                    reject(new Error('YummyAnime request timeout'));
+                }, timeout);
+            });
+            return Promise.race([fetch(url, requestOptions), timeoutPromise]).then(function (response) {
                 clearTimeout(timer);
                 var retryableStatus = response.status === 408 || response.status === 425 || response.status === 429 || response.status >= 500;
                 if (!response.ok && retryableStatus && number < retries) {
@@ -506,10 +513,11 @@ function pluginYummyAnime() {
 
     function request(path, options) {
         options = options || {};
-        var headers = options.headers || {};
+        var headers = Object.assign({}, options.headers || {});
         var apiLanguage = window.LampaYaniI18n ? LampaYaniI18n.getLanguage() : 'ru';
         var cacheKey = 'lampa_yummyanime_cache_' + apiLanguage + '_' + path;
         var cacheTtl = options.cacheTtl || config.cacheTtl || 300000;
+        var method = options.method || 'GET';
 
         var applicationToken = config.applicationToken ? config.applicationToken() : config.applicationHeader;
         if (applicationToken) headers['X-Application'] = applicationToken;
@@ -518,21 +526,26 @@ function pluginYummyAnime() {
         headers.Lang = apiLanguage;
         if (options.token) headers.Authorization = 'Bearer ' + options.token;
 
-        return fetchWithRetry(config.apiBase + path, {
-            method: options.method || 'GET',
+        var pendingKey = method === 'GET' && options.dedupe !== false
+            ? [apiLanguage, path, options.auth ? 'auth' : 'public', options.token ? 'token' : ''].join('|')
+            : '';
+        if (pendingKey && pendingRequests[pendingKey]) return pendingRequests[pendingKey];
+
+        var operation = fetchWithRetry(config.apiBase + path, {
+            method: method,
             headers: headers,
             body: options.body
-        }, (options.method || 'GET') === 'GET').then(function (response) {
+        }, method === 'GET').then(function (response) {
             if (!response.ok) throw new Error('YummyAnime API: ' + response.status);
             return response.json();
         }).then(function (payload) {
-            if ((options.method || 'GET') === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
+            if (method === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
                 Lampa.Storage.set(cacheKey, JSON.stringify({time: Date.now(), data: payload}));
                 rememberCacheKey(cacheKey);
             }
             return payload;
         }).catch(function (error) {
-            if ((options.method || 'GET') === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
+            if (method === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
                 try {
                     var cached = JSON.parse(Lampa.Storage.get(cacheKey, 'null'));
                     if (cached && (options.staleFallback || Date.now() - cached.time < cacheTtl)) return cached.data;
@@ -540,6 +553,16 @@ function pluginYummyAnime() {
             }
             throw error;
         });
+
+        if (!pendingKey) return operation;
+        pendingRequests[pendingKey] = operation.then(function (payload) {
+            delete pendingRequests[pendingKey];
+            return payload;
+        }, function (error) {
+            delete pendingRequests[pendingKey];
+            throw error;
+        });
+        return pendingRequests[pendingKey];
     }
 
     function externalRequest(base, path, options) {
@@ -1816,14 +1839,74 @@ function pluginYummyAnime() {
 
 (function (global) {
     'use strict';
-    var cache = {}, order = [], limit = 200;
+
+    var cache = {};
+    var order = [];
+    var pending = {};
+    var queue = [];
+    var active = 0;
+    var limit = 80;
+    var maxActive = 2;
+    var requestTimeout = 8000;
+
     function remember(key, value) {
-        if (Object.prototype.hasOwnProperty.call(cache, key)) order = order.filter(function (item) { return item !== key; });
-        cache[key] = value; order.push(key);
+        if (Object.prototype.hasOwnProperty.call(cache, key)) {
+            order = order.filter(function (item) { return item !== key; });
+        }
+        cache[key] = value;
+        order.push(key);
         while (order.length > limit) delete cache[order.shift()];
     }
+
+    function enqueue(task) {
+        return new Promise(function (resolve, reject) {
+            queue.push({task: task, resolve: resolve, reject: reject});
+            drain();
+        });
+    }
+
+    function drain() {
+        while (active < maxActive && queue.length) {
+            (function (entry) {
+                active++;
+                var operation;
+                try { operation = entry.task(); } catch (error) { operation = Promise.reject(error); }
+                operation.then(entry.resolve, entry.reject).then(function () {
+                    active--;
+                    drain();
+                });
+            }(queue.shift()));
+        }
+    }
+
+    function requestJson(source) {
+        return enqueue(function () {
+            var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            var options = source.query
+                ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({query: 'query ($search: String) { Page(perPage: 1) { media(search: $search, type: ANIME) { coverImage { extraLarge large } } } }', variables: {search: source.query}})}
+                : {};
+            if (controller) options.signal = controller.signal;
+            var timer;
+            var timeout = new Promise(function (resolve, reject) {
+                timer = setTimeout(function () {
+                    if (controller) controller.abort();
+                    reject(new Error('poster request timeout'));
+                }, requestTimeout);
+            });
+            return Promise.race([fetch(source.url, options), timeout]).then(function (response) {
+                clearTimeout(timer);
+                if (!response.ok) throw new Error('poster source ' + response.status);
+                return response.json();
+            }).catch(function (error) {
+                clearTimeout(timer);
+                throw error;
+            });
+        });
+    }
+
     function titles(item) {
-        var values = [], add = function (value) {
+        var values = [];
+        var add = function (value) {
             value = typeof value === 'string' ? value.trim() : '';
             if (value && values.indexOf(value) < 0) values.push(value);
         };
@@ -1832,41 +1915,104 @@ function pluginYummyAnime() {
             var list = item && item[key];
             if (Array.isArray(list)) list.forEach(function (value) { add(typeof value === 'string' ? value : value && (value.title || value.name || value.value)); });
         });
-        return values.slice(0, 5);
+        // A missing poster must not fan out into dozens of requests on a TV.
+        return values.slice(0, 2);
     }
+
+    function posterFromPayload(payload, aniList) {
+        var item = aniList && payload && payload.data && payload.data.Page
+            ? payload.data.Page.media && payload.data.Page.media[0]
+            : payload && payload.data
+                ? (Array.isArray(payload.data) ? payload.data[0] : payload.data)
+                : payload;
+        var images = item && item.images || {};
+        return aniList
+            ? item && item.coverImage && (item.coverImage.large || item.coverImage.extraLarge)
+            : images.jpg && (images.jpg.image_url || images.jpg.large_image_url) ||
+                images.webp && (images.webp.image_url || images.webp.large_image_url) ||
+                item && (item.poster || item.image);
+    }
+
     function find(card) {
         var key = String(card && (card.yani_id || card.title) || '').toLowerCase();
         if (!key) return Promise.resolve('');
-        if (cache[key]) return Promise.resolve(cache[key]);
-        if (cache[key] === null) return Promise.resolve('');
-        var ids = card.yani_remote_ids || {}, urls = [];
+        if (Object.prototype.hasOwnProperty.call(cache, key)) return Promise.resolve(cache[key] || '');
+        if (pending[key]) return pending[key];
+
+        var ids = card.yani_remote_ids || {};
+        var urls = [];
         if (ids.mal || ids.myanimelist) urls.push({url: 'https://api.jikan.moe/v4/anime/' + encodeURIComponent(ids.mal || ids.myanimelist) + '/full'});
         if (ids.shikimori) urls.push({url: 'https://shikimori.one/api/animes/' + encodeURIComponent(ids.shikimori) + '.json'});
-        titles(card).forEach(function (title) { urls.push({url: 'https://api.jikan.moe/v4/anime?q=' + encodeURIComponent(title) + '&limit=1'}); urls.push({url: 'https://graphql.anilist.co', query: title}); });
+        titles(card).forEach(function (title) {
+            urls.push({url: 'https://api.jikan.moe/v4/anime?q=' + encodeURIComponent(title) + '&limit=1'});
+            urls.push({url: 'https://graphql.anilist.co', query: title});
+        });
+
         function load(index) {
-            if (index >= urls.length) { remember(key, null); return Promise.resolve(''); }
-            var source = urls[index], ani = source.url === 'https://graphql.anilist.co';
-            var request = ani ? fetch(source.url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({query: 'query ($search: String) { Page(perPage: 1) { media(search: $search, type: ANIME) { coverImage { extraLarge large } } } }', variables: {search: source.query}})}) : fetch(source.url);
-            return request.then(function (response) { if (!response.ok) throw new Error('poster source ' + response.status); return response.json(); }).then(function (payload) {
-                var item = ani && payload && payload.data && payload.data.Page ? payload.data.Page.media && payload.data.Page.media[0] : payload && payload.data ? (Array.isArray(payload.data) ? payload.data[0] : payload.data) : payload;
-                var images = item && item.images || {};
-                var poster = ani ? item && item.coverImage && (item.coverImage.extraLarge || item.coverImage.large) : images.jpg && (images.jpg.large_image_url || images.jpg.image_url) || images.webp && (images.webp.large_image_url || images.webp.image_url) || item && (item.poster || item.image);
-                if (!poster) throw new Error('alternative poster is empty'); remember(key, poster); return poster;
+            if (index >= urls.length) return Promise.resolve('');
+            var source = urls[index];
+            var aniList = source.url === 'https://graphql.anilist.co';
+            return requestJson(source).then(function (payload) {
+                var poster = posterFromPayload(payload, aniList);
+                if (!poster) throw new Error('alternative poster is empty');
+                return poster;
             }).catch(function () { return load(index + 1); });
         }
-        return urls.length ? load(0) : (remember(key, null), Promise.resolve(''));
+
+        pending[key] = (urls.length ? load(0) : Promise.resolve('')).then(function (poster) {
+            delete pending[key];
+            remember(key, poster || null);
+            return poster || '';
+        }, function () {
+            delete pending[key];
+            remember(key, null);
+            return '';
+        });
+        return pending[key];
     }
+
+    function renderElement(element, card) {
+        var render = element && element.jquery ? element : element ? $(element) : $();
+        if (!render.length && card && card.render) render = $(card.render(true));
+        return render;
+    }
+
+    function prepareImage(image) {
+        if (!image || !image.length) return;
+        image.attr('loading', 'lazy').attr('decoding', 'async');
+    }
+
     function attach(element, card) {
-        var render = card && card.render ? $(card.render(true)) : $(element), image = render.find('img').first(), box = render.find('.card__img').first();
-        var apply = function (poster) { if (!poster) return; if (image.length) image.attr('src', poster); if (box.length) box.css('background-image', 'url("' + poster.replace(/"/g, '%22') + '")'); };
+        var render = renderElement(element, card);
+        var image = render.find('img').first();
+        var box = render.find('.card__img').first();
+        var apply = function (poster) {
+            if (!poster) return;
+            if (image.length) image.attr('src', poster);
+            if (box.length) box.css('background-image', 'url("' + poster.replace(/"/g, '%22') + '")');
+        };
         var alternative = function () { find(card).then(apply); };
-        if (image.length) image.off('error.yaniPoster').on('error.yaniPoster', alternative);
-        if (!card.poster) return alternative();
-        var probe = new Image(); probe.onload = function () {}; probe.onerror = alternative; probe.src = card.poster;
+        prepareImage(image);
+        if (image.length) image.off('error.yaniPoster').one('error.yaniPoster', alternative);
+        // Do not create a second hidden Image probe. On low-memory WebViews it
+        // decoded every catalog poster twice and could terminate the process.
+        if (!card.poster && !card.img) alternative();
     }
-    function bind(image, card) { image.off('error.yaniPoster').on('error.yaniPoster', function () { find(card).then(function (poster) { if (poster) image.attr('src', poster); }); }); if (!card.poster && !card.img) find(card).then(function (poster) { if (poster) image.attr('src', poster); }); }
+
+    function bind(image, card) {
+        prepareImage(image);
+        image.off('error.yaniPoster').one('error.yaniPoster', function () {
+            find(card).then(function (poster) { if (poster) image.attr('src', poster); });
+        });
+        if (!card.poster && !card.img) find(card).then(function (poster) { if (poster) image.attr('src', poster); });
+    }
+
     global.LampaYani = global.LampaYani || {};
-    global.LampaYani.Media = global.LampaYaniMedia = {findAlternativePoster: find, attachPosterFallback: attach, bindPosterFallback: bind};
+    global.LampaYani.Media = global.LampaYaniMedia = {
+        findAlternativePoster: find,
+        attachPosterFallback: attach,
+        bindPosterFallback: bind
+    };
 }(window));
 
 (function (window) {
@@ -2110,19 +2256,6 @@ function pluginYummyAnime() {
     }
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Player = window.LampaYaniPlayer = {create: create};
-}(window));
-
-(function (window) {
-    'use strict';
-    function create(deps) {
-        function order(data) { var section = $('<div class="yani-detail__order"></div>').append($('<div class="yani-detail__order-title"></div>').text(deps.t('viewing_order'))), list = $('<div class="yani-detail__order-list"></div>'); (data.yani_viewing_order || []).forEach(function (entry, index) { var card = deps.toCard(entry), relation = entry.data && (entry.data.text || entry.data.title) || '', row = $('<div class="yani-detail__order-item selector"></div>').append($('<span class="yani-detail__order-index"></span>').text((index + 1) + '.')).append($('<span class="yani-detail__order-name"></span>').text(card.title)); if (card.release_date) row.append($('<span class="yani-detail__order-year"></span>').text(card.release_date)); if (relation) row.append($('<span class="yani-detail__order-relation"></span>').text('· ' + relation)); row.on('hover:focus', function () { row.addClass('focus'); }).on('hover:blur', function () { row.removeClass('focus'); }).on('hover:enter click.yaniOrder', function () { deps.openDetail(card, true); }); list.append(row); }); return section.append(list); }
-        function recommendations(data, container) { var section = $('<div class="yani-detail__extra yani-detail__recommendations"><div class="yani-detail__extra-title"></div></div>'), list = $('<div class="yani-detail__recommendations-list"></div>'); section.find('.yani-detail__extra-title').text(deps.t('recommendations')); container.append(section.append(list)); LampaYaniApi.recommendations(data.yani_id).then(function (payload) { var items = LampaYaniApi.normalize(payload).slice(0, 12); if (!items.length) return section.remove(); items.forEach(function (item) { var card = deps.toCard(item), row = $('<div class="yani-detail__recommendation selector"></div>'), poster = $('<img class="yani-detail__recommendation-poster" alt="">').attr('src', card.poster || ''); LampaYaniMedia.bindPosterFallback(poster, card); row.append(poster, $('<div class="yani-detail__recommendation-title"></div>').text(card.title)); if (card.release_date) row.append($('<div class="yani-detail__recommendation-year"></div>').text(card.release_date)); row.on('hover:focus', function () { row.addClass('focus'); }).on('hover:blur', function () { row.removeClass('focus'); }).on('hover:enter click.yaniRecommendation', function () { deps.openDetail(card, true); }); list.append(row); }); }).catch(function () { section.remove(); }); }
-        function collections(data, container) { var section = $('<div class="yani-detail__extra yani-detail__collections"><div class="yani-detail__extra-title"></div></div>'), list = $('<div class="yani-detail__collections-list"></div>'); section.find('.yani-detail__extra-title').text(deps.t('collections')); container.append(section.append(list)); LampaYaniApi.collections(data.yani_id, 10, 0).then(function (payload) { var response = payload && payload.response ? payload.response : payload, items = Array.isArray(response) ? response : response && (response.items || response.data || response.collections) || []; if (!items.length) return section.remove(); items.forEach(function (collection) { var animes = Array.isArray(collection.animes) ? collection.animes : [], row = $('<div class="yani-detail__collection selector"></div>').append($('<div class="yani-detail__collection-title"></div>').text(collection.title || collection.name || deps.t('collection'))); if (collection.description) row.append($('<div class="yani-detail__collection-description"></div>').text(deps.clean(collection.description))); if (animes.length) row.append($('<div class="yani-detail__collection-count"></div>').text(animes.length + ' ' + deps.t('anime_count'))); row.on('hover:focus', function () { row.addClass('focus'); }).on('hover:blur', function () { row.removeClass('focus'); }).on('hover:enter click.yaniCollection', function () { if (animes.length) Lampa.Select.show({title: collection.title || deps.t('collection'), items: animes.map(function (item) { var card = deps.toCard(item); return {title: card.title, card: card}; }), onSelect: function (item) { deps.openDetail(item.card, true); }}); }); list.append(row); }); }).catch(function () { section.remove(); }); }
-        function trailers(data, container) { var section = $('<div class="yani-detail__extra yani-detail__trailers"><div class="yani-detail__extra-title"></div></div>'), list = $('<div class="yani-detail__trailers-list"></div>'); section.find('.yani-detail__extra-title').text(deps.t('trailers')); container.append(section.append(list)); LampaYaniApi.trailers(data.yani_id).then(function (payload) { var items = payload && payload.response ? payload.response : payload; if (!Array.isArray(items) || !items.length) return section.remove(); items.forEach(function (trailer, index) { var title = trailer.title || trailer.name || ('Trailer ' + (index + 1)), url = trailer.iframe_url || trailer.url || trailer.video_url || trailer.link, row = $('<div class="yani-detail__trailer selector"></div>').text('▶ ' + title); row.on('hover:focus', function () { row.addClass('focus'); }).on('hover:blur', function () { row.removeClass('focus'); }); if (url) row.on('hover:enter click.yaniTrailer', function () { url = LampaYaniUiUtils.normalizeVideoUrl(url); if (!deps.showIframe(url)) Lampa.Activity.push({url: 'yani/trailer/' + encodeURIComponent(title), title: title, component: 'yani_player', iframe_url: url}); }); list.append(row); }); }).catch(function () { section.remove(); }); }
-        return {order: order, recommendations: recommendations, collections: collections, trailers: trailers};
-    }
-    window.LampaYani = window.LampaYani || {};
-    window.LampaYani.DetailSections = window.LampaYaniDetailSections = {create: create};
 }(window));
 
 (function (window) {
@@ -2662,6 +2795,12 @@ function pluginYummyAnime() {
         bindYummyCardRender(first, second, third, {openYummyDetail: true});
     }
 
+    function cardRenderElement(element, card) {
+        var render = element && element.jquery ? element : element ? $(element) : $();
+        if (!render.length && card && card.render) render = $(card.render(true));
+        return render;
+    }
+
     function bindYummyCard(element, card, options) {
         // Keep an explicit marker on the original Lampa card.  Some Lampa
         // versions preserve only custom fields when forwarding a card to the
@@ -2674,7 +2813,7 @@ function pluginYummyAnime() {
         LampaYaniMedia.attachPosterFallback(element, card);
         // Some Lampa versions clone the card object after cardRender. Keep a
         // DOM-level handler as a fallback so search results remain clickable.
-        var rendered = element && element.jquery ? element : $(element);
+        var rendered = cardRenderElement(element, card);
         // Lampa cards already have a default `hover:enter` handler. Some
         // builds attach it to an inner card element, not the rendered root.
         // Remove it from the full YummyAnime card tree: otherwise one Enter
@@ -2713,11 +2852,11 @@ function pluginYummyAnime() {
 
     function addCardMediaBadges(element, card) {
         var requested = false;
-        var cardRender = card && card.render ? $(card.render(true)) : $(element);
+        var cardRender = cardRenderElement(element, card);
         renderCardMediaBadges(element, card, card.yani_media || mediaMeta(card));
         if (!card.yani_id || (card.yani_media && card.yani_media.loaded)) return;
 
-        cardRender.on('hover:focus', function () {
+        cardRender.off('hover:focus.yaniMedia').one('hover:focus.yaniMedia', function () {
             if (requested) return;
             requested = true;
             LampaYaniApi.videos(card.yani_id).then(function (payload) {
@@ -2731,7 +2870,7 @@ function pluginYummyAnime() {
 
     function renderCardMediaBadges(element, card, meta) {
         if (!meta || (!meta.quality && !meta.voices)) return;
-        var render = card && card.render ? $(card.render(true)) : $(element);
+        var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length) return;
         var block = $('.yani-card-media', view);
@@ -2743,7 +2882,7 @@ function pluginYummyAnime() {
 
     function addCardUpdateBadge(element, card) {
         if (!card || !card.yani_update_episode) return;
-        var render = card.render ? $(card.render(true)) : $(element);
+        var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length || view.find('.yani-card-update').length) return;
         view.append($('<span class="yani-card-update"></span>').text(t('episode') + ' ' + card.yani_update_episode));
@@ -2751,7 +2890,7 @@ function pluginYummyAnime() {
 
     function addCardListBadge(element, card) {
         if (!card || (card.yani_list_id === null && !card.yani_is_favorite)) return;
-        var render = card.render ? $(card.render(true)) : $(element);
+        var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length) return;
         var badge = $('.yani-card-list', view);
@@ -4483,17 +4622,22 @@ function pluginYummyAnime() {
         console.info('[YummyAnime] Native TMDB resolve started', {yaniId: getYummyId(card), titles: titles});
 
         function resolveTitles(searchTitles) {
-            // The native-card watchdog is intentionally short. Searching a
-            // long alias list one by one meant a slow first alias could keep
-            // an exact English/Japanese title from ever being queried. Run
-            // the bounded title set together and score the combined results.
-            return Promise.all((searchTitles || []).slice(0, 8).map(function (title) {
-                return searchTmdbTitle(tmdb, title).catch(function () { return []; });
-            })).then(function (rows) {
-                var items = [];
-                rows.forEach(function (row) { items = items.concat(Array.isArray(row) ? row : []); });
-                return bestStandardCard(items, card);
-            });
+            // Search aliases in small batches. Eight aliases multiplied by
+            // movie and TV endpoints created a large simultaneous request
+            // burst that could terminate low-memory Android WebViews.
+            var titlesToSearch = (searchTitles || []).slice(0, 8);
+            var collected = [];
+            function next(offset) {
+                if (offset >= titlesToSearch.length) return Promise.resolve(bestStandardCard(collected, card));
+                return Promise.all(titlesToSearch.slice(offset, offset + 2).map(function (title) {
+                    return searchTmdbTitle(tmdb, title).catch(function () { return []; });
+                })).then(function (rows) {
+                    rows.forEach(function (row) { collected = collected.concat(Array.isArray(row) ? row : []); });
+                    var match = bestStandardCard(collected, card);
+                    return match || next(offset + 2);
+                });
+            }
+            return next(0);
         }
 
         return resolveTitles(titles).then(function (match) {
@@ -4634,15 +4778,36 @@ function pluginYummyAnime() {
         return items[0];
     }
 
+    var nativeMatchCache = {};
+    var nativeMatchPending = {};
+    var nativeMatchOrder = [];
+
+    function nativeMatchKey(movie) {
+        return [movie && (movie.source || ''), movie && (movie.id || ''), movie && (movie.title || movie.name || ''), movie && (movie.release_date || movie.first_air_date || '')].join('|').toLowerCase();
+    }
+
+    function rememberNativeMatch(key, cards) {
+        nativeMatchCache[key] = cards;
+        nativeMatchOrder = nativeMatchOrder.filter(function (item) { return item !== key; });
+        nativeMatchOrder.push(key);
+        while (nativeMatchOrder.length > 50) delete nativeMatchCache[nativeMatchOrder.shift()];
+    }
+
     function findYummyMatches(movie) {
         movie = movie || {};
         var title = movie.title || movie.name || movie.original_title || movie.original_name || '';
         var year = String(movie.release_date || movie.first_air_date || movie.year || '').slice(0, 4);
         if (!title) return Promise.resolve([]);
+        var cacheKey = nativeMatchKey(movie);
+        if (Object.prototype.hasOwnProperty.call(nativeMatchCache, cacheKey)) return Promise.resolve(nativeMatchCache[cacheKey]);
+        if (nativeMatchPending[cacheKey]) return nativeMatchPending[cacheKey];
 
         var queries = LampaYaniUiUtils.titleValues(movie);
         if (queries.indexOf(title) < 0) queries.unshift(title);
-        return Promise.all(queries.slice(0, 8).map(function (query) {
+        // Native cards usually expose a localized and an original title. Two
+        // queries are enough for matching and avoid an eight-request burst on
+        // low-memory TVs whenever Lampa emits the full-card event twice.
+        nativeMatchPending[cacheKey] = Promise.all(queries.slice(0, 2).map(function (query) {
             return LampaYaniApi.search(query, {limit: 10}).then(function (payload) {
                 return LampaYaniApi.normalize(payload).map(toCard);
             }).catch(function () { return []; });
@@ -4665,7 +4830,15 @@ function pluginYummyAnime() {
             if (!cards.length || cards[0]._match_score < 70) return [];
             var best = cards[0]._match_score;
             return cards.filter(function (card, index) { return index < 5 && (card._match_score === best || card._match_score >= 70); });
+        }).then(function (cards) {
+            delete nativeMatchPending[cacheKey];
+            rememberNativeMatch(cacheKey, cards);
+            return cards;
+        }, function (error) {
+            delete nativeMatchPending[cacheKey];
+            throw error;
         });
+        return nativeMatchPending[cacheKey];
     }
 
     function isNativeAnimeCard(movie) {
@@ -4680,10 +4853,15 @@ function pluginYummyAnime() {
         }).join(' ').toLowerCase();
         if (/(?:animation|animated|anime|аниме|мультфильм|мультипликац)/.test(names)) return true;
 
-        // Some Lampa builds expose only the numeric TMDB genre ids after the
-        // detail is rendered. In that case keep the exact-title resolver as
-        // the fallback instead of rejecting an otherwise valid anime.
-        return !source && !Array.isArray(ids);
+        // Missing genres used to classify every film and series as anime,
+        // causing background YummyAnime searches on every native detail page.
+        // A Japanese origin is a safer fallback when genre metadata is absent.
+        var language = String(movie && (movie.original_language || movie.language) || '').toLowerCase();
+        var countries = movie && (movie.origin_country || movie.production_countries) || [];
+        var japaneseOrigin = Array.isArray(countries) && countries.some(function (country) {
+            return String(typeof country === 'string' ? country : country && (country.iso_3166_1 || country.code) || '').toUpperCase() === 'JP';
+        });
+        return language === 'ja' && japaneseOrigin;
     }
 
     function movePageDown(scroll) { LampaYaniNavigation.moveDown(scroll); }
@@ -5194,8 +5372,8 @@ function pluginYummyAnime() {
         var image = item.image && typeof item.image === 'object' ? item.image : {};
         var cover = item.cover && typeof item.cover === 'object' ? item.cover : {};
         var poster = typeof item.cover === 'string' ? item.cover : typeof item.image === 'string' ? item.image : item.poster_url ||
-            image.large || image.original || image.url || cover.large || cover.original || cover.url || '';
-        if (!poster && item.poster) poster = item.poster.fullsize || item.poster.medium || item.poster.original || '';
+            image.medium || image.large || image.url || image.original || cover.medium || cover.large || cover.url || cover.original || '';
+        if (!poster && item.poster) poster = item.poster.medium || item.poster.fullsize || item.poster.original || '';
         if (typeof poster !== 'string') poster = '';
         if (poster.indexOf('//') === 0) poster = 'https:' + poster;
         var rating = typeof item.rating === 'object' ? item.rating.average : item.rating;
@@ -5792,9 +5970,9 @@ function pluginYummyAnime() {
     }
 
     function addCardRatings(element, card) {
-        var ratings = element.yani_ratings || [];
-        if (!ratings.length || !card || !card.render) return;
-        var render = $(card.render(true));
+        var ratings = card && card.yani_ratings || [];
+        if (!ratings.length || !card) return;
+        var render = cardRenderElement(element, card);
         if ($('.yani-card-ratings', render).length) return;
 
         $('.card__vote', render).hide();
@@ -6200,11 +6378,12 @@ function pluginYummyAnime() {
         Lampa.Listener.follow('full', function (event) {
             if (event.type !== 'complite') return;
             var movie = event.data && event.data.movie ? event.data.movie : event.object && event.object.card_data;
-            if (!movie) return;
+            if (!movie || !event.object || !event.object.activity) return;
+            if (!lampaCardIntegrationEnabled('rating') && !lampaCardIntegrationEnabled('button')) return;
             // A native Lampa card may be a film or a live-action series with
             // an accidentally similar title. Do not decorate those cards
             // with a YummyAnime action.
-            if (!isNativeAnimeCard(movie)) return;
+            if (!movie.yani_card && !isNativeAnimeCard(movie)) return;
 
             var matchRequest = movie.yani_card ? Promise.resolve([movie.yani_card]) : findYummyMatches(movie);
             matchRequest.then(function (matches) {
@@ -6251,7 +6430,7 @@ function pluginYummyAnime() {
         if (!container.length) return;
 
         if (!$('.view--yummyanime', render).length) {
-            var button = $('<div class="full-start__button selector view--yummyanime" title="YummyAnime" aria-label="YummyAnime"><img class="view--yummyanime__icon" alt="YummyAnime" src="https://andrewcodeman.github.io/lampa_yani/assets/yummyanime.svg"></div>');
+            var button = $('<div class="full-start__button selector view--yummyanime" title="YummyAnime" aria-label="YummyAnime"><span class="view--yummyanime__icon" aria-hidden="true">' + yummyRatingLogo() + '</span></div>');
             button.on('hover:enter click.yaniFullDetail', function () { openYummyDetail(anime, false); });
             container.prepend(button);
         }
