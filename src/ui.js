@@ -16,6 +16,9 @@
         controller: 'content',
         element: null
     };
+    var usagePolicyRevision = '1';
+    var usagePolicyScheduled = false;
+    var usagePolicyVisible = false;
 
     function goBack() {
         if (window.Lampa && Lampa.Activity && Lampa.Activity.backward) {
@@ -54,6 +57,8 @@
                     component: 'yani_home'
                 });
             });
+
+            scheduleUsagePolicy();
 
             }
 
@@ -129,6 +134,7 @@
             Lampa.Component.add('yani_history', History);
 
             Lampa.Component.add('yani_detail', Detail);
+            Lampa.Component.add('yani_policy', UsagePolicy);
             Lampa.Component.add('yani_trailers', TrailerList);
             Lampa.Component.add('yani_account', Account);
             Lampa.Component.add('yani_account_list', AccountList);
@@ -214,6 +220,81 @@
 
         this.render = function (js) { return js ? html[0] : html; };
         this.destroy = function () { scroll.destroy(); html.remove(); };
+    }
+
+    function UsagePolicy(object) {
+        var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
+        scroll.minus();
+        var html = $('<div class="yani-policy"></div>');
+        var title;
+        var accept;
+
+        this.create = function () {
+            var self = this;
+            var mark = $('<div class="yani-policy__mark" aria-hidden="true"></div>').html(yummyAnimeIcon());
+            title = $('<div class="yani-policy__title selector"></div>').text(t('usage_policy_title'));
+            var content = $('<div class="yani-policy__content"></div>');
+            [
+                t('usage_policy_as_is'),
+                t('usage_policy_information'),
+                t('usage_policy_legal'),
+                t('usage_policy_responsibility')
+            ].forEach(function (paragraph) {
+                content.append($('<div class="yani-policy__paragraph"></div>').text(paragraph));
+            });
+            accept = $('<div class="yani-policy__accept selector"></div>').text(t('usage_policy_accept'));
+            accept.on('hover:enter click.yaniPolicyAccept', function () {
+                if (Lampa.Storage) Lampa.Storage.set('yani_usage_policy_revision', usagePolicyRevision);
+                usagePolicyVisible = false;
+                goBack();
+            });
+            html.append(mark, title, content, accept);
+            html.on('hover:focus', function (event) {
+                var target = $(event.target).closest('.selector');
+                html.find('.focus').removeClass('focus');
+                target.addClass('focus');
+                scroll.update(target, true);
+            });
+            scroll.append(html);
+            self.activity.loader(false);
+        };
+
+        this.start = function () {
+            Lampa.Controller.add('content', {
+                toggle: function () { Lampa.Controller.collectionSet(scroll.render()); Lampa.Controller.collectionFocus(title, scroll.render()); },
+                left: function () { Lampa.Controller.toggle('menu'); },
+                right: function () {},
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
+                down: function () { movePageDown(scroll); },
+                back: function () { usagePolicyVisible = false; goBack(); }
+            });
+            Lampa.Controller.toggle('content');
+        };
+
+        this.render = function (js) { return js ? scroll.render(true) : scroll.render(); };
+        this.destroy = function () { usagePolicyVisible = false; scroll.destroy(); html.remove(); };
+    }
+
+    function scheduleUsagePolicy() {
+        if (usagePolicyScheduled || !Lampa.Storage) return;
+        if (String(Lampa.Storage.get('yani_usage_policy_revision', '')) === usagePolicyRevision) return;
+        usagePolicyScheduled = true;
+        setTimeout(function () {
+            usagePolicyScheduled = false;
+            showUsagePolicy(false);
+        }, 600);
+    }
+
+    function showUsagePolicy(force) {
+        if (!Lampa.Activity || !Lampa.Activity.push || usagePolicyVisible) return;
+        if (!force && Lampa.Storage && String(Lampa.Storage.get('yani_usage_policy_revision', '')) === usagePolicyRevision) return;
+        usagePolicyVisible = true;
+        Lampa.Activity.push({
+            url: 'yani/policy',
+            title: t('usage_policy_title'),
+            component: 'yani_policy',
+            manual: Boolean(force)
+        });
     }
 
     function homeIcon(key) {
@@ -3621,6 +3702,13 @@
                 description: t('version_label') + ' ' + LampaYaniConfig.version + ' · ' + t('unofficial_extension') + ' · ' + t('website_description') + ': ' + yummyWebsiteUrl()
             },
             onChange: openYummyWebsite
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_usage_policy', type: 'button'},
+            field: {name: t('usage_policy_title'), description: t('usage_policy_settings_description')},
+            onChange: function () { showUsagePolicy(true); }
         });
 
         Lampa.SettingsApi.addParam({

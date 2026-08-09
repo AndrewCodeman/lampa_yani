@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.20.21 — 2026-08-09
+
+- Add a localized usage-policy window shown once on first launch.
+- State that the extension is provided as is, is intended for informational purposes and must not be used for illegal activity.
+- Add a settings action for reopening the policy at any time.
+
 ## 0.20.20 — 2026-08-09
 
 - Restore an open YummyAnime title after Lampa clears its plugin cache or reloads extensions.
