@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.29.1',
+        version: '0.29.2',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -97,6 +97,7 @@ function pluginYummyAnime() {
     messages.ru.user_lists = 'Ваши списки';
     messages.ru.user_lists_description = 'Списки вашего аккаунта YummyAnime';
     messages.ru.user_lists_error = 'Не удалось загрузить ваши списки YummyAnime';
+    messages.ru.open_list = 'Открыть список';
     messages.ru.favorites = 'Любимое';
     messages.ru.license_notice = 'Расширение распространяется по свободной лицензии MIT · https://github.com/AndrewCodeman/lampa_yani';
     messages.ru.my_reviews = 'Мои отзывы';
@@ -139,6 +140,7 @@ function pluginYummyAnime() {
     messages.en.user_lists = 'Your Lists';
     messages.en.user_lists_description = 'Lists from your YummyAnime account';
     messages.en.user_lists_error = 'Failed to load your YummyAnime lists';
+    messages.en.open_list = 'Open list';
     messages.en.favorites = 'Favorites';
     messages.en.license_notice = 'This extension is distributed under the free MIT License · https://github.com/AndrewCodeman/lampa_yani';
     messages.en.my_reviews = 'My reviews';
@@ -332,6 +334,7 @@ function pluginYummyAnime() {
     messages.uk.user_lists = 'Ваші списки';
     messages.uk.user_lists_description = 'Списки вашого облікового запису YummyAnime';
     messages.uk.user_lists_error = 'Не вдалося завантажити ваші списки YummyAnime';
+    messages.uk.open_list = 'Відкрити список';
     messages.uk.favorites = 'Улюблене';
     messages.uk.license_notice = 'Розширення поширюється за вільною ліцензією MIT · https://github.com/AndrewCodeman/lampa_yani';
     messages.uk.my_reviews = 'Мої відгуки';
@@ -2685,46 +2688,17 @@ function pluginYummyAnime() {
             });
         }
 
-        function finish(component) {
-            scroll.append(content);
-            html.append(scroll.render(true));
-            component.activity.loader(false);
-            component.activity.toggle();
-        }
-
-        function notice(title, description) {
-            var item = $('<div class="yani-account__notice selector"></div>');
-            item.append($('<div class="yani-account__notice-title"></div>').text(title));
-            item.append($('<div class="yani-account__notice-text"></div>').text(description));
-            focus(item);
-            content.append(item);
-        }
-
-        function render(profile, stats, lists) {
-            var counts = {};
-            lists.forEach(function (anime) {
-                var userList = anime.user && anime.user.list;
-                if (!userList) return;
-                if (userList.list && typeof userList.list.id !== 'undefined') {
-                    counts[userList.list.id] = (counts[userList.list.id] || 0) + 1;
-                }
-                if (userList.is_fav) counts[4] = (counts[4] || 0) + 1;
-            });
-
+        function render() {
             content.append($('<div class="yani-user-lists__heading"></div>').text(deps.t('user_lists')));
             content.append($('<div class="yani-user-lists__description"></div>').text(deps.t('user_lists_description')));
             var grid = $('<div class="yani-account__lists"></div>');
             deps.definitions().forEach(function (definition) {
-                var stat = stats.filter(function (item) {
-                    return Number(item.list && item.list.id) === definition.id;
-                })[0] || {};
                 var tile = $('<div class="yani-account__list selector"></div>');
                 tile.append($('<div class="yani-account__list-title"></div>').text(definition.title));
-                tile.append($('<div class="yani-account__list-count"></div>').text(String(counts[definition.id] || 0) + ' ' + deps.t('anime_count')));
-                tile.append($('<div class="yani-account__list-time"></div>').text(deps.t('total_time') + ': ' + deps.formatWatchTime(stat.seconds)));
+                tile.append($('<div class="yani-account__list-time"></div>').text(deps.t('open_list')));
                 focus(tile);
                 tile.on('hover:enter click.yaniUserList', function () {
-                    deps.openList(definition, lists, profile.id);
+                    deps.openList(definition);
                 });
                 grid.append(tile);
             });
@@ -2732,28 +2706,16 @@ function pluginYummyAnime() {
         }
 
         this.create = function () {
-            var self = this;
-            this.activity.loader(true);
             if (!LampaYaniAuth.token()) {
-                notice(deps.t('not_logged_in'), deps.t('login_hint'));
-                finish(self);
+                Lampa.Noty.show(deps.t('login_required'));
+                deps.goBack();
                 return;
             }
-            LampaYaniApi.profile().then(function (payload) {
-                var profile = payload && payload.response ? payload.response : payload;
-                return Promise.all([
-                    Promise.resolve(profile),
-                    LampaYaniApi.userListStats(profile.id).then(deps.responseData).catch(function () { return []; }),
-                    LampaYaniApi.userLists(profile.id).then(deps.normalizeList).catch(function () { return []; })
-                ]);
-            }).then(function (result) {
-                render(result[0], Array.isArray(result[1]) ? result[1] : [], Array.isArray(result[2]) ? result[2] : []);
-                finish(self);
-            }).catch(function (error) {
-                console.error('[YummyAnime User Lists]', error);
-                notice(deps.t('user_lists_error'), deps.t('account_retry'));
-                finish(self);
-            });
+            render();
+            scroll.append(content);
+            html.append(scroll.render(true));
+            this.activity.loader(false);
+            this.activity.toggle();
         };
 
         this.start = function () {
@@ -3982,22 +3944,68 @@ function pluginYummyAnime() {
         ];
     }
 
-    function openAccountList(definition, items, userId) {
-        var selected = (items || []).filter(function (item) {
-            var userList = item.user && item.user.list;
-            return definition.id === 4 ? Boolean(userList && userList.is_fav) : Boolean(userList && userList.list && Number(userList.list.id) === definition.id);
+    function userListState(item) {
+        if (!item) return null;
+        return item.user && item.user.list || item.user_list || item.list_state || null;
+    }
+
+    function filterAccountListItems(definition, items) {
+        return (items || []).filter(function (item) {
+            var state = userListState(item);
+            if (!state) return false;
+            if (definition.id === 4) return Boolean(state.is_fav || state.is_favorite || state.favorite);
+            var list = state.list && typeof state.list === 'object' ? state.list : state;
+            return typeof list.id !== 'undefined' && Number(list.id) === definition.id;
         });
+    }
+
+    function pushAccountList(definition, items) {
+        Lampa.Activity.push({
+            url: 'yani/account/list/' + definition.key,
+            title: 'YummyAnime · ' + definition.title,
+            component: 'yani_account_list',
+            items: items || []
+        });
+    }
+
+    function openAccountList(definition, items, userId) {
+        var selected = filterAccountListItems(definition, items);
         var load = definition.id === 4 || !userId ? Promise.resolve(selected) : LampaYaniApi.userList(userId, definition.id).then(function (payload) {
             var result = normalizeUserList(payload);
             return result.length ? result : selected;
         }).catch(function () { return selected; });
         load.then(function (result) {
-            Lampa.Activity.push({
-                url: 'yani/account/list/' + definition.key,
-                title: 'YummyAnime · ' + definition.title,
-                component: 'yani_account_list',
-                items: result
+            pushAccountList(definition, result);
+        });
+    }
+
+    function openUserListShortcut(definition) {
+        if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
+        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+
+        function loadAll(userId) {
+            return LampaYaniApi.userLists(userId).then(normalizeUserList).then(function (items) {
+                return filterAccountListItems(definition, items);
             });
+        }
+
+        LampaYaniApi.profile().then(function (payload) {
+            var profile = payload && payload.response ? payload.response : payload;
+            var userId = profile && (profile.id || profile.user_id || profile.user && profile.user.id);
+            if (!userId) throw new Error('YummyAnime profile id is missing');
+            if (definition.id === 4) return loadAll(userId);
+            return LampaYaniApi.userList(userId, definition.id).then(normalizeUserList).catch(function () {
+                return [];
+            }).then(function (items) {
+                return items.length ? items : loadAll(userId);
+            });
+        }).then(function (items) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            pushAccountList(definition, items);
+        }).catch(function (error) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            console.error('[YummyAnime User Lists]', error);
+            Lampa.Noty.show(t('user_lists_error'));
         });
     }
 
@@ -4020,10 +4028,7 @@ function pluginYummyAnime() {
         return LampaYaniAccountLists.userLists(object, {
             t: t,
             definitions: accountListDefinitions,
-            openList: openAccountList,
-            normalizeList: normalizeUserList,
-            responseData: function (payload) { return payload && payload.response ? payload.response : payload || []; },
-            formatWatchTime: formatWatchTime,
+            openList: openUserListShortcut,
             goBack: goBack
         });
     }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.29.2 — 2026-08-10
+
+- Replace the eager Your Lists API dashboard with a reliable shortcut menu for Watching, Planned, Completed, Dropped, Postponed and Favorites.
+- Load only the selected account list and fall back to filtering the complete account list when a dedicated endpoint is unavailable.
+
 ## 0.29.1 — 2026-08-10
 
 - Preserve the title-detail controller and focused action throughout the playback selection chain.

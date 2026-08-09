@@ -1188,22 +1188,68 @@
         ];
     }
 
-    function openAccountList(definition, items, userId) {
-        var selected = (items || []).filter(function (item) {
-            var userList = item.user && item.user.list;
-            return definition.id === 4 ? Boolean(userList && userList.is_fav) : Boolean(userList && userList.list && Number(userList.list.id) === definition.id);
+    function userListState(item) {
+        if (!item) return null;
+        return item.user && item.user.list || item.user_list || item.list_state || null;
+    }
+
+    function filterAccountListItems(definition, items) {
+        return (items || []).filter(function (item) {
+            var state = userListState(item);
+            if (!state) return false;
+            if (definition.id === 4) return Boolean(state.is_fav || state.is_favorite || state.favorite);
+            var list = state.list && typeof state.list === 'object' ? state.list : state;
+            return typeof list.id !== 'undefined' && Number(list.id) === definition.id;
         });
+    }
+
+    function pushAccountList(definition, items) {
+        Lampa.Activity.push({
+            url: 'yani/account/list/' + definition.key,
+            title: 'YummyAnime · ' + definition.title,
+            component: 'yani_account_list',
+            items: items || []
+        });
+    }
+
+    function openAccountList(definition, items, userId) {
+        var selected = filterAccountListItems(definition, items);
         var load = definition.id === 4 || !userId ? Promise.resolve(selected) : LampaYaniApi.userList(userId, definition.id).then(function (payload) {
             var result = normalizeUserList(payload);
             return result.length ? result : selected;
         }).catch(function () { return selected; });
         load.then(function (result) {
-            Lampa.Activity.push({
-                url: 'yani/account/list/' + definition.key,
-                title: 'YummyAnime · ' + definition.title,
-                component: 'yani_account_list',
-                items: result
+            pushAccountList(definition, result);
+        });
+    }
+
+    function openUserListShortcut(definition) {
+        if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
+        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+
+        function loadAll(userId) {
+            return LampaYaniApi.userLists(userId).then(normalizeUserList).then(function (items) {
+                return filterAccountListItems(definition, items);
             });
+        }
+
+        LampaYaniApi.profile().then(function (payload) {
+            var profile = payload && payload.response ? payload.response : payload;
+            var userId = profile && (profile.id || profile.user_id || profile.user && profile.user.id);
+            if (!userId) throw new Error('YummyAnime profile id is missing');
+            if (definition.id === 4) return loadAll(userId);
+            return LampaYaniApi.userList(userId, definition.id).then(normalizeUserList).catch(function () {
+                return [];
+            }).then(function (items) {
+                return items.length ? items : loadAll(userId);
+            });
+        }).then(function (items) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            pushAccountList(definition, items);
+        }).catch(function (error) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            console.error('[YummyAnime User Lists]', error);
+            Lampa.Noty.show(t('user_lists_error'));
         });
     }
 
@@ -1226,10 +1272,7 @@
         return LampaYaniAccountLists.userLists(object, {
             t: t,
             definitions: accountListDefinitions,
-            openList: openAccountList,
-            normalizeList: normalizeUserList,
-            responseData: function (payload) { return payload && payload.response ? payload.response : payload || []; },
-            formatWatchTime: formatWatchTime,
+            openList: openUserListShortcut,
             goBack: goBack
         });
     }

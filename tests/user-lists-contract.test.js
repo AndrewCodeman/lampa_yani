@@ -12,15 +12,22 @@ assert.match(ui, /\['user_lists', 'user_lists'\]/);
 assert.match(ui, /component: 'yani_user_lists'/);
 
 assert.match(lists, /function userLists\(object, deps\)/);
-assert.match(lists, /LampaYaniApi\.userListStats\(profile\.id\)/);
-assert.match(lists, /LampaYaniApi\.userLists\(profile\.id\)/);
 assert.match(lists, /deps\.definitions\(\)\.forEach/);
-assert.match(lists, /deps\.openList\(definition, lists, profile\.id\)/);
+assert.match(lists, /deps\.openList\(definition\)/);
 assert.match(lists, /click\.yaniUserList/);
+const userListsComponent = lists.slice(lists.indexOf('function userLists'), lists.indexOf('window.LampaYani ='));
+assert.doesNotMatch(userListsComponent, /LampaYaniApi\./, 'list shortcuts must render without an eager API request');
+
+assert.match(ui, /function openUserListShortcut\(definition\)/);
+assert.match(ui, /function openUserListShortcut[\s\S]{0,2200}LampaYaniApi\.profile\(\)/);
+assert.match(ui, /function openUserListShortcut[\s\S]{0,2200}LampaYaniApi\.userList\(userId, definition\.id\)/);
+assert.match(ui, /function openUserListShortcut[\s\S]{0,2200}LampaYaniApi\.userLists\(userId\)/);
+assert.match(ui, /openList: openUserListShortcut/);
 
 ['ru', 'en', 'uk'].forEach((language) => {
     assert.match(i18n, new RegExp(`messages\\.${language}\\.user_lists\\s*=`));
     assert.match(i18n, new RegExp(`messages\\.${language}\\.favorites\\s*=`));
+    assert.match(i18n, new RegExp(`messages\\.${language}\\.open_list\\s*=`));
 });
 
 console.log('User lists contract checks passed');
