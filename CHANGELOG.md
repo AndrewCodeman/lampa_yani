@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.28.0 — 2026-08-09
+
+- Add opt-out automatic viewing-progress synchronization for authorized YummyAnime users.
+- Track the internal Lampa player's real position locally every ten seconds and synchronize it to YummyAnime at a bounded interval and on pause or completion.
+- Keep manual account-page synchronization available when automatic synchronization is disabled.
+- Clarify that external Android players cannot report their playback position back to Lampa.
+
 ## 0.27.2 — 2026-08-09
 
 - Give a captured Alloha master an assumed lifetime, so the session is refreshed ahead of time even when the player never states one; a 12-minute test showed playback stalling after roughly eight minutes without it.

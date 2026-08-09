@@ -41,6 +41,8 @@
     messages.ru.sync_history_description = 'Отправить локальную историю в аккаунт YummyAnime';
     messages.ru.sync_history_ok = 'История просмотра синхронизирована';
     messages.ru.sync_history_error = 'Не удалось синхронизировать историю';
+    messages.ru.auto_sync_progress = 'Автосинхронизация прогресса';
+    messages.ru.auto_sync_progress_description = 'Автоматически сохранять в аккаунте YummyAnime прогресс внутреннего плеера Lampa. При отключении доступна ручная синхронизация на странице аккаунта';
     messages.ru.my_reviews = 'Мои отзывы';
     messages.ru.my_reviews_description = 'Отзывы пользователя YummyAnime';
     messages.ru.reviews_empty = 'Отзывов пока нет';
@@ -76,6 +78,8 @@
     messages.en.sync_history_description = 'Send local history to your YummyAnime account';
     messages.en.sync_history_ok = 'Watch history synchronized';
     messages.en.sync_history_error = 'Failed to synchronize history';
+    messages.en.auto_sync_progress = 'Automatic progress sync';
+    messages.en.auto_sync_progress_description = 'Automatically save internal Lampa player progress to the YummyAnime account. When disabled, manual sync is available on the account page';
     messages.en.my_reviews = 'My reviews';
     messages.en.my_reviews_description = 'Your YummyAnime reviews';
     messages.en.reviews_empty = 'There are no reviews yet';
@@ -262,6 +266,8 @@
     messages.uk.sync_history_description = 'Надіслати локальну історію до облікового запису YummyAnime';
     messages.uk.sync_history_ok = 'Історію перегляду синхронізовано';
     messages.uk.sync_history_error = 'Не вдалося синхронізувати історію';
+    messages.uk.auto_sync_progress = 'Автосинхронізація прогресу';
+    messages.uk.auto_sync_progress_description = 'Автоматично зберігати в обліковому записі YummyAnime прогрес внутрішнього плеєра Lampa. Після вимкнення доступна ручна синхронізація на сторінці облікового запису';
     messages.uk.my_reviews = 'Мої відгуки';
     messages.uk.my_reviews_description = 'Відгуки користувача YummyAnime';
     messages.uk.reviews_empty = 'Відгуків ще немає';

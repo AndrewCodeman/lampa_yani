@@ -756,26 +756,16 @@
             bindAccountFocus(subscriptionsButton);
             subscriptionsButton.on('hover:enter click.yaniSubscriptions', function () { openSubscriptions(profile.id); });
             content.append(subscriptionsButton);
-            var syncButton = $('<div class="yani-account__notification-button selector"></div>');
-            syncButton.append($('<strong></strong>').text(t('sync_history')));
-            syncButton.append($('<span></span>').text(t('sync_history_description')));
-            bindAccountFocus(syncButton);
-            syncButton.on('hover:enter click.yaniSync', function () {
-                var history = playbackHistory();
-                var videos = Object.keys(history).map(function (id) {
-                    var item = history[id] || {};
-                    if (!item.video_id) return null;
-                    return {video_id: Number(item.video_id), time: Number(item.time || 0), date: Math.floor(Number(item.updated_at || Date.now()) / 1000)};
-                }).filter(function (item) { return item && item.video_id; });
-                if (!videos.length) return Lampa.Noty.show(t('history_empty'));
-                LampaYaniApi.syncVideoWatches(videos).then(function () {
-                    Lampa.Noty.show(t('sync_history_ok'));
-                }).catch(function (error) {
-                    console.error('[YummyAnime] History sync failed', error);
-                    Lampa.Noty.show(t('sync_history_error'));
-                });
-            });
-            content.append(syncButton);
+            // Manual synchronization remains available from the account page
+            // when automatic progress synchronization is deliberately off.
+            if (!autoProgressSyncEnabled()) {
+                var syncButton = $('<div class="yani-account__notification-button selector"></div>');
+                syncButton.append($('<strong></strong>').text(t('sync_history')));
+                syncButton.append($('<span></span>').text(t('sync_history_description')));
+                bindAccountFocus(syncButton);
+                syncButton.on('hover:enter click.yaniSync', syncPlaybackHistoryManually);
+                content.append(syncButton);
+            }
             var reviewsButton = $('<div class="yani-account__notification-button selector"></div>');
             reviewsButton.append($('<strong></strong>').text(t('my_reviews')));
             reviewsButton.append($('<span></span>').text(t('my_reviews_description')));
@@ -2911,6 +2901,12 @@
         return value === true || value === 'true';
     }
 
+    function autoProgressSyncEnabled() {
+        if (!LampaYaniAuth.token() || !Lampa.Storage || !Lampa.Storage.get) return false;
+        var value = Lampa.Storage.get('yani_auto_sync_progress', true);
+        return value !== false && value !== 'false';
+    }
+
     // Lampa's internal player is an HTML5 video element whichever skin is
     // active, and reading it directly avoids depending on player internals that
     // differ between Lampa builds. External players are out of reach by design.
@@ -2935,19 +2931,24 @@
         if (!context) return;
         var skipMode = skipPreference();
         var autoNext = autoNextEnabled();
-        if (skipMode === 'off' && !autoNext) return;
+        var progressSync = autoProgressSyncEnabled();
 
         var state = {
             timer: 0,
             segments: [],
             skipped: {},
             autoNext: autoNext,
+            progressSync: progressSync,
+            lastLocalSync: 0,
+            lastLocalPosition: Number(context.selected && context.selected.watched && context.selected.watched.end_time || 0),
+            lastServerSync: Date.now(),
+            lastServerPosition: Number(context.selected && context.selected.watched && context.selected.watched.end_time || 0),
             prefetched: false,
             advanced: false,
             lastSeenAt: Date.now()
         };
         playbackWatcher = state;
-        state.timer = setInterval(function () { watchPlayback(generation, context, state); }, 700);
+        state.timer = setInterval(function () { watchPlayback(generation, context, state); }, 1000);
         if (skipMode !== 'off') loadSkipSegments(generation, context, state, skipMode);
     }
 
@@ -2979,6 +2980,21 @@
         state.lastSeenAt = Date.now();
         var position = Number(video.currentTime) || 0;
         var duration = Number(video.duration) || 0;
+
+        if (position > 0) {
+            var now = Date.now();
+            var finalState = video.paused || video.ended || duration > 0 && position >= duration - 2;
+            if (now - state.lastLocalSync >= 10000 || finalState && Math.abs(position - state.lastLocalPosition) >= 2) {
+                state.lastLocalSync = now;
+                state.lastLocalPosition = position;
+                updatePlaybackProgress(context, position, duration, false);
+            }
+            if (state.progressSync && (now - state.lastServerSync >= 60000 || finalState && Math.abs(position - state.lastServerPosition) >= 5)) {
+                state.lastServerSync = now;
+                state.lastServerPosition = position;
+                updatePlaybackProgress(context, position, duration, true);
+            }
+        }
 
         state.segments.forEach(function (segment) {
             if (state.skipped[segment.type]) return;
@@ -3049,9 +3065,39 @@
     }
 
     function syncServerProgress(video) {
-        if (!LampaYaniAuth.token() || !video || !video.video_id) return;
+        if (!autoProgressSyncEnabled() || !video || !video.video_id) return;
         LampaYaniApi.syncVideoProgress(video.video_id, video.watched && video.watched.end_time, video.duration).catch(function (error) {
             console.warn('[YummyAnime] Progress sync failed', error);
+        });
+    }
+
+    function updatePlaybackProgress(context, position, duration, remote) {
+        if (!context || !context.selected || !context.card) return;
+        var video = context.selected;
+        video.watched = video.watched || {};
+        video.watched.end_time = Math.max(0, Math.floor(Number(position) || 0));
+        if (duration > 0) video.duration = Math.floor(duration);
+        rememberPlayback(context.card, context.group, video);
+        if (remote) syncServerProgress(video);
+    }
+
+    function syncPlaybackHistoryManually() {
+        if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
+        var history = playbackHistory();
+        var videos = Object.keys(history).map(function (id) {
+            var item = history[id] || {};
+            if (!item.video_id) return null;
+            return {video_id: Number(item.video_id), time: Number(item.time || 0), date: Math.floor(Number(item.updated_at || Date.now()) / 1000)};
+        }).filter(function (item) { return item && item.video_id; });
+        if (!videos.length) return Lampa.Noty.show(t('history_empty'));
+        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+        LampaYaniApi.syncVideoWatches(videos).then(function () {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            Lampa.Noty.show(t('sync_history_ok'));
+        }).catch(function (error) {
+            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
+            console.error('[YummyAnime] History sync failed', error);
+            Lampa.Noty.show(t('sync_history_error'));
         });
     }
 
@@ -4082,6 +4128,11 @@
                 param: {name: 'yani_account_state', type: 'button'},
                 field: {name: t('authorized') + ': ' + authDisplayName(), description: t('auth_manage_description')},
                 onChange: openSettingsLogin
+            });
+            Lampa.SettingsApi.addParam({
+                component: 'yani',
+                param: {name: 'yani_auto_sync_progress', type: 'trigger', default: true},
+                field: {name: t('auto_sync_progress'), description: t('auto_sync_progress_description')}
             });
             Lampa.SettingsApi.addParam({
                 component: 'yani',
