@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.20.22 — 2026-08-09
+
+- Stop showing the usage policy automatically.
+- Keep the policy available as an explicit action in YummyAnime settings.
+- Explain that installing and enabling the extension constitutes agreement with the stated rules.
+
 ## 0.20.21 — 2026-08-09
 
 - Add a localized usage-policy window shown once on first launch.

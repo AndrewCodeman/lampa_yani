@@ -16,8 +16,6 @@
         controller: 'content',
         element: null
     };
-    var usagePolicyRevision = '1';
-    var usagePolicyScheduled = false;
     var usagePolicyVisible = false;
 
     function goBack() {
@@ -57,8 +55,6 @@
                     component: 'yani_home'
                 });
             });
-
-            scheduleUsagePolicy();
 
             }
 
@@ -244,7 +240,6 @@
             });
             accept = $('<div class="yani-policy__accept selector"></div>').text(t('usage_policy_accept'));
             accept.on('hover:enter click.yaniPolicyAccept', function () {
-                if (Lampa.Storage) Lampa.Storage.set('yani_usage_policy_revision', usagePolicyRevision);
                 usagePolicyVisible = false;
                 goBack();
             });
@@ -275,25 +270,13 @@
         this.destroy = function () { usagePolicyVisible = false; scroll.destroy(); html.remove(); };
     }
 
-    function scheduleUsagePolicy() {
-        if (usagePolicyScheduled || !Lampa.Storage) return;
-        if (String(Lampa.Storage.get('yani_usage_policy_revision', '')) === usagePolicyRevision) return;
-        usagePolicyScheduled = true;
-        setTimeout(function () {
-            usagePolicyScheduled = false;
-            showUsagePolicy(false);
-        }, 600);
-    }
-
-    function showUsagePolicy(force) {
+    function showUsagePolicy() {
         if (!Lampa.Activity || !Lampa.Activity.push || usagePolicyVisible) return;
-        if (!force && Lampa.Storage && String(Lampa.Storage.get('yani_usage_policy_revision', '')) === usagePolicyRevision) return;
         usagePolicyVisible = true;
         Lampa.Activity.push({
             url: 'yani/policy',
             title: t('usage_policy_title'),
-            component: 'yani_policy',
-            manual: Boolean(force)
+            component: 'yani_policy'
         });
     }
 
@@ -3708,7 +3691,7 @@
             component: 'yani',
             param: {name: 'yani_usage_policy', type: 'button'},
             field: {name: t('usage_policy_title'), description: t('usage_policy_settings_description')},
-            onChange: function () { showUsagePolicy(true); }
+            onChange: showUsagePolicy
         });
 
         Lampa.SettingsApi.addParam({

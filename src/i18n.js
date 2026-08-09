@@ -136,8 +136,8 @@
     messages.ru.usage_policy_information = 'Расширение предназначено исключительно для ознакомительных и информационных целей.';
     messages.ru.usage_policy_legal = 'Расширение не предназначено для использования в незаконных действиях, нарушения авторских прав или обхода ограничений доступа.';
     messages.ru.usage_policy_responsibility = 'Пользователь самостоятельно отвечает за соблюдение законодательства своей страны и правил сторонних сервисов.';
-    messages.ru.usage_policy_accept = 'Понятно';
-    messages.ru.usage_policy_settings_description = 'Открыть условия и ограничения использования расширения';
+    messages.ru.usage_policy_accept = 'Закрыть';
+    messages.ru.usage_policy_settings_description = 'Устанавливая и включая расширение, вы автоматически соглашаетесь с установленными правилами. Открыть политику использования';
     messages.en.open_yummytv = 'Open in YummyTV';
     messages.en.yummytv_open_failed = 'Could not open YummyTV. Make sure the app is installed';
     messages.en.yummytv_id_missing = 'Could not determine the YummyAnime title ID';
@@ -173,8 +173,8 @@
     messages.en.usage_policy_information = 'The extension is intended solely for informational and introductory purposes.';
     messages.en.usage_policy_legal = 'The extension is not intended for illegal activity, copyright infringement, or circumvention of access restrictions.';
     messages.en.usage_policy_responsibility = 'Users are responsible for complying with the laws of their country and the rules of third-party services.';
-    messages.en.usage_policy_accept = 'I understand';
-    messages.en.usage_policy_settings_description = 'Open the extension usage terms and restrictions';
+    messages.en.usage_policy_accept = 'Close';
+    messages.en.usage_policy_settings_description = 'By installing and enabling the extension, you automatically agree to the established rules. Open the usage policy';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -256,8 +256,8 @@
     messages.uk.usage_policy_information = 'Розширення призначене виключно для ознайомлювальних та інформаційних цілей.';
     messages.uk.usage_policy_legal = 'Розширення не призначене для незаконних дій, порушення авторських прав або обходу обмежень доступу.';
     messages.uk.usage_policy_responsibility = 'Користувач самостійно відповідає за дотримання законодавства своєї країни та правил сторонніх сервісів.';
-    messages.uk.usage_policy_accept = 'Зрозуміло';
-    messages.uk.usage_policy_settings_description = 'Відкрити умови та обмеження використання розширення';
+    messages.uk.usage_policy_accept = 'Закрити';
+    messages.uk.usage_policy_settings_description = 'Установлюючи та вмикаючи розширення, ви автоматично погоджуєтеся з установленими правилами. Відкрити політику використання';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

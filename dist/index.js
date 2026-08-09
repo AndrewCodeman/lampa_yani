@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.21',
+        version: '0.20.22',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
@@ -160,8 +160,8 @@ function pluginYummyAnime() {
     messages.ru.usage_policy_information = 'Расширение предназначено исключительно для ознакомительных и информационных целей.';
     messages.ru.usage_policy_legal = 'Расширение не предназначено для использования в незаконных действиях, нарушения авторских прав или обхода ограничений доступа.';
     messages.ru.usage_policy_responsibility = 'Пользователь самостоятельно отвечает за соблюдение законодательства своей страны и правил сторонних сервисов.';
-    messages.ru.usage_policy_accept = 'Понятно';
-    messages.ru.usage_policy_settings_description = 'Открыть условия и ограничения использования расширения';
+    messages.ru.usage_policy_accept = 'Закрыть';
+    messages.ru.usage_policy_settings_description = 'Устанавливая и включая расширение, вы автоматически соглашаетесь с установленными правилами. Открыть политику использования';
     messages.en.open_yummytv = 'Open in YummyTV';
     messages.en.yummytv_open_failed = 'Could not open YummyTV. Make sure the app is installed';
     messages.en.yummytv_id_missing = 'Could not determine the YummyAnime title ID';
@@ -197,8 +197,8 @@ function pluginYummyAnime() {
     messages.en.usage_policy_information = 'The extension is intended solely for informational and introductory purposes.';
     messages.en.usage_policy_legal = 'The extension is not intended for illegal activity, copyright infringement, or circumvention of access restrictions.';
     messages.en.usage_policy_responsibility = 'Users are responsible for complying with the laws of their country and the rules of third-party services.';
-    messages.en.usage_policy_accept = 'I understand';
-    messages.en.usage_policy_settings_description = 'Open the extension usage terms and restrictions';
+    messages.en.usage_policy_accept = 'Close';
+    messages.en.usage_policy_settings_description = 'By installing and enabling the extension, you automatically agree to the established rules. Open the usage policy';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -280,8 +280,8 @@ function pluginYummyAnime() {
     messages.uk.usage_policy_information = 'Розширення призначене виключно для ознайомлювальних та інформаційних цілей.';
     messages.uk.usage_policy_legal = 'Розширення не призначене для незаконних дій, порушення авторських прав або обходу обмежень доступу.';
     messages.uk.usage_policy_responsibility = 'Користувач самостійно відповідає за дотримання законодавства своєї країни та правил сторонніх сервісів.';
-    messages.uk.usage_policy_accept = 'Зрозуміло';
-    messages.uk.usage_policy_settings_description = 'Відкрити умови та обмеження використання розширення';
+    messages.uk.usage_policy_accept = 'Закрити';
+    messages.uk.usage_policy_settings_description = 'Установлюючи та вмикаючи розширення, ви автоматично погоджуєтеся з установленими правилами. Відкрити політику використання';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
@@ -2119,8 +2119,6 @@ function pluginYummyAnime() {
         controller: 'content',
         element: null
     };
-    var usagePolicyRevision = '1';
-    var usagePolicyScheduled = false;
     var usagePolicyVisible = false;
 
     function goBack() {
@@ -2160,8 +2158,6 @@ function pluginYummyAnime() {
                     component: 'yani_home'
                 });
             });
-
-            scheduleUsagePolicy();
 
             }
 
@@ -2347,7 +2343,6 @@ function pluginYummyAnime() {
             });
             accept = $('<div class="yani-policy__accept selector"></div>').text(t('usage_policy_accept'));
             accept.on('hover:enter click.yaniPolicyAccept', function () {
-                if (Lampa.Storage) Lampa.Storage.set('yani_usage_policy_revision', usagePolicyRevision);
                 usagePolicyVisible = false;
                 goBack();
             });
@@ -2378,25 +2373,13 @@ function pluginYummyAnime() {
         this.destroy = function () { usagePolicyVisible = false; scroll.destroy(); html.remove(); };
     }
 
-    function scheduleUsagePolicy() {
-        if (usagePolicyScheduled || !Lampa.Storage) return;
-        if (String(Lampa.Storage.get('yani_usage_policy_revision', '')) === usagePolicyRevision) return;
-        usagePolicyScheduled = true;
-        setTimeout(function () {
-            usagePolicyScheduled = false;
-            showUsagePolicy(false);
-        }, 600);
-    }
-
-    function showUsagePolicy(force) {
+    function showUsagePolicy() {
         if (!Lampa.Activity || !Lampa.Activity.push || usagePolicyVisible) return;
-        if (!force && Lampa.Storage && String(Lampa.Storage.get('yani_usage_policy_revision', '')) === usagePolicyRevision) return;
         usagePolicyVisible = true;
         Lampa.Activity.push({
             url: 'yani/policy',
             title: t('usage_policy_title'),
-            component: 'yani_policy',
-            manual: Boolean(force)
+            component: 'yani_policy'
         });
     }
 
@@ -5811,7 +5794,7 @@ function pluginYummyAnime() {
             component: 'yani',
             param: {name: 'yani_usage_policy', type: 'button'},
             field: {name: t('usage_policy_title'), description: t('usage_policy_settings_description')},
-            onChange: function () { showUsagePolicy(true); }
+            onChange: showUsagePolicy
         });
 
         Lampa.SettingsApi.addParam({
