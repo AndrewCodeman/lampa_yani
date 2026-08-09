@@ -53,7 +53,8 @@
         var cacheKey = 'lampa_yummyanime_cache_' + apiLanguage + '_' + path;
         var cacheTtl = options.cacheTtl || config.cacheTtl || 300000;
 
-        if (config.applicationHeader) headers['X-Application'] = config.applicationHeader;
+        var applicationToken = config.applicationToken ? config.applicationToken() : config.applicationHeader;
+        if (applicationToken) headers['X-Application'] = applicationToken;
         if (options.auth && LampaYaniAuth && LampaYaniAuth.token()) headers.Authorization = 'Bearer ' + LampaYaniAuth.token();
         headers.Accept = 'application/json';
         headers.Lang = apiLanguage;

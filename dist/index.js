@@ -9,12 +9,39 @@ function pluginYummyAnime() {
 (function (window) {
     'use strict';
 
+    var defaultApplicationToken = 'p6_gpujl6d3pho8n';
+    var applicationTokenStorageKey = 'yani_public_application_token';
+
+    function normalizeApplicationToken(value) {
+        return String(value || '').trim();
+    }
+
+    function validApplicationToken(value) {
+        return !value || /^[A-Za-z0-9_-]{8,128}$/.test(value);
+    }
+
+    function storedApplicationToken() {
+        if (!window.Lampa || !Lampa.Storage || !Lampa.Storage.get) return '';
+        var value = normalizeApplicationToken(Lampa.Storage.get(applicationTokenStorageKey, ''));
+        return validApplicationToken(value) ? value : '';
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.22',
+        version: '0.20.23',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
-        applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
+        applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
+        defaultApplicationToken: defaultApplicationToken,
+        applicationToken: function () { return storedApplicationToken() || defaultApplicationToken; },
+        customApplicationToken: storedApplicationToken,
+        setApplicationToken: function (value) {
+            value = normalizeApplicationToken(value);
+            if (!validApplicationToken(value)) return false;
+            if (!window.Lampa || !Lampa.Storage || !Lampa.Storage.set) return false;
+            Lampa.Storage.set(applicationTokenStorageKey, value);
+            return true;
+        },
         cacheTtl: 300000,
         cacheEntries: 100,
         requestTimeout: 15000,
@@ -162,6 +189,15 @@ function pluginYummyAnime() {
     messages.ru.usage_policy_responsibility = 'Пользователь самостоятельно отвечает за соблюдение законодательства своей страны и правил сторонних сервисов.';
     messages.ru.usage_policy_accept = 'Закрыть';
     messages.ru.usage_policy_settings_description = 'Устанавливая и включая расширение, вы автоматически соглашаетесь с установленными правилами. Открыть политику использования';
+    messages.ru.api_settings = 'YummyAnime API';
+    messages.ru.public_application_token = 'Публичный ключ приложения';
+    messages.ru.public_application_token_description = 'Ключ для заголовка X-Application';
+    messages.ru.public_application_token_default = 'стандартный ключ YummyAnime for Lampa';
+    messages.ru.public_application_token_custom = 'пользовательский ключ';
+    messages.ru.public_application_token_prompt = 'Введите публичный ключ приложения YummyAnime. Оставьте поле пустым, чтобы вернуть стандартный ключ. Не вводите приватный ключ';
+    messages.ru.public_application_token_saved = 'Пользовательский публичный ключ сохранён';
+    messages.ru.public_application_token_restored = 'Восстановлен стандартный публичный ключ YummyAnime for Lampa';
+    messages.ru.public_application_token_invalid = 'Некорректный публичный ключ приложения';
     messages.en.open_yummytv = 'Open in YummyTV';
     messages.en.yummytv_open_failed = 'Could not open YummyTV. Make sure the app is installed';
     messages.en.yummytv_id_missing = 'Could not determine the YummyAnime title ID';
@@ -199,6 +235,15 @@ function pluginYummyAnime() {
     messages.en.usage_policy_responsibility = 'Users are responsible for complying with the laws of their country and the rules of third-party services.';
     messages.en.usage_policy_accept = 'Close';
     messages.en.usage_policy_settings_description = 'By installing and enabling the extension, you automatically agree to the established rules. Open the usage policy';
+    messages.en.api_settings = 'YummyAnime API';
+    messages.en.public_application_token = 'Public application key';
+    messages.en.public_application_token_description = 'Key sent in the X-Application header';
+    messages.en.public_application_token_default = 'default YummyAnime for Lampa key';
+    messages.en.public_application_token_custom = 'custom key';
+    messages.en.public_application_token_prompt = 'Enter a public YummyAnime application key. Leave empty to restore the default key. Do not enter a private key';
+    messages.en.public_application_token_saved = 'Custom public application key saved';
+    messages.en.public_application_token_restored = 'Default YummyAnime for Lampa public key restored';
+    messages.en.public_application_token_invalid = 'Invalid public application key';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -282,6 +327,15 @@ function pluginYummyAnime() {
     messages.uk.usage_policy_responsibility = 'Користувач самостійно відповідає за дотримання законодавства своєї країни та правил сторонніх сервісів.';
     messages.uk.usage_policy_accept = 'Закрити';
     messages.uk.usage_policy_settings_description = 'Установлюючи та вмикаючи розширення, ви автоматично погоджуєтеся з установленими правилами. Відкрити політику використання';
+    messages.uk.api_settings = 'YummyAnime API';
+    messages.uk.public_application_token = 'Публічний ключ застосунку';
+    messages.uk.public_application_token_description = 'Ключ для заголовка X-Application';
+    messages.uk.public_application_token_default = 'стандартний ключ YummyAnime for Lampa';
+    messages.uk.public_application_token_custom = 'користувацький ключ';
+    messages.uk.public_application_token_prompt = 'Введіть публічний ключ застосунку YummyAnime. Залиште поле порожнім, щоб повернути стандартний ключ. Не вводьте приватний ключ';
+    messages.uk.public_application_token_saved = 'Користувацький публічний ключ збережено';
+    messages.uk.public_application_token_restored = 'Відновлено стандартний публічний ключ YummyAnime for Lampa';
+    messages.uk.public_application_token_invalid = 'Некоректний публічний ключ застосунку';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
@@ -324,6 +378,10 @@ function pluginYummyAnime() {
         return data && String(data.token || data.access_token || '').trim();
     }
 
+    function applicationToken() {
+        return LampaYaniConfig.applicationToken ? LampaYaniConfig.applicationToken() : LampaYaniConfig.applicationHeader;
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Auth = window.LampaYaniAuth = {
         get: function () {
@@ -343,7 +401,7 @@ function pluginYummyAnime() {
             if (!this.token()) return Promise.reject(new Error('Not authorized'));
             return fetch(LampaYaniConfig.apiBase + '/profile/token', {
                 headers: {
-                    'X-Application': LampaYaniConfig.applicationHeader,
+                    'X-Application': applicationToken(),
                     Authorization: 'Bearer ' + this.token(),
                     Accept: 'application/json'
                 }
@@ -360,7 +418,7 @@ function pluginYummyAnime() {
         login: function (login, password) {
             return fetch(LampaYaniConfig.apiBase + '/profile/login', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-Application': LampaYaniConfig.applicationHeader, Accept: 'application/json'},
+                headers: {'Content-Type': 'application/json', 'X-Application': applicationToken(), Accept: 'application/json'},
                 body: JSON.stringify({login: login, password: password, need_json: true})
             }).then(function (response) {
                 if (!response.ok) throw new Error('Login failed: ' + response.status);
@@ -380,7 +438,7 @@ function pluginYummyAnime() {
             return fetch(LampaYaniConfig.apiBase + '/profile/logout', {
                 method: 'POST',
                 headers: {
-                    'X-Application': LampaYaniConfig.applicationHeader,
+                    'X-Application': applicationToken(),
                     Authorization: 'Bearer ' + token,
                     Accept: 'application/json'
                 }
@@ -453,7 +511,8 @@ function pluginYummyAnime() {
         var cacheKey = 'lampa_yummyanime_cache_' + apiLanguage + '_' + path;
         var cacheTtl = options.cacheTtl || config.cacheTtl || 300000;
 
-        if (config.applicationHeader) headers['X-Application'] = config.applicationHeader;
+        var applicationToken = config.applicationToken ? config.applicationToken() : config.applicationHeader;
+        if (applicationToken) headers['X-Application'] = applicationToken;
         if (options.auth && LampaYaniAuth && LampaYaniAuth.token()) headers.Authorization = 'Bearer ' + LampaYaniAuth.token();
         headers.Accept = 'application/json';
         headers.Lang = apiLanguage;
@@ -5908,6 +5967,23 @@ function pluginYummyAnime() {
 
         Lampa.SettingsApi.addParam({
             component: 'yani',
+            param: {name: 'yani_api_settings_title', type: 'title'},
+            field: {name: t('api_settings')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_public_application_token', type: 'button'},
+            field: {
+                name: t('public_application_token'),
+                description: t('public_application_token_description') + ': ' +
+                    (LampaYaniConfig.customApplicationToken() ? t('public_application_token_custom') : t('public_application_token_default'))
+            },
+            onChange: editPublicApplicationToken
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
             param: {name: 'yani_api_check', type: 'button'},
             field: {name: t('api_check_name'), description: t('api_check_description')},
             onChange: function () {
@@ -6010,6 +6086,21 @@ function pluginYummyAnime() {
             var saved = LampaYaniLampacResolver.setBaseUrl(value);
             if (value && !saved) return Lampa.Noty.show(t('lampac_server_invalid'));
             Lampa.Noty.show(saved ? t('lampac_server_saved') : t('lampac_server_disabled'));
+        });
+    }
+
+    function editPublicApplicationToken() {
+        showYummyInput({
+            title: t('public_application_token_prompt'),
+            value: LampaYaniConfig.customApplicationToken(),
+            nosave: true
+        }, function (value) {
+            value = String(value || '').trim();
+            if (!LampaYaniConfig.setApplicationToken(value)) {
+                Lampa.Noty.show(t('public_application_token_invalid'));
+                return;
+            }
+            Lampa.Noty.show(value ? t('public_application_token_saved') : t('public_application_token_restored'));
         });
     }
 

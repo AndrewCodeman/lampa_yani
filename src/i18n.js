@@ -138,6 +138,15 @@
     messages.ru.usage_policy_responsibility = 'Пользователь самостоятельно отвечает за соблюдение законодательства своей страны и правил сторонних сервисов.';
     messages.ru.usage_policy_accept = 'Закрыть';
     messages.ru.usage_policy_settings_description = 'Устанавливая и включая расширение, вы автоматически соглашаетесь с установленными правилами. Открыть политику использования';
+    messages.ru.api_settings = 'YummyAnime API';
+    messages.ru.public_application_token = 'Публичный ключ приложения';
+    messages.ru.public_application_token_description = 'Ключ для заголовка X-Application';
+    messages.ru.public_application_token_default = 'стандартный ключ YummyAnime for Lampa';
+    messages.ru.public_application_token_custom = 'пользовательский ключ';
+    messages.ru.public_application_token_prompt = 'Введите публичный ключ приложения YummyAnime. Оставьте поле пустым, чтобы вернуть стандартный ключ. Не вводите приватный ключ';
+    messages.ru.public_application_token_saved = 'Пользовательский публичный ключ сохранён';
+    messages.ru.public_application_token_restored = 'Восстановлен стандартный публичный ключ YummyAnime for Lampa';
+    messages.ru.public_application_token_invalid = 'Некорректный публичный ключ приложения';
     messages.en.open_yummytv = 'Open in YummyTV';
     messages.en.yummytv_open_failed = 'Could not open YummyTV. Make sure the app is installed';
     messages.en.yummytv_id_missing = 'Could not determine the YummyAnime title ID';
@@ -175,6 +184,15 @@
     messages.en.usage_policy_responsibility = 'Users are responsible for complying with the laws of their country and the rules of third-party services.';
     messages.en.usage_policy_accept = 'Close';
     messages.en.usage_policy_settings_description = 'By installing and enabling the extension, you automatically agree to the established rules. Open the usage policy';
+    messages.en.api_settings = 'YummyAnime API';
+    messages.en.public_application_token = 'Public application key';
+    messages.en.public_application_token_description = 'Key sent in the X-Application header';
+    messages.en.public_application_token_default = 'default YummyAnime for Lampa key';
+    messages.en.public_application_token_custom = 'custom key';
+    messages.en.public_application_token_prompt = 'Enter a public YummyAnime application key. Leave empty to restore the default key. Do not enter a private key';
+    messages.en.public_application_token_saved = 'Custom public application key saved';
+    messages.en.public_application_token_restored = 'Default YummyAnime for Lampa public key restored';
+    messages.en.public_application_token_invalid = 'Invalid public application key';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -258,6 +276,15 @@
     messages.uk.usage_policy_responsibility = 'Користувач самостійно відповідає за дотримання законодавства своєї країни та правил сторонніх сервісів.';
     messages.uk.usage_policy_accept = 'Закрити';
     messages.uk.usage_policy_settings_description = 'Установлюючи та вмикаючи розширення, ви автоматично погоджуєтеся з установленими правилами. Відкрити політику використання';
+    messages.uk.api_settings = 'YummyAnime API';
+    messages.uk.public_application_token = 'Публічний ключ застосунку';
+    messages.uk.public_application_token_description = 'Ключ для заголовка X-Application';
+    messages.uk.public_application_token_default = 'стандартний ключ YummyAnime for Lampa';
+    messages.uk.public_application_token_custom = 'користувацький ключ';
+    messages.uk.public_application_token_prompt = 'Введіть публічний ключ застосунку YummyAnime. Залиште поле порожнім, щоб повернути стандартний ключ. Не вводьте приватний ключ';
+    messages.uk.public_application_token_saved = 'Користувацький публічний ключ збережено';
+    messages.uk.public_application_token_restored = 'Відновлено стандартний публічний ключ YummyAnime for Lampa';
+    messages.uk.public_application_token_invalid = 'Некоректний публічний ключ застосунку';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

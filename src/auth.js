@@ -19,6 +19,10 @@
         return data && String(data.token || data.access_token || '').trim();
     }
 
+    function applicationToken() {
+        return LampaYaniConfig.applicationToken ? LampaYaniConfig.applicationToken() : LampaYaniConfig.applicationHeader;
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Auth = window.LampaYaniAuth = {
         get: function () {
@@ -38,7 +42,7 @@
             if (!this.token()) return Promise.reject(new Error('Not authorized'));
             return fetch(LampaYaniConfig.apiBase + '/profile/token', {
                 headers: {
-                    'X-Application': LampaYaniConfig.applicationHeader,
+                    'X-Application': applicationToken(),
                     Authorization: 'Bearer ' + this.token(),
                     Accept: 'application/json'
                 }
@@ -55,7 +59,7 @@
         login: function (login, password) {
             return fetch(LampaYaniConfig.apiBase + '/profile/login', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-Application': LampaYaniConfig.applicationHeader, Accept: 'application/json'},
+                headers: {'Content-Type': 'application/json', 'X-Application': applicationToken(), Accept: 'application/json'},
                 body: JSON.stringify({login: login, password: password, need_json: true})
             }).then(function (response) {
                 if (!response.ok) throw new Error('Login failed: ' + response.status);
@@ -75,7 +79,7 @@
             return fetch(LampaYaniConfig.apiBase + '/profile/logout', {
                 method: 'POST',
                 headers: {
-                    'X-Application': LampaYaniConfig.applicationHeader,
+                    'X-Application': applicationToken(),
                     Authorization: 'Bearer ' + token,
                     Accept: 'application/json'
                 }

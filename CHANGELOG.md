@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.20.23 — 2026-08-09
+
+- Keep the YummyAnime for Lampa public application key as the default API identity.
+- Add an optional settings action for entering or clearing a custom public `X-Application` key.
+- Use the selected public application key for login, token refresh, logout and all API requests while keeping the user Bearer token separate.
+- Do not create developer applications automatically.
+
 ## 0.20.22 — 2026-08-09
 
 - Stop showing the usage policy automatically.

@@ -35,13 +35,13 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 
 ## Installation
 
-1. Get a public application token from [yummyani.me/dev/applications](https://yummyani.me/dev/applications).
-2. Set it in `src/config.js` as `applicationHeader`.
-3. Add the URL of `index.js` to the Lampa extensions section.
+1. Add the URL of `index.js` to the Lampa extensions section.
+2. The extension uses the built-in public application key for YummyAnime for Lampa by default.
+3. If necessary, open `Settings → YummyAnime → Public application key` to set another public key. Leave the field empty to restore the default key. Never enter a private application key there.
 
 Install the bundled file from GitHub Pages:
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.20.22`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.20.23`
 
 The `YummyAnime → Status` screen shows YummyStatus history for three hours, one day, one week or one month. GitHub Actions refreshes the monitoring snapshot every five minutes.
 
@@ -53,7 +53,7 @@ The extension uses:
 - `GET /anime/genres` — genres.
 - `GET /anime/{id}/videos` — available dubbings, episodes and iframe players.
 
-Search is passed through the `q` parameter. The public token is sent in the `X-Application` header.
+Search is passed through the `q` parameter. The selected public application key is sent in the `X-Application` header. After login, the user's personal Bearer token is sent separately for authorized requests. The extension does not create YummyAnime applications automatically.
 
 ## Project structure
 
