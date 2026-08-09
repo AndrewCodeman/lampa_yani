@@ -12,6 +12,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 - Yani account login;
 - rating anime from 1 to 10;
 - favorites and user lists;
+- a dedicated Your Lists section for signed-in users;
 - viewing comments;
 - dubbing and episode selection with direct-stream playback in Lampa or an external player;
 - blocking Alloha in media players when no direct stream is available, with a clear Lampac warning;
@@ -45,7 +46,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 
 Install the bundled file from GitHub Pages:
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.28.0`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.29.0`
 
 The `YummyAnime → Status` screen shows YummyStatus history for three hours, one day, one week or one month. GitHub Actions refreshes the monitoring snapshot every five minutes.
 

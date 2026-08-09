@@ -91,6 +91,7 @@
 .yani-home__item--continue_watching .yani-home__icon { background: linear-gradient(135deg, #f0af54, #d87742); }
 .yani-home__item--status .yani-home__icon { background: linear-gradient(135deg, #48c7a0, #238d8d); }
 .yani-home__item--top_rated .yani-home__icon { background: linear-gradient(135deg, #f5c95e, #d97939); }
+.yani-home__item--user_lists .yani-home__icon { background: linear-gradient(135deg, #6f8ff3, #5750bb); }
 .yani-home__item--account .yani-home__icon { background: linear-gradient(135deg, #e77ab3, #9d4b9c); }
 
 .yani-home__item.focus .yani-home__icon {
@@ -776,6 +777,18 @@
     margin-top: 1.5em;
     font-size: 1.45em;
     font-weight: 600;
+}
+
+.yani-user-lists__heading {
+    font-size: 2em;
+    font-weight: 700;
+}
+
+.yani-user-lists__description {
+    max-width: 48em;
+    margin-top: .35em;
+    color: rgba(255, 255, 255, .68);
+    font-size: 1.05em;
 }
 
 .yani-account__stats {

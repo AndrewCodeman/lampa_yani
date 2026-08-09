@@ -133,6 +133,7 @@
             Lampa.Component.add('yani_policy', UsagePolicy);
             Lampa.Component.add('yani_trailers', TrailerList);
             Lampa.Component.add('yani_account', Account);
+            Lampa.Component.add('yani_user_lists', UserLists);
             Lampa.Component.add('yani_account_list', AccountList);
             Lampa.Component.add('yani_notifications', Notifications);
             Lampa.Component.add('yani_subscriptions', Subscriptions);
@@ -179,8 +180,11 @@
             {key: 'updates', title: t('updates'), action: function () {
                 Lampa.Activity.push({url: 'yani/updates', title: 'YummyAnime ' + t('updates'), component: 'yani_updates'});
             }},
+            {key: 'user_lists', title: t('user_lists'), authorized: true, action: openUserLists},
             {key: 'account', title: t('account'), action: openAccount}
-        ].filter(function (item) { return homeSectionEnabled(item.key); });
+        ].filter(function (item) {
+            return (!item.authorized || LampaYaniAuth.token()) && homeSectionEnabled(item.key);
+        });
 
         this.create = function () {
             items.forEach(function (item) {
@@ -291,6 +295,7 @@
             top_rated: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg>',
             for_you: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S4 15.7 4 9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5c0 6.2-8 11-8 11Z"/><path d="M12 11v5M9.5 13.5h5"/></svg>',
             updates: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="16" r="3"/><path d="M18 14v2l1.3 1"/></svg>',
+            user_lists: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v5H5zM5 11h14v9H5z"/><path d="M8 6.5h6M8 14h8M8 17h5"/></svg>',
             account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/></svg>'
         };
         return icons[key] || icons.catalog;
@@ -997,6 +1002,15 @@
         Lampa.Activity.push({url: 'yani/notifications', title: t('notifications_title'), component: 'yani_notifications'});
     }
 
+    function openUserLists() {
+        if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
+        Lampa.Activity.push({
+            url: 'yani/user-lists',
+            title: 'YummyAnime · ' + t('user_lists'),
+            component: 'yani_user_lists'
+        });
+    }
+
     function openSubscriptions(userId) {
         Lampa.Activity.push({url: 'yani/subscriptions', title: t('subscriptions'), component: 'yani_subscriptions', userId: userId});
     }
@@ -1153,13 +1167,12 @@
     }
 
     function accountListDefinitions() {
-        var favorites = LampaYaniI18n.getLanguage() === 'en' ? 'Favorites' : 'Любимые';
         return [
             {id: 0, key: 'watching', title: t('watching')},
             {id: 1, key: 'planned', title: t('planned')},
             {id: 2, key: 'completed', title: t('completed')},
             {id: 3, key: 'dropped', title: t('dropped')},
-            {id: 4, key: 'favorites', title: favorites},
+            {id: 4, key: 'favorites', title: t('favorites')},
             {id: 5, key: 'postponed', title: t('postponed')}
         ];
     }
@@ -1196,6 +1209,18 @@
 
     function AccountList(object) {
         return LampaYaniAccountLists.accountList(object, {toCard: toCard, cardRender: bindYummyCardRender});
+    }
+
+    function UserLists(object) {
+        return LampaYaniAccountLists.userLists(object, {
+            t: t,
+            definitions: accountListDefinitions,
+            openList: openAccountList,
+            normalizeList: normalizeUserList,
+            responseData: function (payload) { return payload && payload.response ? payload.response : payload || []; },
+            formatWatchTime: formatWatchTime,
+            goBack: goBack
+        });
     }
 
     function LegacyAccountList(object) {
@@ -4234,6 +4259,7 @@
             ['top_rated', 'top_rated'],
             ['for_you', 'for_you'],
             ['updates', 'updates'],
+            ['user_lists', 'user_lists'],
             ['account', 'account']
         ].forEach(function (section) {
             Lampa.SettingsApi.addParam({

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.29.0 — 2026-08-09
+
+- Add an authorized-only Your Lists section to the YummyAnime home screen.
+- Show Watching, Planned, Completed, Dropped, On hold and Favorites with title counts and watched time.
+- Open each category through the existing account-list catalog and add a visibility switch for the new section.
+- Localize the new section in Russian, English and Ukrainian.
+
 ## 0.28.0 — 2026-08-09
 
 - Add opt-out automatic viewing-progress synchronization for authorized YummyAnime users.
