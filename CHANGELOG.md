@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.25.0 — 2026-08-09
+
+- Skip openings and endings in the internal player using AniSkip timestamps, resolved from the MyAnimeList id YummyAnime already reports.
+- Add a disabled-by-default setting choosing between openings only and openings with endings.
+
 ## 0.24.0 — 2026-08-09
 
 - Pass the season, episode and dubbing stated in the YummyAnime player URL into the Lampac Alloha request and its season/episode selection.

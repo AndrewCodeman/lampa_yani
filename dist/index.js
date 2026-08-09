@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.24.0',
+        version: '0.25.0',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -182,6 +182,13 @@ function pluginYummyAnime() {
     messages.ru.lampac_unavailable = 'Модуль Lampac недоступен';
     messages.ru.not_configured = 'не настроен';
     messages.ru.alloha_direct_required = 'Alloha недоступен во внутреннем и внешнем плеере без прямого потока. Настройте сервер Lampac или выберите другой источник';
+    messages.ru.aniskip = 'Пропуск опенинга и эндинга';
+    messages.ru.aniskip_description = 'Тайминги берутся из AniSkip по идентификатору MyAnimeList. Работает только во внутреннем плеере Lampa';
+    messages.ru.aniskip_off = 'Выключено';
+    messages.ru.aniskip_openings = 'Только опенинги';
+    messages.ru.aniskip_openings_endings = 'Опенинги и эндинги';
+    messages.ru.aniskip_opening_skipped = 'Опенинг пропущен';
+    messages.ru.aniskip_ending_skipped = 'Эндинг пропущен';
     messages.ru.resolver_server = 'Сервер резолвера YummyAnime';
     messages.ru.resolver_server_description = 'Собственный сервис из папки server/, превращающий плеер Alloha в обычный HLS-поток';
     messages.ru.resolver_server_prompt = 'Адрес резолвера, например http://192.168.1.10:8790. Оставьте пустым для отключения';
@@ -241,6 +248,13 @@ function pluginYummyAnime() {
     messages.en.lampac_unavailable = 'Lampac module is unavailable';
     messages.en.not_configured = 'not configured';
     messages.en.alloha_direct_required = 'Alloha cannot use the internal or external player without a direct stream. Configure a Lampac server or choose another source';
+    messages.en.aniskip = 'Skip openings and endings';
+    messages.en.aniskip_description = 'Timestamps come from AniSkip by MyAnimeList id. Works in the internal Lampa player only';
+    messages.en.aniskip_off = 'Disabled';
+    messages.en.aniskip_openings = 'Openings only';
+    messages.en.aniskip_openings_endings = 'Openings and endings';
+    messages.en.aniskip_opening_skipped = 'Opening skipped';
+    messages.en.aniskip_ending_skipped = 'Ending skipped';
     messages.en.resolver_server = 'YummyAnime resolver server';
     messages.en.resolver_server_description = 'Self-hosted service from the server/ directory that turns the Alloha player into a plain HLS stream';
     messages.en.resolver_server_prompt = 'Resolver address, for example http://192.168.1.10:8790. Leave empty to disable';
@@ -346,6 +360,13 @@ function pluginYummyAnime() {
     messages.uk.lampac_unavailable = 'Модуль Lampac недоступний';
     messages.uk.not_configured = 'не налаштовано';
     messages.uk.alloha_direct_required = 'Alloha недоступний у внутрішньому та зовнішньому плеєрі без прямого потоку. Налаштуйте сервер Lampac або виберіть інше джерело';
+    messages.uk.aniskip = 'Пропуск опенінга та ендінга';
+    messages.uk.aniskip_description = 'Тайминги беруться з AniSkip за ідентифікатором MyAnimeList. Працює лише у внутрішньому плеєрі Lampa';
+    messages.uk.aniskip_off = 'Вимкнено';
+    messages.uk.aniskip_openings = 'Лише опенінги';
+    messages.uk.aniskip_openings_endings = 'Опенінги та ендінги';
+    messages.uk.aniskip_opening_skipped = 'Опенінг пропущено';
+    messages.uk.aniskip_ending_skipped = 'Ендінг пропущено';
     messages.uk.resolver_server = 'Сервер резолвера YummyAnime';
     messages.uk.resolver_server_description = 'Власний сервіс із теки server/, що перетворює плеєр Alloha на звичайний HLS-потік';
     messages.uk.resolver_server_prompt = 'Адреса резолвера, наприклад http://192.168.1.10:8790. Залиште порожнім для вимкнення';
@@ -1486,6 +1507,132 @@ function pluginYummyAnime() {
         canResolve: function (url) { return isDirectVideoUrl(url) || isKodikUrl(url) || isCvhUrl(url) || isAksorUrl(url) || isSibnetUrl(url) || isRutubeUrl(url) || isVkUrl(url); },
         resolve: resolve,
         isDirectVideoUrl: isDirectVideoUrl
+    };
+}(window));
+
+(function (window) {
+    'use strict';
+
+    // Opening and ending timestamps from AniSkip, keyed by MyAnimeList id.
+    // YummyAnime already exposes that id on a title (`yani_remote_ids`), which
+    // is the only thing AniSkip needs, so no extra matching is involved.
+
+    var API_BASE = 'https://api.aniskip.com/v2';
+    var CACHE_TTL = 24 * 60 * 60 * 1000;
+    var CACHE_LIMIT = 200;
+    var cache = {};
+    var cacheKeys = [];
+
+    function responseText(value) {
+        if (typeof value === 'string') return value;
+        if (value === undefined || value === null) return '';
+        try { return JSON.stringify(value); } catch (ignore) { return String(value); }
+    }
+
+    function timeout() {
+        return Number((window.LampaYaniConfig && LampaYaniConfig.requestTimeout) || 15000);
+    }
+
+    function nativeRequestText(url) {
+        return new Promise(function (resolve, reject) {
+            if (!window.Lampa || !Lampa.Reguest) return reject(new Error('Lampa native request is unavailable'));
+            var network = new Lampa.Reguest();
+            if (network.timeout) network.timeout(timeout());
+            network.native(url, function (value) {
+                resolve(responseText(value));
+            }, function (error, exception) {
+                var message = (error && (error.responseText || error.message || error.status)) || exception || 'AniSkip request failed';
+                reject(new Error(String(message)));
+            }, false, {dataType: 'text', timeout: timeout()});
+        });
+    }
+
+    function browserRequestText(url) {
+        var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        var timer = setTimeout(function () { if (controller) controller.abort(); }, timeout());
+        var options = {method: 'GET', credentials: 'omit'};
+        if (controller) options.signal = controller.signal;
+        return fetch(url, options).then(function (response) {
+            clearTimeout(timer);
+            return response.text().then(function (text) {
+                // AniSkip answers 404 with a valid body when it simply has no
+                // timestamps for an episode, so the body is parsed either way.
+                return text;
+            });
+        }).catch(function (error) {
+            clearTimeout(timer);
+            throw error;
+        });
+    }
+
+    function requestText(url) {
+        var isAndroid = !!(window.AndroidJS || window.Android) ||
+            !!(window.Lampa && Lampa.Platform && Lampa.Platform.is && Lampa.Platform.is('android'));
+        if (isAndroid && window.Lampa && Lampa.Reguest) {
+            return nativeRequestText(url).catch(function () { return browserRequestText(url); });
+        }
+        return browserRequestText(url);
+    }
+
+    function remember(key, value) {
+        delete cache[key];
+        cache[key] = {time: Date.now(), value: value};
+        cacheKeys = cacheKeys.filter(function (item) { return item !== key; });
+        cacheKeys.push(key);
+        while (cacheKeys.length > CACHE_LIMIT) delete cache[cacheKeys.shift()];
+        return value;
+    }
+
+    function cached(key) {
+        var item = cache[key];
+        if (!item || Date.now() - item.time > CACHE_TTL) return null;
+        return item.value;
+    }
+
+    function parse(text) {
+        var payload;
+        try { payload = JSON.parse(text); } catch (error) { return {}; }
+        var results = payload && payload.results;
+        if (!Array.isArray(results)) return {};
+        var intervals = {};
+        results.forEach(function (result) {
+            var interval = result && result.interval;
+            var type = String(result && result.skipType || '').toLowerCase();
+            if (!interval || (type !== 'op' && type !== 'ed')) return;
+            var start = Number(interval.startTime);
+            var end = Number(interval.endTime);
+            if (!isFinite(start) || !isFinite(end) || end <= start) return;
+            intervals[type] = {start: start, end: end};
+        });
+        return intervals;
+    }
+
+    /**
+     * Resolves `{op: {start, end}, ed: {start, end}}` for one episode. Missing
+     * data resolves to an empty object rather than rejecting: skip timestamps
+     * are a convenience and must never interrupt playback.
+     */
+    function times(malId, episode, episodeLength) {
+        malId = Number(malId) || 0;
+        episode = Number(episode) || 0;
+        if (!malId || !episode) return Promise.resolve({});
+        var key = malId + ':' + episode;
+        var hit = cached(key);
+        if (hit) return Promise.resolve(hit);
+        var url = API_BASE + '/skip-times/' + malId + '/' + episode +
+            '?types[]=op&types[]=ed&episodeLength=' + (Math.max(0, Math.round(Number(episodeLength) || 0)));
+        return requestText(url).then(function (text) {
+            return remember(key, parse(text));
+        }).catch(function (error) {
+            console.warn('[YummyAnime] AniSkip lookup failed', error);
+            return {};
+        });
+    }
+
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.AniSkip = window.LampaYaniAniSkip = {
+        times: times,
+        parse: parse
     };
 }(window));
 
@@ -5156,6 +5303,7 @@ function pluginYummyAnime() {
 
     function launchResolvedVideo(card, group, videos, selected, url) {
         var title = (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (selected.number || selected.index || '?') + ' · ' + group.title;
+        playbackContext = {card: card, group: group, videos: videos, selected: selected};
         rememberPlayback(card, group, selected);
         syncServerProgress(selected);
 
@@ -5385,7 +5533,90 @@ function pluginYummyAnime() {
     }
 
     function playInternalPlayer(current, playlist) {
-        return isDirectVideoUrl(current && current.url) && playInternalDirectVideo(current, playlist);
+        var started = isDirectVideoUrl(current && current.url) && playInternalDirectVideo(current, playlist);
+        if (started) startSkipWatcher(playbackContext);
+        return started;
+    }
+
+    // Set right before playback is dispatched so the skip watcher knows which
+    // title and episode started, whichever of the three entry points ran.
+    var playbackContext = null;
+    var skipWatcher = null;
+    var skipWatcherGeneration = 0;
+
+    function skipPreference() {
+        var value = Lampa.Storage && Lampa.Storage.get ? Lampa.Storage.get('yani_aniskip', 'off') : 'off';
+        return value === 'op' || value === 'op_ed' ? value : 'off';
+    }
+
+    // Lampa's internal player is an HTML5 video element whichever skin is
+    // active, and seeking it directly avoids depending on player internals that
+    // differ between Lampa builds. External players are out of reach by design.
+    function playerVideoElement() {
+        var selectors = ['.player-video video', '.player video', 'video'];
+        for (var i = 0; i < selectors.length; i++) {
+            var element = document.querySelector(selectors[i]);
+            if (element && isFinite(element.duration) && element.duration > 0) return element;
+        }
+        return null;
+    }
+
+    function stopSkipWatcher() {
+        if (!skipWatcher) return;
+        clearInterval(skipWatcher.timer);
+        skipWatcher = null;
+    }
+
+    function startSkipWatcher(context) {
+        stopSkipWatcher();
+        var generation = ++skipWatcherGeneration;
+        var mode = skipPreference();
+        if (mode === 'off' || !window.LampaYaniAniSkip || !context) return;
+
+        var ids = (context.card && context.card.yani_remote_ids) || {};
+        var malId = Number(ids.myanimelist_id || ids.mal_id || 0);
+        var selected = context.selected || {};
+        var episode = Number(selected.number || selected.index || 0);
+        if (!malId || !episode) return;
+
+        LampaYaniAniSkip.times(malId, episode, selected.duration).then(function (intervals) {
+            if (generation !== skipWatcherGeneration) return;
+            var segments = [];
+            if (intervals.op) segments.push({type: 'op', interval: intervals.op, label: t('aniskip_opening_skipped')});
+            if (mode === 'op_ed' && intervals.ed) segments.push({type: 'ed', interval: intervals.ed, label: t('aniskip_ending_skipped')});
+            if (segments.length) watchSkipSegments(generation, segments);
+        });
+    }
+
+    function watchSkipSegments(generation, segments) {
+        var skipped = {};
+        var lastSeenAt = Date.now();
+        var state = {timer: 0};
+        state.timer = setInterval(function () {
+            if (generation !== skipWatcherGeneration) return stopSkipWatcher();
+            var video = playerVideoElement();
+            if (!video) {
+                // The player may still be starting up, so give it a grace
+                // period before the watcher gives up on this episode.
+                if (Date.now() - lastSeenAt > 120000) stopSkipWatcher();
+                return;
+            }
+            lastSeenAt = Date.now();
+            var position = Number(video.currentTime) || 0;
+            segments.forEach(function (segment) {
+                if (skipped[segment.type]) return;
+                if (position < segment.interval.start || position >= segment.interval.end - 1) return;
+                skipped[segment.type] = true;
+                try {
+                    video.currentTime = segment.interval.end;
+                } catch (error) {
+                    console.warn('[YummyAnime] Could not skip a segment', error);
+                    return;
+                }
+                Lampa.Noty.show(segment.label);
+            });
+        }, 700);
+        skipWatcher = state;
     }
 
     function externalPlayablePlaylist(playlist) {
@@ -6334,6 +6565,17 @@ function pluginYummyAnime() {
                 default: 'ask'
             },
             field: {name: t('playback_target'), description: t('playback_target_description')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {
+                name: 'yani_aniskip',
+                type: 'select',
+                values: {off: t('aniskip_off'), op: t('aniskip_openings'), op_ed: t('aniskip_openings_endings')},
+                default: 'off'
+            },
+            field: {name: t('aniskip'), description: t('aniskip_description')}
         });
 
         Lampa.SettingsApi.addParam({
