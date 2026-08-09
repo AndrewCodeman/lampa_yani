@@ -14,7 +14,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 - favorites and user lists;
 - viewing comments;
 - dubbing and episode selection with direct-stream playback in Lampa or an external player;
-- opening the official Alloha player inside Lampa when no direct stream is available;
+- blocking Alloha in media players when no direct stream is available, with a clear Lampac warning;
 - optional self-hosted Lampac resolution of Alloha sources into direct HLS;
 - optional, disabled-by-default YummyTV app integration;
 - YummyAnime button on standard Lampa cards and Online registration when that module is available;
@@ -41,7 +41,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 
 Install the bundled file from GitHub Pages:
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.20.18`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.20.19`
 
 The `YummyAnime → Status` screen shows YummyStatus history for three hours, one day, one week or one month. GitHub Actions refreshes the monitoring snapshot every five minutes.
 
@@ -71,7 +71,7 @@ Search is passed through the `q` parameter. The public token is sent in the `X-A
 
 Direct HLS/DASH/MP4/WebM URLs can be played in Lampa or handed to an external Android player. Choose the behavior under `Settings → YummyAnime → Playback target`.
 
-Without Lampac, an Alloha source opens as its official visible web player. To use your own Lampac instance, enter its complete local or HTTPS URL under `Settings → YummyAnime → Lampac server`. An empty value disables the adapter. The extension contains no Alloha or Lampac credentials.
+Alloha is offered to Lampa or an external media player only after Lampac resolves it to a direct stream. Without Lampac, selecting Alloha shows a warning and playback is blocked. To use your own Lampac instance, enter its complete local or HTTPS URL under `Settings → YummyAnime → Lampac server`. An empty value disables the adapter. The extension contains no Alloha or Lampac credentials.
 
 The private YummyTV application integration is disabled by default and can be enabled separately in the playback sources settings block.
 

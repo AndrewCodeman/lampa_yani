@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.20.19 — 2026-08-09
+
+- Block unresolved Alloha sources from both internal and external media players.
+- Allow Alloha playback only after a configured Lampac server returns a direct stream.
+- Replace the iframe fallback with an explicit localized warning and avoid recording blocked attempts as watched.
+
 ## 0.20.18 — 2026-08-09
 
 - Force the built-in Lampa engine with `Lampa.Player.runas('lampa')` when internal playback is selected.

@@ -2466,7 +2466,8 @@
         var url = videoSourceUrl(selected);
         if (!url) return Lampa.Noty.show(t('no_videos'));
         var allohaSource = isAllohaUrl(url) || /alloha/i.test(String(group && (group.player || group.title) || ''));
-        if (!isDirectVideoUrl(url) && allohaSource && !(window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url))) {
+        var resolvedAlloha = String(selected.yani_stream_source || '').toLowerCase() === 'lampac-alloha';
+        if (allohaSource && !resolvedAlloha) {
             return launchAllohaPlayer(card, group, selected, url);
         }
         if (!isExternalPlayableUrl(url, selected) && window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url)) {
@@ -2534,13 +2535,11 @@
     }
 
     function launchAllohaPlayer(card, group, selected, url) {
-        rememberPlayback(card, group, selected);
-        syncServerProgress(selected);
         if (window.LampaYaniLampacResolver && LampaYaniLampacResolver.enabled()) {
             setLoading(true);
             LampaYaniLampacResolver.resolveAlloha(card, selected, group, url).then(function (result) {
                 setLoading(false);
-                if (!result || !result.url) return openAllohaEmbed(url);
+                if (!result || !result.url) return blockAllohaPlayback();
                 selected.yani_stream_url = result.url;
                 selected.yani_stream_quality = result.quality || '';
                 selected.yani_stream_qualities = result.qualities || null;
@@ -2549,19 +2548,17 @@
                 launchResolvedVideo(card, group, group.videos || [selected], selected, result.url);
             }).catch(function (error) {
                 setLoading(false);
-                console.warn('[YummyAnime] Lampac Alloha resolve failed; opening the official player', error);
-                openAllohaEmbed(url);
+                console.warn('[YummyAnime] Lampac Alloha resolve failed; playback blocked', error);
+                blockAllohaPlayback();
             });
             return true;
         }
-        return openAllohaEmbed(url);
+        return blockAllohaPlayback();
     }
 
-    function openAllohaEmbed(url) {
-        if (showYummyIframe(url)) return true;
-        if (openExternalUri(url)) return true;
-        Lampa.Noty.show(t('alloha_embed_unavailable'));
-        return false;
+    function blockAllohaPlayback() {
+        Lampa.Noty.show(t('alloha_direct_required'));
+        return true;
     }
 
     function setLoading(enabled) {
@@ -2709,20 +2706,6 @@
 
     function isExternalPlayableUrl(url, source) {
         return isDirectVideoUrl(url) || !!(source && source.yani_stream_url && source.yani_stream_url === url);
-    }
-
-    function showYummyIframe(url) {
-        if (!Lampa.Iframe || !Lampa.Iframe.show) return false;
-        var enabledController = Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
-        var previousController = enabledController && enabledController.name;
-        var restored = false;
-        var restore = function () {
-            if (restored) return;
-            restored = true;
-            Lampa.Controller.toggle(previousController || 'content');
-        };
-        Lampa.Iframe.show({url: url, onBack: restore, onClose: restore});
-        return true;
     }
 
     function isKodikUrl(url) {

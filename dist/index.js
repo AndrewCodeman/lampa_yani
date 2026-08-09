@@ -11,7 +11,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.20.18',
+        version: '0.20.19',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: 'p6_gpujl6d3pho8n', // Public Yani application token
@@ -154,7 +154,7 @@ function pluginYummyAnime() {
     messages.ru.lampac_server_invalid = 'Укажите полный адрес Lampac с http:// или https://';
     messages.ru.lampac_unavailable = 'Модуль Lampac недоступен';
     messages.ru.not_configured = 'не настроен';
-    messages.ru.alloha_embed_unavailable = 'Не удалось открыть официальный плеер Alloha';
+    messages.ru.alloha_direct_required = 'Alloha недоступен во внутреннем и внешнем плеере без прямого потока. Настройте сервер Lampac или выберите другой источник';
     messages.en.open_yummytv = 'Open in YummyTV';
     messages.en.yummytv_open_failed = 'Could not open YummyTV. Make sure the app is installed';
     messages.en.yummytv_id_missing = 'Could not determine the YummyAnime title ID';
@@ -184,7 +184,7 @@ function pluginYummyAnime() {
     messages.en.lampac_server_invalid = 'Enter a complete Lampac URL starting with http:// or https://';
     messages.en.lampac_unavailable = 'Lampac module is unavailable';
     messages.en.not_configured = 'not configured';
-    messages.en.alloha_embed_unavailable = 'Could not open the official Alloha player';
+    messages.en.alloha_direct_required = 'Alloha cannot use the internal or external player without a direct stream. Configure a Lampac server or choose another source';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -260,7 +260,7 @@ function pluginYummyAnime() {
     messages.uk.lampac_server_invalid = 'Вкажіть повну адресу Lampac з http:// або https://';
     messages.uk.lampac_unavailable = 'Модуль Lampac недоступний';
     messages.uk.not_configured = 'не налаштовано';
-    messages.uk.alloha_embed_unavailable = 'Не вдалося відкрити офіційний плеєр Alloha';
+    messages.uk.alloha_direct_required = 'Alloha недоступний у внутрішньому та зовнішньому плеєрі без прямого потоку. Налаштуйте сервер Lampac або виберіть інше джерело';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
@@ -4518,7 +4518,8 @@ function pluginYummyAnime() {
         var url = videoSourceUrl(selected);
         if (!url) return Lampa.Noty.show(t('no_videos'));
         var allohaSource = isAllohaUrl(url) || /alloha/i.test(String(group && (group.player || group.title) || ''));
-        if (!isDirectVideoUrl(url) && allohaSource && !(window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url))) {
+        var resolvedAlloha = String(selected.yani_stream_source || '').toLowerCase() === 'lampac-alloha';
+        if (allohaSource && !resolvedAlloha) {
             return launchAllohaPlayer(card, group, selected, url);
         }
         if (!isExternalPlayableUrl(url, selected) && window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve(url)) {
@@ -4586,13 +4587,11 @@ function pluginYummyAnime() {
     }
 
     function launchAllohaPlayer(card, group, selected, url) {
-        rememberPlayback(card, group, selected);
-        syncServerProgress(selected);
         if (window.LampaYaniLampacResolver && LampaYaniLampacResolver.enabled()) {
             setLoading(true);
             LampaYaniLampacResolver.resolveAlloha(card, selected, group, url).then(function (result) {
                 setLoading(false);
-                if (!result || !result.url) return openAllohaEmbed(url);
+                if (!result || !result.url) return blockAllohaPlayback();
                 selected.yani_stream_url = result.url;
                 selected.yani_stream_quality = result.quality || '';
                 selected.yani_stream_qualities = result.qualities || null;
@@ -4601,19 +4600,17 @@ function pluginYummyAnime() {
                 launchResolvedVideo(card, group, group.videos || [selected], selected, result.url);
             }).catch(function (error) {
                 setLoading(false);
-                console.warn('[YummyAnime] Lampac Alloha resolve failed; opening the official player', error);
-                openAllohaEmbed(url);
+                console.warn('[YummyAnime] Lampac Alloha resolve failed; playback blocked', error);
+                blockAllohaPlayback();
             });
             return true;
         }
-        return openAllohaEmbed(url);
+        return blockAllohaPlayback();
     }
 
-    function openAllohaEmbed(url) {
-        if (showYummyIframe(url)) return true;
-        if (openExternalUri(url)) return true;
-        Lampa.Noty.show(t('alloha_embed_unavailable'));
-        return false;
+    function blockAllohaPlayback() {
+        Lampa.Noty.show(t('alloha_direct_required'));
+        return true;
     }
 
     function setLoading(enabled) {
@@ -4761,20 +4758,6 @@ function pluginYummyAnime() {
 
     function isExternalPlayableUrl(url, source) {
         return isDirectVideoUrl(url) || !!(source && source.yani_stream_url && source.yani_stream_url === url);
-    }
-
-    function showYummyIframe(url) {
-        if (!Lampa.Iframe || !Lampa.Iframe.show) return false;
-        var enabledController = Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
-        var previousController = enabledController && enabledController.name;
-        var restored = false;
-        var restore = function () {
-            if (restored) return;
-            restored = true;
-            Lampa.Controller.toggle(previousController || 'content');
-        };
-        Lampa.Iframe.show({url: url, onBack: restore, onClose: restore});
-        return true;
     }
 
     function isKodikUrl(url) {

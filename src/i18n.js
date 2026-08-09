@@ -130,7 +130,7 @@
     messages.ru.lampac_server_invalid = 'Укажите полный адрес Lampac с http:// или https://';
     messages.ru.lampac_unavailable = 'Модуль Lampac недоступен';
     messages.ru.not_configured = 'не настроен';
-    messages.ru.alloha_embed_unavailable = 'Не удалось открыть официальный плеер Alloha';
+    messages.ru.alloha_direct_required = 'Alloha недоступен во внутреннем и внешнем плеере без прямого потока. Настройте сервер Lampac или выберите другой источник';
     messages.en.open_yummytv = 'Open in YummyTV';
     messages.en.yummytv_open_failed = 'Could not open YummyTV. Make sure the app is installed';
     messages.en.yummytv_id_missing = 'Could not determine the YummyAnime title ID';
@@ -160,7 +160,7 @@
     messages.en.lampac_server_invalid = 'Enter a complete Lampac URL starting with http:// or https://';
     messages.en.lampac_unavailable = 'Lampac module is unavailable';
     messages.en.not_configured = 'not configured';
-    messages.en.alloha_embed_unavailable = 'Could not open the official Alloha player';
+    messages.en.alloha_direct_required = 'Alloha cannot use the internal or external player without a direct stream. Configure a Lampac server or choose another source';
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -236,7 +236,7 @@
     messages.uk.lampac_server_invalid = 'Вкажіть повну адресу Lampac з http:// або https://';
     messages.uk.lampac_unavailable = 'Модуль Lampac недоступний';
     messages.uk.not_configured = 'не налаштовано';
-    messages.uk.alloha_embed_unavailable = 'Не вдалося відкрити офіційний плеєр Alloha';
+    messages.uk.alloha_direct_required = 'Alloha недоступний у внутрішньому та зовнішньому плеєрі без прямого потоку. Налаштуйте сервер Lampac або виберіть інше джерело';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
