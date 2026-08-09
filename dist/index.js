@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.25.0',
+        version: '0.26.0',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -189,6 +189,9 @@ function pluginYummyAnime() {
     messages.ru.aniskip_openings_endings = 'Опенинги и эндинги';
     messages.ru.aniskip_opening_skipped = 'Опенинг пропущен';
     messages.ru.aniskip_ending_skipped = 'Эндинг пропущен';
+    messages.ru.auto_next = 'Автопереход к следующей серии';
+    messages.ru.auto_next_description = 'В конце серии запускать следующую и заранее готовить её поток. Работает только во внутреннем плеере Lampa';
+    messages.ru.auto_next_starting = 'Следующая серия:';
     messages.ru.resolver_server = 'Сервер резолвера YummyAnime';
     messages.ru.resolver_server_description = 'Собственный сервис из папки server/, превращающий плеер Alloha в обычный HLS-поток';
     messages.ru.resolver_server_prompt = 'Адрес резолвера, например http://192.168.1.10:8790. Оставьте пустым для отключения';
@@ -255,6 +258,9 @@ function pluginYummyAnime() {
     messages.en.aniskip_openings_endings = 'Openings and endings';
     messages.en.aniskip_opening_skipped = 'Opening skipped';
     messages.en.aniskip_ending_skipped = 'Ending skipped';
+    messages.en.auto_next = 'Auto-play the next episode';
+    messages.en.auto_next_description = 'Start the next episode when one ends and resolve its stream in advance. Works in the internal Lampa player only';
+    messages.en.auto_next_starting = 'Next episode:';
     messages.en.resolver_server = 'YummyAnime resolver server';
     messages.en.resolver_server_description = 'Self-hosted service from the server/ directory that turns the Alloha player into a plain HLS stream';
     messages.en.resolver_server_prompt = 'Resolver address, for example http://192.168.1.10:8790. Leave empty to disable';
@@ -367,6 +373,9 @@ function pluginYummyAnime() {
     messages.uk.aniskip_openings_endings = 'Опенінги та ендінги';
     messages.uk.aniskip_opening_skipped = 'Опенінг пропущено';
     messages.uk.aniskip_ending_skipped = 'Ендінг пропущено';
+    messages.uk.auto_next = 'Автоперехід до наступної серії';
+    messages.uk.auto_next_description = 'Наприкінці серії запускати наступну та заздалегідь готувати її потік. Працює лише у внутрішньому плеєрі Lampa';
+    messages.uk.auto_next_starting = 'Наступна серія:';
     messages.uk.resolver_server = 'Сервер резолвера YummyAnime';
     messages.uk.resolver_server_description = 'Власний сервіс із теки server/, що перетворює плеєр Alloha на звичайний HLS-потік';
     messages.uk.resolver_server_prompt = 'Адреса резолвера, наприклад http://192.168.1.10:8790. Залиште порожнім для вимкнення';
@@ -5271,7 +5280,8 @@ function pluginYummyAnime() {
     // routed through the Alloha policy a second time.
     var ALLOHA_RESOLVED_SOURCES = ['lampac-alloha', 'yani-resolver'];
 
-    function launchVideo(card, group, videos, selected) {
+    function launchVideo(card, group, videos, selected, options) {
+        options = options || {};
         var url = videoSourceUrl(selected);
         if (!url) return Lampa.Noty.show(t('no_videos'));
         var allohaSource = isAllohaUrl(url) || /alloha/i.test(String(group && (group.player || group.title) || ''));
@@ -5290,18 +5300,19 @@ function pluginYummyAnime() {
                     selected.yani_stream_source = result.source || '';
                     selected.yani_stream_headers = result.headers || null;
                 }
-                launchResolvedVideo(card, group, videos, selected, videoSourceUrl(selected) || url);
+                launchResolvedVideo(card, group, videos, selected, videoSourceUrl(selected) || url, options);
             }).catch(function (error) {
                 setLoading(false);
                 console.warn('[YummyAnime] Stream resolve failed', error);
-                launchResolvedVideo(card, group, videos, selected, url);
+                launchResolvedVideo(card, group, videos, selected, url, options);
             });
             return;
         }
-        launchResolvedVideo(card, group, videos, selected, url);
+        launchResolvedVideo(card, group, videos, selected, url, options);
     }
 
-    function launchResolvedVideo(card, group, videos, selected, url) {
+    function launchResolvedVideo(card, group, videos, selected, url, options) {
+        options = options || {};
         var title = (card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + (selected.number || selected.index || '?') + ' · ' + group.title;
         playbackContext = {card: card, group: group, videos: videos, selected: selected};
         rememberPlayback(card, group, selected);
@@ -5329,7 +5340,7 @@ function pluginYummyAnime() {
             return;
         }
 
-        if (showDirectPlaybackOptions(card, current, playlist)) {
+        if (showDirectPlaybackOptions(card, current, playlist, options)) {
             return;
         }
 
@@ -5486,8 +5497,10 @@ function pluginYummyAnime() {
         }
     }
 
-    function showDirectPlaybackOptions(card, current, playlist) {
-        var target = playbackTargetPreference();
+    function showDirectPlaybackOptions(card, current, playlist, options) {
+        // An automatic episode change must never interrupt viewing with a
+        // dialog: playback simply continues where it already was.
+        var target = options && options.autoAdvance ? 'internal' : playbackTargetPreference();
         if (target === 'external') return openExternalPlayer(current, playlist, card);
         if (target === 'internal') {
             if (playInternalPlayer(current, playlist)) return true;
@@ -5534,23 +5547,32 @@ function pluginYummyAnime() {
 
     function playInternalPlayer(current, playlist) {
         var started = isDirectVideoUrl(current && current.url) && playInternalDirectVideo(current, playlist);
-        if (started) startSkipWatcher(playbackContext);
+        if (started) startPlaybackWatcher(playbackContext);
         return started;
     }
 
-    // Set right before playback is dispatched so the skip watcher knows which
-    // title and episode started, whichever of the three entry points ran.
+    // Set right before playback is dispatched so the watcher knows which title
+    // and episode started, whichever of the three entry points ran.
     var playbackContext = null;
-    var skipWatcher = null;
-    var skipWatcherGeneration = 0;
+    var playbackWatcher = null;
+    var playbackWatcherGeneration = 0;
+    var PLAYER_STARTUP_GRACE_MS = 120000;
+    var NEXT_PREFETCH_LEAD = 90;
+    var NEXT_ADVANCE_LEAD = 5;
 
     function skipPreference() {
         var value = Lampa.Storage && Lampa.Storage.get ? Lampa.Storage.get('yani_aniskip', 'off') : 'off';
         return value === 'op' || value === 'op_ed' ? value : 'off';
     }
 
+    function autoNextEnabled() {
+        if (!Lampa.Storage || !Lampa.Storage.get) return false;
+        var value = Lampa.Storage.get('yani_auto_next', false);
+        return value === true || value === 'true';
+    }
+
     // Lampa's internal player is an HTML5 video element whichever skin is
-    // active, and seeking it directly avoids depending on player internals that
+    // active, and reading it directly avoids depending on player internals that
     // differ between Lampa builds. External players are out of reach by design.
     function playerVideoElement() {
         var selectors = ['.player-video video', '.player video', 'video'];
@@ -5561,62 +5583,125 @@ function pluginYummyAnime() {
         return null;
     }
 
-    function stopSkipWatcher() {
-        if (!skipWatcher) return;
-        clearInterval(skipWatcher.timer);
-        skipWatcher = null;
+    function stopPlaybackWatcher() {
+        if (!playbackWatcher) return;
+        clearInterval(playbackWatcher.timer);
+        playbackWatcher = null;
     }
 
-    function startSkipWatcher(context) {
-        stopSkipWatcher();
-        var generation = ++skipWatcherGeneration;
-        var mode = skipPreference();
-        if (mode === 'off' || !window.LampaYaniAniSkip || !context) return;
+    function startPlaybackWatcher(context) {
+        stopPlaybackWatcher();
+        var generation = ++playbackWatcherGeneration;
+        if (!context) return;
+        var skipMode = skipPreference();
+        var autoNext = autoNextEnabled();
+        if (skipMode === 'off' && !autoNext) return;
 
+        var state = {
+            timer: 0,
+            segments: [],
+            skipped: {},
+            autoNext: autoNext,
+            prefetched: false,
+            advanced: false,
+            lastSeenAt: Date.now()
+        };
+        playbackWatcher = state;
+        state.timer = setInterval(function () { watchPlayback(generation, context, state); }, 700);
+        if (skipMode !== 'off') loadSkipSegments(generation, context, state, skipMode);
+    }
+
+    function loadSkipSegments(generation, context, state, mode) {
+        if (!window.LampaYaniAniSkip) return;
         var ids = (context.card && context.card.yani_remote_ids) || {};
         var malId = Number(ids.myanimelist_id || ids.mal_id || 0);
         var selected = context.selected || {};
         var episode = Number(selected.number || selected.index || 0);
         if (!malId || !episode) return;
-
         LampaYaniAniSkip.times(malId, episode, selected.duration).then(function (intervals) {
-            if (generation !== skipWatcherGeneration) return;
+            if (generation !== playbackWatcherGeneration) return;
             var segments = [];
             if (intervals.op) segments.push({type: 'op', interval: intervals.op, label: t('aniskip_opening_skipped')});
             if (mode === 'op_ed' && intervals.ed) segments.push({type: 'ed', interval: intervals.ed, label: t('aniskip_ending_skipped')});
-            if (segments.length) watchSkipSegments(generation, segments);
+            state.segments = segments;
         });
     }
 
-    function watchSkipSegments(generation, segments) {
-        var skipped = {};
-        var lastSeenAt = Date.now();
-        var state = {timer: 0};
-        state.timer = setInterval(function () {
-            if (generation !== skipWatcherGeneration) return stopSkipWatcher();
-            var video = playerVideoElement();
-            if (!video) {
-                // The player may still be starting up, so give it a grace
-                // period before the watcher gives up on this episode.
-                if (Date.now() - lastSeenAt > 120000) stopSkipWatcher();
+    function watchPlayback(generation, context, state) {
+        if (generation !== playbackWatcherGeneration) return stopPlaybackWatcher();
+        var video = playerVideoElement();
+        if (!video) {
+            // The player may still be starting up, so give it a grace period
+            // before the watcher gives up on this episode.
+            if (Date.now() - state.lastSeenAt > PLAYER_STARTUP_GRACE_MS) stopPlaybackWatcher();
+            return;
+        }
+        state.lastSeenAt = Date.now();
+        var position = Number(video.currentTime) || 0;
+        var duration = Number(video.duration) || 0;
+
+        state.segments.forEach(function (segment) {
+            if (state.skipped[segment.type]) return;
+            if (position < segment.interval.start || position >= segment.interval.end - 1) return;
+            state.skipped[segment.type] = true;
+            try {
+                video.currentTime = segment.interval.end;
+            } catch (error) {
+                console.warn('[YummyAnime] Could not skip a segment', error);
                 return;
             }
-            lastSeenAt = Date.now();
-            var position = Number(video.currentTime) || 0;
-            segments.forEach(function (segment) {
-                if (skipped[segment.type]) return;
-                if (position < segment.interval.start || position >= segment.interval.end - 1) return;
-                skipped[segment.type] = true;
-                try {
-                    video.currentTime = segment.interval.end;
-                } catch (error) {
-                    console.warn('[YummyAnime] Could not skip a segment', error);
-                    return;
-                }
-                Lampa.Noty.show(segment.label);
-            });
-        }, 700);
-        skipWatcher = state;
+            Lampa.Noty.show(segment.label);
+        });
+
+        if (!state.autoNext || duration < 60 || position <= 0) return;
+        var remaining = duration - position;
+        if (!state.prefetched && remaining <= NEXT_PREFETCH_LEAD) {
+            state.prefetched = true;
+            prefetchNextEpisode(context);
+        }
+        if (!state.advanced && remaining <= NEXT_ADVANCE_LEAD && !video.paused) {
+            state.advanced = true;
+            stopPlaybackWatcher();
+            advanceToNextEpisode(context);
+        }
+    }
+
+    function nextEpisodeVideo(context) {
+        var videos = (context && context.videos) || [];
+        var index = videos.indexOf(context.selected);
+        if (index < 0 || index + 1 >= videos.length) return null;
+        return videos[index + 1];
+    }
+
+    // Resolving a stream costs a round trip through the source's player page,
+    // which is long enough to be noticeable between episodes. Doing it while
+    // the current episode still plays hides that entirely, and the resolver
+    // caches the result for the launch that follows.
+    function prefetchNextEpisode(context) {
+        var next = nextEpisodeVideo(context);
+        if (!next || next.yani_stream_url) return;
+        var url = videoSourceUrl(next);
+        if (!url || isExternalPlayableUrl(url, next)) return;
+        if (!window.LampaYaniStreamResolver || !LampaYaniStreamResolver.canResolve(url)) return;
+        LampaYaniStreamResolver.resolve(url, next).then(function (result) {
+            if (!result || !result.url) return;
+            next.yani_stream_url = result.url;
+            next.yani_stream_quality = result.quality || '';
+            next.yani_stream_qualities = result.qualities || null;
+            next.yani_stream_source = result.source || '';
+            next.yani_stream_headers = result.headers || null;
+        }).catch(function (error) {
+            // The episode is launched normally later; a failed prefetch only
+            // costs the time it would have saved.
+            console.warn('[YummyAnime] Next episode prefetch failed', error);
+        });
+    }
+
+    function advanceToNextEpisode(context) {
+        var next = nextEpisodeVideo(context);
+        if (!next) return;
+        Lampa.Noty.show(t('auto_next_starting') + ' ' + (next.number || next.index || ''));
+        launchVideo(context.card, context.group, context.videos, next, {autoAdvance: true});
     }
 
     function externalPlayablePlaylist(playlist) {
@@ -6576,6 +6661,12 @@ function pluginYummyAnime() {
                 default: 'off'
             },
             field: {name: t('aniskip'), description: t('aniskip_description')}
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_auto_next', type: 'trigger', default: false},
+            field: {name: t('auto_next'), description: t('auto_next_description')}
         });
 
         Lampa.SettingsApi.addParam({

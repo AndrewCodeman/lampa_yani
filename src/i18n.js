@@ -138,6 +138,9 @@
     messages.ru.aniskip_openings_endings = 'Опенинги и эндинги';
     messages.ru.aniskip_opening_skipped = 'Опенинг пропущен';
     messages.ru.aniskip_ending_skipped = 'Эндинг пропущен';
+    messages.ru.auto_next = 'Автопереход к следующей серии';
+    messages.ru.auto_next_description = 'В конце серии запускать следующую и заранее готовить её поток. Работает только во внутреннем плеере Lampa';
+    messages.ru.auto_next_starting = 'Следующая серия:';
     messages.ru.resolver_server = 'Сервер резолвера YummyAnime';
     messages.ru.resolver_server_description = 'Собственный сервис из папки server/, превращающий плеер Alloha в обычный HLS-поток';
     messages.ru.resolver_server_prompt = 'Адрес резолвера, например http://192.168.1.10:8790. Оставьте пустым для отключения';
@@ -204,6 +207,9 @@
     messages.en.aniskip_openings_endings = 'Openings and endings';
     messages.en.aniskip_opening_skipped = 'Opening skipped';
     messages.en.aniskip_ending_skipped = 'Ending skipped';
+    messages.en.auto_next = 'Auto-play the next episode';
+    messages.en.auto_next_description = 'Start the next episode when one ends and resolve its stream in advance. Works in the internal Lampa player only';
+    messages.en.auto_next_starting = 'Next episode:';
     messages.en.resolver_server = 'YummyAnime resolver server';
     messages.en.resolver_server_description = 'Self-hosted service from the server/ directory that turns the Alloha player into a plain HLS stream';
     messages.en.resolver_server_prompt = 'Resolver address, for example http://192.168.1.10:8790. Leave empty to disable';
@@ -316,6 +322,9 @@
     messages.uk.aniskip_openings_endings = 'Опенінги та ендінги';
     messages.uk.aniskip_opening_skipped = 'Опенінг пропущено';
     messages.uk.aniskip_ending_skipped = 'Ендінг пропущено';
+    messages.uk.auto_next = 'Автоперехід до наступної серії';
+    messages.uk.auto_next_description = 'Наприкінці серії запускати наступну та заздалегідь готувати її потік. Працює лише у внутрішньому плеєрі Lampa';
+    messages.uk.auto_next_starting = 'Наступна серія:';
     messages.uk.resolver_server = 'Сервер резолвера YummyAnime';
     messages.uk.resolver_server_description = 'Власний сервіс із теки server/, що перетворює плеєр Alloha на звичайний HLS-потік';
     messages.uk.resolver_server_prompt = 'Адреса резолвера, наприклад http://192.168.1.10:8790. Залиште порожнім для вимкнення';

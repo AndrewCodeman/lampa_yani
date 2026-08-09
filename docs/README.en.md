@@ -18,6 +18,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 - optional self-hosted Lampac resolution of Alloha sources into direct HLS;
 - self-hosted resolver service in `server/` that serves Alloha as a plain HLS stream;
 - opening and ending skipping from AniSkip timestamps in the internal player;
+- automatic next-episode playback with its stream resolved in advance;
 - optional, disabled-by-default YummyTV app integration;
 - YummyAnime button on standard Lampa cards and Online registration when that module is available;
 - all players and dubbings returned by the YummyAnime API;

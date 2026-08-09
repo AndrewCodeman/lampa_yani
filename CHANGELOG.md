@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.26.0 — 2026-08-09
+
+- Add an opt-in automatic switch to the next episode at the end of the current one.
+- Resolve the next episode's stream a minute and a half before it is needed, so the switch is not spent waiting on the source's player page.
+- Keep an automatic switch inside the running player instead of asking again where to play.
+
 ## 0.25.0 — 2026-08-09
 
 - Skip openings and endings in the internal player using AniSkip timestamps, resolved from the MyAnimeList id YummyAnime already reports.
