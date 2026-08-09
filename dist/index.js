@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.29.5',
+        version: '0.29.6',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -502,8 +502,15 @@ function pluginYummyAnime() {
         token: function () { return tokenFrom(this.get()); },
         save: function (data) {
             var token = tokenFrom(data);
+            var previous = readStored();
             if (!token) throw new Error('Login response did not contain a token');
-            memory = {token: token, refreshed_at: data.refreshed_at || Date.now(), login: data.login || '', display_name: data.display_name || data.login || ''};
+            memory = {
+                token: token,
+                refreshed_at: data.refreshed_at || Date.now(),
+                login: data.login || previous.login || '',
+                display_name: data.display_name || data.login || previous.display_name || previous.login || '',
+                user_id: Number(data.user_id || data.id || previous.user_id || 0) || 0
+            };
             Lampa.Storage.set(key, JSON.stringify(memory));
             return memory;
         },
@@ -522,7 +529,7 @@ function pluginYummyAnime() {
             }).then(function (payload) {
                 var current = LampaYaniAuth.get();
                 var data = payload.response || payload;
-                LampaYaniAuth.save({token: tokenFrom(data), refreshed_at: Date.now(), login: current.login, display_name: current.display_name});
+                LampaYaniAuth.save({token: tokenFrom(data), refreshed_at: Date.now(), login: current.login, display_name: current.display_name, user_id: current.user_id});
                 return LampaYaniAuth.get();
             });
         },
@@ -536,7 +543,7 @@ function pluginYummyAnime() {
                 return response.json();
             }).then(function (payload) {
                 var data = payload.response || payload;
-                LampaYaniAuth.save({token: tokenFrom(data), refreshed_at: Date.now(), login: login});
+                LampaYaniAuth.save({token: tokenFrom(data), refreshed_at: Date.now(), login: login, user_id: data.id || data.user_id});
                 return data;
             });
         },
@@ -2745,6 +2752,58 @@ function pluginYummyAnime() {
 
 (function (window) {
     'use strict';
+
+    function responseItems(payload) {
+        var value = payload;
+        var fields = ['anime', 'animes', 'results', 'items', 'data', 'list', 'values'];
+        var depth = 0;
+
+        while (value && !Array.isArray(value) && depth < 4) {
+            if (value.response && value.response !== value) {
+                value = value.response;
+                depth += 1;
+                continue;
+            }
+
+            var next;
+            fields.some(function (field) {
+                if (Array.isArray(value[field])) {
+                    next = value[field];
+                    return true;
+                }
+                return false;
+            });
+            if (next) return next;
+            break;
+        }
+
+        return Array.isArray(value) ? value : [];
+    }
+
+    function normalize(payload) {
+        return responseItems(payload).map(function (item) {
+            if (!item || !item.anime || typeof item.anime !== 'object') return item;
+            var anime = Object.assign({}, item.anime);
+            if (item.user) anime.user = item.user;
+            if (item.date && !anime.date) anime.date = item.date;
+            return anime;
+        }).filter(Boolean);
+    }
+
+    function state(item) {
+        return item && (item.user && item.user.list || item.user_list || item.list_state) || null;
+    }
+
+    function filterItems(definition, items) {
+        return (items || []).filter(function (item) {
+            var current = state(item);
+            if (!current) return false;
+            if (definition.id === 4) return Boolean(current.is_fav || current.is_favorite || current.favorite);
+            var list = current.list && typeof current.list === 'object' ? current.list : current;
+            return typeof list.id !== 'undefined' && Number(list.id) === Number(definition.id);
+        });
+    }
+
     function accountList(object, deps) {
         var comp = new Lampa.InteractionCategory(object);
         comp.create = function () { this.build({results: (object.items || []).map(deps.toCard), total_pages: 1, title: object.title}); };
@@ -2837,7 +2896,9 @@ function pluginYummyAnime() {
     window.LampaYani.AccountLists = window.LampaYaniAccountLists = {
         accountList: accountList,
         subscriptions: subscriptions,
-        userLists: userLists
+        userLists: userLists,
+        normalize: normalize,
+        filterItems: filterItems
     };
 }(window));
 
@@ -4291,19 +4352,8 @@ function pluginYummyAnime() {
         ];
     }
 
-    function userListState(item) {
-        if (!item) return null;
-        return item.user && item.user.list || item.user_list || item.list_state || null;
-    }
-
     function filterAccountListItems(definition, items) {
-        return (items || []).filter(function (item) {
-            var state = userListState(item);
-            if (!state) return false;
-            if (definition.id === 4) return Boolean(state.is_fav || state.is_favorite || state.favorite);
-            var list = state.list && typeof state.list === 'object' ? state.list : state;
-            return typeof list.id !== 'undefined' && Number(list.id) === definition.id;
-        });
+        return LampaYaniAccountLists.filterItems(definition, items);
     }
 
     function pushAccountList(definition, items) {
@@ -4330,21 +4380,64 @@ function pluginYummyAnime() {
         if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
 
+        function cacheKey(userId) {
+            return 'yani_user_list_' + userId + '_' + definition.id;
+        }
+
+        function readCache(userId) {
+            try {
+                var cached = Lampa.Storage.get(cacheKey(userId), '{}');
+                if (typeof cached === 'string') cached = JSON.parse(cached || '{}');
+                return cached && Array.isArray(cached.items) ? cached.items : null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function writeCache(userId, items) {
+            try {
+                Lampa.Storage.set(cacheKey(userId), JSON.stringify({updated_at: Date.now(), items: items || []}));
+            } catch (error) {
+                console.warn('[YummyAnime User Lists] Could not cache list', error);
+            }
+            return items || [];
+        }
+
         function loadAll(userId) {
             return LampaYaniApi.userLists(userId).then(normalizeUserList).then(function (items) {
                 return filterAccountListItems(definition, items);
             });
         }
 
-        LampaYaniApi.profile().then(function (payload) {
-            var profile = payload && payload.response ? payload.response : payload;
-            var userId = profile && (profile.id || profile.user_id || profile.user && profile.user.id);
-            if (!userId) throw new Error('YummyAnime profile id is missing');
-            if (definition.id === 4) return loadAll(userId);
-            return LampaYaniApi.userList(userId, definition.id).then(normalizeUserList).catch(function () {
-                return [];
-            }).then(function (items) {
-                return items.length ? items : loadAll(userId);
+        function resolveUserId() {
+            var account = LampaYaniAuth.get();
+            var storedId = Number(account && account.user_id || 0);
+            if (storedId) return Promise.resolve(storedId);
+            return LampaYaniApi.profile().then(function (payload) {
+                var profile = payload && payload.response ? payload.response : payload;
+                var userId = profile && (profile.id || profile.user_id || profile.user && profile.user.id);
+                if (!userId) throw new Error('YummyAnime profile id is missing');
+                LampaYaniAuth.save({
+                    token: LampaYaniAuth.token(),
+                    login: account && account.login,
+                    display_name: account && account.display_name,
+                    user_id: userId
+                });
+                return Number(userId);
+            });
+        }
+
+        resolveUserId().then(function (userId) {
+            return LampaYaniApi.userList(userId, definition.id).then(normalizeUserList).then(function (items) {
+                return writeCache(userId, items);
+            }).catch(function (directError) {
+                return loadAll(userId).then(function (items) {
+                    return writeCache(userId, items);
+                }).catch(function (allError) {
+                    var cached = readCache(userId);
+                    if (cached) return cached;
+                    throw directError || allError;
+                });
             });
         }).then(function (items) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
@@ -4357,14 +4450,7 @@ function pluginYummyAnime() {
     }
 
     function normalizeUserList(payload) {
-        var response = payload && payload.response ? payload.response : payload;
-        var values = Array.isArray(response) ? response : response && (response.anime || response.results || response.items || response.data) || [];
-        return values.map(function (item) {
-            if (!item || !item.anime || typeof item.anime !== 'object') return item;
-            var anime = Object.assign({}, item.anime);
-            if (item.user) anime.user = item.user;
-            return anime;
-        }).filter(Boolean);
+        return LampaYaniAccountLists.normalize(payload);
     }
 
     function AccountList(object) {

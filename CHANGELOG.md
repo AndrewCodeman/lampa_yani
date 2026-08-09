@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.29.6 — 2026-08-10
+
+- Fix Your Lists so a valid empty list no longer triggers a failing second request.
+- Load every selected list, including Favorites, from its dedicated YummyAnime endpoint and use the complete list only as a network fallback.
+- Cache the resolved user ID and the six account lists, with stale list data available when both API requests fail.
+- Normalize direct and nested list response shapes before rendering cards.
+
 ## 0.29.5 — 2026-08-10
 
 - Add a compact, focusable episode-information row to YummyAnime title details.

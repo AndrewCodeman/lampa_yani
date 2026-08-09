@@ -1232,19 +1232,8 @@
         ];
     }
 
-    function userListState(item) {
-        if (!item) return null;
-        return item.user && item.user.list || item.user_list || item.list_state || null;
-    }
-
     function filterAccountListItems(definition, items) {
-        return (items || []).filter(function (item) {
-            var state = userListState(item);
-            if (!state) return false;
-            if (definition.id === 4) return Boolean(state.is_fav || state.is_favorite || state.favorite);
-            var list = state.list && typeof state.list === 'object' ? state.list : state;
-            return typeof list.id !== 'undefined' && Number(list.id) === definition.id;
-        });
+        return LampaYaniAccountLists.filterItems(definition, items);
     }
 
     function pushAccountList(definition, items) {
@@ -1271,21 +1260,64 @@
         if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
 
+        function cacheKey(userId) {
+            return 'yani_user_list_' + userId + '_' + definition.id;
+        }
+
+        function readCache(userId) {
+            try {
+                var cached = Lampa.Storage.get(cacheKey(userId), '{}');
+                if (typeof cached === 'string') cached = JSON.parse(cached || '{}');
+                return cached && Array.isArray(cached.items) ? cached.items : null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function writeCache(userId, items) {
+            try {
+                Lampa.Storage.set(cacheKey(userId), JSON.stringify({updated_at: Date.now(), items: items || []}));
+            } catch (error) {
+                console.warn('[YummyAnime User Lists] Could not cache list', error);
+            }
+            return items || [];
+        }
+
         function loadAll(userId) {
             return LampaYaniApi.userLists(userId).then(normalizeUserList).then(function (items) {
                 return filterAccountListItems(definition, items);
             });
         }
 
-        LampaYaniApi.profile().then(function (payload) {
-            var profile = payload && payload.response ? payload.response : payload;
-            var userId = profile && (profile.id || profile.user_id || profile.user && profile.user.id);
-            if (!userId) throw new Error('YummyAnime profile id is missing');
-            if (definition.id === 4) return loadAll(userId);
-            return LampaYaniApi.userList(userId, definition.id).then(normalizeUserList).catch(function () {
-                return [];
-            }).then(function (items) {
-                return items.length ? items : loadAll(userId);
+        function resolveUserId() {
+            var account = LampaYaniAuth.get();
+            var storedId = Number(account && account.user_id || 0);
+            if (storedId) return Promise.resolve(storedId);
+            return LampaYaniApi.profile().then(function (payload) {
+                var profile = payload && payload.response ? payload.response : payload;
+                var userId = profile && (profile.id || profile.user_id || profile.user && profile.user.id);
+                if (!userId) throw new Error('YummyAnime profile id is missing');
+                LampaYaniAuth.save({
+                    token: LampaYaniAuth.token(),
+                    login: account && account.login,
+                    display_name: account && account.display_name,
+                    user_id: userId
+                });
+                return Number(userId);
+            });
+        }
+
+        resolveUserId().then(function (userId) {
+            return LampaYaniApi.userList(userId, definition.id).then(normalizeUserList).then(function (items) {
+                return writeCache(userId, items);
+            }).catch(function (directError) {
+                return loadAll(userId).then(function (items) {
+                    return writeCache(userId, items);
+                }).catch(function (allError) {
+                    var cached = readCache(userId);
+                    if (cached) return cached;
+                    throw directError || allError;
+                });
             });
         }).then(function (items) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
@@ -1298,14 +1330,7 @@
     }
 
     function normalizeUserList(payload) {
-        var response = payload && payload.response ? payload.response : payload;
-        var values = Array.isArray(response) ? response : response && (response.anime || response.results || response.items || response.data) || [];
-        return values.map(function (item) {
-            if (!item || !item.anime || typeof item.anime !== 'object') return item;
-            var anime = Object.assign({}, item.anime);
-            if (item.user) anime.user = item.user;
-            return anime;
-        }).filter(Boolean);
+        return LampaYaniAccountLists.normalize(payload);
     }
 
     function AccountList(object) {

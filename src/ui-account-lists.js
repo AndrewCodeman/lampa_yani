@@ -1,5 +1,57 @@
 (function (window) {
     'use strict';
+
+    function responseItems(payload) {
+        var value = payload;
+        var fields = ['anime', 'animes', 'results', 'items', 'data', 'list', 'values'];
+        var depth = 0;
+
+        while (value && !Array.isArray(value) && depth < 4) {
+            if (value.response && value.response !== value) {
+                value = value.response;
+                depth += 1;
+                continue;
+            }
+
+            var next;
+            fields.some(function (field) {
+                if (Array.isArray(value[field])) {
+                    next = value[field];
+                    return true;
+                }
+                return false;
+            });
+            if (next) return next;
+            break;
+        }
+
+        return Array.isArray(value) ? value : [];
+    }
+
+    function normalize(payload) {
+        return responseItems(payload).map(function (item) {
+            if (!item || !item.anime || typeof item.anime !== 'object') return item;
+            var anime = Object.assign({}, item.anime);
+            if (item.user) anime.user = item.user;
+            if (item.date && !anime.date) anime.date = item.date;
+            return anime;
+        }).filter(Boolean);
+    }
+
+    function state(item) {
+        return item && (item.user && item.user.list || item.user_list || item.list_state) || null;
+    }
+
+    function filterItems(definition, items) {
+        return (items || []).filter(function (item) {
+            var current = state(item);
+            if (!current) return false;
+            if (definition.id === 4) return Boolean(current.is_fav || current.is_favorite || current.favorite);
+            var list = current.list && typeof current.list === 'object' ? current.list : current;
+            return typeof list.id !== 'undefined' && Number(list.id) === Number(definition.id);
+        });
+    }
+
     function accountList(object, deps) {
         var comp = new Lampa.InteractionCategory(object);
         comp.create = function () { this.build({results: (object.items || []).map(deps.toCard), total_pages: 1, title: object.title}); };
@@ -92,6 +144,8 @@
     window.LampaYani.AccountLists = window.LampaYaniAccountLists = {
         accountList: accountList,
         subscriptions: subscriptions,
-        userLists: userLists
+        userLists: userLists,
+        normalize: normalize,
+        filterItems: filterItems
     };
 }(window));
