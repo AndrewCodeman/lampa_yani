@@ -420,7 +420,15 @@
     }
 
     function History(object) {
-        return LampaYaniHomeSections.history(object, {t: t, history: playbackHistory, toCard: toCard, historyCardRender: bindHistoryCardRender});
+        return LampaYaniHomeSections.history(object, {
+            t: t,
+            history: playbackHistory,
+            toCard: toCard,
+            detail: LampaYaniApi.detail,
+            authorized: function () { return Boolean(LampaYaniAuth.token()); },
+            fetchRemote: LampaYaniApi.watchHistory,
+            historyCardRender: bindHistoryCardRender
+        });
     }
 
     function LegacyHistory(object) {
@@ -466,17 +474,45 @@
     function bindHistoryCardRender(first, second, third) {
         bindYummyCardRender(first, second, third);
         var card;
+        var element;
         [first, second, third].forEach(function (value) {
-            if (!value || card) return;
-            if (value.render || value.yani_id || value.title) card = value;
-            else {
+            if (!value) return;
+            if (!element && (value.jquery || value.nodeType || (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement))) element = value;
+            if (!card && (value.render || value.yani_id || value.title)) card = value;
+            else if (!card) {
                 var candidate = value.card || value.object || value.data;
                 if (candidate && (candidate.render || candidate.yani_id || candidate.title)) card = candidate;
             }
         });
         if (card && card.yani_id) {
             // Continue Watching is a playback queue, not an information catalog.
-            card.onEnter = function () { openVideos(card, true); };
+            var openHistoryEntry = function () { openVideos(card, true); };
+            var rendered = cardRenderElement(element, card);
+            rendered.add(rendered.find('*')).off('hover:enter.yaniOpen click.yaniOpen hover:enter.yaniHistory click.yaniHistory');
+            rendered.on('hover:enter.yaniHistory click.yaniHistory', function (event) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                }
+                openHistoryEntry();
+                return false;
+            });
+            card.onEnter = openHistoryEntry;
+            renderHistoryProgress(rendered, card.yani_resume || {});
+        }
+    }
+
+    function renderHistoryProgress(rendered, playback) {
+        var view = $('.card__view', rendered).first();
+        if (!view.length || view.find('.yani-card-history').length) return;
+        var duration = Math.max(0, Number(playback.duration || 0));
+        var position = Math.max(0, Number(playback.time || 0));
+        var percent = duration > 0 ? Math.min(100, Math.round(position / duration * 100)) : 0;
+        var label = playback.number ? t('episode') + ' ' + playback.number : t('continue_watching');
+        if (percent) label += ' · ' + percent + '%';
+        view.append($('<span class="yani-card-history"></span>').text(label));
+        if (duration > 0) {
+            view.append($('<span class="yani-card-history-progress"><span></span></span>').find('span').css('width', percent + '%').end());
         }
     }
 
@@ -2148,12 +2184,21 @@
             if (voices.length && playerMatchesPreference(voices[0].group, preferredPlayer)) voices[0].title = '★ ' + voices[0].title;
 
             if (resume) {
-                var playback = getPlayback(card.yani_id);
-                var resumeVoice = playback && voices.filter(function (voice) { return playerMatchesPreference(voice.group, playback.player); })[0];
+                var playback = card.yani_resume || getPlayback(card.yani_id);
+                var resumeVoice = playback && voices.filter(function (voice) {
+                    if (playback.video_id && voice.group.videos.some(function (video) {
+                        return String(video.video_id || video.id || '') === String(playback.video_id);
+                    })) return true;
+                    return playerMatchesPreference(voice.group, playback.player);
+                })[0];
                 var resumeVideo = resumeVoice && resumeVoice.group.videos.filter(function (video) {
-                    return String(video.number || video.index || '') === playback.number;
+                    if (playback.video_id && String(video.video_id || video.id || '') === String(playback.video_id)) return true;
+                    return String(video.number || video.index || '') === String(playback.number || '');
                 })[0];
                 if (resumeVideo) {
+                    resumeVideo.watched = resumeVideo.watched || {};
+                    resumeVideo.watched.end_time = Math.max(Number(resumeVideo.watched.end_time || 0), Number(playback.time || 0));
+                    if (!resumeVideo.duration && playback.duration) resumeVideo.duration = Number(playback.duration);
                     rememberPlayer(resumeVoice.group);
                     return launchVideo(card, resumeVoice.group, resumeVoice.group.videos, resumeVideo);
                 }

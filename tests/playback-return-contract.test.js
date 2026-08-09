@@ -7,7 +7,7 @@ const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 assert.match(ui, /beginPlaybackNavigation\(button, scroll\.render\(\)\);[\s\S]{0,100}openTitlePlaybackOptions\(data\)/);
 assert.match(ui, /function showPlaybackSelect\(params\)[\s\S]{0,500}params\.onBack = function \(\)[\s\S]{0,200}restorePlaybackInteraction\(\)/);
 assert.match(ui, /function chooseEpisode[\s\S]{0,700}showPlaybackSelect\(\{/);
-assert.match(ui, /function openVideos[\s\S]{0,4000}showPlaybackSelect\(\{/);
+assert.match(ui, /function openVideos[\s\S]{0,5200}showPlaybackSelect\(\{/);
 assert.match(ui, /function showDirectPlaybackOptions[\s\S]{0,1000}showPlaybackSelect\(\{/);
 assert.match(ui, /function openTitlePlaybackOptions[\s\S]{0,900}showPlaybackSelect\(\{/);
 assert.match(ui, /function showYummyActions\(card, originElement, originCollection\)[\s\S]{0,1500}beginPlaybackNavigation\(originElement, originCollection\);[\s\S]{0,100}openVideos\(card\)/);

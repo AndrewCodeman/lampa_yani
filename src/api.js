@@ -323,6 +323,12 @@
                 body: JSON.stringify({videos: videos || []})
             });
         },
+        watchHistory: function (limit, offset) {
+            return request('/video/watch-history?limit=' + encodeURIComponent(limit || 30) + '&offset=' + encodeURIComponent(offset || 0), {
+                auth: true,
+                cache: false
+            });
+        },
         health: function () {
             return request('/anime?limit=1');
         },

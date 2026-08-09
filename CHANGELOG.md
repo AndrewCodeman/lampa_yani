@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.29.4 — 2026-08-10
+
+- Load the authorized user's server-side viewing history and progress from YummyAnime.
+- Merge server records with local Lampa progress, deduplicate matching videos and keep local history available offline or without authorization.
+- Load long server histories page by page and resume the exact saved video, episode and position.
+
 ## 0.29.3 — 2026-08-10
 
 - Add Watch History to the Your Lists shortcut screen and reuse the existing Continue Watching component.

@@ -583,6 +583,9 @@
 .yani-card-media__voices { background: #3b9bd9; }
 .yani-card-update { position: absolute; top: 0.35em; right: 0.35em; z-index: 2; padding: 0.22em 0.38em; border-radius: 0.25em; background: #ef6470; color: #fff; font-size: 0.62em; font-weight: 700; line-height: 1.1; }
 .yani-card-list { position: absolute; left: 0.35em; bottom: 0.35em; z-index: 3; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: #5f43a8; color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.yani-card-history { position: absolute; top: 0.35em; right: 0.35em; z-index: 4; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: rgba(239, 100, 112, 0.94); color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.yani-card-history-progress { position: absolute; right: 0; bottom: 0; left: 0; z-index: 5; height: 0.24em; overflow: hidden; background: rgba(255, 255, 255, 0.25); }
+.yani-card-history-progress span { display: block; height: 100%; background: #ef6470; }
 
 .yani-card-rating {
     display: flex;

@@ -1,0 +1,60 @@
+const assert = require('assert');
+const fs = require('fs');
+const vm = require('vm');
+
+const api = fs.readFileSync('src/api.js', 'utf8');
+const ui = fs.readFileSync('src/ui.js', 'utf8');
+const sectionsSource = fs.readFileSync('src/ui-home-sections.js', 'utf8');
+const context = {window: {}};
+
+vm.runInNewContext(sectionsSource, context);
+const history = context.window.LampaYaniHomeSections;
+
+assert.match(api, /watchHistory: function \(limit, offset\)/);
+assert.match(api, /\/video\/watch-history\?limit=/);
+assert.match(api, /auth: true,[\s\S]{0,40}cache: false/);
+assert.match(ui, /fetchRemote: LampaYaniApi\.watchHistory/);
+assert.match(ui, /var playback = card\.yani_resume \|\| getPlayback\(card\.yani_id\)/);
+assert.match(ui, /String\(video\.video_id \|\| video\.id \|\| ''\) === String\(playback\.video_id\)/);
+assert.match(ui, /function bindHistoryCardRender[\s\S]{0,2200}hover:enter\.yaniHistory click\.yaniHistory/);
+assert.match(ui, /function renderHistoryProgress/);
+
+const remote = history.normalizeRemoteHistory({response: [{
+    anime_id: 42,
+    video_id: 4207,
+    date: 1720000000,
+    end_time: 333,
+    duration: 1440,
+    title: 'Example',
+    episode: 7,
+    ep_title: 'Seventh',
+    dub_title: 'Dub',
+    player_title: 'Kodika',
+    poster: {huge: 'https://img.example/poster.jpg'}
+}]});
+
+assert.strictEqual(remote.length, 1);
+assert.strictEqual(remote[0].anime_id, 42);
+assert.strictEqual(remote[0].video_id, 4207);
+assert.strictEqual(remote[0].number, '7');
+assert.strictEqual(remote[0].time, 333);
+assert.strictEqual(remote[0].updated_at, 1720000000000);
+assert.strictEqual(remote[0].poster, 'https://img.example/poster.jpg');
+
+const merged = history.mergeHistory({
+    42: {
+        video_id: 4207,
+        number: '7',
+        time: 120,
+        updated_at: 1710000000000,
+        card: {anime_id: 42, title: 'Stored title'}
+    },
+    99: {video_id: 9901, number: '1', time: 15, updated_at: 1700000000000}
+}, remote);
+
+assert.strictEqual(merged.length, 2, 'matching local and remote video records must be deduplicated');
+assert.strictEqual(merged[0].video_id, 4207);
+assert.strictEqual(merged[0].time, 333, 'newer remote progress must win');
+assert.strictEqual(merged[0].card.title, 'Stored title', 'local card metadata must survive a server merge');
+
+console.log('Watch history contract checks passed');
