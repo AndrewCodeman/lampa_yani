@@ -10,6 +10,7 @@
 // a CORS preflight the CDN never answers - which is why the Lampa plugin needs
 // this service instead of doing the work in place.
 
+const crypto = require('crypto');
 const http = require('http');
 const {Readable} = require('stream');
 const {URL} = require('url');
@@ -45,6 +46,31 @@ function encodeTarget(value) {
 
 function decodeTarget(value) {
     return Buffer.from(String(value || '').replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
+}
+
+// Segment URLs name their upstream target in the query string. Without a
+// signature this service would forward any URL anyone asked it to, which on a
+// process listening beyond loopback is an open proxy. The secret lives and dies
+// with the process: links from an older run simply stop resolving.
+const PROXY_SECRET = crypto.randomBytes(32);
+
+function signTarget(encoded) {
+    return crypto.createHmac('sha256', PROXY_SECRET).update(encoded).digest('base64')
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '').slice(0, 16);
+}
+
+function signedTarget(url) {
+    const encoded = encodeTarget(url);
+    return `u=${encoded}&s=${signTarget(encoded)}`;
+}
+
+function verifiedTarget(encoded, signature) {
+    if (!encoded || !signature) return '';
+    const expected = signTarget(encoded);
+    const given = String(signature);
+    if (expected.length !== given.length) return '';
+    if (!crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(given))) return '';
+    return decodeTarget(encoded);
 }
 
 async function browser() {
@@ -184,14 +210,23 @@ async function handleResolve(request, response, query) {
         const session = await acquireSession(iframeUrl);
         const id = encodeTarget(iframeUrl);
         const base = playbackBase(request);
+
+        // The live master carries only the rung the offscreen player happened to
+        // settle on, which is never the best one - it is playing muted in a
+        // headless window. The bnsi ladder holds every rung, so it is what gets
+        // offered, with the live master kept as the fallback.
+        const labels = Object.keys(session.qualities)
+            .sort((first, second) => (parseInt(first, 10) || 0) - (parseInt(second, 10) || 0));
+        const qualities = {};
+        labels.forEach((label) => {
+            qualities[label] = `${base}/hls/${id}/q/${encodeURIComponent(label)}/master.m3u8`;
+        });
+        const best = labels[labels.length - 1];
+
         sendJson(response, 200, {
-            url: `${base}/hls/${id}/master.m3u8`,
-            quality: 'auto',
-            // The variants live inside the proxied master, so the player picks
-            // the quality itself. The bnsi ladder is reported for display only:
-            // those URLs carry a spent token and 403 on a live session.
-            qualities: null,
-            available_qualities: Object.keys(session.qualities),
+            url: best ? qualities[best] : `${base}/hls/${id}/master.m3u8`,
+            quality: best || 'auto',
+            qualities: labels.length ? qualities : null,
             headers: null,
             source: 'yani-resolver',
             session: id,
@@ -204,9 +239,21 @@ async function handleResolve(request, response, query) {
     }
 }
 
+/**
+ * `/hls/<id>/master.m3u8` follows the live session, `/hls/<id>/q/<label>/…`
+ * pins one rung of the bnsi quality ladder, and anything else is a proxied
+ * segment or nested playlist named by the `u` query parameter.
+ */
+function parseStreamPath(path) {
+    const parts = String(path || '').split('/').filter(Boolean); // hls/<id>/<rest>
+    const id = parts[1] || '';
+    const quality = parts[2] === 'q' ? decodeURIComponent(parts[3] || '') : '';
+    return {id: id, quality: quality, isMaster: parts[2] === 'master.m3u8' || Boolean(quality)};
+}
+
 async function handleStream(request, response, path, query) {
-    const parts = path.split('/').filter(Boolean); // hls/<id>/<rest>
-    const id = parts[1];
+    const route = parseStreamPath(path);
+    const id = route.id;
     if (!id) return sendJson(response, 400, {error: 'session is required'});
 
     let iframeUrl;
@@ -221,8 +268,15 @@ async function handleStream(request, response, path, query) {
     session.touch();
     if (session.expiringSoon()) session.refresh();
 
-    const isMaster = parts[2] === 'master.m3u8';
-    const target = isMaster ? session.state().masterUrl : decodeTarget(query.get('u') || '');
+    let target;
+    if (route.isMaster) {
+        target = route.quality
+            ? (Object.prototype.hasOwnProperty.call(session.qualities, route.quality) ? session.qualities[route.quality] : '')
+            : session.state().masterUrl;
+    } else {
+        target = verifiedTarget(query.get('u'), query.get('s'));
+        if (!target) return sendJson(response, 403, {error: 'invalid stream signature'});
+    }
     if (!target) return sendJson(response, 404, {error: 'stream is not ready'});
 
     let upstream;
@@ -239,7 +293,7 @@ async function handleStream(request, response, path, query) {
     if (playlist) {
         const text = await upstream.text();
         const base = playbackBase(request);
-        const body = rewritePlaylist(text, target, (value, baseUrl) => `${base}/hls/${id}/p?u=${encodeTarget(absolute(value, baseUrl))}`);
+        const body = rewritePlaylist(text, target, (value, baseUrl) => `${base}/hls/${id}/p?${signedTarget(absolute(value, baseUrl))}`);
         response.writeHead(upstream.status, {
             'Content-Type': 'application/vnd.apple.mpegurl',
             'Access-Control-Allow-Origin': '*',
@@ -313,4 +367,13 @@ if (require.main === module) {
     });
 }
 
-module.exports = {server, rewritePlaylist, encodeTarget, decodeTarget, isAllohaUrl};
+module.exports = {
+    server,
+    rewritePlaylist,
+    parseStreamPath,
+    encodeTarget,
+    decodeTarget,
+    signedTarget,
+    verifiedTarget,
+    isAllohaUrl
+};

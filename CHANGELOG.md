@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.27.0 — 2026-08-09
+
+- Capture the Alloha session from the browser driver rather than from injected page code, so it is in place before the player issues its first request; this is what makes the resolver actually return a stream.
+- Offer the full Alloha quality ladder and default to the best rung instead of whatever the offscreen player settled on.
+- Keep the player's WebSocket alive from an init script so the session token keeps rotating.
+
 ## 0.26.0 — 2026-08-09
 
 - Add an opt-in automatic switch to the next episode at the end of the current one.

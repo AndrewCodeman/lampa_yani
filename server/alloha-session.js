@@ -1,15 +1,29 @@
 'use strict';
 
-const {wrapperHtml} = require('./wrapper');
+const {wrapperHtml, initScript} = require('./wrapper');
 
 const WRAPPER_PATH = '/__yani_wrapper';
 const OPEN_TIMEOUT_MS = 45000;
-const MASTER_WAIT_MS = 8000;
 const REFRESH_LEAD_MS = 20000;
+const QUALITY_GRACE_MS = 3000;
+const UNAVAILABLE_PATTERN = /озвучка\s*недоступна/i;
+const MASTER_PATTERN = /master\.m3u8/i;
 const DESKTOP_PLATFORMS = [
     'Windows NT 10.0; Win64; x64',
     'Macintosh; Intel Mac OS X 10_15_7',
     'X11; Linux x86_64'
+];
+const FORWARDED_HEADERS = [
+    'authorizations',
+    'accepts-controls',
+    'origin',
+    'referer',
+    'user-agent',
+    'accept',
+    'accept-language',
+    'sec-fetch-dest',
+    'sec-fetch-mode',
+    'sec-fetch-site'
 ];
 
 function desktopUserAgent() {
@@ -34,10 +48,17 @@ class SourceUnavailableError extends Error {}
 /**
  * One live Alloha playback session backed by a headless browser page.
  *
- * The page holds the state the CDN authorizes against, and that state keeps
- * moving: `accepts-controls` rotates roughly every two minutes and the master
- * URL follows the CDN node the player is talking to. Consumers therefore never
- * cache what {@link state} returns - they read it per request.
+ * Everything the CDN authorizes against is produced by the player itself and
+ * keeps moving: `accepts-controls` rotates every couple of minutes and the
+ * master URL follows whichever CDN node the player is talking to. It is all
+ * captured from the driver rather than from injected page code, so it is in
+ * place from the player's very first request:
+ *
+ *   * the master request is intercepted and aborted - its URL and headers are
+ *     exactly what the proxy needs, and the token in its path is single-use, so
+ *     letting the request through would spend it;
+ *   * `/bnsi/` responses carry the quality ladder;
+ *   * `config_update` WebSocket frames carry each new token and its lifetime.
  */
 class AllohaSession {
     constructor(browser, iframeUrl, options) {
@@ -56,8 +77,6 @@ class AllohaSession {
         this.closed = false;
         this.refreshing = null;
         this.userAgent = desktopUserAgent();
-        this.hasStream = false;
-        this.hasMaster = false;
         this.unavailable = false;
         this.waiters = [];
     }
@@ -84,39 +103,65 @@ class AllohaSession {
             viewport: {width: 1280, height: 720},
             locale: 'ru-RU'
         });
+        await this.context.addInitScript(initScript());
         this.page = await this.context.newPage();
-        this.page.on('console', (message) => this.log(`page console: ${message.text()}`));
 
-        await this.page.exposeFunction('yaniBridge', (type, payload) => {
-            try { this._onBridge(type, payload || {}); } catch (error) { this.log(`bridge error: ${error.message}`); }
+        this.wrapperUrl = new URL(WRAPPER_PATH, this.iframeUrl).toString();
+        const html = wrapperHtml(this.iframeUrl);
+
+        await this.page.route('**/*', (route) => {
+            const request = route.request();
+            const url = request.url();
+            if (url === this.wrapperUrl) {
+                return route.fulfill({status: 200, contentType: 'text/html; charset=utf-8', body: html});
+            }
+            if (MASTER_PATTERN.test(url) && !/alloha\./i.test(hostOf(url))) {
+                this._captureMaster(url, request.headers());
+                return route.abort();
+            }
+            return route.continue();
         });
 
-        // Serving the wrapper from Alloha's own origin is the whole trick: it
-        // makes this document same-origin with the player iframe, which is the
-        // only way to instrument the player's network stack.
-        const wrapperUrl = new URL(WRAPPER_PATH, this.iframeUrl).toString();
-        const html = wrapperHtml(this.iframeUrl);
-        await this.page.route(wrapperUrl, (route) => route.fulfill({
-            status: 200,
-            contentType: 'text/html; charset=utf-8',
-            body: html
-        }));
+        this.page.on('response', (response) => {
+            if (response.url().indexOf('/bnsi/') < 0) return;
+            response.text()
+                .then((text) => this._readQualities(text))
+                .catch(() => {});
+        });
 
-        await this.page.goto(wrapperUrl, {waitUntil: 'domcontentloaded', timeout: OPEN_TIMEOUT_MS});
+        this.page.on('websocket', (socket) => {
+            socket.on('framereceived', (frame) => this._readSocketFrame(frame && frame.payload));
+        });
+
+        // The wrapper document exists purely because the player wipes itself out
+        // when it is not framed. It is served from Alloha's own origin so the
+        // player sees a referrer it accepts.
+        await this.page.goto(this.wrapperUrl, {waitUntil: 'domcontentloaded', timeout: OPEN_TIMEOUT_MS});
+        this._watchForUnavailable();
         await this._waitUntilReady(OPEN_TIMEOUT_MS);
+        // The bnsi response is read asynchronously and usually lands within a
+        // few hundred milliseconds of the master; without this wait the first
+        // caller would be told the session has no quality ladder at all.
+        await this._waitForQualities(QUALITY_GRACE_MS);
         return this;
+    }
+
+    async _waitForQualities(timeoutMs) {
+        const deadline = Date.now() + timeoutMs;
+        while (!this.closed && !Object.keys(this.qualities).length && Date.now() < deadline) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
     }
 
     /**
      * Reloads the wrapper so the player mints a fresh token. The live state is
-     * left untouched while that happens: the current token is still valid for
-     * REFRESH_LEAD_MS and has to keep serving segments until the reload has
-     * produced a replacement.
+     * deliberately left in place while that happens: the current token is still
+     * valid for REFRESH_LEAD_MS and has to keep serving segments until the
+     * reload has produced a replacement.
      */
     refresh() {
         if (this.closed) return Promise.resolve();
         if (this.refreshing) return this.refreshing;
-        this.hasMaster = false;
         this.refreshing = (async () => {
             try {
                 this.log('refreshing session');
@@ -134,68 +179,36 @@ class AllohaSession {
     async close() {
         if (this.closed) return;
         this.closed = true;
+        if (this._unavailableTimer) clearInterval(this._unavailableTimer);
         this._settle(new Error('Session closed'));
         try { if (this.page) await this.page.close(); } catch (error) {}
         try { if (this.context) await this.context.close(); } catch (error) {}
     }
 
-    _onBridge(type, payload) {
-        const headers = payload.headers || {};
-        switch (type) {
-            case 'ready':
-                this._mergeHeaders(headers);
-                this._readQualities(payload.bnsi);
-                this.hasStream = true;
-                this.generation += 1;
-                this.log(`session ready, qualities=${Object.keys(this.qualities).join(',') || 'none'}`);
-                this._maybeSettle();
-                break;
-            case 'master': {
-                this._mergeHeaders(headers);
-                const url = normalizeUrl(payload.url);
-                if (!url) break;
-                const previousHost = hostOf(this.masterUrl);
-                const nextHost = hostOf(url);
-                if (this.hasMaster && previousHost && nextHost && previousHost !== nextHost) {
-                    // The CDN node moved. The token we still hold is signed for
-                    // the old host and would 403 on the new one, so restart the
-                    // session instead of adopting a URL we cannot authorize.
-                    this.log(`master host changed ${previousHost} -> ${nextHost}, restarting session`);
-                    this.refresh();
-                    break;
-                }
-                this.masterUrl = url;
-                this.hasMaster = true;
-                this.generation += 1;
-                this._maybeSettle();
-                break;
-            }
-            case 'config':
-                this._mergeHeaders(headers);
-                if (payload.edgeHash) this.headers['accepts-controls'] = payload.edgeHash;
-                this.expiresAt = Date.now() + Number(payload.ttl || 120) * 1000;
-                this.generation += 1;
-                break;
-            case 'headers':
-                this._mergeHeaders(headers);
-                break;
-            case 'unavailable':
-                this.unavailable = true;
-                this._settle(new SourceUnavailableError('Alloha reported the dubbing as unavailable'));
-                break;
-            case 'log':
-                this.log(`page: ${payload.message}`);
-                break;
-            default:
-                break;
+    _captureMaster(url, headers) {
+        const previousHost = hostOf(this.masterUrl);
+        const nextHost = hostOf(url);
+        FORWARDED_HEADERS.forEach((name) => {
+            const value = headers[name];
+            if (value) this.headers[name] = value;
+        });
+        if (!this.headers['user-agent']) this.headers['user-agent'] = this.userAgent;
+        this.masterUrl = url;
+        this.generation += 1;
+        if (previousHost && nextHost && previousHost !== nextHost) {
+            this.log(`master host changed ${previousHost} -> ${nextHost}`);
         }
+        this._settle(null);
     }
 
-    _mergeHeaders(headers) {
-        Object.keys(headers || {}).forEach((name) => {
-            const value = headers[name];
-            if (value) this.headers[String(name).toLowerCase()] = String(value);
-        });
+    _readSocketFrame(payload) {
+        let message;
+        try { message = JSON.parse(payload); } catch (error) { return; }
+        if (!message || message.type !== 'config_update' || !message.edge_hash) return;
+        this.headers['accepts-controls'] = message.edge_hash;
+        this.expiresAt = Date.now() + Number(message.ttl || 120) * 1000;
+        this.generation += 1;
+        this.log(`token refreshed, ttl=${message.ttl || 120}s`);
     }
 
     _readQualities(bnsi) {
@@ -215,29 +228,28 @@ class AllohaSession {
             });
         });
         this.qualities = found;
+        this.log(`qualities: ${Object.keys(found).join(', ') || 'none'}`);
     }
 
-    _maybeSettle() {
-        if (!this.hasStream) return;
-        // The master the player fetches itself is the only correctly signed one;
-        // the bnsi URL is a last resort the CDN usually answers with 403.
-        if (this.hasMaster) return this._settle(null);
-        if (this._masterTimer) return;
-        this._masterTimer = setTimeout(() => {
-            this._masterTimer = null;
-            if (!this.masterUrl) {
-                const fallback = Object.values(this.qualities).pop();
-                if (fallback) {
-                    this.log('no signed master observed, falling back to the bnsi URL');
-                    this.masterUrl = fallback;
-                }
-            }
-            this._settle(this.masterUrl ? null : new Error('No Alloha master playlist was observed'));
-        }, MASTER_WAIT_MS);
+    // The player reports a missing dubbing as page text rather than as a failed
+    // request, so it can only be noticed by reading the frame.
+    _watchForUnavailable() {
+        this._unavailableTimer = setInterval(() => {
+            if (this.closed || this.masterUrl) return;
+            Promise.all(this.page.frames().map((frame) => frame.innerText('body').catch(() => '')))
+                .then((texts) => {
+                    if (this.closed || this.masterUrl) return;
+                    if (!texts.some((text) => UNAVAILABLE_PATTERN.test(text))) return;
+                    this.unavailable = true;
+                    this._settle(new SourceUnavailableError('Alloha reports this dubbing as unavailable'));
+                })
+                .catch(() => {});
+        }, 2000);
+        this._unavailableTimer.unref();
     }
 
     _waitUntilReady(timeoutMs) {
-        if (this.masterUrl && this.hasStream) return Promise.resolve();
+        if (this.masterUrl) return Promise.resolve();
         return new Promise((resolve, reject) => {
             const timer = setTimeout(() => {
                 this._remove(waiter);
@@ -256,10 +268,6 @@ class AllohaSession {
     }
 
     _settle(error) {
-        if (this._masterTimer) {
-            clearTimeout(this._masterTimer);
-            this._masterTimer = null;
-        }
         const waiters = this.waiters;
         this.waiters = [];
         waiters.forEach((waiter) => (error ? waiter.reject(error) : waiter.resolve()));

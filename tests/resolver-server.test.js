@@ -1,5 +1,29 @@
 const assert = require('assert');
-const {rewritePlaylist, encodeTarget, decodeTarget, isAllohaUrl} = require('../server');
+const {rewritePlaylist, parseStreamPath, encodeTarget, decodeTarget, signedTarget, verifiedTarget, isAllohaUrl} = require('../server');
+
+// Segment targets travel in the query string, so an unsigned one would make
+// this service forward any URL it is handed.
+const signed = new URLSearchParams(signedTarget('https://cdn.example/seg1.ts'));
+assert.strictEqual(verifiedTarget(signed.get('u'), signed.get('s')), 'https://cdn.example/seg1.ts');
+assert.strictEqual(verifiedTarget(encodeTarget('https://evil.example/'), signed.get('s')), '', 'a foreign URL must not verify');
+assert.strictEqual(verifiedTarget(signed.get('u'), 'short'), '', 'a truncated signature must not verify');
+assert.strictEqual(verifiedTarget(signed.get('u'), ''), '', 'a missing signature must not verify');
+
+const live = parseStreamPath('/hls/abc123/master.m3u8');
+assert.strictEqual(live.id, 'abc123');
+assert.strictEqual(live.quality, '');
+assert.strictEqual(live.isMaster, true);
+
+const pinned = parseStreamPath('/hls/abc123/q/1080p/master.m3u8');
+assert.strictEqual(pinned.quality, '1080p');
+assert.strictEqual(pinned.isMaster, true);
+
+// Segments name their target in the query string, never in the path, so they
+// must not be mistaken for a manifest.
+const segment = parseStreamPath('/hls/abc123/p');
+assert.strictEqual(segment.id, 'abc123');
+assert.strictEqual(segment.isMaster, false);
+assert.strictEqual(parseStreamPath('/hls/').id, '');
 
 assert.strictEqual(decodeTarget(encodeTarget('https://cdn.example/master.m3u8?a=1&b=2')), 'https://cdn.example/master.m3u8?a=1&b=2');
 assert.ok(!/[+/=]/.test(encodeTarget('https://cdn.example/????')), 'session ids must be URL safe');
@@ -19,6 +43,7 @@ const master = [
 const rewritten = rewritePlaylist(master, 'https://cdn.example/hash/master.m3u8', (value, baseUrl) => {
     return '/proxy?u=' + encodeTarget(new URL(value, baseUrl).toString());
 });
+
 const lines = rewritten.split('\n');
 
 // Every playable reference has to come back through the proxy: the CDN only
