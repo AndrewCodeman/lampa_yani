@@ -6,6 +6,12 @@ const WRAPPER_PATH = '/__yani_wrapper';
 const OPEN_TIMEOUT_MS = 45000;
 const REFRESH_LEAD_MS = 20000;
 const QUALITY_GRACE_MS = 3000;
+
+// What a captured master is assumed to be good for when the player never sends
+// a `config_update` frame stating otherwise. Without this the session would
+// have no expiry at all, so nothing would refresh it until the CDN started
+// rejecting segments - and by then the viewer is already staring at a stall.
+const ASSUMED_TTL_MS = 150000;
 const UNAVAILABLE_PATTERN = /озвучка\s*недоступна/i;
 const MASTER_PATTERN = /master\.m3u8/i;
 const DESKTOP_PLATFORMS = [
@@ -195,6 +201,9 @@ class AllohaSession {
         if (!this.headers['user-agent']) this.headers['user-agent'] = this.userAgent;
         this.masterUrl = url;
         this.generation += 1;
+        // A `config_update` frame, when one arrives, replaces this with the
+        // lifetime the service actually stated.
+        if (!this.expiresAt || this.expiresAt < Date.now()) this.expiresAt = Date.now() + ASSUMED_TTL_MS;
         if (previousHost && nextHost && previousHost !== nextHost) {
             this.log(`master host changed ${previousHost} -> ${nextHost}`);
         }

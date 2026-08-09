@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.27.2 — 2026-08-09
+
+- Give a captured Alloha master an assumed lifetime, so the session is refreshed ahead of time even when the player never states one; a 12-minute test showed playback stalling after roughly eight minutes without it.
+- Stop a request from blocking on a full session refresh for longer than a client will wait, and let that refresh finish in the background.
+
 ## 0.27.1 — 2026-08-09
 
 - Translate the detail-loading error, which used to render its own key name to the user.

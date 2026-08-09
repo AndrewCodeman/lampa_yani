@@ -47,6 +47,7 @@ npm start
 | `YANI_RESOLVER_IDLE_MS` | `300000` | Через сколько закрывать простаивающую сессию |
 | `YANI_RESOLVER_HEADLESS` | `true` | `false` — показать окно браузера (отладка) |
 | `YANI_RESOLVER_VERBOSE` | `false` | Подробный лог |
+| `YANI_RESOLVER_REFRESH_WAIT_MS` | `12000` | Сколько запрос ждёт обновления сессии, прежде чем ответить тем, что есть |
 
 ## API
 

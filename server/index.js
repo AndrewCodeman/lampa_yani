@@ -23,7 +23,8 @@ const IDLE_TIMEOUT_MS = Number(process.env.YANI_RESOLVER_IDLE_MS || 5 * 60 * 100
 const HEADLESS = process.env.YANI_RESOLVER_HEADLESS !== 'false';
 const VERBOSE = process.env.YANI_RESOLVER_VERBOSE === 'true';
 
-const HOP_BY_HOP = ['connection', 'keep-alive', 'transfer-encoding', 'upgrade', 'te', 'trailer', 'host', 'content-length'];
+const REFRESH_WAIT_MS = Number(process.env.YANI_RESOLVER_REFRESH_WAIT_MS || 12000);
+const HOP_BY_HOP =['connection', 'keep-alive', 'transfer-encoding', 'upgrade', 'te', 'trailer', 'host', 'content-length'];
 
 const sessions = new Map();
 let browserPromise = null;
@@ -163,8 +164,16 @@ async function fetchUpstream(session, target, range) {
         // A rejected token means the session moved on without us. One refresh
         // and one retry is the whole recovery budget: anything more just serves
         // the player stale data while it stalls.
+        //
+        // A full refresh reloads the player page and can take tens of seconds,
+        // which is longer than any client will wait, so only the first stretch
+        // of it is waited on here. The refresh itself runs to completion in the
+        // background and the next request picks up its result.
         debug(`upstream ${response.status}, refreshing session`);
-        await session.refresh();
+        await Promise.race([
+            session.refresh(),
+            new Promise((resolve) => setTimeout(resolve, REFRESH_WAIT_MS))
+        ]);
         response = await attempt();
     }
     return response;
