@@ -58,6 +58,10 @@
     messages.ru.collections = 'Коллекции';
     messages.ru.collection = 'Коллекция';
     messages.ru.episodes_short = 'серий';
+    messages.ru.episode_information = 'Информация о сериях';
+    messages.ru.seasons_short = 'сез.';
+    messages.ru.episodes_aired = 'Вышло';
+    messages.ru.episodes_watched = 'Просмотрено';
     messages.ru.recommendations_empty = 'Рекомендации появятся после просмотра тайтлов';
     messages.ru.updates = 'Обновления';
     messages.ru.updates_error = 'Не удалось загрузить обновления';
@@ -102,6 +106,10 @@
     messages.en.collections = 'Collections';
     messages.en.collection = 'Collection';
     messages.en.episodes_short = 'episodes';
+    messages.en.episode_information = 'Episode information';
+    messages.en.seasons_short = 'seasons';
+    messages.en.episodes_aired = 'Aired';
+    messages.en.episodes_watched = 'Watched';
     messages.en.recommendations_empty = 'Recommendations will appear after you watch some anime';
     messages.en.updates = 'Updates';
     messages.en.updates_error = 'Failed to load updates';
@@ -297,6 +305,10 @@
     messages.uk.collections = 'Колекції';
     messages.uk.collection = 'Колекція';
     messages.uk.episodes_short = 'серій';
+    messages.uk.episode_information = 'Інформація про серії';
+    messages.uk.seasons_short = 'сез.';
+    messages.uk.episodes_aired = 'Вийшло';
+    messages.uk.episodes_watched = 'Переглянуто';
     messages.uk.recommendations_empty = 'Рекомендації з’являться після перегляду тайтлів';
     messages.uk.updates = 'Оновлення';
     messages.uk.updates_error = 'Не вдалося завантажити оновлення';

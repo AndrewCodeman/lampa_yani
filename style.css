@@ -171,6 +171,12 @@
 .yani-detail__genre { padding: .24em .5em; border: .08em solid rgba(255,255,255,.28); border-radius: .35em; color: rgba(255,255,255,.82); font-size: .78em; line-height: 1.2; }
 .yani-detail__genre.focus { background: #fff; border-color: #fff; box-shadow: 0 0 0 .14em #ef6470; color: #111; transform: scale(1.04); }
 .yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }
+.yani-detail__episode-summary { display: flex; flex-wrap: wrap; gap: .38em; width: fit-content; max-width: 100%; margin: -.45em 0 .85em; padding: .34em; border: .08em solid rgba(255,255,255,.14); border-radius: .55em; background: rgba(0,0,0,.2); box-sizing: border-box; }
+.yani-detail__episode-summary.focus { border-color: #ef6470; background: rgba(239,100,112,.16); box-shadow: 0 0 0 .1em rgba(239,100,112,.55); }
+.yani-detail__episode-summary.loading { opacity: .72; }
+.yani-detail__episode-stat { display: inline-flex; align-items: center; gap: .28em; padding: .28em .48em; border-radius: .38em; background: rgba(255,255,255,.1); color: rgba(255,255,255,.9); font-size: .76em; font-weight: 600; line-height: 1.15; white-space: nowrap; }
+.yani-detail__episode-stat-icon { display: inline-flex; width: 1em; height: 1em; color: #ef8992; }
+.yani-detail__episode-stat-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }
 .yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }
 .yani-detail__actions { display: flex; flex-wrap: wrap; gap: 0.7em; max-width: 100%; }
 .yani-detail__button { display: block; max-width: 100%; box-sizing: border-box; padding: 0.8em 1.2em; border: 0.12em solid transparent; border-radius: 0.5em; background: rgba(255,255,255,.15); overflow-wrap: anywhere; }

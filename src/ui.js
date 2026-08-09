@@ -1857,6 +1857,8 @@
             var genres = detailGenres(data);
             if (genres.length) info.append(createDetailGenres(genres));
             if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
+            var episodeSummary = createDetailEpisodeSummary(data);
+            if (episodeSummary) info.append(episodeSummary);
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             if (data.yani_user_rating) info.append($('<div class="yani-detail__personal-rating"></div>').text(t('my_rating') + ': ' + data.yani_user_rating + '/10'));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
@@ -1902,6 +1904,69 @@
             scroll.append(html);
             bindDetailScrollTargets(html);
             loadInlineComments(data, comments);
+        }
+
+        function createDetailEpisodeSummary(cardData) {
+            var local = getPlayback(cardData.yani_id);
+            var stats = LampaYaniUiUtils.detailEpisodeStats(cardData, [], local);
+            if (!stats.seasons && !stats.total && !stats.aired && !stats.watched && !stats.minutes) return null;
+            var block = $('<div class="yani-detail__episode-summary selector"></div>')
+                .attr('aria-label', t('episode_information'));
+            var loading = false;
+            var loaded = false;
+
+            function render(values) {
+                var items = [];
+                if (values.seasons) items.push({icon: 'seasons', text: values.seasons + ' ' + t('seasons_short')});
+                if (values.total) items.push({icon: 'episodes', text: values.total + ' ' + t('episodes_short')});
+                if (values.aired) items.push({icon: 'aired', text: t('episodes_aired') + ' ' + values.aired});
+                if (values.watched) items.push({icon: 'watched', text: t('episodes_watched') + ' ' + values.watched});
+                if (values.minutes) items.push({icon: 'duration', text: '≈ ' + values.minutes + ' ' + t('minutes_short')});
+                block.empty();
+                items.forEach(function (item) {
+                    block.append($('<span class="yani-detail__episode-stat"></span>')
+                        .append($('<span class="yani-detail__episode-stat-icon"></span>').html(detailEpisodeIcon(item.icon)))
+                        .append($('<span></span>').text(item.text)));
+                });
+            }
+
+            function enrich() {
+                if (loading || loaded) return;
+                loading = true;
+                block.addClass('loading');
+                LampaYaniApi.videos(cardData.yani_id).then(function (payload) {
+                    var videos = payload && payload.response ? payload.response : payload;
+                    loaded = true;
+                    loading = false;
+                    block.removeClass('loading');
+                    render(LampaYaniUiUtils.detailEpisodeStats(cardData, Array.isArray(videos) ? videos : [], local));
+                }).catch(function (error) {
+                    loading = false;
+                    loaded = true;
+                    block.removeClass('loading');
+                    console.warn('[YummyAnime] Episode summary enrichment failed', error);
+                });
+            }
+
+            render(stats);
+            bindDetailButtonFocus(block);
+            block.one('hover:focus.yaniEpisodeSummary', enrich);
+            // Normal one-cour titles are cheap to enrich in the background.
+            // Very long shows wait until this compact row receives focus to
+            // avoid loading thousands of video variants on weak devices.
+            if (stats.total > 0 && stats.total <= 100) setTimeout(enrich, 350);
+            return block;
+        }
+
+        function detailEpisodeIcon(name) {
+            var icons = {
+                seasons: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v4H5V4Zm-2 6h18v4H3v-4Zm2 6h14v4H5v-4Z"/></svg>',
+                episodes: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4V4Zm2 2v5h5V6H6Zm7 0v5h5V6h-5ZM6 13v5h5v-5H6Zm7 0v5h5v-5h-5Z"/></svg>',
+                aired: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.2 16.6-4.1-4.1 1.4-1.4 2.7 2.7 8.3-8.3 1.4 1.4-9.7 9.7ZM4 20h16v2H4v-2Z"/></svg>',
+                watched: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5.2 0-9.4 3.4-11 7 1.6 3.6 5.8 7 11 7s9.4-3.4 11-7c-1.6-3.6-5.8-7-11-7Zm0 11.2A4.2 4.2 0 1 1 12 7.8a4.2 4.2 0 0 1 0 8.4Zm0-2A2.2 2.2 0 1 0 12 9.8a2.2 2.2 0 0 0 0 4.4Z"/></svg>',
+                duration: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Zm1-13h-2v6l5 3 1-1.7-4-2.3V7Z"/></svg>'
+            };
+            return icons[name] || '';
         }
 
         function createDetailListPanel(cardData) {
@@ -3539,6 +3604,10 @@
             yani_viewing_order: Array.isArray(item.viewing_order) ? item.viewing_order : [],
             yani_genres: item.genres || item.genre || [],
             yani_type: item.type || null,
+            yani_episodes: item.episodes || null,
+            yani_seasons: Array.isArray(item.seasons) ? item.seasons : null,
+            yani_seasons_count: Number(item.seasons_count || item.season_count || 0) || 0,
+            yani_episode_duration: Number(item.episode_duration || item.average_episode_duration || item.duration || 0) || 0,
             yani_remote_ids: item.remote_ids || {}
         };
     }

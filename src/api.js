@@ -184,7 +184,7 @@
             return request('/anime/' + encodeURIComponent(id), {auth: true});
         },
         videos: function (id) {
-            return request('/anime/' + encodeURIComponent(id) + '/videos', {cache: false});
+            return request('/anime/' + encodeURIComponent(id) + '/videos', {auth: true, cache: false});
         },
         subscribeVideo: function (videoId) {
             return request('/video/' + encodeURIComponent(videoId) + '/subscribe', {

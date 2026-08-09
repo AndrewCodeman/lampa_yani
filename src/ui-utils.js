@@ -102,6 +102,77 @@
         return result;
     }
 
+    function positiveNumber(value) {
+        value = Number(value);
+        return isFinite(value) && value > 0 ? value : 0;
+    }
+
+    function explicitSeasonCount(item) {
+        var seasons = item && (item.yani_seasons || item.seasons);
+        if (Array.isArray(seasons)) return seasons.length;
+        return positiveNumber(item && (item.yani_seasons_count || item.seasons_count || item.season_count));
+    }
+
+    function median(values) {
+        values = values.slice().sort(function (a, b) { return a - b; });
+        if (!values.length) return 0;
+        var middle = Math.floor(values.length / 2);
+        return values.length % 2 ? values[middle] : (values[middle - 1] + values[middle]) / 2;
+    }
+
+    function detailEpisodeStats(item, videos, localPlayback) {
+        item = item || {};
+        videos = Array.isArray(videos) ? videos : [];
+        var episodes = item.yani_episodes || item.episodes || {};
+        var stats = {
+            seasons: explicitSeasonCount(item),
+            total: positiveNumber(episodes.count || episodes.total || item.episodes_count),
+            aired: positiveNumber(episodes.aired || episodes.released || item.episodes_aired),
+            watched: 0,
+            minutes: 0
+        };
+        var grouped = {};
+
+        videos.forEach(function (video, index) {
+            video = video || {};
+            var number = video.number !== undefined && video.number !== null && video.number !== '' ? String(video.number) :
+                video.index !== undefined && video.index !== null && video.index !== '' ? String(video.index) : 'video:' + String(video.video_id || video.id || index);
+            var episode = grouped[number] || (grouped[number] = {durations: [], watched: false});
+            var duration = positiveNumber(video.duration);
+            // YummyAnime video durations are seconds. Ignore implausibly short
+            // and long values before calculating one representative duration
+            // per episode, so duplicate dubbings do not skew the average.
+            if (duration >= 60 && duration <= 4 * 60 * 60) episode.durations.push(duration);
+            if (positiveNumber(video.watched && video.watched.end_time) > 0) episode.watched = true;
+        });
+
+        if (localPlayback && localPlayback.number !== undefined && localPlayback.number !== null && positiveNumber(localPlayback.time) > 0) {
+            var localNumber = String(localPlayback.number || 'local');
+            var localEpisode = grouped[localNumber] || (grouped[localNumber] = {durations: [], watched: false});
+            localEpisode.watched = true;
+            var localDuration = positiveNumber(localPlayback.duration);
+            if (localDuration >= 60 && localDuration <= 4 * 60 * 60) localEpisode.durations.push(localDuration);
+        }
+
+        var episodeKeys = Object.keys(grouped);
+        var durations = [];
+        episodeKeys.forEach(function (key) {
+            var episode = grouped[key];
+            if (episode.watched) stats.watched += 1;
+            var representative = median(episode.durations);
+            if (representative > 0) durations.push(representative);
+        });
+        if (!stats.aired && episodeKeys.length) stats.aired = episodeKeys.length;
+        if (!stats.total && stats.aired) stats.total = stats.aired;
+        if (durations.length) {
+            stats.minutes = Math.max(1, Math.round(durations.reduce(function (sum, value) { return sum + value; }, 0) / durations.length / 60));
+        } else {
+            var fallbackDuration = positiveNumber(item.yani_episode_duration || item.episode_duration || item.duration);
+            if (fallbackDuration) stats.minutes = Math.max(1, Math.round(fallbackDuration > 300 ? fallbackDuration / 60 : fallbackDuration));
+        }
+        return stats;
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.UiUtils = window.LampaYaniUiUtils = {
         videoData: videoData,
@@ -112,6 +183,7 @@
         standardSearchTitles: standardSearchTitles,
         yummyTvDetailsUrl: yummyTvDetailsUrl,
         internalPlayerItem: internalPlayerItem,
-        detailRouteId: detailRouteId
+        detailRouteId: detailRouteId,
+        detailEpisodeStats: detailEpisodeStats
     };
 }(window));

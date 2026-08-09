@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.29.5 — 2026-08-10
+
+- Add a compact, focusable episode-information row to YummyAnime title details.
+- Show explicit season count when available, total and aired episodes, watched episodes and average unique-episode duration.
+- Enrich ordinary titles in the background while deferring large video lists until focus to protect low-memory devices.
+
 ## 0.29.4 — 2026-08-10
 
 - Load the authorized user's server-side viewing history and progress from YummyAnime.
