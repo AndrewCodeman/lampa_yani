@@ -47,6 +47,7 @@
     messages.ru.user_lists_description = 'Списки вашего аккаунта YummyAnime';
     messages.ru.user_lists_error = 'Не удалось загрузить ваши списки YummyAnime';
     messages.ru.favorites = 'Любимое';
+    messages.ru.license_notice = 'Расширение распространяется по свободной лицензии MIT · https://github.com/AndrewCodeman/lampa_yani';
     messages.ru.my_reviews = 'Мои отзывы';
     messages.ru.my_reviews_description = 'Отзывы пользователя YummyAnime';
     messages.ru.reviews_empty = 'Отзывов пока нет';
@@ -88,6 +89,7 @@
     messages.en.user_lists_description = 'Lists from your YummyAnime account';
     messages.en.user_lists_error = 'Failed to load your YummyAnime lists';
     messages.en.favorites = 'Favorites';
+    messages.en.license_notice = 'This extension is distributed under the free MIT License · https://github.com/AndrewCodeman/lampa_yani';
     messages.en.my_reviews = 'My reviews';
     messages.en.my_reviews_description = 'Your YummyAnime reviews';
     messages.en.reviews_empty = 'There are no reviews yet';
@@ -280,6 +282,7 @@
     messages.uk.user_lists_description = 'Списки вашого облікового запису YummyAnime';
     messages.uk.user_lists_error = 'Не вдалося завантажити ваші списки YummyAnime';
     messages.uk.favorites = 'Улюблене';
+    messages.uk.license_notice = 'Розширення поширюється за вільною ліцензією MIT · https://github.com/AndrewCodeman/lampa_yani';
     messages.uk.my_reviews = 'Мої відгуки';
     messages.uk.my_reviews_description = 'Відгуки користувача YummyAnime';
     messages.uk.reviews_empty = 'Відгуків ще немає';

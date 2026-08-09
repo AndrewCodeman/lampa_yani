@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.29.1 — 2026-08-10
+
+- Preserve the title-detail controller and focused action throughout the playback selection chain.
+- Restore title interaction after cancelling source, dubbing, episode or playback-target selection and after returning from internal and external players or YummyTV.
+- Avoid capturing the temporary Select controller as the external-player return target.
+- Add a non-interactive MIT License and repository notice at the bottom of YummyAnime settings.
+
 ## 0.29.0 — 2026-08-09
 
 - Add an authorized-only Your Lists section to the YummyAnime home screen.

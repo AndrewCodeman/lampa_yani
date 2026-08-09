@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.29.0',
+        version: '0.29.1',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -98,6 +98,7 @@ function pluginYummyAnime() {
     messages.ru.user_lists_description = 'Списки вашего аккаунта YummyAnime';
     messages.ru.user_lists_error = 'Не удалось загрузить ваши списки YummyAnime';
     messages.ru.favorites = 'Любимое';
+    messages.ru.license_notice = 'Расширение распространяется по свободной лицензии MIT · https://github.com/AndrewCodeman/lampa_yani';
     messages.ru.my_reviews = 'Мои отзывы';
     messages.ru.my_reviews_description = 'Отзывы пользователя YummyAnime';
     messages.ru.reviews_empty = 'Отзывов пока нет';
@@ -139,6 +140,7 @@ function pluginYummyAnime() {
     messages.en.user_lists_description = 'Lists from your YummyAnime account';
     messages.en.user_lists_error = 'Failed to load your YummyAnime lists';
     messages.en.favorites = 'Favorites';
+    messages.en.license_notice = 'This extension is distributed under the free MIT License · https://github.com/AndrewCodeman/lampa_yani';
     messages.en.my_reviews = 'My reviews';
     messages.en.my_reviews_description = 'Your YummyAnime reviews';
     messages.en.reviews_empty = 'There are no reviews yet';
@@ -331,6 +333,7 @@ function pluginYummyAnime() {
     messages.uk.user_lists_description = 'Списки вашого облікового запису YummyAnime';
     messages.uk.user_lists_error = 'Не вдалося завантажити ваші списки YummyAnime';
     messages.uk.favorites = 'Улюблене';
+    messages.uk.license_notice = 'Розширення поширюється за вільною ліцензією MIT · https://github.com/AndrewCodeman/lampa_yani';
     messages.uk.my_reviews = 'Мої відгуки';
     messages.uk.my_reviews_description = 'Відгуки користувача YummyAnime';
     messages.uk.reviews_empty = 'Відгуків ще немає';
@@ -2804,8 +2807,16 @@ function pluginYummyAnime() {
         pending: false,
         installed: false,
         openedAt: 0,
+        departed: false,
         controller: 'content',
-        element: null
+        element: null,
+        collection: null
+    };
+    var playbackReturnState = {
+        active: false,
+        controller: 'content',
+        element: null,
+        collection: null
     };
     var usagePolicyVisible = false;
 
@@ -3332,7 +3343,7 @@ function pluginYummyAnime() {
         });
         card.onEnter = openCard;
         card.onMenu = function () {
-            if (card.yani_id) showYummyActions(card);
+            if (card.yani_id) showYummyActions(card, rendered, rendered.closest('.scroll, .yani-home'));
         };
     }
 
@@ -3402,7 +3413,7 @@ function pluginYummyAnime() {
         badge.text(label);
     }
 
-    function showYummyActions(card) {
+    function showYummyActions(card, originElement, originCollection) {
         if (!card || !card.yani_id) return;
         var items = [
             {title: t('watch'), action: 'watch'},
@@ -3428,7 +3439,10 @@ function pluginYummyAnime() {
             title: t('actions'),
             items: items,
             onSelect: function (item) {
-                if (item.action === 'watch') return openVideos(card);
+                if (item.action === 'watch') {
+                    beginPlaybackNavigation(originElement, originCollection);
+                    return openVideos(card);
+                }
                 if (item.action === 'details') return openYummyDetail(card, false);
                 if (item.action === 'comments') return commentsMenu(card.yani_id);
                 if (item.action === 'login') return openSettingsLogin();
@@ -4558,7 +4572,10 @@ function pluginYummyAnime() {
             // Keep playback behind one action. When YummyTV is enabled the
             // destination is selected first; regular playback then opens the
             // dubbing/source and episode selectors as before.
-            button.on('hover:enter click.yaniWatch', function () { openTitlePlaybackOptions(data); });
+            button.on('hover:enter click.yaniWatch', function () {
+                beginPlaybackNavigation(button, scroll.render());
+                openTitlePlaybackOptions(data);
+            });
             bindDetailButtonFocus(button);
             var trailersButton = $('<div class="yani-detail__button selector"></div>').text(t('trailers'));
             trailersButton.on('hover:enter click.yaniDetailTrailers', function () { openTrailers(data); });
@@ -4822,7 +4839,12 @@ function pluginYummyAnime() {
     }
 
     function openVideos(card, resume) {
-        if (!card || !card.yani_id) return Lampa.Noty.show(t('no_videos'));
+        beginPlaybackNavigation();
+        if (!card || !card.yani_id) {
+            Lampa.Noty.show(t('no_videos'));
+            restorePlaybackInteraction();
+            return;
+        }
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
 
         LampaYaniApi.videos(card.yani_id).then(function (payload) {
@@ -4835,7 +4857,11 @@ function pluginYummyAnime() {
                 // Keep one normalized field for all player implementations.
                 video.iframe_url = videoSourceUrl(video);
             });
-            if (!videos.length) return Lampa.Noty.show(t('no_videos'));
+            if (!videos.length) {
+                Lampa.Noty.show(t('no_videos'));
+                restorePlaybackInteraction();
+                return;
+            }
 
             var groups = {};
             videos.forEach(function (video) {
@@ -4881,7 +4907,7 @@ function pluginYummyAnime() {
                     chooseEpisode(card, voices[0].group);
                 });
             }
-            Lampa.Select.show({
+            showPlaybackSelect({
                 title: t('choose_voice'),
                 items: voices,
                 onFocus: enrichVoiceOptionQuality,
@@ -4896,6 +4922,7 @@ function pluginYummyAnime() {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             console.error('[YummyAnime Videos]', error);
             Lampa.Noty.show(t('videos_load_error'));
+            restorePlaybackInteraction();
         });
     }
 
@@ -4975,14 +5002,19 @@ function pluginYummyAnime() {
     }
 
     function openYummyForMovie(movie) {
+        beginPlaybackNavigation();
         if (movie && movie.yani_card) return openVideos(movie.yani_card);
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
         findYummyMatches(movie).then(function (matches) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
-            if (!matches.length) return Lampa.Noty.show(t('no_yummy_match'));
+            if (!matches.length) {
+                Lampa.Noty.show(t('no_yummy_match'));
+                restorePlaybackInteraction();
+                return;
+            }
             if (matches.length === 1) return openVideos(matches[0]);
 
-            Lampa.Select.show({
+            showPlaybackSelect({
                 title: t('choose_anime'),
                 items: matches.map(function (card) {
                     return {title: card.title + (card.release_date ? ' · ' + card.release_date : ''), card: card};
@@ -4993,6 +5025,7 @@ function pluginYummyAnime() {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             console.error('[YummyAnime Search Source]', error);
             Lampa.Noty.show(t('catalog_load_error'));
+            restorePlaybackInteraction();
         });
     }
 
@@ -5394,7 +5427,7 @@ function pluginYummyAnime() {
             return {title: episodeOptionTitle(card, video), video: video};
         });
         if (episodes.length === 1) return launchVideo(card, group, videos, videos[0]);
-        Lampa.Select.show({
+        showPlaybackSelect({
             title: t('choose_episode') + ' · ' + group.title,
             items: episodes,
             onSelect: function (item) { launchVideo(card, group, videos, item.video); }
@@ -5429,7 +5462,11 @@ function pluginYummyAnime() {
     function launchVideo(card, group, videos, selected, options) {
         options = options || {};
         var url = videoSourceUrl(selected);
-        if (!url) return Lampa.Noty.show(t('no_videos'));
+        if (!url) {
+            Lampa.Noty.show(t('no_videos'));
+            restorePlaybackInteraction();
+            return;
+        }
         var allohaSource = isAllohaUrl(url) || /alloha/i.test(String(group && (group.player || group.title) || ''));
         var resolvedAlloha = ALLOHA_RESOLVED_SOURCES.indexOf(String(selected.yani_stream_source || '').toLowerCase()) >= 0;
         if (allohaSource && !resolvedAlloha) {
@@ -5499,6 +5536,7 @@ function pluginYummyAnime() {
         }
 
         Lampa.Noty.show(url);
+        restorePlaybackInteraction();
     }
 
     // Both services answer the same question - "give me a direct stream for this
@@ -5564,6 +5602,7 @@ function pluginYummyAnime() {
     function blockAllohaPlayback(card, group, selected, url) {
         if (url && allohaIframeEnabled() && openAllohaEmbed(card, group, selected, url)) return true;
         Lampa.Noty.show(t('alloha_direct_required'));
+        restorePlaybackInteraction();
         return true;
     }
 
@@ -5571,6 +5610,9 @@ function pluginYummyAnime() {
         if (!Lampa.Activity || !Lampa.Activity.push) return false;
         try {
             rememberPlayback(card, group, selected);
+            // Activity owns the back stack for the embedded page and will
+            // restart the detail controller itself.
+            clearPlaybackReturn();
             Lampa.Activity.push({
                 url: 'yani/player',
                 title: (card && card.title || 'YummyAnime') + ' · ' + t('episode') + ' ' + ((selected && (selected.number || selected.index)) || '?'),
@@ -5636,6 +5678,9 @@ function pluginYummyAnime() {
             Lampa.Player.runas('lampa');
             Lampa.Player.play(directCurrent);
             if (Lampa.Player.playlist) Lampa.Player.playlist(directPlaylist);
+            if (Lampa.Player.callback) {
+                Lampa.Player.callback(function () { restorePlaybackInteraction(); });
+            }
             return true;
         } catch (error) {
             console.warn('[YummyAnime] Internal Lampa player failed to start', error);
@@ -5651,10 +5696,11 @@ function pluginYummyAnime() {
         if (target === 'internal') {
             if (playInternalPlayer(current, playlist)) return true;
             Lampa.Noty.show(t('internal_player_unavailable'));
+            restorePlaybackInteraction();
             return true;
         }
         if (!Lampa.Select || !Lampa.Select.show) return false;
-        Lampa.Select.show({
+        showPlaybackSelect({
             title: t('choose_playback'),
             items: [
                 {title: t('watch_external_player'), subtitle: t('watch_external_player_description'), action: 'external'},
@@ -5664,11 +5710,13 @@ function pluginYummyAnime() {
                 if (item && item.action === 'internal') {
                     if (playInternalPlayer(current, playlist)) return;
                     Lampa.Noty.show(t('internal_player_unavailable'));
+                    restorePlaybackInteraction();
                     return;
                 }
                 if (openExternalPlayer(current, playlist, card)) return;
                 if (playInternalPlayer(current, playlist)) return;
                 Lampa.Noty.show(current.url);
+                restorePlaybackInteraction();
             }
         });
         return true;
@@ -6507,6 +6555,7 @@ function pluginYummyAnime() {
             window.open(externalUrl, '_system');
             return true;
         })) return true;
+        cancelExternalRestore();
         return false;
     }
 
@@ -6552,26 +6601,129 @@ function pluginYummyAnime() {
             Android.openBrowser(url);
             return true;
         })) return true;
+        cancelExternalRestore();
         return false;
+    }
+
+    function beginPlaybackNavigation(element, collection) {
+        // Temporary Select windows must not replace the detail controller and
+        // focus target that need to be restored after playback.
+        if (playbackReturnState.active) return;
+        var controller = currentControllerName() || 'content';
+        if (controller === 'select') controller = 'content';
+        var target = element && element.jquery ? element[0] : element;
+        if (!target) target = document.querySelector('.selector.focus') || document.querySelector('.selector');
+        var root = collection && collection.jquery ? collection : collection ? $(collection) : null;
+        if ((!root || !root.length) && target) root = $(target).closest('.scroll, .yani-detail, .yani-home');
+        playbackReturnState.active = true;
+        playbackReturnState.controller = controller;
+        playbackReturnState.element = target || null;
+        playbackReturnState.collection = root && root.length ? root : null;
+    }
+
+    function playbackReturnSnapshot() {
+        return {
+            controller: playbackReturnState.controller || 'content',
+            element: playbackReturnState.element,
+            collection: playbackReturnState.collection
+        };
+    }
+
+    function clearPlaybackReturn() {
+        playbackReturnState.active = false;
+        playbackReturnState.controller = 'content';
+        playbackReturnState.element = null;
+        playbackReturnState.collection = null;
+    }
+
+    function restorePlaybackInteraction(snapshot) {
+        snapshot = snapshot && snapshot.controller ? snapshot : playbackReturnSnapshot();
+        setTimeout(function () {
+            try {
+                var controller = snapshot.controller && snapshot.controller !== 'select' ? snapshot.controller : 'content';
+                if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle(controller);
+                var element = snapshot.element;
+                if (!element || !document.documentElement.contains(element)) {
+                    element = document.querySelector('.yani-detail .selector.focus') ||
+                        document.querySelector('.yani-detail .selector') ||
+                        document.querySelector('.selector.focus') || document.querySelector('.selector');
+                }
+                var collection = snapshot.collection;
+                if (!collection || !collection.length || !document.documentElement.contains(collection[0])) {
+                    collection = element ? $(element).closest('.scroll, .yani-detail, .yani-home') : $('body');
+                }
+                if (collection && collection.length && Lampa.Controller && Lampa.Controller.collectionSet) {
+                    Lampa.Controller.collectionSet(collection);
+                }
+                if (element && Lampa.Controller && Lampa.Controller.collectionFocus) {
+                    Lampa.Controller.collectionFocus(element, collection);
+                }
+            } catch (error) {
+                console.warn('[YummyAnime] Could not restore playback navigation', error);
+            } finally {
+                clearPlaybackReturn();
+            }
+        }, 0);
+    }
+
+    function showPlaybackSelect(params) {
+        if (!Lampa.Select || !Lampa.Select.show) {
+            restorePlaybackInteraction();
+            return false;
+        }
+        params = Object.assign({}, params || {});
+        var originalBack = params.onBack;
+        params.onBack = function () {
+            if (originalBack) originalBack();
+            restorePlaybackInteraction();
+        };
+        Lampa.Select.show(params);
+        return true;
     }
 
     function prepareExternalRestore() {
         installExternalRestoreHooks();
+        if (!playbackReturnState.active) beginPlaybackNavigation();
+        var origin = playbackReturnSnapshot();
         externalRestoreState.pending = true;
         externalRestoreState.openedAt = Date.now();
-        externalRestoreState.controller = currentControllerName() || 'content';
-        externalRestoreState.element = document.querySelector('.selector.focus') || document.querySelector('.selector');
+        externalRestoreState.departed = false;
+        externalRestoreState.controller = origin.controller;
+        externalRestoreState.element = origin.element;
+        externalRestoreState.collection = origin.collection;
+        // Some Android launchers show their chooser without emitting blur or
+        // Cordova pause. A delayed check prevents the underlying detail page
+        // from remaining attached to a stale Select controller in that case.
+        setTimeout(restoreExternalFocus, 1500);
+    }
+
+    function cancelExternalRestore() {
+        externalRestoreState.pending = false;
+        externalRestoreState.departed = false;
+        externalRestoreState.openedAt = 0;
+        externalRestoreState.element = null;
+        externalRestoreState.collection = null;
     }
 
     function installExternalRestoreHooks() {
         if (externalRestoreState.installed) return;
         externalRestoreState.installed = true;
+        window.addEventListener('blur', markExternalDeparture, false);
         window.addEventListener('focus', restoreExternalFocus, false);
         window.addEventListener('pageshow', restoreExternalFocus, false);
-        document.addEventListener('resume', restoreExternalFocus, false);
-        document.addEventListener('visibilitychange', function () {
-            if (!document.hidden) restoreExternalFocus();
+        document.addEventListener('pause', markExternalDeparture, false);
+        document.addEventListener('resume', function () {
+            externalRestoreState.departed = true;
+            restoreExternalFocus();
         }, false);
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) markExternalDeparture();
+            else restoreExternalFocus();
+        }, false);
+    }
+
+    function markExternalDeparture() {
+        if (externalRestoreState.pending) externalRestoreState.departed = true;
     }
 
     function currentControllerName() {
@@ -6585,23 +6737,22 @@ function pluginYummyAnime() {
 
     function restoreExternalFocus() {
         if (!externalRestoreState.pending) return;
-        var delay = Math.max(0, 600 - (Date.now() - externalRestoreState.openedAt));
+        var elapsed = Date.now() - externalRestoreState.openedAt;
+        // Android may emit focus while the chooser is only starting. Ignore
+        // that event until the app departed or enough time has passed.
+        if (!externalRestoreState.departed && elapsed < 1200) {
+            setTimeout(restoreExternalFocus, 1200 - elapsed);
+            return;
+        }
+        var delay = Math.max(0, 250 - elapsed);
         setTimeout(function () {
             if (!externalRestoreState.pending) return;
             externalRestoreState.pending = false;
-            try {
-                var controller = externalRestoreState.controller || 'content';
-                if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle(controller);
-                var element = externalRestoreState.element;
-                if (!element || !document.documentElement.contains(element)) {
-                    element = document.querySelector('.selector.focus') || document.querySelector('.selector');
-                }
-                if (element && Lampa.Controller && Lampa.Controller.collectionFocus) {
-                    Lampa.Controller.collectionFocus(element, $(element).closest('.scroll, .yani-detail, .yani-home, body'));
-                }
-            } catch (error) {
-                console.warn('[YummyAnime] Could not restore Lampa focus after external player', error);
-            }
+            restorePlaybackInteraction({
+                controller: externalRestoreState.controller || 'content',
+                element: externalRestoreState.element,
+                collection: externalRestoreState.collection
+            });
         }, delay);
     }
 
@@ -6617,9 +6768,10 @@ function pluginYummyAnime() {
             if (options.onPlayer && options.onPlayer()) return true;
             if (yummyTvUrl && openYummyTv(card)) return true;
             Lampa.Noty.show(t('external_stream_unavailable'));
+            restorePlaybackInteraction();
             return false;
         }
-        Lampa.Select.show({
+        showPlaybackSelect({
             title: t('choose_playback'),
             items: items,
             onSelect: function (item) {
@@ -6627,9 +6779,10 @@ function pluginYummyAnime() {
                     if (options.onPlayer && options.onPlayer()) return;
                     if (options.url && openExternalUri(options.url)) return;
                     Lampa.Noty.show(t('external_stream_unavailable'));
+                    restorePlaybackInteraction();
                     return;
                 }
-                if (item && item.action === 'yummytv') openYummyTv(card);
+                if (item && item.action === 'yummytv' && !openYummyTv(card)) restorePlaybackInteraction();
             }
         });
         return true;
@@ -6642,7 +6795,7 @@ function pluginYummyAnime() {
             return;
         }
 
-        Lampa.Select.show({
+        showPlaybackSelect({
             title: t('choose_playback'),
             items: [
                 {title: t('watch_in_player'), subtitle: t('watch_in_player_description'), action: 'player'},
@@ -6650,7 +6803,7 @@ function pluginYummyAnime() {
             ],
             onSelect: function (item) {
                 if (item && item.action === 'yummytv') {
-                    openYummyTv(card);
+                    if (!openYummyTv(card)) restorePlaybackInteraction();
                     return;
                 }
                 openVideos(card, false);
@@ -7058,6 +7211,14 @@ function pluginYummyAnime() {
                 param: {name: 'yani_section_' + section[0], type: 'trigger', default: true},
                 field: {name: t(section[1]), description: t('section_visibility_description')}
             });
+        });
+
+        // A title row is deliberately non-interactive: the repository URL is
+        // reference text, not another settings action or external link.
+        Lampa.SettingsApi.addParam({
+            component: 'yani',
+            param: {name: 'yani_license_notice', type: 'title'},
+            field: {name: t('license_notice')}
         });
     }
 
