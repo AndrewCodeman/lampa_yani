@@ -21,6 +21,8 @@ assert.match(ui, /function renderHistoryProgress/);
 assert.match(ui, /function openContinueWatching\(\)/);
 assert.match(ui, /mode: 'continue'/);
 assert.match(ui, /duration: Math\.max\(0, Number\(video\.duration \|\| 0\)\)/);
+assert.match(ui, /fetchExcluded: loadContinueWatchingExclusions/);
+assert.match(ui, /\[2, 3\]\.forEach\(function \(listId\)/, 'completed and dropped lists must be excluded');
 
 const remote = history.normalizeRemoteHistory({response: [{
     anime_id: 42,
@@ -70,5 +72,13 @@ assert.strictEqual(continuing.length, 2, 'continue watching keeps one unfinished
 assert.strictEqual(continuing[0].anime_id, 88, 'a selected but not started episode remains a continue target');
 assert.strictEqual(continuing[1].video_id, 4208, 'the latest unfinished episode wins for a title');
 assert.strictEqual(history.isContinueEntry({anime_id: 77, video_id: 7701, time: 1390, duration: 1440}), false, 'nearly completed episodes are hidden');
+assert.deepStrictEqual(
+    Array.from(history.continueWatchingEntries([
+        {anime_id: 42, video_id: 4208, number: '8', time: 45, duration: 1440, updated_at: 20},
+        {anime_id: 88, video_id: 8801, number: '2', time: 45, duration: 1440, updated_at: 40}
+    ], {'42': true})).map((entry) => entry.anime_id),
+    [88],
+    'completed or dropped titles must be removed after merging local and remote progress'
+);
 
 console.log('Watch history contract checks passed');

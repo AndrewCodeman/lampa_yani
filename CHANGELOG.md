@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.29.8 — 2026-08-10
+
+- Build Continue Watching from merged local Lampa progress and YummyAnime server watch history.
+- Exclude titles currently placed in the user's Completed or Dropped YummyAnime lists.
+- Cache the exclusion set so the filter remains available during temporary API failures.
+
 ## 0.29.7 — 2026-08-10
 
 - Separate Continue Watching from the complete YummyAnime watch history.

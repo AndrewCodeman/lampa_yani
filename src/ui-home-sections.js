@@ -117,12 +117,13 @@
         return position < duration - 300;
     }
 
-    function continueWatchingEntries(entries) {
+    function continueWatchingEntries(entries, excludedAnimeIds) {
         var latest = {};
+        excludedAnimeIds = excludedAnimeIds || {};
         (entries || []).forEach(function (entry) {
             if (!isContinueEntry(entry)) return;
             var key = String(entry.anime_id || '');
-            if (!key) return;
+            if (!key || excludedAnimeIds[key]) return;
             var current = latest[key];
             if (!current || Number(entry.updated_at || 0) > Number(current.updated_at || 0)) latest[key] = entry;
         });
@@ -195,13 +196,19 @@
             var self = this;
             var local = deps.history();
             this.activity.loader(true);
-            loadRemotePage().catch(function (error) {
+            var remote = loadRemotePage().catch(function (error) {
                 console.warn('[YummyAnime History] Server history is unavailable', error);
                 return {entries: [], count: 0, failed: true};
-            }).then(function (page) {
+            });
+            var exclusions = continueMode && deps.fetchExcluded ? deps.fetchExcluded().catch(function (error) {
+                console.warn('[YummyAnime Continue Watching] User-list filter is unavailable', error);
+                return {};
+            }) : Promise.resolve({});
+            Promise.all([remote, exclusions]).then(function (result) {
+                var page = result[0];
                 hasMore = !continueMode && deps.authorized() && !page.failed && page.count >= limit;
                 var entries = mergeHistory(local, page.entries);
-                if (continueMode) entries = continueWatchingEntries(entries);
+                if (continueMode) entries = continueWatchingEntries(entries, result[1]);
                 return cardsFor(uniqueEntries(entries));
             }).then(function (cards) {
                 var totalPages = hasMore ? 2 : 1;
