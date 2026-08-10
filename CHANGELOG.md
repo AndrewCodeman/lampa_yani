@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.29.12 — 2026-08-10
+
+- Prevent duplicate enter/click events from opening the same user list twice.
+- Render large account lists in pages of 30 cards instead of constructing every card at once.
+- Reset the list-navigation lock when returning to Your Lists.
+
 ## 0.29.11 — 2026-08-10
 
 - Add matching status icons to every Your Lists shortcut.

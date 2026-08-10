@@ -13,6 +13,10 @@ assert.match(ui, /\['user_lists', 'user_lists'\]/);
 assert.match(ui, /component: 'yani_user_lists'/);
 
 assert.match(lists, /function userLists\(object, deps\)/);
+assert.match(lists, /var pageSize = 30/);
+assert.match(lists, /items\.slice\(start, start \+ pageSize\)\.map\(deps\.toCard\)/);
+assert.match(lists, /comp\.nextPageReuest = function/);
+assert.match(lists, /comp\.nextPageRequest = comp\.nextPageReuest/);
 assert.match(lists, /var component = \{\}/);
 assert.match(lists, /component\.create = function \(\)/);
 assert.match(lists, /component\.start = function \(\)/);
@@ -22,7 +26,10 @@ assert.match(lists, /var definitions = deps\.definitions\(\)\.slice\(\)/);
 assert.match(lists, /deps\.openList\(definition\)/);
 assert.match(lists, /click\.yaniUserList/);
 assert.match(lists, /definitions\.push\(\{key: 'history', title: deps\.t\('watch_history'\), history: true\}\)/);
-assert.match(lists, /if \(definition\.history\) deps\.openHistory\(\)/);
+assert.match(lists, /if \(opening\) return/);
+assert.match(lists, /opening = true/);
+assert.match(lists, /definition\.history \? deps\.openHistory\(\) : deps\.openList\(definition\)/);
+assert.match(lists, /component\.start = function \(\) \{\s*opening = false/);
 assert.match(lists, /function listIcon\(name\)/);
 assert.match(lists, /yani-user-lists__icon/);
 assert.match(lists, /function loadCounts\(\)/);
@@ -34,6 +41,7 @@ const userListsComponent = lists.slice(lists.indexOf('function userLists'), list
 assert.doesNotMatch(userListsComponent, /LampaYaniApi\./, 'list shortcuts must render without an eager API request');
 
 assert.match(ui, /function openUserListShortcut\(definition\)/);
+assert.match(ui, /return resolveUserId\(\)\.then\(function \(userId\)/);
 assert.match(ui, /var storedId = Number\(account && account\.user_id \|\| 0\)/);
 assert.match(ui, /return LampaYaniApi\.userList\(userId, definition\.id\)\.then\(normalizeUserList\)/);
 assert.match(ui, /catch\(function \(directError\)[\s\S]{0,300}loadAll\(userId\)/);

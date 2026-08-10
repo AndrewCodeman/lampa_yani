@@ -54,7 +54,23 @@
 
     function accountList(object, deps) {
         var comp = new Lampa.InteractionCategory(object);
-        comp.create = function () { this.build({results: (object.items || []).map(deps.toCard), total_pages: 1, title: object.title}); };
+        var items = object.items || [];
+        var pageSize = 30;
+        var totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+
+        function pageCards(page) {
+            var start = Math.max(0, (page - 1) * pageSize);
+            return items.slice(start, start + pageSize).map(deps.toCard);
+        }
+
+        comp.create = function () {
+            this.build({results: pageCards(1), total_pages: totalPages, title: object.title});
+        };
+        comp.nextPageReuest = function (requestObject, resolve) {
+            var page = Math.max(2, Number(requestObject.page) || 2);
+            resolve({results: pageCards(page), total_pages: totalPages, title: object.title});
+        };
+        comp.nextPageRequest = comp.nextPageReuest;
         comp.cardRender = deps.cardRender;
         return comp;
     }
@@ -81,6 +97,7 @@
         var content = $('<div class="yani-account__content"></div>');
         var last;
         var countElements = {};
+        var opening = false;
 
         function listIcon(name) {
             var icons = {
@@ -121,8 +138,10 @@
                 tile.append(body);
                 focus(tile);
                 tile.on('hover:enter click.yaniUserList', function () {
-                    if (definition.history) deps.openHistory();
-                    else deps.openList(definition);
+                    if (opening) return;
+                    opening = true;
+                    var navigation = definition.history ? deps.openHistory() : deps.openList(definition);
+                    if (navigation && typeof navigation.catch === 'function') navigation.catch(function () { opening = false; });
                 });
                 grid.append(tile);
             });
@@ -159,6 +178,7 @@
         };
 
         component.start = function () {
+            opening = false;
             Lampa.Controller.add('content', {
                 toggle: function () {
                     Lampa.Controller.collectionSet(scroll.render());

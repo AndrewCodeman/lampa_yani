@@ -1400,7 +1400,7 @@
             });
         }
 
-        resolveUserId().then(function (userId) {
+        return resolveUserId().then(function (userId) {
             return LampaYaniApi.userList(userId, definition.id).then(normalizeUserList).then(function (items) {
                 return writeCache(userId, items);
             }).catch(function (directError) {
@@ -1419,6 +1419,7 @@
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             console.error('[YummyAnime User Lists]', error);
             Lampa.Noty.show(t('user_lists_error'));
+            throw error;
         });
     }
 
