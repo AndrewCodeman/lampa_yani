@@ -32,6 +32,11 @@ assert.match(ui, /function shouldEnterToolbarOnRight\(\)[\s\S]{0,2000}rightmostV
 assert.match(ui, /visibleBeforeToolbar = rect\.left \+ rect\.width \/ 2 < toolbarRect\.left/);
 assert.match(ui, /controller\.right = function \(\)[\s\S]{0,500}shouldEnterToolbarOnRight\(\)[\s\S]{0,160}focusToolbar\(toolbarTargetForCard\(focusedCard\)\)[\s\S]{0,180}Navigator\.canmove\('right'\)/);
 assert.match(ui, /controller\.left = function \(\)[\s\S]{0,250}toolbarHasFocus\(\)[\s\S]{0,120}focusCards\(false\)/);
+const sortIconFunction = ui.match(/function catalogSortIcon\(key\) \{([\s\S]*?)\n    \}/);
+assert.ok(sortIconFunction, 'catalog sorting icon map must exist');
+const iconPaths = Array.from(sortIconFunction[1].matchAll(/<path d="([^"]+)"/g), (match) => match[1]);
+assert.strictEqual(iconPaths.length, 7, 'every sorting action must define an SVG path');
+assert.strictEqual(new Set(iconPaths).size, iconPaths.length, 'sorting actions must not reuse the same SVG path');
 assert.match(css, /\.yani-catalog-toolbar[\s\S]{0,500}backdrop-filter/);
 assert.match(css, /\.yani-catalog-toolbar\s*\{[\s\S]{0,250}position:\s*absolute[\s\S]{0,250}right:\s*\.8em/);
 assert.match(css, /\.yani-catalog-toolbar__track\s*\{[\s\S]{0,180}flex-direction:\s*column/);

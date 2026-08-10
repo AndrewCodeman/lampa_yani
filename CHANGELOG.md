@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.11 — 2026-08-11
+
+- Give every catalog sorting action a distinct icon.
+- Replace the duplicated popularity star with a trophy icon.
+- Add a contract check that prevents duplicate sorting SVG paths.
+
 ## 0.33.10 — 2026-08-11
 
 - Show the YummyAnime media type as a compact badge on catalog cards.
