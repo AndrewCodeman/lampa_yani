@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.33.2',
+        version: '0.33.3',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -5166,6 +5166,30 @@ function pluginYummyAnime() {
         });
     }
 
+    function allohaDirectResolverEnabled() {
+        return Boolean(
+            window.LampaYaniResolver && LampaYaniResolver.enabled && LampaYaniResolver.enabled() ||
+            window.LampaYaniLampacResolver && LampaYaniLampacResolver.enabled && LampaYaniLampacResolver.enabled()
+        );
+    }
+
+    function videoPlaybackPriority(video, group) {
+        var url = videoSourceUrl(video);
+        if (!url) return 0;
+        if (isExternalPlayableUrl(url, video)) return 4;
+        var player = String(group && (group.player || group.title) || '');
+        var alloha = isAllohaUrl(url) || /alloha/i.test(player);
+        if (alloha) return allohaDirectResolverEnabled() ? 3 : 0;
+        if (window.LampaYaniStreamResolver && LampaYaniStreamResolver.canResolve && LampaYaniStreamResolver.canResolve(url)) return 3;
+        return 1;
+    }
+
+    function groupPlaybackPriority(group) {
+        return (group && group.videos || []).reduce(function (priority, video) {
+            return Math.max(priority, videoPlaybackPriority(video, group));
+        }, 0);
+    }
+
     function openVideos(card, resume) {
         beginPlaybackNavigation();
         if (!card || !card.yani_id) {
@@ -5211,6 +5235,11 @@ function pluginYummyAnime() {
             });
             var preferredPlayer = getPreferredPlayer();
             voices.sort(function (a, b) {
+                if (!allohaIframeEnabled()) {
+                    var playableA = groupPlaybackPriority(a.group);
+                    var playableB = groupPlaybackPriority(b.group);
+                    if (playableA !== playableB) return playableB - playableA;
+                }
                 var preferredA = playerMatchesPreference(a.group, preferredPlayer) ? 1 : 0;
                 var preferredB = playerMatchesPreference(b.group, preferredPlayer) ? 1 : 0;
                 return preferredB - preferredA || a.title.localeCompare(b.title);
@@ -5759,6 +5788,11 @@ function pluginYummyAnime() {
 
     function chooseEpisode(card, group) {
         var videos = group.videos.slice().sort(function (a, b) {
+            if (!allohaIframeEnabled()) {
+                var playableA = videoPlaybackPriority(a, group);
+                var playableB = videoPlaybackPriority(b, group);
+                if (playableA !== playableB) return playableB - playableA;
+            }
             var numberA = parseFloat(a.number);
             var numberB = parseFloat(b.number);
             if (isFinite(numberA) && isFinite(numberB)) return numberA - numberB;

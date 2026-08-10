@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.3 — 2026-08-10
+
+- When the embedded Alloha player is disabled, list direct and resolvable playback sources before iframe-only choices.
+- Prioritize Kodik and other supported stream resolvers while retaining unavailable Alloha variants at the bottom.
+- Apply the same capability-first ordering to both dubbing and episode selections.
+
 ## 0.33.2 — 2026-08-10
 
 - Enter the catalog toolbar from the rightmost visible card of every grid row, including rows reached after vertical scrolling.

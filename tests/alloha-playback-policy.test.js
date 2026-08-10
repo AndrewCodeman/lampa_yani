@@ -32,4 +32,19 @@ assert.ok(
 );
 assert.ok(!source.includes('function showYummyIframe'), 'generic iframe playback must stay disabled');
 
+const voiceStart = source.indexOf('function allohaDirectResolverEnabled');
+const voiceEnd = source.indexOf('function voiceOptionSubtitle', voiceStart);
+const voicePolicy = source.slice(voiceStart, voiceEnd);
+assert.ok(voicePolicy.includes('function videoPlaybackPriority'), 'playback choices must have a capability priority');
+assert.ok(voicePolicy.includes('LampaYaniStreamResolver.canResolve(url)'), 'Kodik and other resolvable sources must receive playable priority');
+assert.ok(voicePolicy.includes('allohaDirectResolverEnabled() ? 3 : 0'), 'unresolved Alloha must sort below playable sources');
+assert.ok(voicePolicy.includes('if (!allohaIframeEnabled())'), 'capability-first sorting must apply when the Alloha embed is disabled');
+assert.ok(voicePolicy.includes('groupPlaybackPriority(a.group)'), 'voice choices must be sorted by playable source capability');
+
+const episodeStart = source.indexOf('function chooseEpisode');
+const episodeEnd = source.indexOf('function enrichEpisodeTitles', episodeStart);
+const episodePolicy = source.slice(episodeStart, episodeEnd);
+assert.ok(episodePolicy.includes('videoPlaybackPriority(a, group)'), 'episode choices must prioritize playable sources');
+assert.ok(episodePolicy.indexOf('playableB - playableA') < episodePolicy.indexOf('numberA - numberB'), 'episode capability must sort before episode number');
+
 console.log('Alloha playback policy tests passed');
