@@ -15,6 +15,9 @@ assert.match(ui, /component: 'yani_user_lists'/);
 assert.match(lists, /function userLists\(object, deps\)/);
 assert.match(lists, /var pageSize = 30/);
 assert.match(lists, /items\.slice\(start, start \+ pageSize\)\.map\(deps\.toCard\)/);
+assert.match(lists, /object\.lazy && deps\.loadItems/);
+assert.match(lists, /deps\.loadItems\(object\.definition\)/);
+assert.match(lists, /this\.activity\.loader\(true\)/);
 assert.match(lists, /comp\.nextPageReuest = function/);
 assert.match(lists, /comp\.nextPageRequest = comp\.nextPageReuest/);
 assert.match(lists, /var component = \{\}/);
@@ -41,12 +44,13 @@ const userListsComponent = lists.slice(lists.indexOf('function userLists'), list
 assert.doesNotMatch(userListsComponent, /LampaYaniApi\./, 'list shortcuts must render without an eager API request');
 
 assert.match(ui, /function openUserListShortcut\(definition\)/);
-assert.match(ui, /return resolveUserId\(\)\.then\(function \(userId\)/);
-assert.match(ui, /var storedId = Number\(account && account\.user_id \|\| 0\)/);
-assert.match(ui, /return LampaYaniApi\.userList\(userId, definition\.id\)\.then\(normalizeUserList\)/);
-assert.match(ui, /catch\(function \(directError\)[\s\S]{0,300}loadAll\(userId\)/);
-assert.doesNotMatch(ui, /items\.length \? items : loadAll\(userId\)/, 'an empty dedicated list is a valid response');
+assert.match(ui, /pushAccountList\(definition, \[\], true\)/);
+assert.match(ui, /function resolveUserListsUserId\(\)/);
+assert.match(ui, /function loadUserListsSnapshot\(userId\)/);
+assert.match(ui, /function loadUserListShortcutItems\(definition\)/);
+assert.match(ui, /return loadUserListsSnapshot\(userId\)\.then\(function \(items\)/);
 assert.match(ui, /var cached = readCache\(userId\)/);
+assert.match(ui, /loadItems: loadUserListShortcutItems/);
 assert.match(ui, /openList: openUserListShortcut/);
 assert.match(ui, /openHistory: openWatchHistory/);
 assert.match(ui, /function openWatchHistory\(\)[\s\S]{0,300}component: 'yani_history'/);

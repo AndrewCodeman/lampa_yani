@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.29.12',
+        version: '0.29.13',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -2806,9 +2806,10 @@ function pluginYummyAnime() {
 
     function accountList(object, deps) {
         var comp = new Lampa.InteractionCategory(object);
-        var items = object.items || [];
+        var items = [];
         var pageSize = 30;
-        var totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+        var totalPages = 1;
+        var destroyed = false;
 
         function pageCards(page) {
             var start = Math.max(0, (page - 1) * pageSize);
@@ -2816,7 +2817,22 @@ function pluginYummyAnime() {
         }
 
         comp.create = function () {
-            this.build({results: pageCards(1), total_pages: totalPages, title: object.title});
+            var self = this;
+            this.activity.loader(true);
+            var source = object.lazy && deps.loadItems
+                ? deps.loadItems(object.definition)
+                : Promise.resolve(object.items || []);
+            source.then(function (loaded) {
+                if (destroyed) return;
+                items = Array.isArray(loaded) ? loaded : [];
+                totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+                self.build({results: pageCards(1), total_pages: totalPages, title: object.title});
+            }).catch(function (error) {
+                if (destroyed) return;
+                console.error('[YummyAnime User List]', error);
+                self.build({results: [], total_pages: 1, title: object.title});
+                if (deps.onError) deps.onError(error);
+            });
         };
         comp.nextPageReuest = function (requestObject, resolve) {
             var page = Math.max(2, Number(requestObject.page) || 2);
@@ -2824,6 +2840,11 @@ function pluginYummyAnime() {
         };
         comp.nextPageRequest = comp.nextPageReuest;
         comp.cardRender = deps.cardRender;
+        var originalDestroy = comp.destroy;
+        comp.destroy = function () {
+            destroyed = true;
+            if (originalDestroy) originalDestroy.apply(this, arguments);
+        };
         return comp;
     }
     function subscriptions(object, deps) {
@@ -4524,19 +4545,44 @@ function pluginYummyAnime() {
         ];
     }
 
-    function loadUserListShortcutCounts() {
-        var counts = {history: Object.keys(playbackHistory()).length};
+    var userListsSnapshot = null;
+
+    function resolveUserListsUserId() {
         var account = LampaYaniAuth.get();
         var storedId = Number(account && account.user_id || 0);
-        var userId = storedId ? Promise.resolve(storedId) : LampaYaniApi.profile().then(function (payload) {
+        if (storedId) return Promise.resolve(storedId);
+        return LampaYaniApi.profile().then(function (payload) {
             var profile = payload && payload.response ? payload.response : payload;
-            return Number(profile && (profile.id || profile.user_id || profile.user && profile.user.id) || 0);
+            var userId = Number(profile && (profile.id || profile.user_id || profile.user && profile.user.id) || 0);
+            if (!userId) throw new Error('YummyAnime profile id is missing');
+            LampaYaniAuth.save({
+                token: LampaYaniAuth.token(),
+                login: account && account.login,
+                display_name: account && account.display_name,
+                user_id: userId
+            });
+            return userId;
         });
+    }
 
-        return userId.then(function (id) {
-            if (!id) throw new Error('YummyAnime profile id is missing');
+    function loadUserListsSnapshot(userId) {
+        var now = Date.now();
+        if (userListsSnapshot && userListsSnapshot.userId === userId && now - userListsSnapshot.createdAt < 300000) {
+            return userListsSnapshot.promise;
+        }
+        var promise = LampaYaniApi.userLists(userId).then(normalizeUserList);
+        userListsSnapshot = {userId: userId, createdAt: now, promise: promise};
+        promise.catch(function () {
+            if (userListsSnapshot && userListsSnapshot.promise === promise) userListsSnapshot = null;
+        });
+        return promise;
+    }
+
+    function loadUserListShortcutCounts() {
+        var counts = {history: Object.keys(playbackHistory()).length};
+        return resolveUserListsUserId().then(function (id) {
             return Promise.all([
-                LampaYaniApi.userLists(id).then(normalizeUserList),
+                loadUserListsSnapshot(id),
                 LampaYaniApi.watchHistory(100, 0).catch(function () { return []; })
             ]);
         }).then(function (result) {
@@ -4555,11 +4601,13 @@ function pluginYummyAnime() {
         return LampaYaniAccountLists.filterItems(definition, items);
     }
 
-    function pushAccountList(definition, items) {
+    function pushAccountList(definition, items, lazy) {
         Lampa.Activity.push({
             url: 'yani/account/list/' + definition.key,
             title: 'YummyAnime · ' + definition.title,
             component: 'yani_account_list',
+            definition: definition,
+            lazy: Boolean(lazy),
             items: items || []
         });
     }
@@ -4577,75 +4625,33 @@ function pluginYummyAnime() {
 
     function openUserListShortcut(definition) {
         if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
-        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+        pushAccountList(definition, [], true);
+        return Promise.resolve();
+    }
 
-        function cacheKey(userId) {
-            return 'yani_user_list_' + userId + '_' + definition.id;
-        }
-
+    function loadUserListShortcutItems(definition) {
+        function cacheKey(userId) { return 'yani_user_list_' + userId + '_' + definition.id; }
         function readCache(userId) {
             try {
                 var cached = Lampa.Storage.get(cacheKey(userId), '{}');
                 if (typeof cached === 'string') cached = JSON.parse(cached || '{}');
                 return cached && Array.isArray(cached.items) ? cached.items : null;
-            } catch (error) {
-                return null;
-            }
+            } catch (error) { return null; }
         }
-
         function writeCache(userId, items) {
-            try {
-                Lampa.Storage.set(cacheKey(userId), JSON.stringify({updated_at: Date.now(), items: items || []}));
-            } catch (error) {
-                console.warn('[YummyAnime User Lists] Could not cache list', error);
-            }
+            try { Lampa.Storage.set(cacheKey(userId), JSON.stringify({updated_at: Date.now(), items: items || []})); }
+            catch (error) { console.warn('[YummyAnime User Lists] Could not cache list', error); }
             return items || [];
         }
 
-        function loadAll(userId) {
-            return LampaYaniApi.userLists(userId).then(normalizeUserList).then(function (items) {
-                return filterAccountListItems(definition, items);
+        return resolveUserListsUserId().then(function (userId) {
+            return loadUserListsSnapshot(userId).then(function (items) {
+                return writeCache(userId, filterAccountListItems(definition, items));
+            }).catch(function (error) {
+                var cached = readCache(userId);
+                if (cached) return cached;
+                throw error;
             });
-        }
-
-        function resolveUserId() {
-            var account = LampaYaniAuth.get();
-            var storedId = Number(account && account.user_id || 0);
-            if (storedId) return Promise.resolve(storedId);
-            return LampaYaniApi.profile().then(function (payload) {
-                var profile = payload && payload.response ? payload.response : payload;
-                var userId = profile && (profile.id || profile.user_id || profile.user && profile.user.id);
-                if (!userId) throw new Error('YummyAnime profile id is missing');
-                LampaYaniAuth.save({
-                    token: LampaYaniAuth.token(),
-                    login: account && account.login,
-                    display_name: account && account.display_name,
-                    user_id: userId
-                });
-                return Number(userId);
-            });
-        }
-
-        return resolveUserId().then(function (userId) {
-            return LampaYaniApi.userList(userId, definition.id).then(normalizeUserList).then(function (items) {
-                return writeCache(userId, items);
-            }).catch(function (directError) {
-                return loadAll(userId).then(function (items) {
-                    return writeCache(userId, items);
-                }).catch(function (allError) {
-                    var cached = readCache(userId);
-                    if (cached) return cached;
-                    throw directError || allError;
-                });
-            });
-        }).then(function (items) {
-            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
-            pushAccountList(definition, items);
-        }).catch(function (error) {
-            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
-            console.error('[YummyAnime User Lists]', error);
-            Lampa.Noty.show(t('user_lists_error'));
-            throw error;
         });
     }
 
@@ -4654,7 +4660,12 @@ function pluginYummyAnime() {
     }
 
     function AccountList(object) {
-        return LampaYaniAccountLists.accountList(object, {toCard: toCard, cardRender: bindYummyCardRender});
+        return LampaYaniAccountLists.accountList(object, {
+            toCard: toCard,
+            cardRender: bindYummyCardRender,
+            loadItems: loadUserListShortcutItems,
+            onError: function () { Lampa.Noty.show(t('user_lists_error')); }
+        });
     }
 
     function UserLists(object) {

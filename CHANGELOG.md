@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.29.13 — 2026-08-10
+
+- Open a selected account-list screen immediately and load its titles inside the destination Activity.
+- Reuse one five-minute user-list snapshot for shortcut counters and list contents instead of downloading the same large payload twice.
+- Keep cached list contents available when the YummyAnime API is temporarily unavailable.
+
 ## 0.29.12 — 2026-08-10
 
 - Prevent duplicate enter/click events from opening the same user list twice.

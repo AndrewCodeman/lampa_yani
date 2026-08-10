@@ -54,9 +54,10 @@
 
     function accountList(object, deps) {
         var comp = new Lampa.InteractionCategory(object);
-        var items = object.items || [];
+        var items = [];
         var pageSize = 30;
-        var totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+        var totalPages = 1;
+        var destroyed = false;
 
         function pageCards(page) {
             var start = Math.max(0, (page - 1) * pageSize);
@@ -64,7 +65,22 @@
         }
 
         comp.create = function () {
-            this.build({results: pageCards(1), total_pages: totalPages, title: object.title});
+            var self = this;
+            this.activity.loader(true);
+            var source = object.lazy && deps.loadItems
+                ? deps.loadItems(object.definition)
+                : Promise.resolve(object.items || []);
+            source.then(function (loaded) {
+                if (destroyed) return;
+                items = Array.isArray(loaded) ? loaded : [];
+                totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+                self.build({results: pageCards(1), total_pages: totalPages, title: object.title});
+            }).catch(function (error) {
+                if (destroyed) return;
+                console.error('[YummyAnime User List]', error);
+                self.build({results: [], total_pages: 1, title: object.title});
+                if (deps.onError) deps.onError(error);
+            });
         };
         comp.nextPageReuest = function (requestObject, resolve) {
             var page = Math.max(2, Number(requestObject.page) || 2);
@@ -72,6 +88,11 @@
         };
         comp.nextPageRequest = comp.nextPageReuest;
         comp.cardRender = deps.cardRender;
+        var originalDestroy = comp.destroy;
+        comp.destroy = function () {
+            destroyed = true;
+            if (originalDestroy) originalDestroy.apply(this, arguments);
+        };
         return comp;
     }
     function subscriptions(object, deps) {
