@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.6 — 2026-08-10
+
+- Install the catalog toolbar controller on Lampa's legacy `InteractionCategory` implementation.
+- Allow right-edge cards in every visible catalog row to enter the side toolbar with a TV remote.
+- Keep toolbar selectors attached after the legacy category rebuilds its limited navigation collection.
+
 ## 0.33.5 — 2026-08-10
 
 - Initialize pagination when opening a full account list from the `More` card.

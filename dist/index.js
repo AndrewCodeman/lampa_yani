@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.33.5',
+        version: '0.33.6',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -3476,7 +3476,12 @@ function pluginYummyAnime() {
         }
 
         function syncNavigationCollection() {
-            if (!controlsReady || !Lampa.Controller.own(comp)) return;
+            if (!controlsReady) return;
+            var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
+            var controller = enabled && enabled.controller;
+            var ownsController = enabled && enabled.name === 'content' && controller &&
+                (controller.yaniCatalogOwner === comp || controller.link === comp);
+            if (!ownsController) return;
             var selectors = toolbarTrack && toolbarTrack[0] ? Array.prototype.slice.call(toolbarTrack[0].querySelectorAll('.selector')).filter(function (element) {
                 return element.offsetParent !== null;
             }) : [];
@@ -3589,14 +3594,16 @@ function pluginYummyAnime() {
             comp.on('scroll', function () { setTimeout(syncNavigationCollection, 0); });
         }
 
-        if (comp.on) comp.on('controller', function (controller) {
+        function patchCatalogController(controller) {
+            if (!controller || controller.yaniCatalogOwner === comp) return;
             var originalLeft = controller.left;
             var originalRight = controller.right;
             var originalUp = controller.up;
             var originalDown = controller.down;
+            controller.yaniCatalogOwner = comp;
             controller.left = function () {
                 if (toolbar && toolbar.find('.focus').length) return focusCards(false);
-                originalLeft();
+                if (originalLeft) originalLeft();
             };
             controller.right = function () {
                 if (toolbar && toolbar.find('.focus').length) return;
@@ -3604,7 +3611,7 @@ function pluginYummyAnime() {
                 if (shouldEnterToolbarOnRight() && topButton) return focusToolbar(toolbarTargetForCard(focusedCard));
                 if (Navigator.canmove('right')) return Navigator.move('right');
                 if (topButton) return focusToolbar(toolbarTargetForCard(focusedCard));
-                originalRight();
+                if (originalRight) originalRight();
             };
             controller.up = function () {
                 if (toolbar && toolbar.find('.focus').length) {
@@ -3620,9 +3627,24 @@ function pluginYummyAnime() {
                     return;
                 }
                 if (Navigator.canmove('down')) return Navigator.move('down');
-                originalDown();
+                if (originalDown) originalDown();
             };
-        });
+        }
+
+        if (comp.on) comp.on('controller', patchCatalogController);
+
+        // Lampa currently exports the legacy InteractionCategory, which does
+        // not emit a `controller` event and does not attach `link` to its
+        // content controller. Patch that controller immediately after start,
+        // while keeping the event path for newer category implementations.
+        var originalStart = comp.start;
+        comp.start = function () {
+            var result = originalStart.apply(this, arguments);
+            var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
+            if (enabled && enabled.name === 'content') patchCatalogController(enabled.controller);
+            syncNavigationCollection();
+            return result;
+        };
 
         comp.create = function () {
             var self = this;
