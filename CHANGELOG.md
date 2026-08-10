@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.32.3 — 2026-08-10
+
+- Make the television catalog side toolbar reachable with a standard directional remote from the rightmost visible card of every row.
+- Return from the toolbar to the exact card that was focused before entering it.
+
 ## 0.32.2 — 2026-08-10
 
 - Keep the focused recommendation card inside its horizontal viewport while navigating both right and left with a television remote.

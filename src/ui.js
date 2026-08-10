@@ -232,6 +232,27 @@
             Lampa.Controller.collectionFocus(target, toolbarTrack);
         }
 
+        function shouldEnterToolbarOnRight() {
+            if (!toolbar || !toolbar.length || window.innerWidth <= 700) return false;
+            var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
+            var focused = collection && collection.find ? collection.find('.card.selector.focus, .selector.focus').first() : null;
+            if (!focused || !focused.length) return !Navigator.canmove('right');
+            var currentRect = focused[0].getBoundingClientRect();
+            var toolbarRect = toolbar[0].getBoundingClientRect();
+            var currentCenter = currentRect.top + currentRect.height / 2;
+            var hasVisibleCardToRight = false;
+            collection.find('.card.selector').each(function () {
+                if (this === focused[0]) return;
+                var rect = this.getBoundingClientRect();
+                var sameRow = Math.abs((rect.top + rect.height / 2) - currentCenter) < Math.max(20, currentRect.height * 0.45);
+                if (sameRow && rect.left > currentRect.left + 4 && rect.left < toolbarRect.left - 4) {
+                    hasVisibleCardToRight = true;
+                    return false;
+                }
+            });
+            return !hasVisibleCardToRight;
+        }
+
         function scrollToTop() {
             if (comp.scroll && comp.scroll.reset) comp.scroll.reset();
             else if (comp.scroll && comp.scroll.render) comp.scroll.render(true).scrollTop = 0;
@@ -276,6 +297,7 @@
             };
             controller.right = function () {
                 if (toolbar && toolbar.find('.focus').length) return;
+                if (shouldEnterToolbarOnRight() && topButton) return focusToolbar(topButton);
                 if (Navigator.canmove('right')) return Navigator.move('right');
                 if (topButton) return focusToolbar(topButton);
                 originalRight();

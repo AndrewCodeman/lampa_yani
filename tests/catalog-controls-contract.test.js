@@ -12,7 +12,8 @@ assert.match(ui, /function scrollToTop\(\)[\s\S]{0,250}comp\.scroll\.reset\(\)[\
 assert.match(ui, /comp\.on\('controller'/);
 assert.match(ui, /function focusToolbar\(preferred\)[\s\S]{0,700}collectionSet\(toolbarTrack\)/);
 assert.match(ui, /toolbarTrack\.append\(topButton\)/);
-assert.match(ui, /controller\.right = function \(\)[\s\S]{0,500}focusToolbar\(topButton\)/);
+assert.match(ui, /function shouldEnterToolbarOnRight\(\)[\s\S]{0,1800}return !hasVisibleCardToRight/);
+assert.match(ui, /controller\.right = function \(\)[\s\S]{0,350}shouldEnterToolbarOnRight\(\)[\s\S]{0,100}focusToolbar\(topButton\)[\s\S]{0,180}Navigator\.canmove\('right'\)/);
 assert.match(ui, /controller\.left = function \(\)[\s\S]{0,250}focusCards\(false\)/);
 assert.match(css, /\.yani-catalog-toolbar[\s\S]{0,500}backdrop-filter/);
 assert.match(css, /\.yani-catalog-toolbar\s*\{[\s\S]{0,250}position:\s*absolute[\s\S]{0,250}right:\s*\.8em/);
