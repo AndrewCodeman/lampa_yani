@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.29.14 — 2026-08-10
+
+- Redesign My Lists as native Lampa-style horizontal rows instead of a shortcut grid.
+- Show up to 10 most recently added titles per account list and the 10 latest locally watched titles.
+- Add a final More card to every row which opens the complete list or watch history.
+- Keep list counts in row headings and load all previews from one cached YummyAnime list snapshot.
+
 ## 0.29.13 — 2026-08-10
 
 - Open a selected account-list screen immediately and load its titles inside the destination Activity.

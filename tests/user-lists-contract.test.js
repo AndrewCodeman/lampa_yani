@@ -20,26 +20,20 @@ assert.match(lists, /deps\.loadItems\(object\.definition\)/);
 assert.match(lists, /this\.activity\.loader\(true\)/);
 assert.match(lists, /comp\.nextPageReuest = function/);
 assert.match(lists, /comp\.nextPageRequest = comp\.nextPageReuest/);
-assert.match(lists, /var component = \{\}/);
+assert.match(lists, /var component = new Lampa\.InteractionMain\(object\)/);
 assert.match(lists, /component\.create = function \(\)/);
-assert.match(lists, /component\.start = function \(\)/);
 assert.match(lists, /return component;/);
 assert.doesNotMatch(lists.slice(lists.indexOf('function userLists'), lists.indexOf('window.LampaYani =')), /this\.create = function/, 'the modular factory must return the Activity component');
-assert.match(lists, /var definitions = deps\.definitions\(\)\.slice\(\)/);
-assert.match(lists, /deps\.openList\(definition\)/);
-assert.match(lists, /click\.yaniUserList/);
-assert.match(lists, /definitions\.push\(\{key: 'history', title: deps\.t\('watch_history'\), history: true\}\)/);
-assert.match(lists, /if \(opening\) return/);
-assert.match(lists, /opening = true/);
-assert.match(lists, /definition\.history \? deps\.openHistory\(\) : deps\.openList\(definition\)/);
-assert.match(lists, /component\.start = function \(\) \{\s*opening = false/);
-assert.match(lists, /function listIcon\(name\)/);
-assert.match(lists, /yani-user-lists__icon/);
-assert.match(lists, /function loadCounts\(\)/);
-assert.match(lists, /deps\.loadCounts\(\)/);
+assert.match(lists, /function withMore\(row\)/);
+assert.match(lists, /\(row\.results \|\| \[\]\)\.slice\(0, 10\)/);
+assert.match(lists, /yani_more: true/);
+assert.match(lists, /card_events:/);
+assert.match(lists, /card\.yani_history\) deps\.openHistory\(\)/);
+assert.match(lists, /deps\.openList\(card\.yani_definition\)/);
+assert.match(lists, /deps\.openCard\(card\)/);
+assert.match(lists, /deps\.loadRows\(\)/);
 assert.match(ui, /function loadUserListShortcutCounts\(\)/);
 assert.match(ui, /counts\[definition\.key\] = filterAccountListItems\(definition, result\[0\]\)\.length/);
-assert.match(ui, /loadCounts: loadUserListShortcutCounts/);
 const userListsComponent = lists.slice(lists.indexOf('function userLists'), lists.indexOf('window.LampaYani ='));
 assert.doesNotMatch(userListsComponent, /LampaYaniApi\./, 'list shortcuts must render without an eager API request');
 
@@ -53,6 +47,11 @@ assert.match(ui, /var cached = readCache\(userId\)/);
 assert.match(ui, /loadItems: loadUserListShortcutItems/);
 assert.match(ui, /openList: openUserListShortcut/);
 assert.match(ui, /openHistory: openWatchHistory/);
+assert.match(ui, /function loadUserListRows\(\)/);
+assert.match(ui, /results: selected\.slice\(0, 10\)\.map\(toCard\)/);
+assert.match(ui, /function localHistoryCards\(\)/);
+assert.match(ui, /loadRows: loadUserListRows/);
+assert.match(ui, /openCard: openCardOnce/);
 assert.match(ui, /function openWatchHistory\(\)[\s\S]{0,300}component: 'yani_history'/);
 
 ['ru', 'en', 'uk'].forEach((language) => {
@@ -60,6 +59,7 @@ assert.match(ui, /function openWatchHistory\(\)[\s\S]{0,300}component: 'yani_his
     assert.match(i18n, new RegExp(`messages\\.${language}\\.favorites\\s*=`));
     assert.match(i18n, new RegExp(`messages\\.${language}\\.open_list\\s*=`));
     assert.match(i18n, new RegExp(`messages\\.${language}\\.watch_history\\s*=`));
+    assert.match(i18n, new RegExp(`messages\\.${language}\\.more\\s*=`));
 });
 
 const context = {window: {}};

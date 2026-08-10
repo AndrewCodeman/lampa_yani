@@ -43,7 +43,8 @@
     messages.ru.sync_history_error = 'Не удалось синхронизировать историю';
     messages.ru.auto_sync_progress = 'Автосинхронизация прогресса';
     messages.ru.auto_sync_progress_description = 'Автоматически сохранять в аккаунте YummyAnime прогресс внутреннего плеера Lampa. При отключении доступна ручная синхронизация на странице аккаунта';
-    messages.ru.user_lists = 'Ваши списки';
+    messages.ru.user_lists = 'Мои списки';
+    messages.ru.more = 'Ещё';
     messages.ru.user_lists_description = 'Списки вашего аккаунта YummyAnime';
     messages.ru.user_lists_error = 'Не удалось загрузить ваши списки YummyAnime';
     messages.ru.open_list = 'Открыть список';
@@ -91,7 +92,8 @@
     messages.en.sync_history_error = 'Failed to synchronize history';
     messages.en.auto_sync_progress = 'Automatic progress sync';
     messages.en.auto_sync_progress_description = 'Automatically save internal Lampa player progress to the YummyAnime account. When disabled, manual sync is available on the account page';
-    messages.en.user_lists = 'Your Lists';
+    messages.en.user_lists = 'My Lists';
+    messages.en.more = 'More';
     messages.en.user_lists_description = 'Lists from your YummyAnime account';
     messages.en.user_lists_error = 'Failed to load your YummyAnime lists';
     messages.en.open_list = 'Open list';
@@ -290,7 +292,8 @@
     messages.uk.sync_history_error = 'Не вдалося синхронізувати історію';
     messages.uk.auto_sync_progress = 'Автосинхронізація прогресу';
     messages.uk.auto_sync_progress_description = 'Автоматично зберігати в обліковому записі YummyAnime прогрес внутрішнього плеєра Lampa. Після вимкнення доступна ручна синхронізація на сторінці облікового запису';
-    messages.uk.user_lists = 'Ваші списки';
+    messages.uk.user_lists = 'Мої списки';
+    messages.uk.more = 'Ще';
     messages.uk.user_lists_description = 'Списки вашого облікового запису YummyAnime';
     messages.uk.user_lists_error = 'Не вдалося завантажити ваші списки YummyAnime';
     messages.uk.open_list = 'Відкрити список';

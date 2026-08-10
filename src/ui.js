@@ -1350,6 +1350,53 @@
         });
     }
 
+    function userListItemTime(item) {
+        item = item || {};
+        var current = item.user && item.user.list || item.user_list || item.list_state || {};
+        var nested = current.list && typeof current.list === 'object' ? current.list : {};
+        var value = item.updated_at || item.date || item.created_at || current.updated_at || current.date ||
+            current.created_at || nested.updated_at || nested.date || nested.created_at || 0;
+        var numeric = Number(value);
+        if (numeric > 0) return numeric < 100000000000 ? numeric * 1000 : numeric;
+        var parsed = Date.parse(value);
+        return isNaN(parsed) ? 0 : parsed;
+    }
+
+    function localHistoryCards() {
+        var history = playbackHistory();
+        return Object.keys(history).map(function (id) {
+            var entry = history[id] || {};
+            var source = Object.assign({}, entry.card || {}, {
+                anime_id: entry.card && (entry.card.anime_id || entry.card.yani_id) || id,
+                title: entry.title || entry.card && entry.card.title,
+                poster: entry.poster || entry.card && entry.card.poster,
+                updated_at: entry.updated_at || 0
+            });
+            return {time: Number(entry.updated_at || 0), card: toCard(source)};
+        }).sort(function (a, b) { return b.time - a.time; }).map(function (entry) { return entry.card; });
+    }
+
+    function loadUserListRows() {
+        return resolveUserListsUserId().then(function (userId) {
+            return loadUserListsSnapshot(userId);
+        }).then(function (items) {
+            var rows = accountListDefinitions().map(function (definition) {
+                var selected = filterAccountListItems(definition, items).slice().sort(function (a, b) {
+                    return userListItemTime(b) - userListItemTime(a);
+                });
+                return {
+                    title: definition.title,
+                    definition: definition,
+                    total: selected.length,
+                    results: selected.slice(0, 10).map(toCard)
+                };
+            });
+            var history = localHistoryCards();
+            rows.push({title: t('watch_history'), history: true, total: history.length, results: history.slice(0, 10)});
+            return rows;
+        });
+    }
+
     function filterAccountListItems(definition, items) {
         return LampaYaniAccountLists.filterItems(definition, items);
     }
@@ -1424,11 +1471,12 @@
     function UserLists(object) {
         return LampaYaniAccountLists.userLists(object, {
             t: t,
-            definitions: accountListDefinitions,
             openList: openUserListShortcut,
             openHistory: openWatchHistory,
-            loadCounts: loadUserListShortcutCounts,
-            goBack: goBack
+            openCard: openCardOnce,
+            loadRows: loadUserListRows,
+            goBack: goBack,
+            onError: function () { Lampa.Noty.show(t('user_lists_error')); }
         });
     }
 
