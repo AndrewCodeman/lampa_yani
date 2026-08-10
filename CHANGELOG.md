@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.7 — 2026-08-10
+
+- Automatically refresh an authorized user's Bearer token every 48 hours as recommended by the YummyAnime API.
+- Deduplicate parallel refresh attempts before authenticated API requests.
+- Preserve the current token after transient refresh failures and retry after a 3-hour cooldown.
+
 ## 0.33.6 — 2026-08-10
 
 - Install the catalog toolbar controller on Lampa's legacy `InteractionCategory` implementation.

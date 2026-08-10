@@ -55,6 +55,12 @@
 
     function request(path, options) {
         options = options || {};
+        if (options.auth && !options.authRefreshChecked && window.LampaYaniAuth && LampaYaniAuth.token() && LampaYaniAuth.refreshIfNeeded) {
+            var refreshedOptions = Object.assign({}, options, {authRefreshChecked: true});
+            return LampaYaniAuth.refreshIfNeeded().then(function () {
+                return request(path, refreshedOptions);
+            });
+        }
         var headers = Object.assign({}, options.headers || {});
         var apiLanguage = window.LampaYaniI18n ? LampaYaniI18n.getLanguage() : 'ru';
         var cacheKey = 'lampa_yummyanime_cache_' + apiLanguage + '_' + path;
