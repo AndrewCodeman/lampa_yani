@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.32.1 — 2026-08-10
+
+- Open viewing-order entries directly in YummyAnime detail without showing a misleading failed-Lampa-card fallback notification.
+
 ## 0.32.0 — 2026-08-10
 
 - Replace the television catalog header with a compact fixed right-side toolbar containing sorting actions and Back to top.

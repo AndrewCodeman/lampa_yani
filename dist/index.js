@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.32.0',
+        version: '0.32.1',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -7317,7 +7317,9 @@ function pluginYummyAnime() {
             if (relation) row.append($('<span class="yani-detail__order-relation"></span>').text('· ' + relation));
             row.on('hover:focus', function () { row.addClass('focus'); });
             row.on('hover:blur', function () { row.removeClass('focus'); });
-            row.on('hover:enter click.yaniOrder', function () { openYummyDetail(related, true); });
+            // Viewing-order entries already contain YummyAnime identifiers.
+            // Open them directly without a misleading native-Lampa fallback.
+            row.on('hover:enter click.yaniOrder', function () { openYummyDetail(related, false); });
             list.append(row);
         });
         section.append(list);

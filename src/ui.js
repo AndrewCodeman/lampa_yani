@@ -4084,7 +4084,9 @@
             if (relation) row.append($('<span class="yani-detail__order-relation"></span>').text('· ' + relation));
             row.on('hover:focus', function () { row.addClass('focus'); });
             row.on('hover:blur', function () { row.removeClass('focus'); });
-            row.on('hover:enter click.yaniOrder', function () { openYummyDetail(related, true); });
+            // Viewing-order entries already contain YummyAnime identifiers.
+            // Open them directly without a misleading native-Lampa fallback.
+            row.on('hover:enter click.yaniOrder', function () { openYummyDetail(related, false); });
             list.append(row);
         });
         section.append(list);
