@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.29.11 — 2026-08-10
+
+- Add matching status icons to every Your Lists shortcut.
+- Show the number of titles in each YummyAnime list without issuing a separate request per status.
+- Show the available local/server watch-history count and keep temporary API failures non-blocking.
+
 ## 0.29.10 — 2026-08-10
 
 - Fix the Your Lists Activity factory so it returns a valid Lampa component with `create`, `start`, `render` and `destroy` methods.

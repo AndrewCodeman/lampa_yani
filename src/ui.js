@@ -1289,13 +1289,40 @@
 
     function accountListDefinitions() {
         return [
-            {id: 0, key: 'watching', title: t('watching')},
-            {id: 1, key: 'planned', title: t('planned')},
-            {id: 2, key: 'completed', title: t('completed')},
-            {id: 3, key: 'dropped', title: t('dropped')},
-            {id: 4, key: 'favorites', title: t('favorites')},
-            {id: 5, key: 'postponed', title: t('postponed')}
+            {id: 0, key: 'watching', title: t('watching'), icon: 'eye'},
+            {id: 1, key: 'planned', title: t('planned'), icon: 'cloud'},
+            {id: 2, key: 'completed', title: t('completed'), icon: 'flag'},
+            {id: 3, key: 'dropped', title: t('dropped'), icon: 'eye-off'},
+            {id: 4, key: 'favorites', title: t('favorites'), icon: 'heart'},
+            {id: 5, key: 'postponed', title: t('postponed'), icon: 'hourglass'}
         ];
+    }
+
+    function loadUserListShortcutCounts() {
+        var counts = {history: Object.keys(playbackHistory()).length};
+        var account = LampaYaniAuth.get();
+        var storedId = Number(account && account.user_id || 0);
+        var userId = storedId ? Promise.resolve(storedId) : LampaYaniApi.profile().then(function (payload) {
+            var profile = payload && payload.response ? payload.response : payload;
+            return Number(profile && (profile.id || profile.user_id || profile.user && profile.user.id) || 0);
+        });
+
+        return userId.then(function (id) {
+            if (!id) throw new Error('YummyAnime profile id is missing');
+            return Promise.all([
+                LampaYaniApi.userLists(id).then(normalizeUserList),
+                LampaYaniApi.watchHistory(100, 0).catch(function () { return []; })
+            ]);
+        }).then(function (result) {
+            var definitions = accountListDefinitions();
+            definitions.forEach(function (definition) {
+                counts[definition.key] = filterAccountListItems(definition, result[0]).length;
+            });
+            var historyPayload = result[1] && result[1].response ? result[1].response : result[1];
+            var remoteHistory = Array.isArray(historyPayload) ? historyPayload : historyPayload && (historyPayload.items || historyPayload.data || historyPayload.history || historyPayload.results) || [];
+            counts.history = Math.max(counts.history, remoteHistory.length);
+            return counts;
+        });
     }
 
     function filterAccountListItems(definition, items) {
@@ -1409,6 +1436,7 @@
             definitions: accountListDefinitions,
             openList: openUserListShortcut,
             openHistory: openWatchHistory,
+            loadCounts: loadUserListShortcutCounts,
             goBack: goBack
         });
     }

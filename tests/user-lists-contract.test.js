@@ -23,6 +23,13 @@ assert.match(lists, /deps\.openList\(definition\)/);
 assert.match(lists, /click\.yaniUserList/);
 assert.match(lists, /definitions\.push\(\{key: 'history', title: deps\.t\('watch_history'\), history: true\}\)/);
 assert.match(lists, /if \(definition\.history\) deps\.openHistory\(\)/);
+assert.match(lists, /function listIcon\(name\)/);
+assert.match(lists, /yani-user-lists__icon/);
+assert.match(lists, /function loadCounts\(\)/);
+assert.match(lists, /deps\.loadCounts\(\)/);
+assert.match(ui, /function loadUserListShortcutCounts\(\)/);
+assert.match(ui, /counts\[definition\.key\] = filterAccountListItems\(definition, result\[0\]\)\.length/);
+assert.match(ui, /loadCounts: loadUserListShortcutCounts/);
 const userListsComponent = lists.slice(lists.indexOf('function userLists'), lists.indexOf('window.LampaYani ='));
 assert.doesNotMatch(userListsComponent, /LampaYaniApi\./, 'list shortcuts must render without an eager API request');
 

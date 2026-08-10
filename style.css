@@ -800,6 +800,39 @@
     font-size: 1.05em;
 }
 
+.yani-user-lists__tile {
+    display: flex;
+    align-items: center;
+    min-height: 5.4em;
+}
+
+.yani-user-lists__icon {
+    width: 2.7em;
+    height: 2.7em;
+    margin-right: 1em;
+    flex: 0 0 auto;
+    color: #ff6674;
+}
+
+.yani-user-lists__icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+.yani-user-lists__tile.focus .yani-user-lists__icon {
+    color: #cf3f50;
+}
+
+.yani-user-lists__body {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.yani-user-lists__count {
+    font-size: 1em;
+}
+
 .yani-account__stats {
     display: inline-flex;
     flex-direction: column;
