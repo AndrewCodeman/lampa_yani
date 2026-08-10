@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.29.7 — 2026-08-10
+
+- Separate Continue Watching from the complete YummyAnime watch history.
+- Keep only the latest unfinished episode for each title and hide completed episodes using duration-aware thresholds.
+- Persist local episode duration, dubbing and source information so resume cards remain useful after restarting Lampa.
+- Support nested screenshot URLs from the YummyAnime watch-history response.
+
 ## 0.29.6 — 2026-08-10
 
 - Fix Your Lists so a valid empty list no longer triggers a failing second request.

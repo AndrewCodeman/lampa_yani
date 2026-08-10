@@ -18,6 +18,9 @@ assert.match(ui, /var playback = card\.yani_resume \|\| getPlayback\(card\.yani_
 assert.match(ui, /String\(video\.video_id \|\| video\.id \|\| ''\) === String\(playback\.video_id\)/);
 assert.match(ui, /function bindHistoryCardRender[\s\S]{0,2200}hover:enter\.yaniHistory click\.yaniHistory/);
 assert.match(ui, /function renderHistoryProgress/);
+assert.match(ui, /function openContinueWatching\(\)/);
+assert.match(ui, /mode: 'continue'/);
+assert.match(ui, /duration: Math\.max\(0, Number\(video\.duration \|\| 0\)\)/);
 
 const remote = history.normalizeRemoteHistory({response: [{
     anime_id: 42,
@@ -56,5 +59,16 @@ assert.strictEqual(merged.length, 2, 'matching local and remote video records mu
 assert.strictEqual(merged[0].video_id, 4207);
 assert.strictEqual(merged[0].time, 333, 'newer remote progress must win');
 assert.strictEqual(merged[0].card.title, 'Stored title', 'local card metadata must survive a server merge');
+
+const continuing = history.continueWatchingEntries([
+    {anime_id: 42, video_id: 4207, number: '7', time: 333, duration: 1440, updated_at: 10},
+    {anime_id: 42, video_id: 4208, number: '8', time: 45, duration: 1440, updated_at: 20},
+    {anime_id: 77, video_id: 7701, number: '1', time: 1390, duration: 1440, updated_at: 30},
+    {anime_id: 88, video_id: 8801, number: '2', time: 0, duration: 0, updated_at: 40}
+]);
+assert.strictEqual(continuing.length, 2, 'continue watching keeps one unfinished entry per title');
+assert.strictEqual(continuing[0].anime_id, 88, 'a selected but not started episode remains a continue target');
+assert.strictEqual(continuing[1].video_id, 4208, 'the latest unfinished episode wins for a title');
+assert.strictEqual(history.isContinueEntry({anime_id: 77, video_id: 7701, time: 1390, duration: 1440}), false, 'nearly completed episodes are hidden');
 
 console.log('Watch history contract checks passed');

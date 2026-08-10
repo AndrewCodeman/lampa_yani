@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.29.6',
+        version: '0.29.7',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -2927,6 +2927,13 @@ function pluginYummyAnime() {
         return value.fullsize || value.original || value.huge || value.mega || value.big || value.medium || value.small || value.url || '';
     }
 
+    function historyScreenshot(value) {
+        if (!value) return '';
+        if (typeof value === 'string') return value;
+        var sizes = value.sizes || value.images || {};
+        return value.full || value.url || sizes.full || sizes.big || sizes.medium || sizes.small || '';
+    }
+
     function normalizeRemoteHistory(payload) {
         return historyPayloadItems(payload).map(function (item) {
             item = item || {};
@@ -2940,6 +2947,7 @@ function pluginYummyAnime() {
                 episode_title: item.ep_title || item.episode_title || screenshot.title || '',
                 title: item.title || item.anime_title || '',
                 poster: historyPoster(item.poster) || historyPoster(screenshot.poster) || historyPoster(screenshot),
+                screenshot: historyScreenshot(item.screenshot_url || screenshot),
                 player: String(item.player_title || item.player || ''),
                 voice: String(item.dub_title || item.dubbing || ''),
                 time: Math.max(0, Number(item.end_time || item.time || 0)),
@@ -2960,6 +2968,7 @@ function pluginYummyAnime() {
                 episode_title: item.episode_title || '',
                 title: item.title || item.card && item.card.title || '',
                 poster: historyPoster(item.poster || item.card && item.card.poster),
+                screenshot: historyScreenshot(item.screenshot || item.screenshot_url),
                 player: String(item.player || ''),
                 voice: String(item.voice || ''),
                 time: Math.max(0, Number(item.time || 0)),
@@ -2992,10 +3001,36 @@ function pluginYummyAnime() {
                 duration: Number(newer.duration || older.duration || 0),
                 title: newer.title || older.title || '',
                 poster: newer.poster || older.poster || '',
+                screenshot: newer.screenshot || older.screenshot || '',
                 card: newer.card || older.card || null
             });
         });
         return Object.keys(merged).map(function (key) { return merged[key]; }).sort(function (a, b) {
+            return Number(b.updated_at || 0) - Number(a.updated_at || 0);
+        });
+    }
+
+    function isContinueEntry(entry) {
+        var position = Math.max(0, Number(entry && entry.time || 0));
+        var duration = Math.max(0, Number(entry && entry.duration || 0));
+        var hasTarget = Boolean(entry && (entry.video_id || entry.number));
+        if (!hasTarget) return false;
+        if (!duration) return position >= 30 || position === 0;
+        if (position < 30) return false;
+        if (duration <= 300) return position / duration < 0.9;
+        return position < duration - 300;
+    }
+
+    function continueWatchingEntries(entries) {
+        var latest = {};
+        (entries || []).forEach(function (entry) {
+            if (!isContinueEntry(entry)) return;
+            var key = String(entry.anime_id || '');
+            if (!key) return;
+            var current = latest[key];
+            if (!current || Number(entry.updated_at || 0) > Number(current.updated_at || 0)) latest[key] = entry;
+        });
+        return Object.keys(latest).map(function (key) { return latest[key]; }).sort(function (a, b) {
             return Number(b.updated_at || 0) - Number(a.updated_at || 0);
         });
     }
@@ -3031,7 +3066,8 @@ function pluginYummyAnime() {
 
     function history(object, deps) {
         var comp = new Lampa.InteractionCategory(object);
-        var limit = 30;
+        var continueMode = object.mode === 'continue';
+        var limit = continueMode ? 100 : 30;
         var offset = 0;
         var hasMore = false;
         var seen = {};
@@ -3067,11 +3103,13 @@ function pluginYummyAnime() {
                 console.warn('[YummyAnime History] Server history is unavailable', error);
                 return {entries: [], count: 0, failed: true};
             }).then(function (page) {
-                hasMore = deps.authorized() && !page.failed && page.count >= limit;
-                return cardsFor(uniqueEntries(mergeHistory(local, page.entries)));
+                hasMore = !continueMode && deps.authorized() && !page.failed && page.count >= limit;
+                var entries = mergeHistory(local, page.entries);
+                if (continueMode) entries = continueWatchingEntries(entries);
+                return cardsFor(uniqueEntries(entries));
             }).then(function (cards) {
                 var totalPages = hasMore ? 2 : 1;
-                self.build({results: cards.filter(Boolean), total_pages: totalPages, title: deps.t('watch_history')});
+                self.build({results: cards.filter(Boolean), total_pages: totalPages, title: deps.t(continueMode ? 'continue_watching' : 'watch_history')});
                 if (!cards.length) Lampa.Noty.show(deps.t('history_empty'));
             }).catch(function (error) {
                 console.error('[YummyAnime History]', error);
@@ -3092,7 +3130,7 @@ function pluginYummyAnime() {
                 resolve({
                     results: cards.filter(Boolean),
                     total_pages: hasMore ? requestObject.page + 1 : requestObject.page,
-                    title: deps.t('watch_history')
+                    title: deps.t(continueMode ? 'continue_watching' : 'watch_history')
                 });
             }).catch(function (error) {
                 requestObject.page = Math.max(1, requestObject.page - 1);
@@ -3114,7 +3152,9 @@ function pluginYummyAnime() {
         normalizeRemoteHistory: normalizeRemoteHistory,
         normalizeLocalHistory: normalizeLocalHistory,
         mergeHistory: mergeHistory,
-        historyEntryKey: historyEntryKey
+        historyEntryKey: historyEntryKey,
+        isContinueEntry: isContinueEntry,
+        continueWatchingEntries: continueWatchingEntries
     };
 }(window));
 
@@ -3294,7 +3334,7 @@ function pluginYummyAnime() {
                 Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime ' + t('schedule'), component: 'yani_schedule'});
             }},
             {key: 'continue_watching', title: t('continue_watching'), action: function () {
-                openWatchHistory();
+                openContinueWatching();
             }},
             {key: 'status', title: t('status'), action: function () {
                 Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime ' + t('status'), component: 'yani_status'});
@@ -4182,7 +4222,17 @@ function pluginYummyAnime() {
         Lampa.Activity.push({
             url: 'yani/history',
             title: 'YummyAnime · ' + t('watch_history'),
-            component: 'yani_history'
+            component: 'yani_history',
+            mode: 'history'
+        });
+    }
+
+    function openContinueWatching() {
+        Lampa.Activity.push({
+            url: 'yani/continue-watching',
+            title: 'YummyAnime · ' + t('continue_watching'),
+            component: 'yani_history',
+            mode: 'continue'
         });
     }
 
@@ -6569,7 +6619,10 @@ function pluginYummyAnime() {
             number: String(video.number || video.index || ''),
             video_id: video.video_id || '',
             time: Number(video.watched && video.watched.end_time || 0),
+            duration: Math.max(0, Number(video.duration || 0)),
             player: playerKey(group),
+            voice: String(LampaYaniUiUtils.videoData(video).dubbing || ''),
+            episode_url: videoSourceUrl(video),
             title: card.title || '',
             poster: card.poster || card.img || '',
             card: {

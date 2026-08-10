@@ -23,6 +23,13 @@
         return value.fullsize || value.original || value.huge || value.mega || value.big || value.medium || value.small || value.url || '';
     }
 
+    function historyScreenshot(value) {
+        if (!value) return '';
+        if (typeof value === 'string') return value;
+        var sizes = value.sizes || value.images || {};
+        return value.full || value.url || sizes.full || sizes.big || sizes.medium || sizes.small || '';
+    }
+
     function normalizeRemoteHistory(payload) {
         return historyPayloadItems(payload).map(function (item) {
             item = item || {};
@@ -36,6 +43,7 @@
                 episode_title: item.ep_title || item.episode_title || screenshot.title || '',
                 title: item.title || item.anime_title || '',
                 poster: historyPoster(item.poster) || historyPoster(screenshot.poster) || historyPoster(screenshot),
+                screenshot: historyScreenshot(item.screenshot_url || screenshot),
                 player: String(item.player_title || item.player || ''),
                 voice: String(item.dub_title || item.dubbing || ''),
                 time: Math.max(0, Number(item.end_time || item.time || 0)),
@@ -56,6 +64,7 @@
                 episode_title: item.episode_title || '',
                 title: item.title || item.card && item.card.title || '',
                 poster: historyPoster(item.poster || item.card && item.card.poster),
+                screenshot: historyScreenshot(item.screenshot || item.screenshot_url),
                 player: String(item.player || ''),
                 voice: String(item.voice || ''),
                 time: Math.max(0, Number(item.time || 0)),
@@ -88,10 +97,36 @@
                 duration: Number(newer.duration || older.duration || 0),
                 title: newer.title || older.title || '',
                 poster: newer.poster || older.poster || '',
+                screenshot: newer.screenshot || older.screenshot || '',
                 card: newer.card || older.card || null
             });
         });
         return Object.keys(merged).map(function (key) { return merged[key]; }).sort(function (a, b) {
+            return Number(b.updated_at || 0) - Number(a.updated_at || 0);
+        });
+    }
+
+    function isContinueEntry(entry) {
+        var position = Math.max(0, Number(entry && entry.time || 0));
+        var duration = Math.max(0, Number(entry && entry.duration || 0));
+        var hasTarget = Boolean(entry && (entry.video_id || entry.number));
+        if (!hasTarget) return false;
+        if (!duration) return position >= 30 || position === 0;
+        if (position < 30) return false;
+        if (duration <= 300) return position / duration < 0.9;
+        return position < duration - 300;
+    }
+
+    function continueWatchingEntries(entries) {
+        var latest = {};
+        (entries || []).forEach(function (entry) {
+            if (!isContinueEntry(entry)) return;
+            var key = String(entry.anime_id || '');
+            if (!key) return;
+            var current = latest[key];
+            if (!current || Number(entry.updated_at || 0) > Number(current.updated_at || 0)) latest[key] = entry;
+        });
+        return Object.keys(latest).map(function (key) { return latest[key]; }).sort(function (a, b) {
             return Number(b.updated_at || 0) - Number(a.updated_at || 0);
         });
     }
@@ -127,7 +162,8 @@
 
     function history(object, deps) {
         var comp = new Lampa.InteractionCategory(object);
-        var limit = 30;
+        var continueMode = object.mode === 'continue';
+        var limit = continueMode ? 100 : 30;
         var offset = 0;
         var hasMore = false;
         var seen = {};
@@ -163,11 +199,13 @@
                 console.warn('[YummyAnime History] Server history is unavailable', error);
                 return {entries: [], count: 0, failed: true};
             }).then(function (page) {
-                hasMore = deps.authorized() && !page.failed && page.count >= limit;
-                return cardsFor(uniqueEntries(mergeHistory(local, page.entries)));
+                hasMore = !continueMode && deps.authorized() && !page.failed && page.count >= limit;
+                var entries = mergeHistory(local, page.entries);
+                if (continueMode) entries = continueWatchingEntries(entries);
+                return cardsFor(uniqueEntries(entries));
             }).then(function (cards) {
                 var totalPages = hasMore ? 2 : 1;
-                self.build({results: cards.filter(Boolean), total_pages: totalPages, title: deps.t('watch_history')});
+                self.build({results: cards.filter(Boolean), total_pages: totalPages, title: deps.t(continueMode ? 'continue_watching' : 'watch_history')});
                 if (!cards.length) Lampa.Noty.show(deps.t('history_empty'));
             }).catch(function (error) {
                 console.error('[YummyAnime History]', error);
@@ -188,7 +226,7 @@
                 resolve({
                     results: cards.filter(Boolean),
                     total_pages: hasMore ? requestObject.page + 1 : requestObject.page,
-                    title: deps.t('watch_history')
+                    title: deps.t(continueMode ? 'continue_watching' : 'watch_history')
                 });
             }).catch(function (error) {
                 requestObject.page = Math.max(1, requestObject.page - 1);
@@ -210,6 +248,8 @@
         normalizeRemoteHistory: normalizeRemoteHistory,
         normalizeLocalHistory: normalizeLocalHistory,
         mergeHistory: mergeHistory,
-        historyEntryKey: historyEntryKey
+        historyEntryKey: historyEntryKey,
+        isContinueEntry: isContinueEntry,
+        continueWatchingEntries: continueWatchingEntries
     };
 }(window));

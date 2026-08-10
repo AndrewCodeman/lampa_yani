@@ -174,7 +174,7 @@
                 Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime ' + t('schedule'), component: 'yani_schedule'});
             }},
             {key: 'continue_watching', title: t('continue_watching'), action: function () {
-                openWatchHistory();
+                openContinueWatching();
             }},
             {key: 'status', title: t('status'), action: function () {
                 Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime ' + t('status'), component: 'yani_status'});
@@ -1062,7 +1062,17 @@
         Lampa.Activity.push({
             url: 'yani/history',
             title: 'YummyAnime · ' + t('watch_history'),
-            component: 'yani_history'
+            component: 'yani_history',
+            mode: 'history'
+        });
+    }
+
+    function openContinueWatching() {
+        Lampa.Activity.push({
+            url: 'yani/continue-watching',
+            title: 'YummyAnime · ' + t('continue_watching'),
+            component: 'yani_history',
+            mode: 'continue'
         });
     }
 
@@ -3449,7 +3459,10 @@
             number: String(video.number || video.index || ''),
             video_id: video.video_id || '',
             time: Number(video.watched && video.watched.end_time || 0),
+            duration: Math.max(0, Number(video.duration || 0)),
             player: playerKey(group),
+            voice: String(LampaYaniUiUtils.videoData(video).dubbing || ''),
+            episode_url: videoSourceUrl(video),
             title: card.title || '',
             poster: card.poster || card.img || '',
             card: {
