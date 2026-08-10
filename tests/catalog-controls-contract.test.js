@@ -10,10 +10,14 @@ assert.match(ui, /function Catalog\(object\)[\s\S]{0,2500}sort: 'top'[\s\S]{0,30
 assert.match(ui, /function changeSort\(definition\)[\s\S]{0,700}params\.sort = definition\.sort[\s\S]{0,500}Lampa\.Activity\.replace/);
 assert.match(ui, /function scrollToTop\(\)[\s\S]{0,250}comp\.scroll\.reset\(\)[\s\S]{0,150}focusCards\(true\)/);
 assert.match(ui, /comp\.on\('controller'/);
-assert.match(ui, /function focusToolbar\(\)[\s\S]{0,500}collectionSet\(toolbarTrack\)/);
-assert.match(ui, /controller\.down = function \(\)[\s\S]{0,900}collectionSet\(topButton\)/);
+assert.match(ui, /function focusToolbar\(preferred\)[\s\S]{0,700}collectionSet\(toolbarTrack\)/);
+assert.match(ui, /toolbarTrack\.append\(topButton\)/);
+assert.match(ui, /controller\.right = function \(\)[\s\S]{0,500}focusToolbar\(topButton\)/);
+assert.match(ui, /controller\.left = function \(\)[\s\S]{0,250}focusCards\(false\)/);
 assert.match(css, /\.yani-catalog-toolbar[\s\S]{0,500}backdrop-filter/);
-assert.match(css, /\.yani-catalog-top\s*\{[\s\S]{0,200}position:\s*absolute/);
+assert.match(css, /\.yani-catalog-toolbar\s*\{[\s\S]{0,250}position:\s*absolute[\s\S]{0,250}right:\s*\.8em/);
+assert.match(css, /\.yani-catalog-toolbar__track\s*\{[\s\S]{0,180}flex-direction:\s*column/);
+assert.match(css, /@media \(max-width: 700px\)[\s\S]{0,350}flex-direction:\s*row/);
 
 ['ru', 'en', 'uk'].forEach((language) => {
     ['catalog_sort_top', 'catalog_sort_new', 'catalog_sort_rating', 'catalog_sort_votes', 'catalog_sort_views', 'catalog_sort_title', 'catalog_sort_random', 'scroll_to_top'].forEach((key) => {

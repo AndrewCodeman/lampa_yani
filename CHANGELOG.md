@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.32.0 — 2026-08-10
+
+- Replace the television catalog header with a compact fixed right-side toolbar containing sorting actions and Back to top.
+- Enter the toolbar by pressing Right at the edge of any catalog row and return to the last focused card with Left.
+- Show icon labels only while focused on television screens, while retaining the horizontal toolbar on narrow touch screens.
+
 ## 0.31.1 — 2026-08-10
 
 - Restore the title-detail controller and focused comment after closing an inline replies dialog.

@@ -222,9 +222,11 @@
             Lampa.Controller.collectionFocus(target || false, collection);
         }
 
-        function focusToolbar() {
+        function focusToolbar(preferred) {
             if (!toolbarTrack || !toolbarTrack.length) return;
-            var target = toolbarTrack.find('.yani-catalog-sort--active').first();
+            var focusedCard = comp.scroll && comp.scroll.render ? comp.scroll.render().find('.selector.focus').first() : null;
+            if (focusedCard && focusedCard.length) comp.last = focusedCard[0];
+            var target = preferred && preferred.length ? preferred : toolbarTrack.find('.yani-catalog-sort--active').first();
             if (!target.length) target = toolbarTrack.find('.selector').first();
             Lampa.Controller.collectionSet(toolbarTrack);
             Lampa.Controller.collectionFocus(target, toolbarTrack);
@@ -244,6 +246,11 @@
             root.addClass('yani-catalog-view');
             toolbar = $('<div class="yani-catalog-toolbar"></div>');
             toolbarTrack = $('<div class="yani-catalog-toolbar__track"></div>');
+            topButton = $('<div class="yani-catalog-top selector" aria-label="' + t('scroll_to_top') + '"></div>');
+            topButton.append('<span class="yani-catalog-top__icon">↑</span>');
+            topButton.append($('<span class="yani-catalog-top__title"></span>').text(t('scroll_to_top')));
+            topButton.on('hover:enter click.yaniCatalogTop', scrollToTop);
+            toolbarTrack.append(topButton);
             sortDefinitions.forEach(function (definition) {
                 var button = $('<div class="yani-catalog-sort selector"></div>');
                 button.toggleClass('yani-catalog-sort--active', activeSort(definition));
@@ -254,13 +261,8 @@
                 toolbarTrack.append(button);
             });
             toolbar.append(toolbarTrack);
-            topButton = $('<div class="yani-catalog-top selector" aria-label="' + t('scroll_to_top') + '"></div>');
-            topButton.append('<span class="yani-catalog-top__icon">↑</span>');
-            topButton.append($('<span class="yani-catalog-top__title"></span>').text(t('scroll_to_top')));
-            topButton.on('hover:enter click.yaniCatalogTop', scrollToTop);
             root.prepend(toolbar);
-            root.append(topButton);
-            if (comp.scroll && comp.scroll.minus) comp.scroll.minus(toolbar);
+            if (window.innerWidth <= 700 && comp.scroll && comp.scroll.minus) comp.scroll.minus(toolbar);
         }
 
         if (comp.on) comp.on('controller', function (controller) {
@@ -269,30 +271,29 @@
             var originalUp = controller.up;
             var originalDown = controller.down;
             controller.left = function () {
-                if (toolbar && toolbar.find('.focus').length) return Navigator.move('left');
-                if (topButton && topButton.hasClass('focus')) return;
+                if (toolbar && toolbar.find('.focus').length) return focusCards(false);
                 originalLeft();
             };
             controller.right = function () {
-                if (toolbar && toolbar.find('.focus').length) return Navigator.move('right');
-                if (topButton && topButton.hasClass('focus')) return;
+                if (toolbar && toolbar.find('.focus').length) return;
+                if (Navigator.canmove('right')) return Navigator.move('right');
+                if (topButton) return focusToolbar(topButton);
                 originalRight();
             };
             controller.up = function () {
-                if (topButton && topButton.hasClass('focus')) return focusCards(false);
-                if (toolbar && toolbar.find('.focus').length) return Lampa.Controller.toggle('head');
+                if (toolbar && toolbar.find('.focus').length) {
+                    if (Navigator.canmove('up')) return Navigator.move('up');
+                    return Lampa.Controller.toggle('head');
+                }
                 if (Navigator.canmove('up')) return Navigator.move('up');
-                focusToolbar();
+                Lampa.Controller.toggle('head');
             };
             controller.down = function () {
-                if (toolbar && toolbar.find('.focus').length) return focusCards(true);
-                if (topButton && topButton.hasClass('focus')) return;
-                if (Navigator.canmove('down')) return Navigator.move('down');
-                if (topButton) {
-                    Lampa.Controller.collectionSet(topButton);
-                    Lampa.Controller.collectionFocus(topButton, topButton);
+                if (toolbar && toolbar.find('.focus').length) {
+                    if (Navigator.canmove('down')) return Navigator.move('down');
                     return;
                 }
+                if (Navigator.canmove('down')) return Navigator.move('down');
                 originalDown();
             };
         });
