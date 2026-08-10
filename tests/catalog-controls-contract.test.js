@@ -10,7 +10,11 @@ assert.match(ui, /function Catalog\(object\)[\s\S]{0,2500}sort: 'top'[\s\S]{0,30
 assert.match(ui, /function changeSort\(definition\)[\s\S]{0,700}params\.sort = definition\.sort[\s\S]{0,500}Lampa\.Activity\.replace/);
 assert.match(ui, /function scrollToTop\(\)[\s\S]{0,250}comp\.scroll\.reset\(\)[\s\S]{0,150}focusCards\(true\)/);
 assert.match(ui, /comp\.on\('controller'/);
-assert.match(ui, /function focusToolbar\(preferred\)[\s\S]{0,700}collectionSet\(toolbarTrack\)/);
+assert.match(ui, /function navigationCollection\(\)[\s\S]{0,350}comp\.render\(\)/);
+assert.match(ui, /function syncNavigationCollection\(\)[\s\S]{0,900}Navigator\.setCollection\(selectors\)/);
+assert.match(ui, /comp\.on\('toggle'[\s\S]{0,150}syncNavigationCollection/);
+assert.match(ui, /comp\.on\('scroll'[\s\S]{0,150}syncNavigationCollection/);
+assert.match(ui, /function focusToolbar\(preferred\)[\s\S]{0,900}navigationCollection\(\)[\s\S]{0,200}collectionSet\(collection, false, true\)/);
 assert.match(ui, /toolbarTrack\.append\(topButton\)/);
 assert.match(ui, /function shouldEnterToolbarOnRight\(\)[\s\S]{0,1800}return !hasVisibleCardToRight/);
 assert.match(ui, /controller\.right = function \(\)[\s\S]{0,350}shouldEnterToolbarOnRight\(\)[\s\S]{0,100}focusToolbar\(topButton\)[\s\S]{0,180}Navigator\.canmove\('right'\)/);

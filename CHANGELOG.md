@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.0 — 2026-08-10
+
+- Put catalog cards and the fixed sorting toolbar into one television navigation collection so a standard remote can enter the toolbar from the right edge.
+- Preserve focus after authentication, status-period and notification-list re-renders.
+- Add a focusable Return to Lampa control to the legacy embedded player.
+
 ## 0.32.3 — 2026-08-10
 
 - Make the television catalog side toolbar reachable with a standard directional remote from the rightmost visible card of every row.

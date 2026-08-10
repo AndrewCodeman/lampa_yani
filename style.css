@@ -504,6 +504,23 @@
     background: #000;
 }
 
+.yani-player__back {
+    position: absolute;
+    z-index: 2;
+    top: 1.25em;
+    left: 1.25em;
+    padding: .65em 1em;
+    border-radius: .45em;
+    color: #fff;
+    background: rgba(20, 20, 24, .82);
+    box-shadow: 0 .35em 1.2em rgba(0, 0, 0, .28);
+}
+
+.yani-player__back.focus {
+    color: #18181b;
+    background: #fff;
+}
+
 .full-start__button.view--yummyanime {
     background: #ef6470;
     color: #fff;

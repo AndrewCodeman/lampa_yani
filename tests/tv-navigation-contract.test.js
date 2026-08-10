@@ -1,0 +1,30 @@
+const assert = require('assert');
+const fs = require('fs');
+
+const auth = fs.readFileSync('src/ui-auth.js', 'utf8');
+const status = fs.readFileSync('src/ui-status.js', 'utf8');
+const notifications = fs.readFileSync('src/ui-notifications.js', 'utf8');
+const player = fs.readFileSync('src/ui-player.js', 'utf8');
+const css = fs.readFileSync('style.css', 'utf8');
+const i18n = fs.readFileSync('src/i18n.js', 'utf8');
+
+assert.match(auth, /data-yani-focus-key/);
+assert.match(auth, /function refreshFocus\(\)[\s\S]{0,800}collectionFocus/);
+assert.match(auth, /toggle: refreshFocus/);
+
+assert.match(status, /data-yani-focus-key/);
+assert.match(status, /last && document\.documentElement\.contains\(last\)/);
+assert.match(status, /period-["'] \+ key/);
+
+assert.match(notifications, /function focusable\(element\)[\s\S]{0,220}LampaYaniNavigation\.bindFocus/);
+assert.match(notifications, /function refreshFocus\(preferred\)[\s\S]{0,700}collectionFocus/);
+assert.match(notifications, /collectionSet\(scroll\.render\(\), false, true\)/);
+
+assert.match(player, /yani-player__back selector/);
+assert.match(player, /collectionFocus\(back, html, true\)/);
+assert.match(css, /\.yani-player__back\.focus/);
+['ru', 'en', 'uk'].forEach((language) => {
+    assert.match(i18n, new RegExp(`messages\\.${language}\\.back_to_lampa\\s*=`));
+});
+
+console.log('TV navigation contract checks passed');

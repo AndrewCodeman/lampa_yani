@@ -31,6 +31,8 @@
     messages.ru.version_label = 'Версия';
     messages.en.version_name = 'YummyAnime';
     messages.en.version_label = 'Version';
+    messages.ru.back_to_lampa = 'Вернуться в Lampa';
+    messages.en.back_to_lampa = 'Return to Lampa';
     messages.ru.notifications_title = 'Уведомления YummyAnime';
     messages.ru.notifications_empty = 'Новых уведомлений нет';
     messages.ru.notifications_error = 'Не удалось загрузить уведомления';
@@ -297,6 +299,7 @@
         language_name: 'Мова / Language', language_description: 'Мова інтерфейсу розширення YummyAnime', language_changed: 'Мову YummyAnime змінено. Відкрийте розширення знову.', section_visibility_description: 'Показувати цей розділ на головному екрані YummyAnime', lampa_card_integration: 'Картка Lampa', lampa_card_rating: 'Рейтинг YummyAnime', lampa_card_rating_description: 'Показувати рейтинг YummyAnime на звичайній картці Lampa', lampa_card_button: 'Кнопка YummyAnime', lampa_card_button_description: 'Показувати кнопку з логотипом YummyAnime на звичайній картці Lampa', version_name: 'YummyAnime', version_label: 'Версія', website_description: 'Офіційний сайт YummyAnime', unofficial_extension: 'Неофіційне розширення', account_statistics: 'Статистика', genres_statistics: 'Жанри', ratings_statistics: 'Оцінки', types_statistics: 'Типи', auth_title: 'Авторизація YummyAnime', auth_authorized: 'Ви увійшли до облікового запису YummyAnime', auth_not_authorized: 'Вхід не виконано', auth_login: 'Нікнейм або Email', auth_password: 'Пароль', auth_submit: 'Увійти', auth_account: 'Обліковий запис',
         login_name: 'Увійти до YummyAnime', refresh_name: 'Оновити токен YummyAnime', login_first: 'Спочатку увійдіть до YummyAnime', token_refreshed: 'Токен YummyAnime оновлено', token_refresh_error: 'Не вдалося оновити токен YummyAnime', logout_name: 'Вийти з YummyAnime', logged_out: 'Ви вийшли з YummyAnime', api_check_name: 'Перевірити YummyAnime API', api_ok: 'YummyAnime API працює', api_error: 'YummyAnime API недоступний або публічний токен неправильний', email_prompt: 'Нікнейм або Email', email_required: 'Введіть нікнейм або email YummyAnime', password_prompt: 'Пароль YummyAnime', password_required: 'Введіть пароль YummyAnime', login_ok: 'Вхід до YummyAnime виконано', login_error: 'Помилка входу до YummyAnime', comments_title: 'Коментарі YummyAnime', comments_error: 'Не вдалося завантажити коментарі', kinopoisk: 'Кінопошук'
     });
+    messages.uk.back_to_lampa = 'Повернутися до Lampa';
     messages.uk.notifications_title = 'Сповіщення YummyAnime';
     messages.uk.notifications_empty = 'Нових сповіщень немає';
     messages.uk.notifications_error = 'Не вдалося завантажити сповіщення';

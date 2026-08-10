@@ -214,12 +214,29 @@
             return collection && collection.find ? collection.find('.card.selector, .selector').first()[0] : null;
         }
 
+        function navigationCollection() {
+            var root = comp.render();
+            return root && root.length ? root : (comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render());
+        }
+
+        function syncNavigationCollection() {
+            if (!controlsReady || !Lampa.Controller.own(comp)) return;
+            var collection = navigationCollection();
+            var focused = collection && collection.find ? collection.find('.selector.focus').first()[0] : null;
+            var target = focused || comp.last || firstCard();
+            var selectors = collection && collection[0] ? Array.prototype.slice.call(collection[0].querySelectorAll('.selector')).filter(function (element) {
+                return element.offsetParent !== null;
+            }) : [];
+            Navigator.setCollection(selectors);
+            if (!focused) Lampa.Controller.collectionFocus(target || false, collection, true);
+        }
+
         function focusCards(first) {
-            var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
+            var collection = navigationCollection();
             var target = first ? firstCard() : comp.last || firstCard();
             if (target) comp.last = target;
-            Lampa.Controller.collectionSet(collection);
-            Lampa.Controller.collectionFocus(target || false, collection);
+            Lampa.Controller.collectionSet(collection, false, true);
+            Lampa.Controller.collectionFocus(target || false, collection, true);
         }
 
         function focusToolbar(preferred) {
@@ -228,8 +245,9 @@
             if (focusedCard && focusedCard.length) comp.last = focusedCard[0];
             var target = preferred && preferred.length ? preferred : toolbarTrack.find('.yani-catalog-sort--active').first();
             if (!target.length) target = toolbarTrack.find('.selector').first();
-            Lampa.Controller.collectionSet(toolbarTrack);
-            Lampa.Controller.collectionFocus(target, toolbarTrack);
+            var collection = navigationCollection();
+            Lampa.Controller.collectionSet(collection, false, true);
+            Lampa.Controller.collectionFocus(target, collection, true);
         }
 
         function shouldEnterToolbarOnRight() {
@@ -284,6 +302,12 @@
             toolbar.append(toolbarTrack);
             root.prepend(toolbar);
             if (window.innerWidth <= 700 && comp.scroll && comp.scroll.minus) comp.scroll.minus(toolbar);
+            setTimeout(syncNavigationCollection, 0);
+        }
+
+        if (comp.on) {
+            comp.on('toggle', function () { setTimeout(syncNavigationCollection, 0); });
+            comp.on('scroll', function () { setTimeout(syncNavigationCollection, 0); });
         }
 
         if (comp.on) comp.on('controller', function (controller) {
