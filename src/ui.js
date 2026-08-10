@@ -1339,6 +1339,7 @@
             title: 'YummyAnime · ' + definition.title,
             component: 'yani_account_list',
             definition: definition,
+            page: 1,
             lazy: Boolean(lazy),
             items: items || []
         });

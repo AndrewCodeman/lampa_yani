@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.5 — 2026-08-10
+
+- Initialize pagination when opening a full account list from the `More` card.
+- Restore lazy rendering after the first 30 titles in `My Lists`.
+- Keep the account-list pager compatible with both Lampa pagination method spellings.
+
 ## 0.33.4 — 2026-08-10
 
 - Preserve Lampa's active catalog card when the category refreshes its navigation collection after vertical scrolling.

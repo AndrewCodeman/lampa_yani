@@ -14,6 +14,7 @@ assert.match(ui, /component: 'yani_user_lists'/);
 
 assert.match(lists, /function userLists\(object, deps\)/);
 assert.match(lists, /var pageSize = 30/);
+assert.match(lists, /object\.page = 1/);
 assert.match(lists, /items\.slice\(start, start \+ pageSize\)\.map\(deps\.toCard\)/);
 assert.match(lists, /object\.lazy && deps\.loadItems/);
 assert.match(lists, /deps\.loadItems\(object\.definition\)/);
@@ -39,6 +40,7 @@ assert.doesNotMatch(userListsComponent, /LampaYaniApi\./, 'list shortcuts must r
 
 assert.match(ui, /function openUserListShortcut\(definition\)/);
 assert.match(ui, /pushAccountList\(definition, \[\], true\)/);
+assert.match(ui, /component: 'yani_account_list',[\s\S]{0,160}page: 1/);
 assert.match(ui, /function resolveUserListsUserId\(\)/);
 assert.match(ui, /function loadUserListsSnapshot\(userId\)/);
 assert.match(ui, /function loadUserListShortcutItems\(definition\)/);

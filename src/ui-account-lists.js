@@ -53,6 +53,11 @@
     }
 
     function accountList(object, deps) {
+        // InteractionCategory only requests the next page when object.page is
+        // numeric. Account-list activities are opened without API pagination,
+        // so initialise the local pager explicitly for both old and current
+        // Lampa builds.
+        object.page = 1;
         var comp = new Lampa.InteractionCategory(object);
         var items = [];
         var pageSize = 30;

@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.33.4',
+        version: '0.33.5',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -2851,6 +2851,11 @@ function pluginYummyAnime() {
     }
 
     function accountList(object, deps) {
+        // InteractionCategory only requests the next page when object.page is
+        // numeric. Account-list activities are opened without API pagination,
+        // so initialise the local pager explicitly for both old and current
+        // Lampa builds.
+        object.page = 1;
         var comp = new Lampa.InteractionCategory(object);
         var items = [];
         var pageSize = 30;
@@ -4590,6 +4595,7 @@ function pluginYummyAnime() {
             title: 'YummyAnime · ' + definition.title,
             component: 'yani_account_list',
             definition: definition,
+            page: 1,
             lazy: Boolean(lazy),
             items: items || []
         });
