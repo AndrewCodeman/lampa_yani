@@ -15,6 +15,7 @@ assert.match(api, /var pendingRequests = \{\};/, 'identical in-flight API reques
 assert.match(ui, /queries\.slice\(0, 2\)/, 'native Lampa matching must use a bounded title set');
 assert.doesNotMatch(ui, /return !source && !Array\.isArray\(ids\);/, 'missing metadata must not classify every title as anime');
 assert.doesNotMatch(build, /src\/ui-detail-sections\.js/, 'unused duplicate detail sections must stay out of the bundle');
+assert.doesNotMatch(fs.readFileSync('index.js', 'utf8'), /src\/ui-detail-sections\.js/, 'legacy loader must not fetch unused duplicate detail sections');
 assert.doesNotMatch(css, /\.view--yummyanime__icon svg\s*\{\s*display:\s*none/, 'YummyAnime button logo must remain visible');
 
 console.log('low-memory contract tests passed');

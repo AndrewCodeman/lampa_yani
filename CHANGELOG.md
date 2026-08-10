@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.30.4 — 2026-08-10
+
+- Remove an accidentally committed temporary SSH known-hosts file.
+- Remove the public smoke-test plugin from the release directory.
+- Remove an unused duplicate detail-sections module from source and the legacy loader.
+
 ## 0.30.3 — 2026-08-10
 
 - Restore the originating controller, collection and focused item after closing temporary YummyAnime lists.
