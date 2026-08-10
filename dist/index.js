@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.29.14',
+        version: '0.30.0',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -6967,7 +6967,17 @@ function pluginYummyAnime() {
     function openSearch() {
         showYummyInput({title: t('search_title'), value: ''}, function (query) {
             query = (query || '').trim();
-            if (query) Lampa.Activity.push({url: 'yani/search/' + encodeURIComponent(query), title: query, component: 'yani_catalog', params: {q: query, limit: 30}});
+            if (query) {
+                Lampa.Activity.push({url: 'yani/search/' + encodeURIComponent(query), title: query, component: 'yani_catalog', params: {q: query, limit: 30}});
+                return;
+            }
+            // Lampa.Input is primarily a settings control and switches to
+            // `settings_component` when it closes. Search is opened from the
+            // Home Activity, so cancelling it must explicitly restore the
+            // existing content controller and its last focused tile.
+            setTimeout(function () {
+                if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle('content');
+            }, 0);
         });
     }
 

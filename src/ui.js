@@ -3759,7 +3759,17 @@
     function openSearch() {
         showYummyInput({title: t('search_title'), value: ''}, function (query) {
             query = (query || '').trim();
-            if (query) Lampa.Activity.push({url: 'yani/search/' + encodeURIComponent(query), title: query, component: 'yani_catalog', params: {q: query, limit: 30}});
+            if (query) {
+                Lampa.Activity.push({url: 'yani/search/' + encodeURIComponent(query), title: query, component: 'yani_catalog', params: {q: query, limit: 30}});
+                return;
+            }
+            // Lampa.Input is primarily a settings control and switches to
+            // `settings_component` when it closes. Search is opened from the
+            // Home Activity, so cancelling it must explicitly restore the
+            // existing content controller and its last focused tile.
+            setTimeout(function () {
+                if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle('content');
+            }, 0);
         });
     }
 

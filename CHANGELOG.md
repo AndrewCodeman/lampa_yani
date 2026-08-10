@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.30.0 — 2026-08-10
+
+- Restore the YummyAnime Home content controller after cancelling the search input.
+- Preserve the last focused Home tile so remote, mouse and touch navigation continue working after return.
+
 ## 0.29.14 — 2026-08-10
 
 - Redesign My Lists as native Lampa-style horizontal rows instead of a shortcut grid.
