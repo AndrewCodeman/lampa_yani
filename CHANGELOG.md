@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.1 — 2026-08-10
+
+- Remove ten unreferenced legacy screen implementations left behind after component extraction.
+- Remove obsolete status and schedule formatting helpers from the main UI bundle.
+- Add a regression contract preventing legacy screens from returning to the release bundle.
+
 ## 0.33.0 — 2026-08-10
 
 - Put catalog cards and the fixed sorting toolbar into one television navigation collection so a standard remote can enter the toolbar from the right edge.
