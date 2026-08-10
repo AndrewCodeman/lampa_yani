@@ -4,6 +4,127 @@
     gap: 1rem;
 }
 
+.yani-catalog-view {
+    position: relative;
+    height: 100%;
+}
+
+.yani-catalog-toolbar {
+    position: relative;
+    z-index: 12;
+    margin: 0 2.2em .65em;
+    padding: .42em;
+    border: .08em solid rgba(255,255,255,.13);
+    border-radius: 1em;
+    background: linear-gradient(135deg, rgba(22,25,36,.9), rgba(48,37,52,.82));
+    box-shadow: 0 .65em 1.8em rgba(0,0,0,.2), inset 0 .08em 0 rgba(255,255,255,.08);
+    backdrop-filter: blur(1em);
+}
+
+.yani-catalog-toolbar__track {
+    display: flex;
+    gap: .38em;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.yani-catalog-toolbar__track::-webkit-scrollbar {
+    display: none;
+}
+
+.yani-catalog-sort {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: .48em;
+    min-height: 2.35em;
+    padding: 0 .82em;
+    border: .08em solid transparent;
+    border-radius: .72em;
+    color: rgba(255,255,255,.74);
+    background: rgba(255,255,255,.055);
+    transition: color .16s ease, background .16s ease, border-color .16s ease, transform .16s ease;
+}
+
+.yani-catalog-sort__icon {
+    width: 1.05em;
+    height: 1.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.yani-catalog-sort__icon svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.yani-catalog-sort--active {
+    color: #fff;
+    border-color: rgba(239,100,112,.55);
+    background: linear-gradient(135deg, rgba(239,100,112,.65), rgba(184,64,104,.48));
+}
+
+.yani-catalog-sort.focus {
+    color: #17151c;
+    border-color: #fff;
+    background: #fff;
+    box-shadow: 0 0 0 .16em rgba(255,255,255,.2), 0 .45em 1.1em rgba(0,0,0,.24);
+    transform: translateY(-.06em);
+}
+
+.yani-catalog-sort__title {
+    white-space: nowrap;
+    font-size: .92em;
+    font-weight: 600;
+}
+
+.yani-catalog-top {
+    position: absolute;
+    z-index: 15;
+    right: 2.2em;
+    bottom: 1.7em;
+    display: flex;
+    align-items: center;
+    gap: .48em;
+    min-height: 2.7em;
+    padding: 0 .95em;
+    border: .08em solid rgba(255,255,255,.2);
+    border-radius: 1.35em;
+    color: #fff;
+    background: rgba(25,24,32,.82);
+    box-shadow: 0 .7em 1.8em rgba(0,0,0,.28);
+    backdrop-filter: blur(.8em);
+}
+
+.yani-catalog-top.focus {
+    color: #17151c;
+    background: #fff;
+    border-color: #fff;
+}
+
+.yani-catalog-top__icon {
+    font-size: 1.25em;
+    line-height: 1;
+}
+
+.yani-catalog-top__title {
+    font-size: .9em;
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .yani-catalog-toolbar { margin-left: .85em; margin-right: .85em; }
+    .yani-catalog-sort { padding: 0 .65em; }
+    .yani-catalog-top { right: .85em; bottom: .9em; }
+    .yani-catalog-top__title { display: none; }
+}
+
 .icon-yani {
     width: 2.4em;
     height: 2.4em;

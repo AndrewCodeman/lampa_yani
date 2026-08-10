@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.31.0 — 2026-08-10
+
+- Add a compact fixed catalog toolbar with server-side sorting by popularity, year, rating, rating count, views, title and random order.
+- Preserve active search, genre and filter parameters when changing catalog sorting.
+- Add remote-friendly navigation between the sorting toolbar, catalog cards and a floating Back to top control.
+
 ## 0.30.5 — 2026-08-10
 
 - Ignore temporary SSH known-hosts files, the smoke-test bundle and the removed duplicate detail-sections module.

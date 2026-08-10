@@ -135,62 +135,7 @@
 
             Lampa.Component.add('yani_home', Home);
 
-            Lampa.Component.add('yani_catalog', function (object) {
-                var comp = new Lampa.InteractionCategory(object);
-                var baseParams = copyParams(object.params || {limit: 30, sort: 'top', sort_forward: false});
-                var limit = Number(baseParams.limit || 30);
-                var maxPages = Math.ceil(20000 / limit) + 1;
-                var seen = {};
-                var requestedOffsets = {};
-
-                object.page = 1;
-                baseParams.limit = limit;
-                baseParams.offset = Number(baseParams.offset || 0);
-
-                comp.create = function () {
-                    var self = this;
-                    this.activity.loader(true);
-                    LampaYaniApi.catalog(baseParams)
-                        .then(function (payload) {
-                            var raw = LampaYaniApi.normalize(payload);
-                            var results = mapUniqueCards(raw, seen);
-                            requestedOffsets[baseParams.offset] = true;
-                            if (raw.length < limit) object.page = maxPages;
-                            self.build({results: results, total_pages: maxPages, title: t('anime')});
-                        })
-                        .catch(function (error) {
-                            console.error('[YummyAnime]', error);
-                            self.activity.loader(false);
-                            Lampa.Noty.show(t('catalog_load_error'));
-                        });
-                };
-                comp.nextPageReuest = function (requestObject, resolve, reject) {
-                    var params = copyParams(baseParams);
-                    params.offset = baseParams.offset + (requestObject.page - 1) * limit;
-                    if (requestedOffsets[params.offset]) {
-                        resolve({results: [], total_pages: maxPages, title: t('anime')});
-                        return;
-                    }
-                    requestedOffsets[params.offset] = true;
-
-                    LampaYaniApi.catalog(params).then(function (payload) {
-                        var raw = LampaYaniApi.normalize(payload);
-                        var results = mapUniqueCards(raw, seen);
-                        if (raw.length < limit) requestObject.page = maxPages;
-                        resolve({results: results, total_pages: maxPages, title: t('anime')});
-                    }).catch(function (error) {
-                        delete requestedOffsets[params.offset];
-                        requestObject.page = Math.max(1, requestObject.page - 1);
-                        console.error('[YummyAnime]', error);
-                        Lampa.Noty.show(t('next_page_error'));
-                        reject(error);
-                    });
-                };
-                // Lampa builds use both spellings across releases.
-                comp.nextPageRequest = comp.nextPageReuest;
-                comp.cardRender = bindYummyCardRender;
-                return comp;
-            });
+            Lampa.Component.add('yani_catalog', Catalog);
 
             Lampa.Component.add('yani_recommended', Recommended);
             Lampa.Component.add('yani_updates', Updates);
@@ -216,6 +161,200 @@
             console.log('[YummyAnime] Extension registered');
         }
     };
+
+    function Catalog(object) {
+        var comp = new Lampa.InteractionCategory(object);
+        var baseParams = copyParams(object.params || {limit: 30, sort: 'top', sort_forward: false});
+        var limit = Number(baseParams.limit || 30);
+        var maxPages = Math.ceil(20000 / limit) + 1;
+        var seen = {};
+        var requestedOffsets = {};
+        var toolbar;
+        var toolbarTrack;
+        var topButton;
+        var controlsReady = false;
+        var sortDefinitions = [
+            {key: 'top', sort: 'top', forward: false, title: t('catalog_sort_top')},
+            {key: 'new', sort: 'year', forward: false, title: t('catalog_sort_new')},
+            {key: 'rating', sort: 'rating', forward: false, title: t('catalog_sort_rating')},
+            {key: 'votes', sort: 'rating_counters', forward: false, title: t('catalog_sort_votes')},
+            {key: 'views', sort: 'views', forward: false, title: t('catalog_sort_views')},
+            {key: 'title', sort: 'title', forward: true, title: t('catalog_sort_title')},
+            {key: 'random', sort: 'random', forward: false, title: t('catalog_sort_random')}
+        ];
+
+        object.page = 1;
+        baseParams.limit = limit;
+        baseParams.offset = Number(baseParams.offset || 0);
+        baseParams.sort = baseParams.sort || 'top';
+        baseParams.sort_forward = baseParams.sort_forward === true || baseParams.sort_forward === 'true';
+
+        function activeSort(definition) {
+            return definition.sort === baseParams.sort && definition.forward === baseParams.sort_forward;
+        }
+
+        function changeSort(definition) {
+            if (activeSort(definition) && definition.key !== 'random') return;
+            var params = copyParams(baseParams);
+            params.offset = 0;
+            params.sort = definition.sort;
+            params.sort_forward = definition.forward;
+            var route = String(object.url || 'yani/catalog').replace(/\/sort\/[^/]+$/, '');
+            Lampa.Activity.replace({
+                url: route + '/sort/' + definition.key,
+                title: object.title || ('YummyAnime ' + t('catalog')),
+                component: 'yani_catalog',
+                params: params
+            });
+        }
+
+        function firstCard() {
+            if (comp.items && comp.items.length && comp.items[0].render) return comp.items[0].render(true);
+            var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
+            return collection && collection.find ? collection.find('.card.selector, .selector').first()[0] : null;
+        }
+
+        function focusCards(first) {
+            var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
+            var target = first ? firstCard() : comp.last || firstCard();
+            if (target) comp.last = target;
+            Lampa.Controller.collectionSet(collection);
+            Lampa.Controller.collectionFocus(target || false, collection);
+        }
+
+        function focusToolbar() {
+            if (!toolbarTrack || !toolbarTrack.length) return;
+            var target = toolbarTrack.find('.yani-catalog-sort--active').first();
+            if (!target.length) target = toolbarTrack.find('.selector').first();
+            Lampa.Controller.collectionSet(toolbarTrack);
+            Lampa.Controller.collectionFocus(target, toolbarTrack);
+        }
+
+        function scrollToTop() {
+            if (comp.scroll && comp.scroll.reset) comp.scroll.reset();
+            else if (comp.scroll && comp.scroll.render) comp.scroll.render(true).scrollTop = 0;
+            focusCards(true);
+        }
+
+        function installControls() {
+            if (controlsReady) return;
+            var root = comp.render();
+            if (!root || !root.length) return;
+            controlsReady = true;
+            root.addClass('yani-catalog-view');
+            toolbar = $('<div class="yani-catalog-toolbar"></div>');
+            toolbarTrack = $('<div class="yani-catalog-toolbar__track"></div>');
+            sortDefinitions.forEach(function (definition) {
+                var button = $('<div class="yani-catalog-sort selector"></div>');
+                button.toggleClass('yani-catalog-sort--active', activeSort(definition));
+                button.append($('<span class="yani-catalog-sort__icon"></span>').html(catalogSortIcon(definition.key)));
+                button.append($('<span class="yani-catalog-sort__title"></span>').text(definition.title));
+                button.on('hover:focus', function () { toolbarTrack[0].scrollLeft = Math.max(0, button[0].offsetLeft - toolbarTrack[0].clientWidth / 3); });
+                button.on('hover:enter click.yaniCatalogSort', function () { changeSort(definition); });
+                toolbarTrack.append(button);
+            });
+            toolbar.append(toolbarTrack);
+            topButton = $('<div class="yani-catalog-top selector" aria-label="' + t('scroll_to_top') + '"></div>');
+            topButton.append('<span class="yani-catalog-top__icon">↑</span>');
+            topButton.append($('<span class="yani-catalog-top__title"></span>').text(t('scroll_to_top')));
+            topButton.on('hover:enter click.yaniCatalogTop', scrollToTop);
+            root.prepend(toolbar);
+            root.append(topButton);
+            if (comp.scroll && comp.scroll.minus) comp.scroll.minus(toolbar);
+        }
+
+        if (comp.on) comp.on('controller', function (controller) {
+            var originalLeft = controller.left;
+            var originalRight = controller.right;
+            var originalUp = controller.up;
+            var originalDown = controller.down;
+            controller.left = function () {
+                if (toolbar && toolbar.find('.focus').length) return Navigator.move('left');
+                if (topButton && topButton.hasClass('focus')) return;
+                originalLeft();
+            };
+            controller.right = function () {
+                if (toolbar && toolbar.find('.focus').length) return Navigator.move('right');
+                if (topButton && topButton.hasClass('focus')) return;
+                originalRight();
+            };
+            controller.up = function () {
+                if (topButton && topButton.hasClass('focus')) return focusCards(false);
+                if (toolbar && toolbar.find('.focus').length) return Lampa.Controller.toggle('head');
+                if (Navigator.canmove('up')) return Navigator.move('up');
+                focusToolbar();
+            };
+            controller.down = function () {
+                if (toolbar && toolbar.find('.focus').length) return focusCards(true);
+                if (topButton && topButton.hasClass('focus')) return;
+                if (Navigator.canmove('down')) return Navigator.move('down');
+                if (topButton) {
+                    Lampa.Controller.collectionSet(topButton);
+                    Lampa.Controller.collectionFocus(topButton, topButton);
+                    return;
+                }
+                originalDown();
+            };
+        });
+
+        comp.create = function () {
+            var self = this;
+            this.activity.loader(true);
+            LampaYaniApi.catalog(baseParams)
+                .then(function (payload) {
+                    var raw = LampaYaniApi.normalize(payload);
+                    var results = mapUniqueCards(raw, seen);
+                    requestedOffsets[baseParams.offset] = true;
+                    if (raw.length < limit) object.page = maxPages;
+                    self.build({results: results, total_pages: maxPages, title: t('anime')});
+                    installControls();
+                })
+                .catch(function (error) {
+                    console.error('[YummyAnime]', error);
+                    self.activity.loader(false);
+                    Lampa.Noty.show(t('catalog_load_error'));
+                });
+        };
+        comp.nextPageReuest = function (requestObject, resolve, reject) {
+            var params = copyParams(baseParams);
+            params.offset = baseParams.offset + (requestObject.page - 1) * limit;
+            if (requestedOffsets[params.offset]) {
+                resolve({results: [], total_pages: maxPages, title: t('anime')});
+                return;
+            }
+            requestedOffsets[params.offset] = true;
+
+            LampaYaniApi.catalog(params).then(function (payload) {
+                var raw = LampaYaniApi.normalize(payload);
+                var results = mapUniqueCards(raw, seen);
+                if (raw.length < limit) requestObject.page = maxPages;
+                resolve({results: results, total_pages: maxPages, title: t('anime')});
+            }).catch(function (error) {
+                delete requestedOffsets[params.offset];
+                requestObject.page = Math.max(1, requestObject.page - 1);
+                console.error('[YummyAnime]', error);
+                Lampa.Noty.show(t('next_page_error'));
+                reject(error);
+            });
+        };
+        // Lampa builds use both spellings across releases.
+        comp.nextPageRequest = comp.nextPageReuest;
+        comp.cardRender = bindYummyCardRender;
+        return comp;
+    }
+
+    function catalogSortIcon(key) {
+        var icons = {
+            top: '<svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.1 5.6.8-4 3.9.9 5.5-5-2.6-5 2.6.9-5.5-4-3.9 5.6-.8z"/></svg>',
+            new: '<svg viewBox="0 0 24 24"><path d="M5 5h14v15H5zM8 3v4M16 3v4M5 9h14"/></svg>',
+            rating: '<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
+            votes: '<svg viewBox="0 0 24 24"><path d="M7 11a3 3 0 100-6 3 3 0 000 6zm10 0a3 3 0 100-6 3 3 0 000 6zM2 20c0-4 2-6 5-6s5 2 5 6m0 0c0-4 2-6 5-6s5 2 5 6"/></svg>',
+            views: '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12zm10 3a3 3 0 100-6 3 3 0 000 6z"/></svg>',
+            title: '<svg viewBox="0 0 24 24"><path d="M4 19l4-14 4 14M5.5 14h5M15 6h6l-6 12h6"/></svg>',
+            random: '<svg viewBox="0 0 24 24"><path d="M4 7h3c5 0 5 10 10 10h3M17 4l3 3-3 3M4 17h3c2.5 0 3.7-2.5 5-5M17 14l3 3-3 3"/></svg>'
+        };
+        return icons[key] || icons.top;
+    }
 
     function Home(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});

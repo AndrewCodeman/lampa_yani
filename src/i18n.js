@@ -269,6 +269,23 @@
     messages.en.public_application_token_saved = 'Custom public application key saved';
     messages.en.public_application_token_restored = 'Default YummyAnime for Lampa public key restored';
     messages.en.public_application_token_invalid = 'Invalid public application key';
+    messages.ru.catalog_sort_top = 'Популярное';
+    messages.ru.catalog_sort_new = 'Новинки';
+    messages.ru.catalog_sort_rating = 'По рейтингу';
+    messages.ru.catalog_sort_votes = 'По оценкам';
+    messages.ru.catalog_sort_views = 'По просмотрам';
+    messages.ru.catalog_sort_title = 'А–Я';
+    messages.ru.catalog_sort_random = 'Случайно';
+    messages.ru.scroll_to_top = 'Наверх';
+    messages.en.catalog_sort_top = 'Popular';
+    messages.en.catalog_sort_new = 'Newest';
+    messages.en.catalog_sort_rating = 'Top rating';
+    messages.en.catalog_sort_votes = 'Most rated';
+    messages.en.catalog_sort_views = 'Most viewed';
+    messages.en.catalog_sort_title = 'A–Z';
+    messages.en.catalog_sort_random = 'Random';
+    messages.en.scroll_to_top = 'Back to top';
+
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -399,6 +416,14 @@
     messages.uk.public_application_token_saved = 'Користувацький публічний ключ збережено';
     messages.uk.public_application_token_restored = 'Відновлено стандартний публічний ключ YummyAnime for Lampa';
     messages.uk.public_application_token_invalid = 'Некоректний публічний ключ застосунку';
+    messages.uk.catalog_sort_top = 'Популярне';
+    messages.uk.catalog_sort_new = 'Новинки';
+    messages.uk.catalog_sort_rating = 'За рейтингом';
+    messages.uk.catalog_sort_votes = 'За оцінками';
+    messages.uk.catalog_sort_views = 'За переглядами';
+    messages.uk.catalog_sort_title = 'А–Я';
+    messages.uk.catalog_sort_random = 'Випадково';
+    messages.uk.scroll_to_top = 'Нагору';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';
