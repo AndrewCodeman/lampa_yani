@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.33.3',
+        version: '0.33.4',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -3472,21 +3472,18 @@ function pluginYummyAnime() {
 
         function syncNavigationCollection() {
             if (!controlsReady || !Lampa.Controller.own(comp)) return;
-            var collection = navigationCollection();
-            var focused = collection && collection.find ? collection.find('.selector.focus').first()[0] : null;
-            var target = focused || comp.last || firstCard();
-            var selectors = collection && collection[0] ? Array.prototype.slice.call(collection[0].querySelectorAll('.selector')).filter(function (element) {
+            var selectors = toolbarTrack && toolbarTrack[0] ? Array.prototype.slice.call(toolbarTrack[0].querySelectorAll('.selector')).filter(function (element) {
                 return element.offsetParent !== null;
             }) : [];
-            Navigator.setCollection(selectors);
-            if (!focused) Lampa.Controller.collectionFocus(target || false, collection, true);
+            selectors.forEach(function (element) { Navigator.add(element); });
         }
 
         function focusCards(first) {
             var collection = navigationCollection();
             var target = first ? firstCard() : comp.last || firstCard();
             if (target) comp.last = target;
-            Lampa.Controller.collectionSet(collection, false, true);
+            if (first) Lampa.Controller.collectionSet(collection, false, true);
+            else syncNavigationCollection();
             Lampa.Controller.collectionFocus(target || false, collection, true);
         }
 
@@ -3497,7 +3494,7 @@ function pluginYummyAnime() {
             var target = preferred && preferred.length ? preferred : toolbarTrack.find('.yani-catalog-sort--active').first();
             if (!target.length) target = toolbarTrack.find('.selector').first();
             var collection = navigationCollection();
-            Lampa.Controller.collectionSet(collection, false, true);
+            syncNavigationCollection();
             Lampa.Controller.collectionFocus(target, collection, true);
         }
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.4 — 2026-08-10
+
+- Preserve Lampa's active catalog card when the category refreshes its navigation collection after vertical scrolling.
+- Append toolbar controls to the native category collection without resetting Navigator focus.
+- Restore toolbar entry from right-edge cards below the first catalog row.
+
 ## 0.33.3 — 2026-08-10
 
 - When the embedded Alloha player is disabled, list direct and resolvable playback sources before iframe-only choices.

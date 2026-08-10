@@ -11,10 +11,11 @@ assert.match(ui, /function changeSort\(definition\)[\s\S]{0,700}params\.sort = d
 assert.match(ui, /function scrollToTop\(\)[\s\S]{0,250}comp\.scroll\.reset\(\)[\s\S]{0,150}focusCards\(true\)/);
 assert.match(ui, /comp\.on\('controller'/);
 assert.match(ui, /function navigationCollection\(\)[\s\S]{0,350}comp\.render\(\)/);
-assert.match(ui, /function syncNavigationCollection\(\)[\s\S]{0,900}Navigator\.setCollection\(selectors\)/);
+assert.match(ui, /function syncNavigationCollection\(\)[\s\S]{0,700}toolbarTrack\[0\]\.querySelectorAll\('\.selector'\)[\s\S]{0,250}Navigator\.add\(element\)/);
+assert.doesNotMatch(ui, /function syncNavigationCollection\(\)[\s\S]{0,700}Navigator\.setCollection/);
 assert.match(ui, /comp\.on\('toggle'[\s\S]{0,150}syncNavigationCollection/);
 assert.match(ui, /comp\.on\('scroll'[\s\S]{0,150}syncNavigationCollection/);
-assert.match(ui, /function focusToolbar\(preferred\)[\s\S]{0,900}navigationCollection\(\)[\s\S]{0,200}collectionSet\(collection, false, true\)/);
+assert.match(ui, /function focusToolbar\(preferred\)[\s\S]{0,900}syncNavigationCollection\(\)[\s\S]{0,150}collectionFocus\(target, collection, true\)/);
 assert.match(ui, /toolbarTrack\.append\(topButton\)/);
 assert.match(ui, /function toolbarTargetForCard\(card\)[\s\S]{0,1000}Math\.abs[\s\S]{0,400}return target/);
 assert.match(ui, /function shouldEnterToolbarOnRight\(\)[\s\S]{0,2000}rightmostVisible === focused\[0\]/);
