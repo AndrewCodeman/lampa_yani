@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.32.1',
+        version: '0.32.2',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -7343,7 +7343,10 @@ function pluginYummyAnime() {
                 row.append(recommendationPoster);
                 row.append($('<div class="yani-detail__recommendation-title"></div>').text(card.title));
                 if (card.release_date) row.append($('<div class="yani-detail__recommendation-year"></div>').text(card.release_date));
-                row.on('hover:focus', function () { row.addClass('focus'); });
+                row.on('hover:focus', function () {
+                    row.addClass('focus');
+                    keepHorizontalFocusVisible(list, row);
+                });
                 row.on('hover:blur', function () { row.removeClass('focus'); });
                 // Recommendations already originate from YummyAnime. Do not
                 // show a misleading Lampa-card fallback message before their
@@ -7353,6 +7356,22 @@ function pluginYummyAnime() {
                 if (bindFocus) bindFocus(row);
             });
         }).catch(function () { section.remove(); });
+    }
+
+    function keepHorizontalFocusVisible(container, element) {
+        var viewport = container && container[0];
+        var target = element && element[0];
+        if (!viewport || !target) return;
+        var padding = Math.max(8, Math.round(viewport.clientWidth * 0.035));
+        var visibleLeft = viewport.scrollLeft;
+        var visibleRight = visibleLeft + viewport.clientWidth;
+        var targetLeft = target.offsetLeft;
+        var targetRight = targetLeft + target.offsetWidth;
+        if (targetLeft < visibleLeft + padding) {
+            viewport.scrollLeft = Math.max(0, targetLeft - padding);
+        } else if (targetRight > visibleRight - padding) {
+            viewport.scrollLeft = targetRight - viewport.clientWidth + padding;
+        }
     }
 
     function loadDetailCollections(data, container, bindFocus) {

@@ -10,5 +10,7 @@ assert.match(source, /component: 'yani_detail',[\s\S]{0,120}id: id,[\s\S]{0,80}y
 assert.match(source, /component: 'yani_detail',[\s\S]{0,160}id: yaniId,[\s\S]{0,80}yani_id: yaniId/);
 assert.match(source, /click\.yaniOrder'[\s\S]{0,120}openYummyDetail\(related, false\)/);
 assert.doesNotMatch(source, /click\.yaniOrder'[\s\S]{0,120}openYummyDetail\(related, true\)/);
+assert.match(source, /yani-detail__recommendation selector[\s\S]{0,900}hover:focus'[\s\S]{0,220}keepHorizontalFocusVisible\(list, row\)/);
+assert.match(source, /function keepHorizontalFocusVisible\(container, element\)[\s\S]{0,900}viewport\.scrollLeft = targetRight - viewport\.clientWidth \+ padding/);
 
 console.log('detail restore contract tests passed');

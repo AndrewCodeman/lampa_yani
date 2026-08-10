@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.32.2 — 2026-08-10
+
+- Keep the focused recommendation card inside its horizontal viewport while navigating both right and left with a television remote.
+
 ## 0.32.1 — 2026-08-10
 
 - Open viewing-order entries directly in YummyAnime detail without showing a misleading failed-Lampa-card fallback notification.
