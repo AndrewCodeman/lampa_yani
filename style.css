@@ -749,7 +749,11 @@
 }
 
 .yani-detail__community { margin: 1em 0 1.2em; }
-.yani-detail__personal-rating { display: inline-block; margin: .5em 0; padding: .45em .7em; border-radius: .45em; background: rgba(240, 175, 84, .22); color: #ffd27a; font-weight: 700; }
+.yani-detail__rating-action { display: inline-flex; align-items: center; gap: .4em; width: fit-content; margin: .5em 0; padding: .45em .7em; border: .1em solid rgba(255,210,122,.35); border-radius: .45em; background: rgba(240,175,84,.14); color: rgba(255,255,255,.86); font-weight: 700; }
+.yani-detail__rating-action.active { background: rgba(240,175,84,.22); color: #ffd27a; }
+.yani-detail__rating-action.focus { border-color: #fff; background: #fff; color: #171717; box-shadow: 0 0 0 .16em #ef6470; transform: scale(1.03); }
+.yani-detail__rating-icon { color: #ffd27a; font-size: 1.08em; line-height: 1; }
+.yani-detail__rating-action.focus .yani-detail__rating-icon { color: #ef9d29; }
 .yani-detail__community-title { margin-bottom: .55em; color: #fff; font-size: 1.15em; font-weight: 700; }
 .yani-detail__community-grid { display: flex; flex-wrap: wrap; gap: .45em; }
 .yani-detail__community-item { padding: .45em .7em; border-radius: .45em; background: rgba(255,255,255,.1); color: #d9e7f2; }

@@ -293,6 +293,9 @@
     messages.ru.media_type_special_short = 'Спешл';
     messages.ru.media_type_music = 'Музыкальное видео';
     messages.ru.media_type_music_short = 'Music';
+    messages.ru.set_rating = 'Оценить тайтл';
+    messages.ru.remove_rating = 'Удалить оценку';
+    messages.ru.rating_removed = 'Оценка удалена из YummyAnime';
     messages.en.catalog_sort_top = 'Popular';
     messages.en.catalog_sort_new = 'Newest';
     messages.en.catalog_sort_rating = 'Top rating';
@@ -315,6 +318,9 @@
     messages.en.media_type_special_short = 'Special';
     messages.en.media_type_music = 'Music video';
     messages.en.media_type_music_short = 'Music';
+    messages.en.set_rating = 'Rate title';
+    messages.en.remove_rating = 'Remove rating';
+    messages.en.rating_removed = 'Rating removed from YummyAnime';
 
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
@@ -469,6 +475,9 @@
     messages.uk.media_type_special_short = 'Спешл';
     messages.uk.media_type_music = 'Музичне відео';
     messages.uk.media_type_music_short = 'Music';
+    messages.uk.set_rating = 'Оцінити тайтл';
+    messages.uk.remove_rating = 'Видалити оцінку';
+    messages.uk.rating_removed = 'Оцінку видалено з YummyAnime';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

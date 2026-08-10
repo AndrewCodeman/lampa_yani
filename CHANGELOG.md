@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.12 — 2026-08-11
+
+- Add a focusable personal-rating action to the YummyAnime title page.
+- Allow signed-in users to set a score from 1 to 10 or remove the current score.
+- Update the displayed personal score immediately after a successful API request.
+
 ## 0.33.11 — 2026-08-11
 
 - Give every catalog sorting action a distinct icon.

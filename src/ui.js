@@ -1645,7 +1645,7 @@
             var episodeSummary = createDetailEpisodeSummary(data);
             if (episodeSummary) info.append(episodeSummary);
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
-            if (data.yani_user_rating) info.append($('<div class="yani-detail__personal-rating"></div>').text(t('my_rating') + ': ' + data.yani_user_rating + '/10'));
+            info.append(createDetailRatingAction(data));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
             info.append($('<div class="yani-detail__overview"></div>').text(data.overview || ''));
             var actions = $('<div class="yani-detail__actions"></div>');
@@ -1778,6 +1778,55 @@
             });
             updateDetailListPanel(panel, cardData);
             return panel;
+        }
+
+        function createDetailRatingAction(cardData) {
+            var action = $('<div class="yani-detail__rating-action selector"></div>');
+            action.append('<span class="yani-detail__rating-icon" aria-hidden="true">★</span>');
+            action.append('<span class="yani-detail__rating-label"></span>');
+
+            function update() {
+                var value = Number(cardData.yani_user_rating || 0);
+                action.toggleClass('active', value > 0);
+                action.attr('aria-label', value > 0 ? t('my_rating') + ': ' + value + '/10' : t('set_rating'));
+                action.find('.yani-detail__rating-label').text(value > 0 ? t('my_rating') + ': ' + value + '/10' : t('set_rating'));
+            }
+
+            action.on('hover:enter click.yaniDetailRating', function () {
+                if (!LampaYaniAuth.token()) {
+                    Lampa.Noty.show(t('login_required'));
+                    return;
+                }
+                var items = [];
+                for (var value = 10; value >= 1; value--) {
+                    items.push({
+                        title: (Number(cardData.yani_user_rating) === value ? '✓ ' : '') + value + '/10',
+                        value: value
+                    });
+                }
+                if (Number(cardData.yani_user_rating || 0) > 0) items.push({title: t('remove_rating'), remove: true});
+
+                showYummySelect({
+                    title: t('set_rating'),
+                    items: items,
+                    onSelect: function (selected) {
+                        var request = selected.remove
+                            ? LampaYaniApi.removeRate(cardData.yani_id)
+                            : LampaYaniApi.rate(cardData.yani_id, selected.value);
+                        request.then(function () {
+                            cardData.yani_user_rating = selected.remove ? null : Number(selected.value);
+                            update();
+                            Lampa.Noty.show(selected.remove ? t('rating_removed') : t('saved'));
+                        }).catch(function (error) {
+                            console.error('[YummyAnime Rating]', error);
+                            Lampa.Noty.show(t('save_error'));
+                        });
+                    }
+                });
+            });
+            bindDetailButtonFocus(action);
+            update();
+            return action;
         }
 
         function createDetailGenres(genres) {
