@@ -173,6 +173,8 @@
         var toolbarTrack;
         var topButton;
         var controlsReady = false;
+        var toolbarFocused = false;
+        var lastCatalogCard = null;
         var sortDefinitions = [
             {key: 'top', sort: 'top', forward: false, title: t('catalog_sort_top')},
             {key: 'new', sort: 'year', forward: false, title: t('catalog_sort_new')},
@@ -234,8 +236,14 @@
 
         function focusCards(first) {
             var collection = navigationCollection();
-            var target = first ? firstCard() : comp.last || firstCard();
-            if (target) comp.last = target;
+            var target = first ? firstCard() : lastCatalogCard || comp.last || firstCard();
+            if (target && !document.documentElement.contains(target)) target = firstCard();
+            toolbarFocused = false;
+            if (target) {
+                lastCatalogCard = target;
+                comp.last = target;
+                Navigator.add(target);
+            }
             if (first) Lampa.Controller.collectionSet(collection, false, true);
             else syncNavigationCollection();
             Lampa.Controller.collectionFocus(target || false, collection, true);
@@ -244,12 +252,20 @@
         function focusToolbar(preferred) {
             if (!toolbarTrack || !toolbarTrack.length) return;
             var focusedCard = comp.scroll && comp.scroll.render ? comp.scroll.render().find('.selector.focus').first() : null;
-            if (focusedCard && focusedCard.length) comp.last = focusedCard[0];
+            if (focusedCard && focusedCard.length) {
+                lastCatalogCard = focusedCard[0];
+                comp.last = focusedCard[0];
+            }
             var target = preferred && preferred.length ? preferred : toolbarTrack.find('.yani-catalog-sort--active').first();
             if (!target.length) target = toolbarTrack.find('.selector').first();
             var collection = navigationCollection();
+            toolbarFocused = true;
             syncNavigationCollection();
             Lampa.Controller.collectionFocus(target, collection, true);
+        }
+
+        function toolbarHasFocus() {
+            return toolbarFocused || Boolean(toolbar && toolbar.find('.selector.focus, .focus.selector').length);
         }
 
         function focusedCatalogCard() {
@@ -316,6 +332,7 @@
             topButton = $('<div class="yani-catalog-top selector" aria-label="' + t('scroll_to_top') + '"></div>');
             topButton.append('<span class="yani-catalog-top__icon">↑</span>');
             topButton.append($('<span class="yani-catalog-top__title"></span>').text(t('scroll_to_top')));
+            topButton.on('hover:focus', function () { toolbarFocused = true; });
             topButton.on('hover:enter click.yaniCatalogTop', scrollToTop);
             toolbarTrack.append(topButton);
             sortDefinitions.forEach(function (definition) {
@@ -323,7 +340,10 @@
                 button.toggleClass('yani-catalog-sort--active', activeSort(definition));
                 button.append($('<span class="yani-catalog-sort__icon"></span>').html(catalogSortIcon(definition.key)));
                 button.append($('<span class="yani-catalog-sort__title"></span>').text(definition.title));
-                button.on('hover:focus', function () { toolbarTrack[0].scrollLeft = Math.max(0, button[0].offsetLeft - toolbarTrack[0].clientWidth / 3); });
+                button.on('hover:focus', function () {
+                    toolbarFocused = true;
+                    toolbarTrack[0].scrollLeft = Math.max(0, button[0].offsetLeft - toolbarTrack[0].clientWidth / 3);
+                });
                 button.on('hover:enter click.yaniCatalogSort', function () { changeSort(definition); });
                 toolbarTrack.append(button);
             });
@@ -346,11 +366,11 @@
             var originalDown = controller.down;
             controller.yaniCatalogOwner = comp;
             controller.left = function () {
-                if (toolbar && toolbar.find('.focus').length) return focusCards(false);
+                if (toolbarHasFocus()) return focusCards(false);
                 if (originalLeft) originalLeft();
             };
             controller.right = function () {
-                if (toolbar && toolbar.find('.focus').length) return;
+                if (toolbarHasFocus()) return;
                 var focusedCard = focusedCatalogCard();
                 if (shouldEnterToolbarOnRight() && topButton) return focusToolbar(toolbarTargetForCard(focusedCard));
                 if (Navigator.canmove('right')) return Navigator.move('right');
@@ -358,7 +378,7 @@
                 if (originalRight) originalRight();
             };
             controller.up = function () {
-                if (toolbar && toolbar.find('.focus').length) {
+                if (toolbarHasFocus()) {
                     if (Navigator.canmove('up')) return Navigator.move('up');
                     return Lampa.Controller.toggle('head');
                 }
@@ -366,7 +386,7 @@
                 Lampa.Controller.toggle('head');
             };
             controller.down = function () {
-                if (toolbar && toolbar.find('.focus').length) {
+                if (toolbarHasFocus()) {
                     if (Navigator.canmove('down')) return Navigator.move('down');
                     return;
                 }

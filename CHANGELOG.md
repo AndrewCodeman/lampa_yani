@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.9 — 2026-08-11
+
+- Remember the exact catalog card used to enter the sorting toolbar.
+- Return focus from the toolbar to that card with the TV remote left button.
+- Track toolbar focus independently of Lampa's inconsistent legacy CSS focus marker.
+
 ## 0.33.8 — 2026-08-11
 
 - Add asynchronously loaded recommendations and comments to the active Lampa detail navigation collection.
