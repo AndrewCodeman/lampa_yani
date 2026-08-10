@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.30.3 — 2026-08-10
+
+- Restore the originating controller, collection and focused item after closing temporary YummyAnime lists.
+- Apply the same return handling to genres, actions, reviews, collections, trailers and comments.
+- Restore the correct screen after cancelling text input from Home, account and settings screens.
+
 ## 0.30.2 — 2026-08-10
 
 - Open preview titles from My Lists directly in the YummyAnime detail screen.

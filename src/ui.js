@@ -32,6 +32,66 @@
         }
     }
 
+    function transientNavigationSnapshot() {
+        var element = document.querySelector('.yani-home .selector.focus, .yani-detail .selector.focus, .yani-account .selector.focus, .yani-schedule .selector.focus') ||
+            document.querySelector('.selector.focus') ||
+            document.querySelector('.yani-home .selector, .yani-detail .selector, .yani-account .selector, .yani-schedule .selector') ||
+            document.querySelector('.selector');
+        var collection = element ? $(element).closest('.scroll, .yani-detail, .yani-home, .yani-account, .yani-schedule') : null;
+        return {
+            controller: currentControllerName() || 'content',
+            element: element || null,
+            collection: collection && collection.length ? collection : null
+        };
+    }
+
+    function restoreTransientInteraction(snapshot) {
+        snapshot = snapshot || transientNavigationSnapshot();
+        setTimeout(function () {
+            try {
+                var controller = snapshot.controller && snapshot.controller !== 'select' && snapshot.controller !== 'input'
+                    ? snapshot.controller
+                    : 'content';
+                var element = snapshot.element;
+                if (!element || !document.documentElement.contains(element)) {
+                    element = document.querySelector('.yani-home .selector') ||
+                        document.querySelector('.yani-detail .selector') ||
+                        document.querySelector('.yani-account .selector') ||
+                        document.querySelector('.yani-schedule .selector') ||
+                        document.querySelector('.selector');
+                }
+                var collection = snapshot.collection;
+                if (!collection || !collection.length || !document.documentElement.contains(collection[0])) {
+                    collection = element ? $(element).closest('.scroll, .yani-detail, .yani-home, .yani-account, .yani-schedule') : null;
+                }
+                if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle(controller);
+                if (collection && collection.length && Lampa.Controller && Lampa.Controller.collectionSet) {
+                    Lampa.Controller.collectionSet(collection);
+                }
+                if (element && Lampa.Controller && Lampa.Controller.collectionFocus) {
+                    Lampa.Controller.collectionFocus(element, collection && collection.length ? collection : undefined);
+                }
+            } catch (error) {
+                console.warn('[YummyAnime] Could not restore transient navigation', error);
+            }
+        }, 0);
+    }
+
+    function showYummySelect(params, snapshot) {
+        if (!Lampa.Select || !Lampa.Select.show) return false;
+        snapshot = snapshot || transientNavigationSnapshot();
+        params = Object.assign({}, params || {});
+        var originalBack = params.onBack;
+        params.onBack = function () {
+            // A nested Select may deliberately rebuild its parent list.
+            // Only the root window should restore the underlying Activity.
+            if (originalBack) return originalBack();
+            restoreTransientInteraction(snapshot);
+        };
+        Lampa.Select.show(params);
+        return true;
+    }
+
     window.LampaYani = {
         register: function () {
             if (!window.Lampa || !Lampa.Component || !Lampa.Component.add) {
@@ -733,7 +793,7 @@
             items.push({title: t('login_name'), action: 'login'});
         }
 
-        Lampa.Select.show({
+        showYummySelect({
             title: t('actions'),
             items: items,
             onSelect: function (item) {
@@ -1141,7 +1201,7 @@
             var response = payload && payload.response ? payload.response : payload;
             var items = Array.isArray(response) ? response : response && (response.items || response.data || response.reviews) || [];
             if (!items.length) return Lampa.Noty.show(t('reviews_empty'));
-            Lampa.Select.show({title: t('my_reviews'), items: items.map(function (review) {
+            showYummySelect({title: t('my_reviews'), items: items.map(function (review) {
                 var anime = review.anime || review.title_data || review.object || {};
                 var title = anime.title || anime.name || review.anime_title || review.title || t('anime');
                 var text = cleanCommentText(review.text || review.body || review.description || '');
@@ -3739,13 +3799,14 @@
     }
 
     function openGenres() {
+        var navigation = transientNavigationSnapshot();
         LampaYaniApi.genres().then(function (payload) {
             var genres = LampaYaniApi.normalizeGenres(payload);
             if (!genres.length) {
                 Lampa.Noty.show(t('genres_empty'));
                 return;
             }
-            Lampa.Select.show({
+            showYummySelect({
                 title: t('genres_title'),
                 items: genres.map(function (genre) {
                     return {
@@ -3756,7 +3817,7 @@
                 onSelect: function (item) {
                     openGenreCatalog(item.title, item.value);
                 }
-            });
+            }, navigation);
         }).catch(function () { Lampa.Noty.show(t('genres_load_error')); });
     }
 
@@ -3932,7 +3993,7 @@
                 row.on('hover:blur', function () { row.removeClass('focus'); });
                 row.on('hover:enter click.yaniCollection', function () {
                     if (!animes.length) return;
-                    Lampa.Select.show({title: collection.title || t('collection'), items: animes.map(function (item) {
+                    showYummySelect({title: collection.title || t('collection'), items: animes.map(function (item) {
                         var card = toCard(item);
                         return {title: card.title, card: card};
                     }), onSelect: function (item) { openYummyDetail(item.card, true); }});
@@ -4062,7 +4123,7 @@
                 openTrailer(items[0].url, items[0].title);
                 return;
             }
-            Lampa.Select.show({
+            showYummySelect({
                 title: t('trailers'),
                 items: items,
                 onSelect: function (item) { openTrailer(item.url, item.title); }
@@ -4299,7 +4360,7 @@
             if (originalBack) originalBack();
             restorePlaybackInteraction();
         };
-        Lampa.Select.show(params);
+        showYummySelect(params);
         return true;
     }
 
@@ -4927,11 +4988,28 @@
             Lampa.Noty.show(t('input_unavailable'));
             return;
         }
+        var navigation = transientNavigationSnapshot();
+        var inputParams = Object.assign({}, params || {});
+        var originalBack = inputParams.onBack;
+        var complete = function (value) {
+            var result = callback(value);
+            setTimeout(function () {
+                var controller = currentControllerName();
+                if (!controller || controller === 'input' || controller === 'settings_component') {
+                    restoreTransientInteraction(navigation);
+                }
+            }, 0);
+            return result;
+        };
+        inputParams.onBack = function () {
+            if (originalBack) originalBack();
+            restoreTransientInteraction(navigation);
+        };
         if (Lampa.Input.show) {
-            params.onEnter = callback;
-            return Lampa.Input.show(params);
+            inputParams.onEnter = complete;
+            return Lampa.Input.show(inputParams);
         }
-        if (Lampa.Input.edit) return Lampa.Input.edit(params, callback);
+        if (Lampa.Input.edit) return Lampa.Input.edit(inputParams, complete);
         Lampa.Noty.show(t('input_unavailable'));
     }
 
@@ -4989,7 +5067,7 @@
             }
         };
         if (onBack) params.onBack = onBack;
-        Lampa.Select.show(params);
+        showYummySelect(params);
     }
 
     function commentItem(comment) {
