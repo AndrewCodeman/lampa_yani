@@ -54,7 +54,7 @@ assert.match(ui, /function hydrateHistoryPosters\(cards, listItems\)/);
 assert.match(ui, /LampaYaniApi\.watchHistory\(30, 0\)/);
 assert.match(ui, /missing\.slice\(offset, offset \+ 2\)/, 'poster recovery must limit request concurrency');
 assert.match(ui, /loadRows: loadUserListRows/);
-assert.match(ui, /openCard: openCardOnce/);
+assert.match(ui, /openCard: function \(card\) \{ openYummyDetail\(card, false\); \}/);
 assert.match(ui, /function openWatchHistory\(\)[\s\S]{0,300}component: 'yani_history'/);
 
 ['ru', 'en', 'uk'].forEach((language) => {

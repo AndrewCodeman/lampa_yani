@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.30.2 — 2026-08-10
+
+- Open preview titles from My Lists directly in the YummyAnime detail screen.
+- Prevent successful empty TMDB movie/TV searches from launching a duplicate aggregate lookup.
+- Give six alternative titles a bounded lookup window while retaining aggregate fallback for actual TMDB client failures.
+
 ## 0.30.1 — 2026-08-10
 
 - Restore poster images in the My Lists watch-history row when local history stores the poster as a plain URL.

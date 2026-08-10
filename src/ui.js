@@ -1502,7 +1502,9 @@
             t: t,
             openList: openUserListShortcut,
             openHistory: openWatchHistory,
-            openCard: openCardOnce,
+            // These previews belong to the YummyAnime account, so avoid a
+            // second native-card lookup before opening their details.
+            openCard: function (card) { openYummyDetail(card, false); },
             loadRows: loadUserListRows,
             goBack: goBack,
             onError: function () { Lampa.Noty.show(t('user_lists_error')); }
@@ -2618,7 +2620,7 @@
         // Do not leave the UI blocked if a third-party TMDB proxy silently
         // drops a request. The normal request callbacks still win when they
         // finish in time.
-        setTimeout(function () { finish(null); }, 9000);
+        setTimeout(function () { finish(null); }, 12000);
         enrichCardForStandardSearch(card).then(findStandardLampaCard).then(finish).catch(function (error) {
             console.warn('[YummyAnime] Native Lampa card lookup failed', error);
             finish(null);
@@ -2724,7 +2726,7 @@
             // Search aliases in small batches. Eight aliases multiplied by
             // movie and TV endpoints created a large simultaneous request
             // burst that could terminate low-memory Android WebViews.
-            var titlesToSearch = (searchTitles || []).slice(0, 8);
+            var titlesToSearch = (searchTitles || []).slice(0, 6);
             var collected = [];
             function next(offset) {
                 if (offset >= titlesToSearch.length) return Promise.resolve(bestStandardCard(collected, card));
@@ -2781,8 +2783,10 @@
         // reach that aggregate callback.  Resolve the two card endpoints
         // directly first, through the same Lampa TMDB client and credentials.
         if (tmdb.get) {
-            return searchTmdbCardEndpoints(tmdb, title).then(function (items) {
-                return items.length ? items : searchTmdbAggregate(tmdb, title);
+            return searchTmdbCardEndpoints(tmdb, title).then(function (result) {
+                // An empty but successful movie/TV response is authoritative.
+                // Repeating it through aggregate search doubled every miss.
+                return result.usable ? result.items : searchTmdbAggregate(tmdb, title);
             });
         }
         return searchTmdbAggregate(tmdb, title);
@@ -2793,13 +2797,14 @@
             var pending = 2;
             var completed = false;
             var items = [];
-            var timeout = setTimeout(finish, 6000);
+            var responses = 0;
+            var timeout = setTimeout(finish, 3000);
 
             function finish() {
                 if (completed) return;
                 completed = true;
                 clearTimeout(timeout);
-                resolve(items);
+                resolve({items: items, usable: responses > 0});
             }
 
             function complete() {
@@ -2810,6 +2815,7 @@
             ['tv', 'movie'].forEach(function (method) {
                 try {
                     tmdb.get('search/' + method, {query: title, page: 1}, function (response) {
+                        responses++;
                         var results = response && Array.isArray(response.results) ? response.results : [];
                         results.forEach(function (card) { items.push({card: card, method: method}); });
                         complete();
