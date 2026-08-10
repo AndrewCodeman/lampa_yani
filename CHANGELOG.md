@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.30.5 — 2026-08-10
+
+- Ignore temporary SSH known-hosts files, the smoke-test bundle and the removed duplicate detail-sections module.
+
 ## 0.30.4 — 2026-08-10
 
 - Remove an accidentally committed temporary SSH known-hosts file.

@@ -7,3 +7,7 @@ package-lock.json
 server/package-lock.json
 
 *lampa-yani-known-hosts
+
+# Development-only artifacts
+dist/smoke.js
+src/ui-detail-sections.js
