@@ -72,6 +72,8 @@ assert.strictEqual(continuing.length, 2, 'continue watching keeps one unfinished
 assert.strictEqual(continuing[0].anime_id, 88, 'a selected but not started episode remains a continue target');
 assert.strictEqual(continuing[1].video_id, 4208, 'the latest unfinished episode wins for a title');
 assert.strictEqual(history.isContinueEntry({anime_id: 77, video_id: 7701, time: 1390, duration: 1440}), false, 'nearly completed episodes are hidden');
+assert.strictEqual(history.isContinueEntry({anime_id: 77, video_id: 7701, time: 1080, duration: 1440}), false, '75 percent is considered watched without an explicit state');
+assert.strictEqual(history.isContinueEntry({anime_id: 77, video_id: 7701, time: 1079, duration: 1440}), true, 'progress below 75 percent remains resumable');
 assert.deepStrictEqual(
     Array.from(history.continueWatchingEntries([
         {anime_id: 42, video_id: 4208, number: '8', time: 45, duration: 1440, updated_at: 20},

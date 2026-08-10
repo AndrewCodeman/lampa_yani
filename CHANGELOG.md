@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.29.9 — 2026-08-10
+
+- Flush the final internal-player position locally and to YummyAnime when playback closes.
+- Update the already rendered Continue Watching card immediately after a progress change.
+- Keep the active card resume metadata synchronized with local playback storage.
+- Treat 75% playback as completed when no explicit completion state is available.
+
 ## 0.29.8 — 2026-08-10
 
 - Build Continue Watching from merged local Lampa progress and YummyAnime server watch history.

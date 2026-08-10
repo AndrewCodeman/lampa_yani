@@ -113,8 +113,9 @@
         if (!hasTarget) return false;
         if (!duration) return position >= 30 || position === 0;
         if (position < 30) return false;
-        if (duration <= 300) return position / duration < 0.9;
-        return position < duration - 300;
+        // When the API does not provide an explicit completion state, use a
+        // predictable percentage fallback for both short and regular videos.
+        return position / duration < 0.75;
     }
 
     function continueWatchingEntries(entries, excludedAnimeIds) {

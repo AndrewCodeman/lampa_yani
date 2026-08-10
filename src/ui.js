@@ -542,6 +542,7 @@
             // Continue Watching is a playback queue, not an information catalog.
             var openHistoryEntry = function () { openVideos(card, true); };
             var rendered = cardRenderElement(element, card);
+            rendered.addClass('yani-history-card').attr('data-yani-history-id', String(card.yani_id));
             rendered.add(rendered.find('*')).off('hover:enter.yaniOpen click.yaniOpen hover:enter.yaniHistory click.yaniHistory');
             rendered.on('hover:enter.yaniHistory click.yaniHistory', function (event) {
                 if (event) {
@@ -558,7 +559,8 @@
 
     function renderHistoryProgress(rendered, playback) {
         var view = $('.card__view', rendered).first();
-        if (!view.length || view.find('.yani-card-history').length) return;
+        if (!view.length) return;
+        view.find('.yani-card-history, .yani-card-history-progress').remove();
         var duration = Math.max(0, Number(playback.duration || 0));
         var position = Math.max(0, Number(playback.time || 0));
         var percent = duration > 0 ? Math.min(100, Math.round(position / duration * 100)) : 0;
@@ -3136,7 +3138,10 @@
             Lampa.Player.play(directCurrent);
             if (Lampa.Player.playlist) Lampa.Player.playlist(directPlaylist);
             if (Lampa.Player.callback) {
-                Lampa.Player.callback(function () { restorePlaybackInteraction(); });
+                Lampa.Player.callback(function () {
+                    flushPlaybackProgress(true);
+                    restorePlaybackInteraction();
+                });
             }
             return true;
         } catch (error) {
@@ -3255,6 +3260,7 @@
         var progressSync = autoProgressSyncEnabled();
 
         var state = {
+            context: context,
             timer: 0,
             segments: [],
             skipped: {},
@@ -3262,6 +3268,8 @@
             progressSync: progressSync,
             lastLocalSync: 0,
             lastLocalPosition: Number(context.selected && context.selected.watched && context.selected.watched.end_time || 0),
+            lastObservedPosition: Number(context.selected && context.selected.watched && context.selected.watched.end_time || 0),
+            lastObservedDuration: Number(context.selected && context.selected.duration || 0),
             lastServerSync: Date.now(),
             lastServerPosition: Number(context.selected && context.selected.watched && context.selected.watched.end_time || 0),
             prefetched: false,
@@ -3271,6 +3279,20 @@
         playbackWatcher = state;
         state.timer = setInterval(function () { watchPlayback(generation, context, state); }, 1000);
         if (skipMode !== 'off') loadSkipSegments(generation, context, state, skipMode);
+    }
+
+    function flushPlaybackProgress(remote) {
+        var state = playbackWatcher;
+        var context = state && state.context || playbackContext;
+        if (!context || !context.selected) {
+            stopPlaybackWatcher();
+            return;
+        }
+        var element = playerVideoElement();
+        var position = element ? Number(element.currentTime || 0) : Number(state && state.lastObservedPosition || context.selected.watched && context.selected.watched.end_time || 0);
+        var duration = element ? Number(element.duration || 0) : Number(state && state.lastObservedDuration || context.selected.duration || 0);
+        if (position > 0) updatePlaybackProgress(context, position, duration, Boolean(remote));
+        stopPlaybackWatcher();
     }
 
     function loadSkipSegments(generation, context, state, mode) {
@@ -3301,6 +3323,8 @@
         state.lastSeenAt = Date.now();
         var position = Number(video.currentTime) || 0;
         var duration = Number(video.duration) || 0;
+        state.lastObservedPosition = position;
+        state.lastObservedDuration = duration;
 
         if (position > 0) {
             var now = Date.now();
@@ -3398,8 +3422,29 @@
         video.watched = video.watched || {};
         video.watched.end_time = Math.max(0, Math.floor(Number(position) || 0));
         if (duration > 0) video.duration = Math.floor(duration);
-        rememberPlayback(context.card, context.group, video);
+        var saved = rememberPlayback(context.card, context.group, video);
+        if (saved) {
+            context.card.yani_resume = {
+                number: saved.number,
+                video_id: saved.video_id,
+                time: saved.time,
+                duration: saved.duration,
+                player: saved.player,
+                voice: saved.voice,
+                updated_at: saved.updated_at
+            };
+            refreshVisiblePlaybackProgress(context.card);
+        }
         if (remote) syncServerProgress(video);
+    }
+
+    function refreshVisiblePlaybackProgress(card) {
+        if (!card || !card.yani_id) return;
+        $('.yani-history-card').each(function () {
+            var rendered = $(this);
+            if (String(rendered.attr('data-yani-history-id') || '') !== String(card.yani_id)) return;
+            renderHistoryProgress(rendered, card.yani_resume || getPlayback(card.yani_id) || {});
+        });
     }
 
     function syncPlaybackHistoryManually() {
@@ -3507,9 +3552,9 @@
     }
 
     function rememberPlayback(card, group, video) {
-        if (!Lampa.Storage || !card || !card.yani_id) return;
+        if (!Lampa.Storage || !card || !card.yani_id) return null;
         var history = playbackHistory();
-        history[String(card.yani_id)] = {
+        var saved = history[String(card.yani_id)] = {
             number: String(video.number || video.index || ''),
             video_id: video.video_id || '',
             time: Number(video.watched && video.watched.end_time || 0),
@@ -3533,6 +3578,7 @@
         var ids = Object.keys(history).sort(function (a, b) { return Number(history[b].updated_at || 0) - Number(history[a].updated_at || 0); });
         ids.slice(100).forEach(function (id) { delete history[id]; });
         Lampa.Storage.set('yani_playback_history', JSON.stringify(history));
+        return saved;
     }
 
     function episodeOptionTitle(card, video) {
