@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.29.9',
+        version: '0.29.10',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -2826,6 +2826,7 @@ function pluginYummyAnime() {
     }
 
     function userLists(object, deps) {
+        var component = {};
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
         scroll.minus();
         var html = $('<div class="yani-account yani-user-lists"></div>');
@@ -2860,7 +2861,7 @@ function pluginYummyAnime() {
             content.append(grid);
         }
 
-        this.create = function () {
+        component.create = function () {
             if (!LampaYaniAuth.token()) {
                 Lampa.Noty.show(deps.t('login_required'));
                 deps.goBack();
@@ -2873,7 +2874,7 @@ function pluginYummyAnime() {
             this.activity.toggle();
         };
 
-        this.start = function () {
+        component.start = function () {
             Lampa.Controller.add('content', {
                 toggle: function () {
                     Lampa.Controller.collectionSet(scroll.render());
@@ -2888,8 +2889,9 @@ function pluginYummyAnime() {
             Lampa.Controller.toggle('content');
         };
 
-        this.render = function (js) { return js ? html[0] : html; };
-        this.destroy = function () { scroll.destroy(); html.remove(); };
+        component.render = function (js) { return js ? html[0] : html; };
+        component.destroy = function () { scroll.destroy(); html.remove(); };
+        return component;
     }
 
     window.LampaYani = window.LampaYani || {};

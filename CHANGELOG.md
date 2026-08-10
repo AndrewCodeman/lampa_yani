@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.29.10 — 2026-08-10
+
+- Fix the Your Lists Activity factory so it returns a valid Lampa component with `create`, `start`, `render` and `destroy` methods.
+- Add a regression contract that prevents modular components from silently returning `undefined`.
+
 ## 0.29.9 — 2026-08-10
 
 - Flush the final internal-player position locally and to YummyAnime when playback closes.

@@ -13,6 +13,11 @@ assert.match(ui, /\['user_lists', 'user_lists'\]/);
 assert.match(ui, /component: 'yani_user_lists'/);
 
 assert.match(lists, /function userLists\(object, deps\)/);
+assert.match(lists, /var component = \{\}/);
+assert.match(lists, /component\.create = function \(\)/);
+assert.match(lists, /component\.start = function \(\)/);
+assert.match(lists, /return component;/);
+assert.doesNotMatch(lists.slice(lists.indexOf('function userLists'), lists.indexOf('window.LampaYani =')), /this\.create = function/, 'the modular factory must return the Activity component');
 assert.match(lists, /var definitions = deps\.definitions\(\)\.slice\(\)/);
 assert.match(lists, /deps\.openList\(definition\)/);
 assert.match(lists, /click\.yaniUserList/);
