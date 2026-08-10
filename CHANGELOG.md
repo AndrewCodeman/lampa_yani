@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.31.1 — 2026-08-10
+
+- Restore the title-detail controller and focused comment after closing an inline replies dialog.
+- Preserve the original card navigation context across comments, nested replies and paginated comment lists.
+- Reopen a parent comments list after its child dialog has fully closed to avoid a frozen Select controller.
+
 ## 0.31.0 — 2026-08-10
 
 - Add a compact fixed catalog toolbar with server-side sorting by popularity, year, rating, rating count, views, title and random order.

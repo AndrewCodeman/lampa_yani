@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.31.0',
+        version: '0.31.1',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -4145,6 +4145,12 @@ function pluginYummyAnime() {
 
     function showYummyActions(card, originElement, originCollection) {
         if (!card || !card.yani_id) return;
+        var originNode = originElement && originElement.jquery ? originElement[0] : originElement;
+        var navigation = {
+            controller: 'content',
+            element: originNode || null,
+            collection: originCollection && originCollection.length ? originCollection : null
+        };
         var items = [
             {title: t('watch'), action: 'watch'},
             {title: t('yummy_details'), action: 'details'},
@@ -4174,7 +4180,7 @@ function pluginYummyAnime() {
                     return openVideos(card);
                 }
                 if (item.action === 'details') return openYummyDetail(card, false);
-                if (item.action === 'comments') return commentsMenu(card.yani_id);
+                if (item.action === 'comments') return commentsMenu(card.yani_id, 0, [], navigation);
                 if (item.action === 'login') return openSettingsLogin();
                 if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
                 var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(card.yani_id) : item.action ? LampaYaniApi.addToList(card.yani_id, item.action) : LampaYaniApi.rate(card.yani_id, item.value);
@@ -4188,7 +4194,7 @@ function pluginYummyAnime() {
                     Lampa.Noty.show(t('save_error'));
                 });
             }
-        });
+        }, navigation);
     }
 
     function listActionTitle(card, key) {
@@ -5751,8 +5757,9 @@ function pluginYummyAnime() {
                     if (item.subtitle) row.append($('<div class="yani-detail__comment-stats"></div>').text(item.subtitle));
                     row.on('hover:focus', function () { row.addClass('focus'); });
                     row.on('hover:enter click.yaniComment', function () {
-                        if (Number(comment.children_count) > 0) commentReplies(comment, 0, [], function () {});
-                        else commentsMenu(cardData.yani_id);
+                        var navigation = transientNavigationSnapshot();
+                        if (Number(comment.children_count) > 0) commentReplies(comment, 0, [], null, navigation);
+                        else commentsMenu(cardData.yani_id, 0, [], navigation);
                     });
                     list.append(row);
                     bindDetailScrollTargets(row);
@@ -8385,9 +8392,10 @@ function pluginYummyAnime() {
         Lampa.Noty.show(t('input_unavailable'));
     }
 
-    function commentsMenu(id, skip, existing) {
+    function commentsMenu(id, skip, existing, navigation) {
         skip = Number(skip || 0);
         existing = existing || [];
+        navigation = navigation || transientNavigationSnapshot();
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
         LampaYaniApi.comments(id, skip).then(function (payload) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
@@ -8395,8 +8403,8 @@ function pluginYummyAnime() {
             var comments = existing.concat(page);
             if (!comments.length) return Lampa.Noty.show(t('comments_empty'));
             renderCommentList(t('comments_title'), comments, page.length >= 20 ? function () {
-                commentsMenu(id, skip + page.length, comments);
-            } : null);
+                commentsMenu(id, skip + page.length, comments, navigation);
+            } : null, null, navigation);
         }).catch(function (error) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             console.error('[YummyAnime Comments]', error);
@@ -8404,9 +8412,10 @@ function pluginYummyAnime() {
         });
     }
 
-    function commentReplies(comment, skip, existing, onBack) {
+    function commentReplies(comment, skip, existing, onBack, navigation) {
         skip = Number(skip || 0);
         existing = existing || [];
+        navigation = navigation || transientNavigationSnapshot();
         if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
         LampaYaniApi.commentChildren(comment.id, skip).then(function (payload) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
@@ -8414,8 +8423,8 @@ function pluginYummyAnime() {
             var comments = existing.concat(page);
             if (!comments.length) return Lampa.Noty.show(t('comments_empty'));
             renderCommentList(t('replies_title'), comments, page.length >= 20 ? function () {
-                commentReplies(comment, skip + page.length, comments, onBack);
-            } : null, onBack);
+                commentReplies(comment, skip + page.length, comments, onBack, navigation);
+            } : null, onBack, navigation);
         }).catch(function (error) {
             if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
             console.error('[YummyAnime Comment Replies]', error);
@@ -8423,7 +8432,8 @@ function pluginYummyAnime() {
         });
     }
 
-    function renderCommentList(title, comments, onMore, onBack) {
+    function renderCommentList(title, comments, onMore, onBack, navigation) {
+        navigation = navigation || transientNavigationSnapshot();
         var items = comments.map(commentItem);
         if (onMore) items.push({title: t('load_more'), load_more: true});
         var params = {
@@ -8433,13 +8443,18 @@ function pluginYummyAnime() {
                 if (item.load_more) return onMore();
                 if (item.comment && Number(item.comment.children_count) > 0) {
                     return commentReplies(item.comment, 0, [], function () {
-                        renderCommentList(title, comments, onMore, onBack);
-                    });
+                        // Lampa closes the current Select after onBack. Reopen
+                        // the parent on the next turn so that it is not removed
+                        // together with the child dialog.
+                        setTimeout(function () {
+                            renderCommentList(title, comments, onMore, onBack, navigation);
+                        }, 0);
+                    }, navigation);
                 }
             }
         };
         if (onBack) params.onBack = onBack;
-        showYummySelect(params);
+        showYummySelect(params, navigation);
     }
 
     function commentItem(comment) {

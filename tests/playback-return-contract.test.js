@@ -10,7 +10,11 @@ assert.match(ui, /function chooseEpisode[\s\S]{0,700}showPlaybackSelect\(\{/);
 assert.match(ui, /function openVideos[\s\S]{0,5200}showPlaybackSelect\(\{/);
 assert.match(ui, /function showDirectPlaybackOptions[\s\S]{0,1000}showPlaybackSelect\(\{/);
 assert.match(ui, /function openTitlePlaybackOptions[\s\S]{0,900}showPlaybackSelect\(\{/);
-assert.match(ui, /function showYummyActions\(card, originElement, originCollection\)[\s\S]{0,1500}beginPlaybackNavigation\(originElement, originCollection\);[\s\S]{0,100}openVideos\(card\)/);
+const actionsStart = ui.indexOf('function showYummyActions(card, originElement, originCollection)');
+const actionsEnd = ui.indexOf('\n    function listActionTitle', actionsStart);
+const actionsSource = ui.slice(actionsStart, actionsEnd);
+assert.ok(actionsStart >= 0 && actionsEnd > actionsStart, 'showYummyActions must exist');
+assert.match(actionsSource, /beginPlaybackNavigation\(originElement, originCollection\);[\s\S]{0,100}openVideos\(card\)/);
 
 assert.match(ui, /function prepareExternalRestore\(\)[\s\S]{0,500}var origin = playbackReturnSnapshot\(\)/);
 assert.match(ui, /function cancelExternalRestore\(\)[\s\S]{0,300}externalRestoreState\.pending = false/);
