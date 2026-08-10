@@ -173,6 +173,29 @@
         return stats;
     }
 
+    function mediaTypeInfo(value) {
+        var source = value && typeof value === 'object' ? value : {};
+        var full = String(source.name || source.title || source.title_long || '').trim();
+        // `alias` is a routing/filter value in parts of the API and is not a
+        // user-facing abbreviation. Prefer only the documented short-name
+        // fields here.
+        var short = String(source.shortname || source.short_name || source.short || '').trim();
+        var raw = String(full || short || (typeof value === 'string' ? value : '')).trim();
+        if (!raw) return {key: '', full: '', short: ''};
+
+        var normalized = raw.toLowerCase().replace(/[._-]+/g, ' ').replace(/\s+/g, ' ').trim();
+        var key = '';
+        if (/^(?:tv|tv series|series|serial|сериал|серіал)$/.test(normalized)) key = 'series';
+        else if (/^(?:movie|film|feature film|full length film|фильм|полнометражный фильм|фільм|повнометражний фільм)$/.test(normalized)) key = 'movie';
+        else if (/^(?:short|short film|короткометражный фильм|короткометражний фільм)$/.test(normalized)) key = 'short';
+        else if (/^ova$/.test(normalized)) key = 'ova';
+        else if (/^ona$/.test(normalized)) key = 'ona';
+        else if (/^(?:special|tv special|спецвыпуск|спецвипуск)$/.test(normalized)) key = 'special';
+        else if (/^(?:music|music video|музыкальное видео|музичне відео)$/.test(normalized)) key = 'music';
+
+        return {key: key, full: full, short: short};
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.UiUtils = window.LampaYaniUiUtils = {
         videoData: videoData,
@@ -184,6 +207,7 @@
         yummyTvDetailsUrl: yummyTvDetailsUrl,
         internalPlayerItem: internalPlayerItem,
         detailRouteId: detailRouteId,
-        detailEpisodeStats: detailEpisodeStats
+        detailEpisodeStats: detailEpisodeStats,
+        mediaTypeInfo: mediaTypeInfo
     };
 }(window));

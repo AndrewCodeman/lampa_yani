@@ -349,6 +349,7 @@
 .yani-detail__title.focus { background: rgba(239,100,112,.22); box-shadow: 0 0 0 .12em #ef6470; color: #fff; }
 .yani-detail__alternative-titles { margin-top: 0.35em; color: rgba(255,255,255,.68); line-height: 1.35; overflow-wrap: anywhere; }
 .yani-detail__genres { display: flex; flex-wrap: wrap; gap: .36em; margin-top: .55em; }
+.yani-detail__type { display: inline-flex; margin-top: .55em; padding: .25em .58em; border: .08em solid rgba(239,100,112,.62); border-radius: 999px; background: rgba(239,100,112,.16); color: rgba(255,255,255,.92); font-size: .78em; font-weight: 700; line-height: 1.2; }
 .yani-detail__genre { padding: .24em .5em; border: .08em solid rgba(255,255,255,.28); border-radius: .35em; color: rgba(255,255,255,.82); font-size: .78em; line-height: 1.2; }
 .yani-detail__genre.focus { background: #fff; border-color: #fff; box-shadow: 0 0 0 .14em #ef6470; color: #111; transform: scale(1.04); }
 .yani-detail__meta { margin: 0.8em 0 1.2em; font-size: 1.2em; }
@@ -768,7 +769,9 @@
     position: absolute;
     top: 0.35em;
     left: 0.35em;
+    right: 0.35em;
     display: flex;
+    flex-wrap: wrap;
     gap: 0.25em;
     pointer-events: none;
 }
@@ -785,6 +788,7 @@
 
 .yani-card-media__quality { background: #f1c40f; color: #171717; }
 .yani-card-media__voices { background: #3b9bd9; }
+.yani-card-media__type { background: rgba(239, 100, 112, 0.94); }
 .yani-card-update { position: absolute; top: 0.35em; right: 0.35em; z-index: 2; padding: 0.22em 0.38em; border-radius: 0.25em; background: #ef6470; color: #fff; font-size: 0.62em; font-weight: 700; line-height: 1.1; }
 .yani-card-list { position: absolute; left: 0.35em; bottom: 0.35em; z-index: 3; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: #5f43a8; color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .yani-card-history { position: absolute; top: 0.35em; right: 0.35em; z-index: 4; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: rgba(239, 100, 112, 0.94); color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

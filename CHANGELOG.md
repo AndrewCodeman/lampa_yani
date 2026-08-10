@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.10 — 2026-08-11
+
+- Show the YummyAnime media type as a compact badge on catalog cards.
+- Show the full media type separately from the title on the detail page.
+- Support series, films, short films, OVA, ONA, specials and music videos without modifying title text.
+
 ## 0.33.9 — 2026-08-11
 
 - Remember the exact catalog card used to enter the sorting toolbar.

@@ -279,6 +279,20 @@
     messages.ru.catalog_sort_title = 'А–Я';
     messages.ru.catalog_sort_random = 'Случайно';
     messages.ru.scroll_to_top = 'Наверх';
+    messages.ru.media_type_series = 'Сериал';
+    messages.ru.media_type_series_short = 'TV';
+    messages.ru.media_type_movie = 'Фильм';
+    messages.ru.media_type_movie_short = 'Фильм';
+    messages.ru.media_type_short = 'Короткометражный фильм';
+    messages.ru.media_type_short_short = 'К/м фильм';
+    messages.ru.media_type_ova = 'OVA';
+    messages.ru.media_type_ova_short = 'OVA';
+    messages.ru.media_type_ona = 'ONA';
+    messages.ru.media_type_ona_short = 'ONA';
+    messages.ru.media_type_special = 'Спецвыпуск';
+    messages.ru.media_type_special_short = 'Спешл';
+    messages.ru.media_type_music = 'Музыкальное видео';
+    messages.ru.media_type_music_short = 'Music';
     messages.en.catalog_sort_top = 'Popular';
     messages.en.catalog_sort_new = 'Newest';
     messages.en.catalog_sort_rating = 'Top rating';
@@ -287,6 +301,20 @@
     messages.en.catalog_sort_title = 'A–Z';
     messages.en.catalog_sort_random = 'Random';
     messages.en.scroll_to_top = 'Back to top';
+    messages.en.media_type_series = 'Series';
+    messages.en.media_type_series_short = 'TV';
+    messages.en.media_type_movie = 'Film';
+    messages.en.media_type_movie_short = 'Film';
+    messages.en.media_type_short = 'Short film';
+    messages.en.media_type_short_short = 'Short';
+    messages.en.media_type_ova = 'OVA';
+    messages.en.media_type_ova_short = 'OVA';
+    messages.en.media_type_ona = 'ONA';
+    messages.en.media_type_ona_short = 'ONA';
+    messages.en.media_type_special = 'Special';
+    messages.en.media_type_special_short = 'Special';
+    messages.en.media_type_music = 'Music video';
+    messages.en.media_type_music_short = 'Music';
 
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
@@ -427,6 +455,20 @@
     messages.uk.catalog_sort_title = 'А–Я';
     messages.uk.catalog_sort_random = 'Випадково';
     messages.uk.scroll_to_top = 'Нагору';
+    messages.uk.media_type_series = 'Серіал';
+    messages.uk.media_type_series_short = 'TV';
+    messages.uk.media_type_movie = 'Фільм';
+    messages.uk.media_type_movie_short = 'Фільм';
+    messages.uk.media_type_short = 'Короткометражний фільм';
+    messages.uk.media_type_short_short = 'К/м фільм';
+    messages.uk.media_type_ova = 'OVA';
+    messages.uk.media_type_ova_short = 'OVA';
+    messages.uk.media_type_ona = 'ONA';
+    messages.uk.media_type_ona_short = 'ONA';
+    messages.uk.media_type_special = 'Спецвипуск';
+    messages.uk.media_type_special_short = 'Спешл';
+    messages.uk.media_type_music = 'Музичне відео';
+    messages.uk.media_type_music_short = 'Music';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

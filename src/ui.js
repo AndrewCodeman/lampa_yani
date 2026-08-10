@@ -856,14 +856,28 @@
         });
     }
 
+    function mediaTypeLabels(value) {
+        var info = LampaYaniUiUtils.mediaTypeInfo(value);
+        if (!info.key && !info.full && !info.short) return null;
+        var fallback = info.key ? t('media_type_' + info.key) : '';
+        var fallbackShort = info.key ? t('media_type_' + info.key + '_short') : '';
+        return {
+            full: info.full || fallback || info.short,
+            short: info.short || fallbackShort || fallback || info.full
+        };
+    }
+
     function renderCardMediaBadges(element, card, meta) {
-        if (!meta || (!meta.quality && !meta.voices)) return;
+        meta = meta || {};
+        var mediaType = mediaTypeLabels(card && card.yani_type);
+        if (!mediaType && !meta.quality && !meta.voices) return;
         var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length) return;
         var block = $('.yani-card-media', view);
         if (!block.length) block = $('<div class="yani-card-media"></div>').appendTo(view);
         block.empty();
+        if (mediaType) block.append($('<span class="yani-card-media__badge yani-card-media__type"></span>').text(mediaType.short));
         if (meta.quality) block.append($('<span class="yani-card-media__badge yani-card-media__quality"></span>').text(meta.quality));
         if (meta.voices) block.append($('<span class="yani-card-media__badge yani-card-media__voices"></span>').text(meta.voices + ' ' + t('voices_short')));
     }
@@ -1623,6 +1637,8 @@
             info.append(title);
             var alternativeTitles = (data.yani_titles || []).filter(function (title) { return title && title !== data.title; });
             if (alternativeTitles.length) info.append($('<div class="yani-detail__alternative-titles"></div>').text(alternativeTitles.join(' · ')));
+            var detailType = mediaTypeLabels(data.yani_type);
+            if (detailType) info.append($('<div class="yani-detail__type"></div>').text(detailType.full));
             var genres = detailGenres(data);
             if (genres.length) info.append(createDetailGenres(genres));
             if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));

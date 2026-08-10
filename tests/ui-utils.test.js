@@ -51,5 +51,13 @@ assert.strictEqual(episodeStats.watched, 2, 'dubbings must not duplicate watched
 assert.strictEqual(episodeStats.minutes, 24, 'duration must average representative unique-episode durations');
 assert.strictEqual(utils.detailEpisodeStats({season: 3, episodes: {count: 1}}, [], null).seasons, 0,
     'season catalog code must not be presented as a season count');
+assert.deepStrictEqual(JSON.parse(JSON.stringify(utils.mediaTypeInfo({name: 'Сериал', shortname: 'TV', value: 1}))),
+    {key: 'series', full: 'Сериал', short: 'TV'});
+assert.deepStrictEqual(JSON.parse(JSON.stringify(utils.mediaTypeInfo('short film'))),
+    {key: 'short', full: '', short: ''});
+assert.deepStrictEqual(JSON.parse(JSON.stringify(utils.mediaTypeInfo({name: 'OVA', shortname: 'OVA'}))),
+    {key: 'ova', full: 'OVA', short: 'OVA'});
+assert.deepStrictEqual(JSON.parse(JSON.stringify(utils.mediaTypeInfo(3))),
+    {key: '', full: '', short: ''}, 'numeric type ids without API labels must stay hidden');
 
 console.log('ui-utils tests passed');
