@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.8 — 2026-08-11
+
+- Add asynchronously loaded recommendations and comments to the active Lampa detail navigation collection.
+- Restore TV-remote focus for detail sections regardless of whether the title was opened from Schedule, Top Rated, For You, Updates, or Continue Watching.
+- Route startup token maintenance through the automatic refresh cooldown.
+
 ## 0.33.7 — 2026-08-10
 
 - Automatically refresh an authorized user's Bearer token every 48 hours as recommended by the YummyAnime API.

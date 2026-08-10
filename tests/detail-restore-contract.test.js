@@ -12,5 +12,14 @@ assert.match(source, /click\.yaniOrder'[\s\S]{0,120}openYummyDetail\(related, fa
 assert.doesNotMatch(source, /click\.yaniOrder'[\s\S]{0,120}openYummyDetail\(related, true\)/);
 assert.match(source, /yani-detail__recommendation selector[\s\S]{0,900}hover:focus'[\s\S]{0,220}keepHorizontalFocusVisible\(list, row\)/);
 assert.match(source, /function keepHorizontalFocusVisible\(container, element\)[\s\S]{0,900}viewport\.scrollLeft = targetRight - viewport\.clientWidth \+ padding/);
+assert.match(source, /function appendDetailNavigation\(container\)/);
+assert.match(source, /enabled\.controller\.yaniDetailOwner !== detailComponent/);
+assert.match(source, /Lampa\.Controller\.collectionAppend\(targets\)/);
+assert.match(source, /loadDetailRecommendations\(data, info, bindDetailScrollTargets, appendDetailNavigation\)/);
+assert.match(source, /if \(appendNavigation\) appendNavigation\(row\)/);
+assert.match(source, /appendDetailNavigation\(empty\)/);
+assert.match(source, /appendDetailNavigation\(errorRow\)/);
+assert.match(source, /yaniDetailOwner: detailComponent/);
+assert.match(source, /this\.destroy = function \(\) \{ destroyed = true/);
 
 console.log('detail restore contract tests passed');

@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.33.7',
+        version: '0.33.8',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -3432,8 +3432,8 @@ function pluginYummyAnime() {
                 console.error('[YummyAnime] Settings registration failed', settingsError);
             }
             var account = LampaYaniAuth.get();
-            if (account.token && (!account.refreshed_at || Date.now() - account.refreshed_at > 2 * 24 * 60 * 60 * 1000)) {
-                LampaYaniAuth.refresh().catch(function () { console.warn('[YummyAnime] Token refresh failed'); });
+            if (account.token && LampaYaniAuth.refreshIfNeeded) {
+                LampaYaniAuth.refreshIfNeeded();
             }
 
             Lampa.Menu.addButton(yummyIcon, 'YummyAnime', function () {
@@ -4805,6 +4805,7 @@ function pluginYummyAnime() {
     }
 
     function Detail(object) {
+        var detailComponent = this;
         object = object || {};
         var restoredActivity = !object.card || typeof object.card !== 'object' || !getYummyId(object.card);
         var data = object.card || object.object || object.data || {};
@@ -4815,6 +4816,17 @@ function pluginYummyAnime() {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
         scroll.minus();
         var button;
+        var destroyed = false;
+
+        function appendDetailNavigation(container) {
+            if (destroyed || !container || !Lampa.Controller || !Lampa.Controller.enabled || !Lampa.Controller.collectionAppend) return;
+            var enabled = Lampa.Controller.enabled();
+            if (!enabled || enabled.name !== 'content' || !enabled.controller || enabled.controller.yaniDetailOwner !== detailComponent) return;
+            var targets = container.hasClass && container.hasClass('selector')
+                ? container.add(container.find('.selector'))
+                : container.find('.selector');
+            if (targets.length) Lampa.Controller.collectionAppend(targets);
+        }
 
         html.on('hover:focus', function (event) {
             var target = $(event.target).closest('.selector');
@@ -4955,7 +4967,7 @@ function pluginYummyAnime() {
             info.append(actions);
             info.append(listPanel);
             if (data.yani_viewing_order && data.yani_viewing_order.length) info.append(createViewingOrder(data));
-            loadDetailRecommendations(data, info, bindDetailScrollTargets);
+            loadDetailRecommendations(data, info, bindDetailScrollTargets, appendDetailNavigation);
             info.append(comments);
             html.append(poster, info);
             scroll.append(html);
@@ -5178,6 +5190,7 @@ function pluginYummyAnime() {
                     empty.on('hover:focus', function () { empty.addClass('focus'); });
                     list.append(empty);
                     bindDetailScrollTargets(empty);
+                    appendDetailNavigation(empty);
                     return;
                 }
                 comments.forEach(function (comment) {
@@ -5193,6 +5206,7 @@ function pluginYummyAnime() {
                     });
                     list.append(row);
                     bindDetailScrollTargets(row);
+                    appendDetailNavigation(row);
                 });
             }).catch(function (error) {
                 console.error('[YummyAnime Comments]', error);
@@ -5200,18 +5214,22 @@ function pluginYummyAnime() {
                 errorRow.on('hover:focus', function () { errorRow.addClass('focus'); });
                 list.empty().append(errorRow);
                 bindDetailScrollTargets(errorRow);
+                appendDetailNavigation(errorRow);
             });
         }
 
         this.start = function () {
-            Lampa.Controller.add('content', {
+            var controller = {
+                link: detailComponent,
+                yaniDetailOwner: detailComponent,
                 toggle: function () { Lampa.Controller.collectionSet(scroll.render()); Lampa.Controller.collectionFocus(button, scroll.render()); },
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
                 down: function () { movePageDown(scroll); },
                 back: goBack
-            });
+            };
+            Lampa.Controller.add('content', controller);
             Lampa.Controller.toggle('content');
             setTimeout(function () {
                 var first = html.find('.yani-detail__button.selector, .yani-detail__order-item.selector, .yani-detail__comment.selector').first();
@@ -5223,7 +5241,7 @@ function pluginYummyAnime() {
         };
 
         this.render = function (js) { return js ? scroll.render(true) : scroll.render(); };
-        this.destroy = function () { scroll.destroy(); html.remove(); };
+        this.destroy = function () { destroyed = true; scroll.destroy(); html.remove(); };
     }
 
     function toggleEpisodeSubscription(card, button) {
@@ -6757,7 +6775,7 @@ function pluginYummyAnime() {
         return section;
     }
 
-    function loadDetailRecommendations(data, container, bindFocus) {
+    function loadDetailRecommendations(data, container, bindFocus, appendNavigation) {
         var section = $('<div class="yani-detail__extra yani-detail__recommendations"><div class="yani-detail__extra-title"></div></div>');
         $('.yani-detail__extra-title', section).text(t('recommendations'));
         var list = $('<div class="yani-detail__recommendations-list"></div>');
@@ -6785,6 +6803,7 @@ function pluginYummyAnime() {
                 row.on('hover:enter click.yaniRecommendation', function () { openYummyDetail(card, false); });
                 list.append(row);
                 if (bindFocus) bindFocus(row);
+                if (appendNavigation) appendNavigation(row);
             });
         }).catch(function () { section.remove(); });
     }
