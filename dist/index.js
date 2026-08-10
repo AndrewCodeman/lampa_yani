@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.30.0',
+        version: '0.30.1',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -3093,13 +3093,13 @@ function pluginYummyAnime() {
     }
 
     function historyCard(entry, deps) {
-        var source = entry.card || {
+        var source = Object.assign({}, entry.card || {}, {
             anime_id: entry.anime_id,
-            title: entry.title || deps.t('untitled'),
-            poster: entry.poster || ''
-        };
+            title: entry.title || entry.card && entry.card.title || deps.t('untitled'),
+            poster: entry.poster || entry.card && entry.card.poster || ''
+        });
         var fallback = attachHistoryEntry(deps.toCard(source), entry);
-        if (entry.title) return Promise.resolve(fallback);
+        if (entry.title && fallback.poster) return Promise.resolve(fallback);
         return deps.detail(entry.anime_id).then(function (payload) {
             var value = payload && payload.response ? payload.response : payload;
             return value ? attachHistoryEntry(deps.toCard(value), entry) : fallback;
@@ -4570,24 +4570,51 @@ function pluginYummyAnime() {
         return isNaN(parsed) ? 0 : parsed;
     }
 
-    function localHistoryCards() {
-        var history = playbackHistory();
-        return Object.keys(history).map(function (id) {
-            var entry = history[id] || {};
-            var source = Object.assign({}, entry.card || {}, {
-                anime_id: entry.card && (entry.card.anime_id || entry.card.yani_id) || id,
+    function localHistoryCards(remotePayload) {
+        var remote = LampaYaniHomeSections.normalizeRemoteHistory(remotePayload || []);
+        return LampaYaniHomeSections.mergeHistory(playbackHistory(), remote).map(function (entry) {
+            return toCard(Object.assign({}, entry.card || {}, {
+                anime_id: entry.anime_id,
                 title: entry.title || entry.card && entry.card.title,
                 poster: entry.poster || entry.card && entry.card.poster,
                 updated_at: entry.updated_at || 0
-            });
-            return {time: Number(entry.updated_at || 0), card: toCard(source)};
-        }).sort(function (a, b) { return b.time - a.time; }).map(function (entry) { return entry.card; });
+            }));
+        });
+    }
+
+    function hydrateHistoryPosters(cards, listItems) {
+        var known = {};
+        (listItems || []).forEach(function (item) {
+            var card = toCard(item);
+            if (card.yani_id && card.poster) known[String(card.yani_id)] = card.poster;
+        });
+        cards.forEach(function (card) {
+            var poster = known[String(card.yani_id || '')];
+            if (!card.poster && poster) card.poster = card.img = poster;
+        });
+
+        var missing = cards.filter(function (card) { return card.yani_id && !card.poster; }).slice(0, 10);
+        function next(offset) {
+            if (offset >= missing.length) return Promise.resolve(cards);
+            return Promise.all(missing.slice(offset, offset + 2).map(function (card) {
+                return LampaYaniApi.detail(card.yani_id).then(function (payload) {
+                    var value = payload && payload.response ? payload.response : payload;
+                    var detailed = toCard(value || {});
+                    if (detailed.poster) card.poster = card.img = detailed.poster;
+                }).catch(function () {});
+            })).then(function () { return next(offset + 2); });
+        }
+        return next(0);
     }
 
     function loadUserListRows() {
         return resolveUserListsUserId().then(function (userId) {
-            return loadUserListsSnapshot(userId);
-        }).then(function (items) {
+            return Promise.all([
+                loadUserListsSnapshot(userId),
+                LampaYaniApi.watchHistory(30, 0).catch(function () { return []; })
+            ]);
+        }).then(function (result) {
+            var items = result[0];
             var rows = accountListDefinitions().map(function (definition) {
                 var selected = filterAccountListItems(definition, items).slice().sort(function (a, b) {
                     return userListItemTime(b) - userListItemTime(a);
@@ -4599,9 +4626,11 @@ function pluginYummyAnime() {
                     results: selected.slice(0, 10).map(toCard)
                 };
             });
-            var history = localHistoryCards();
-            rows.push({title: t('watch_history'), history: true, total: history.length, results: history.slice(0, 10)});
-            return rows;
+            var history = localHistoryCards(result[1]);
+            return hydrateHistoryPosters(history.slice(0, 10), items).then(function (preview) {
+                rows.push({title: t('watch_history'), history: true, total: history.length, results: preview});
+                return rows;
+            });
         });
     }
 
@@ -6997,9 +7026,9 @@ function pluginYummyAnime() {
         if (titles.indexOf(title) < 0) titles.unshift(title);
         var image = item.image && typeof item.image === 'object' ? item.image : {};
         var cover = item.cover && typeof item.cover === 'object' ? item.cover : {};
-        var poster = typeof item.cover === 'string' ? item.cover : typeof item.image === 'string' ? item.image : item.poster_url ||
+        var poster = typeof item.poster === 'string' ? item.poster : typeof item.cover === 'string' ? item.cover : typeof item.image === 'string' ? item.image : item.poster_url ||
             image.medium || image.large || image.url || image.original || cover.medium || cover.large || cover.url || cover.original || '';
-        if (!poster && item.poster) poster = item.poster.medium || item.poster.fullsize || item.poster.original || '';
+        if (!poster && item.poster) poster = item.poster.medium || item.poster.large || item.poster.huge || item.poster.fullsize || item.poster.url || item.poster.original || '';
         if (typeof poster !== 'string') poster = '';
         if (poster.indexOf('//') === 0) poster = 'https:' + poster;
         var rating = typeof item.rating === 'object' ? item.rating.average : item.rating;

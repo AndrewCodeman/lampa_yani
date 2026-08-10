@@ -23,6 +23,8 @@ assert.match(ui, /mode: 'continue'/);
 assert.match(ui, /duration: Math\.max\(0, Number\(video\.duration \|\| 0\)\)/);
 assert.match(ui, /fetchExcluded: loadContinueWatchingExclusions/);
 assert.match(ui, /\[2, 3\]\.forEach\(function \(listId\)/, 'completed and dropped lists must be excluded');
+assert.match(ui, /typeof item\.poster === 'string' \? item\.poster/, 'locally stored string poster URLs must remain visible');
+assert.match(ui, /item\.poster\.huge/, 'large remote history posters must be supported');
 
 const remote = history.normalizeRemoteHistory({response: [{
     anime_id: 42,

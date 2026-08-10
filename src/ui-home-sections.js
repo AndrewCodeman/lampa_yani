@@ -149,13 +149,13 @@
     }
 
     function historyCard(entry, deps) {
-        var source = entry.card || {
+        var source = Object.assign({}, entry.card || {}, {
             anime_id: entry.anime_id,
-            title: entry.title || deps.t('untitled'),
-            poster: entry.poster || ''
-        };
+            title: entry.title || entry.card && entry.card.title || deps.t('untitled'),
+            poster: entry.poster || entry.card && entry.card.poster || ''
+        });
         var fallback = attachHistoryEntry(deps.toCard(source), entry);
-        if (entry.title) return Promise.resolve(fallback);
+        if (entry.title && fallback.poster) return Promise.resolve(fallback);
         return deps.detail(entry.anime_id).then(function (payload) {
             var value = payload && payload.response ? payload.response : payload;
             return value ? attachHistoryEntry(deps.toCard(value), entry) : fallback;

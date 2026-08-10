@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.30.1 — 2026-08-10
+
+- Restore poster images in the My Lists watch-history row when local history stores the poster as a plain URL.
+- Support `large`, `huge` and `url` poster variants returned by YummyAnime history responses.
+- Merge the server watch-history metadata into local entries and recover missing legacy posters from list or detail data in small batches.
+
 ## 0.30.0 — 2026-08-10
 
 - Restore the YummyAnime Home content controller after cancelling the search input.
