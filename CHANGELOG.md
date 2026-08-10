@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.2 — 2026-08-10
+
+- Enter the catalog toolbar from the rightmost visible card of every grid row, including rows reached after vertical scrolling.
+- Ignore cards mostly hidden underneath the fixed toolbar when determining the visible right edge.
+- Focus the toolbar action nearest to the originating card instead of always jumping to the first action.
+
 ## 0.33.1 — 2026-08-10
 
 - Remove ten unreferenced legacy screen implementations left behind after component extraction.

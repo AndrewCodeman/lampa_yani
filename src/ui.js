@@ -250,25 +250,51 @@
             Lampa.Controller.collectionFocus(target, collection, true);
         }
 
+        function focusedCatalogCard() {
+            var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
+            var focused = collection && collection.find ? collection.find('.card.selector.focus, .selector.focus').first() : null;
+            return focused && focused.length ? focused : $();
+        }
+
+        function toolbarTargetForCard(card) {
+            if (!toolbarTrack || !toolbarTrack.length || !card || !card.length) return topButton;
+            var cardRect = card[0].getBoundingClientRect();
+            var cardCenter = cardRect.top + cardRect.height / 2;
+            var target = topButton;
+            var distance = Infinity;
+            toolbarTrack.find('.selector').each(function () {
+                if (this.offsetParent === null) return;
+                var rect = this.getBoundingClientRect();
+                var currentDistance = Math.abs((rect.top + rect.height / 2) - cardCenter);
+                if (currentDistance < distance) {
+                    distance = currentDistance;
+                    target = $(this);
+                }
+            });
+            return target;
+        }
+
         function shouldEnterToolbarOnRight() {
             if (!toolbar || !toolbar.length || window.innerWidth <= 700) return false;
             var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
-            var focused = collection && collection.find ? collection.find('.card.selector.focus, .selector.focus').first() : null;
+            var focused = focusedCatalogCard();
             if (!focused || !focused.length) return !Navigator.canmove('right');
             var currentRect = focused[0].getBoundingClientRect();
             var toolbarRect = toolbar[0].getBoundingClientRect();
             var currentCenter = currentRect.top + currentRect.height / 2;
-            var hasVisibleCardToRight = false;
+            var rightmostVisible = focused[0];
+            var rightmostLeft = currentRect.left;
             collection.find('.card.selector').each(function () {
-                if (this === focused[0]) return;
+                if (this.offsetParent === null) return;
                 var rect = this.getBoundingClientRect();
                 var sameRow = Math.abs((rect.top + rect.height / 2) - currentCenter) < Math.max(20, currentRect.height * 0.45);
-                if (sameRow && rect.left > currentRect.left + 4 && rect.left < toolbarRect.left - 4) {
-                    hasVisibleCardToRight = true;
-                    return false;
+                var visibleBeforeToolbar = rect.left + rect.width / 2 < toolbarRect.left;
+                if (sameRow && visibleBeforeToolbar && rect.left > rightmostLeft) {
+                    rightmostLeft = rect.left;
+                    rightmostVisible = this;
                 }
             });
-            return !hasVisibleCardToRight;
+            return rightmostVisible === focused[0] || currentRect.right >= toolbarRect.left - 8;
         }
 
         function scrollToTop() {
@@ -321,9 +347,10 @@
             };
             controller.right = function () {
                 if (toolbar && toolbar.find('.focus').length) return;
-                if (shouldEnterToolbarOnRight() && topButton) return focusToolbar(topButton);
+                var focusedCard = focusedCatalogCard();
+                if (shouldEnterToolbarOnRight() && topButton) return focusToolbar(toolbarTargetForCard(focusedCard));
                 if (Navigator.canmove('right')) return Navigator.move('right');
-                if (topButton) return focusToolbar(topButton);
+                if (topButton) return focusToolbar(toolbarTargetForCard(focusedCard));
                 originalRight();
             };
             controller.up = function () {
