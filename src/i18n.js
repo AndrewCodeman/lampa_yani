@@ -426,6 +426,7 @@
 
     messages.ru.dashboard_title = 'Ваше аниме — в одном месте';
     messages.ru.dashboard_subtitle = 'Эфир, новые переводы, списки и открытия без лишних переходов';
+    messages.ru.broadcasts_today = 'Эфиры сегодня';
     messages.ru.dashboard_browse = 'Найти аниме';
     messages.ru.dashboard_library = 'Моё аниме';
     messages.ru.dashboard_service = 'Профиль и сервис';
@@ -435,6 +436,7 @@
     messages.ru.dashboard_data_offline = 'API недоступен · сохранённые данные';
     messages.en.dashboard_title = 'Your anime in one place';
     messages.en.dashboard_subtitle = 'Broadcasts, new translations, lists and discoveries with fewer steps';
+    messages.en.broadcasts_today = 'Broadcasts today';
     messages.en.dashboard_browse = 'Find anime';
     messages.en.dashboard_library = 'My anime';
     messages.en.dashboard_service = 'Profile and service';
@@ -652,6 +654,7 @@
     messages.uk.rating_removed = 'Оцінку видалено з YummyAnime';
     messages.uk.dashboard_title = 'Ваше аніме — в одному місці';
     messages.uk.dashboard_subtitle = 'Ефір, нові переклади, списки та відкриття без зайвих переходів';
+    messages.uk.broadcasts_today = 'Ефіри сьогодні';
     messages.uk.dashboard_browse = 'Знайти аніме';
     messages.uk.dashboard_library = 'Моє аніме';
     messages.uk.dashboard_service = 'Профіль і сервіс';

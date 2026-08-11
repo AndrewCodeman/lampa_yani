@@ -368,7 +368,7 @@
             intro.find('.yani-home__intro-subtitle').text(t('dashboard_subtitle'));
             var introSummary = $('<div class="yani-home__intro-summary" aria-hidden="true"></div>');
             [
-                {key: 'today', label: t('today'), icon: homeIcon('schedule')},
+                {key: 'today', label: t('broadcasts_today'), icon: homeIcon('schedule')},
                 {key: 'translations', label: t('new_translations'), icon: homeIcon('new_translations')},
                 {key: 'continue', label: t('continue_watching'), icon: homeIcon('continue_watching')}
             ].forEach(function (metric) {

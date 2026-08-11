@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.37.5',
+        version: '0.37.6',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -477,6 +477,7 @@ function pluginYummyAnime() {
 
     messages.ru.dashboard_title = 'Ваше аниме — в одном месте';
     messages.ru.dashboard_subtitle = 'Эфир, новые переводы, списки и открытия без лишних переходов';
+    messages.ru.broadcasts_today = 'Эфиры сегодня';
     messages.ru.dashboard_browse = 'Найти аниме';
     messages.ru.dashboard_library = 'Моё аниме';
     messages.ru.dashboard_service = 'Профиль и сервис';
@@ -486,6 +487,7 @@ function pluginYummyAnime() {
     messages.ru.dashboard_data_offline = 'API недоступен · сохранённые данные';
     messages.en.dashboard_title = 'Your anime in one place';
     messages.en.dashboard_subtitle = 'Broadcasts, new translations, lists and discoveries with fewer steps';
+    messages.en.broadcasts_today = 'Broadcasts today';
     messages.en.dashboard_browse = 'Find anime';
     messages.en.dashboard_library = 'My anime';
     messages.en.dashboard_service = 'Profile and service';
@@ -703,6 +705,7 @@ function pluginYummyAnime() {
     messages.uk.rating_removed = 'Оцінку видалено з YummyAnime';
     messages.uk.dashboard_title = 'Ваше аніме — в одному місці';
     messages.uk.dashboard_subtitle = 'Ефір, нові переклади, списки та відкриття без зайвих переходів';
+    messages.uk.broadcasts_today = 'Ефіри сьогодні';
     messages.uk.dashboard_browse = 'Знайти аніме';
     messages.uk.dashboard_library = 'Моє аніме';
     messages.uk.dashboard_service = 'Профіль і сервіс';
@@ -5823,7 +5826,7 @@ function pluginYummyAnime() {
             intro.find('.yani-home__intro-subtitle').text(t('dashboard_subtitle'));
             var introSummary = $('<div class="yani-home__intro-summary" aria-hidden="true"></div>');
             [
-                {key: 'today', label: t('today'), icon: homeIcon('schedule')},
+                {key: 'today', label: t('broadcasts_today'), icon: homeIcon('schedule')},
                 {key: 'translations', label: t('new_translations'), icon: homeIcon('new_translations')},
                 {key: 'continue', label: t('continue_watching'), icon: homeIcon('continue_watching')}
             ].forEach(function (metric) {

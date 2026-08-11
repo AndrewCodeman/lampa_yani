@@ -5,6 +5,8 @@ const ui = fs.readFileSync('src/ui.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 
 assert.match(ui, /yani-home__intro-summary/);
+assert.match(ui, /label: t\('broadcasts_today'\)/);
+assert.doesNotMatch(ui, /key: 'today', label: t\('today'\)/);
 assert.match(ui, /setIntroMetric\('continue', continuing\.length, continueMetricDetail\(continuing\[0\]\)\)/);
 assert.match(ui, /setIntroMetric\('today', schedule\.today, \[releaseTime, schedule\.preview\.title\]/);
 assert.match(ui, /setIntroMetric\('translations', dashboard\.translations && dashboard\.translations\.count, \[translation\.title, translation\.dubbing\]/);

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.37.6 — 2026-08-12
+
+- Renamed the ambiguous Today dashboard metric to Broadcasts today.
+- Clarified that the number represents scheduled Japanese anime broadcasts.
+- Added matching Russian, English and Ukrainian labels.
+
 ## 0.37.5 — 2026-08-12
 
 - Added a smart initial dashboard focus based on the existing priority signal.
