@@ -373,6 +373,7 @@
 .yani-home__intro-metric-copy em.yani-home__intro-metric-detail--visible { display: block; }
 .yani-home__intro-metric--ready .yani-home__intro-metric-copy b { color: #fff; }
 .yani-home__intro-metric--active { border-color: rgba(255,255,255,.2); background: linear-gradient(132deg, rgba(255,255,255,.15), rgba(255,255,255,.065)); }
+.yani-home__intro-metric--unknown { border-style: dashed; opacity: .62; }
 .yani-home__intro-metric--today .yani-home__intro-metric-icon { background: rgba(98,184,255,.17); color: #7bc7ff; }
 .yani-home__intro-metric--translations .yani-home__intro-metric-icon { background: rgba(188,119,255,.17); color: #cfa0ff; }
 .yani-home__intro-metric--continue .yani-home__intro-metric-icon { background: rgba(85,215,149,.15); color: #6be1a5; }

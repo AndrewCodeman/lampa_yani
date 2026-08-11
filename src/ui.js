@@ -544,10 +544,18 @@
             function setIntroMetric(key, value, detail) {
                 var metric = introMetrics[key];
                 if (!metric || !metric.length) return;
+                var known = value !== null && value !== undefined && value !== '';
+                metric.removeClass('yani-home__intro-metric--active yani-home__intro-metric--ready yani-home__intro-metric--unknown');
+                if (!known) {
+                    metric.addClass('yani-home__intro-metric--unknown');
+                    metric.find('b').text('—');
+                    metric.find('em').text('').removeClass('yani-home__intro-metric-detail--visible');
+                    return;
+                }
                 value = Math.max(0, Number(value) || 0);
                 metric.find('b').text(value > 99 ? '99+' : String(value));
                 metric.find('em').text(String(detail || '')).toggleClass('yani-home__intro-metric-detail--visible', Boolean(detail));
-                metric.removeClass('yani-home__intro-metric--active').addClass('yani-home__intro-metric--ready');
+                metric.addClass('yani-home__intro-metric--ready');
                 if (value) metric.addClass('yani-home__intro-metric--active');
             }
 
@@ -766,6 +774,7 @@
                         setCount(homeButtons[key], dashboard.counts[key]);
                     });
                     var schedule = dashboard.schedule || {};
+                    var scheduleKnown = Object.prototype.hasOwnProperty.call(schedule, 'today');
                     renderEpisodeTimeline(dashboard.episode_flow);
                     var service = dashboard.service || {};
                     var serviceState = dataState === 'cached' ? 'degraded' : service.degraded ? 'degraded' : service.api ? 'up' : 'down';
@@ -783,22 +792,24 @@
                         if (schedule.preview.total) episode += ' ' + t('of') + ' ' + schedule.preview.total;
                         setPreview(homeButtons.schedule, schedule.preview.title, releaseTime + ' · ' + episode);
                         setArtwork(homeButtons.schedule, schedule.preview.poster);
-                        setIntroMetric('today', schedule.today, [releaseTime, schedule.preview.title].filter(Boolean).join(' · '));
+                        setIntroMetric('today', scheduleKnown ? schedule.today : null, [releaseTime, schedule.preview.title].filter(Boolean).join(' · '));
                     } else {
                         setPreview(homeButtons.schedule, '', '');
                         setArtwork(homeButtons.schedule, '');
-                        setIntroMetric('today', schedule.today, '');
+                        setIntroMetric('today', scheduleKnown ? schedule.today : null, '');
                     }
-                    var translation = dashboard.translations && dashboard.translations.preview;
+                    var translations = dashboard.translations || {};
+                    var translationsKnown = Object.prototype.hasOwnProperty.call(translations, 'count');
+                    var translation = translations.preview;
                     prioritySignals.has_translation = Boolean(translation);
                     if (translation) {
                         setPreview(homeButtons.new_translations, translation.title, [translation.episode, translation.dubbing, translation.source].filter(Boolean).join(' · '));
                         setArtwork(homeButtons.new_translations, translation.poster);
-                        setIntroMetric('translations', dashboard.translations && dashboard.translations.count, [translation.title, translation.dubbing].filter(Boolean).join(' · '));
+                        setIntroMetric('translations', translationsKnown ? translations.count : null, [translation.title, translation.dubbing].filter(Boolean).join(' · '));
                     } else {
                         setPreview(homeButtons.new_translations, '', '');
                         setArtwork(homeButtons.new_translations, '');
-                        setIntroMetric('translations', dashboard.translations && dashboard.translations.count, '');
+                        setIntroMetric('translations', translationsKnown ? translations.count : null, '');
                     }
                     var discovery = dashboard.discovery || {};
                     var newRelease = discovery.new_release;

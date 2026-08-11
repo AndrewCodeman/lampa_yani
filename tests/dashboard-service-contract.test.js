@@ -29,6 +29,8 @@ assert.match(css, /\.yani-home__service-state--down/);
     assert.equal(partial.service.degraded, true);
     assert.equal(partial.service.feed, true);
     assert.equal(partial.service.schedule, false);
+    assert.equal(partial.schedule, null);
+    assert.equal(partial.translations.count, 0);
 
     const down = await insights.dashboard({
         feed: () => Promise.reject(new Error('offline')),
@@ -37,6 +39,9 @@ assert.match(css, /\.yani-home__service-state--down/);
     });
     assert.equal(down.service.api, false);
     assert.equal(down.service.degraded, false);
+    assert.equal(down.counts, null);
+    assert.equal(down.schedule, null);
+    assert.equal(down.translations, null);
     console.log('dashboard service contract checks passed');
 })().catch((error) => {
     console.error(error);

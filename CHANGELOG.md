@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.37.8 — 2026-08-12
+
+- Distinguished real zero counts from unavailable dashboard data.
+- Displayed an em dash and a subdued dashed metric when its API source is unavailable.
+- Preserved valid zero values when the API successfully returns an empty schedule or feed.
+- Continued to display cached metrics during partial and complete outages.
+
 ## 0.37.7 — 2026-08-12
 
 - Widened the dashboard summary area so all three metrics remain understandable on TV screens.

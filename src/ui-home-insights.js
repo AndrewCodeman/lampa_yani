@@ -357,10 +357,10 @@
             var feed = result[0];
             var schedule = result[1];
             return {
-                counts: counts(feed.data),
-                schedule: scheduleInsight(schedule.data, options.now),
-                translations: translationInsight(feed.data),
-                discovery: discoveryInsights(feed.data),
+                counts: feed.ok ? counts(feed.data) : null,
+                schedule: schedule.ok ? scheduleInsight(schedule.data, options.now) : null,
+                translations: feed.ok ? translationInsight(feed.data) : null,
+                discovery: feed.ok ? discoveryInsights(feed.data) : null,
                 episode_flow: episodeFlow(schedule.data, feed.data, options.now),
                 service: {
                     api: feed.ok || schedule.ok,
