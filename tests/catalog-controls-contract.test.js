@@ -1,13 +1,16 @@
 const assert = require('assert');
 const fs = require('fs');
 
-const ui = fs.readFileSync('src/ui.js', 'utf8');
+const uiSource = fs.readFileSync('src/ui.js', 'utf8');
+const controls = fs.readFileSync('src/ui-catalog-controls.js', 'utf8');
+const ui = uiSource + '\n' + controls;
 const css = fs.readFileSync('style.css', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 const filters = fs.readFileSync('src/ui-catalog-filters.js', 'utf8');
 
 assert.match(ui, /Lampa\.Component\.add\('yani_catalog', Catalog\)/);
-assert.match(ui, /function Catalog\(object\)[\s\S]{0,2500}sort: 'top'[\s\S]{0,300}sort: 'year'[\s\S]{0,300}sort: 'rating'[\s\S]{0,300}sort: 'rating_counters'[\s\S]{0,300}sort: 'views'[\s\S]{0,300}sort: 'title'[\s\S]{0,300}sort: 'random'/);
+assert.match(uiSource, /function Catalog\(object\)[\s\S]{0,1000}LampaYaniCatalogControls\.create/);
+assert.match(controls, /var sortDefinitions = \[[\s\S]{0,500}sort: 'top'[\s\S]{0,300}sort: 'year'[\s\S]{0,300}sort: 'rating'[\s\S]{0,300}sort: 'rating_counters'[\s\S]{0,300}sort: 'views'[\s\S]{0,300}sort: 'title'[\s\S]{0,300}sort: 'random'/);
 assert.match(ui, /function changeSort\(definition\)[\s\S]{0,1600}params\.sort = definition\.sort[\s\S]{0,500}Lampa\.Activity\.replace/);
 assert.match(ui, /function scrollToTop\(\)[\s\S]{0,250}comp\.scroll\.reset\(\)[\s\S]{0,150}focusCards\(true\)/);
 assert.match(ui, /comp\.on\('controller'/);
@@ -29,9 +32,9 @@ assert.match(ui, /function focusToolbar\(preferred\)[\s\S]{0,700}lastCatalogCard
 assert.match(ui, /function focusCards\(first\)[\s\S]{0,700}lastCatalogCard \|\| comp\.last[\s\S]{0,350}toolbarFocused = false[\s\S]{0,300}Navigator\.add\(target\)/);
 assert.match(ui, /toolbarTrack\.append\(topButton\)/);
 assert.match(ui, /function openFilterMenu\(navigation\)/);
-assert.match(ui, /LampaYaniCatalogFilters\.activeCount\(baseParams\)/);
+assert.match(ui, /filterModel\.activeCount\(baseParams\)/);
 assert.match(ui, /yani-catalog-filter selector/);
-assert.match(ui, /replaceWithFilters\(LampaYaniCatalogFilters\.clear\(baseParams\)\)/);
+assert.match(ui, /replaceWithFilters\(filterModel\.clear\(baseParams\)\)/);
 assert.match(filters, /key: 'type'/);
 assert.match(filters, /key: 'status'/);
 assert.match(filters, /key: 'year'/);

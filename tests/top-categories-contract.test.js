@@ -1,11 +1,13 @@
 const assert = require('assert');
 const fs = require('fs');
 
-const ui = fs.readFileSync('src/ui.js', 'utf8');
+const uiSource = fs.readFileSync('src/ui.js', 'utf8');
+const controls = fs.readFileSync('src/ui-catalog-controls.js', 'utf8');
+const ui = uiSource + '\n' + controls;
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 
 assert.match(ui, /Lampa\.Component\.add\('yani_top', Top\)/);
-assert.match(ui, /function Top\(object\)[\s\S]{0,300}topMode = true[\s\S]{0,250}sort: 'top'[\s\S]{0,150}sort_forward: true[\s\S]{0,150}from_year: 1900[\s\S]{0,150}return Catalog\(object\)/);
+assert.match(uiSource, /function Top\(object\)[\s\S]{0,300}topMode = true[\s\S]{0,250}sort: 'top'[\s\S]{0,150}sort_forward: true[\s\S]{0,150}from_year: 1900[\s\S]{0,150}return Catalog\(object\)/);
 assert.match(ui, /var topDefinitions = \[[\s\S]{0,500}key: 'all', types: ''[\s\S]{0,150}key: 'tv', types: 'tv'[\s\S]{0,150}key: 'movie', types: 'movie'[\s\S]{0,150}key: 'ona', types: 'ona'/);
 assert.match(ui, /var controlDefinitions = topMode \? topDefinitions : sortDefinitions/);
 assert.match(ui, /if \(topMode\) \{[\s\S]{0,250}params\.sort = 'top'[\s\S]{0,150}params\.sort_forward = true[\s\S]{0,150}params\.from_year = 1900[\s\S]{0,250}params\.types = definition\.types/);

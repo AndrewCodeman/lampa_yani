@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.35.1 — 2026-08-11
+
+- Extracted catalog sorting, filtering and TV remote navigation into a dedicated UI module.
+- Preserved catalog API loading and pagination behavior while reducing the main UI monolith.
+
 ## 0.35.0 — 2026-08-11
 
 - Added TV-friendly catalog filters for anime type, release status and release period.
