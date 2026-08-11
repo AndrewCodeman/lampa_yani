@@ -403,20 +403,52 @@
             html.append(scroll.render(true));
             this.activity.loader(false);
             this.activity.toggle();
-            if (homeButtons.new_translations || homeButtons.new_releases || homeButtons.collections) {
-                LampaYaniHomeInsights.load(LampaYaniApi.feed).then(function (insights) {
+            if (homeButtons.schedule || homeButtons.new_translations || homeButtons.new_releases || homeButtons.collections) {
+                LampaYaniHomeInsights.dashboard({
+                    feed: LampaYaniApi.feed,
+                    schedule: function () { return LampaYaniApi.schedule({}); },
+                    now: Date.now()
+                }).then(function (dashboard) {
                     if (destroyed) return;
-                    Object.keys(insights).forEach(function (key) {
+                    Object.keys(dashboard.counts).forEach(function (key) {
                         var button = homeButtons[key];
-                        var count = Number(insights[key] || 0);
+                        var count = Number(dashboard.counts[key] || 0);
                         if (!button || !count) return;
                         $('.yani-home__count', button)
                             .text(count > 99 ? '99+' : String(count))
                             .attr('aria-hidden', 'false')
                             .addClass('yani-home__count--visible');
                     });
+                    function preview(button, title, meta) {
+                        if (!button || !title) return;
+                        var insight = $('<div class="yani-home__item-insight"></div>');
+                        insight.append($('<div class="yani-home__item-insight-title"></div>').text(title));
+                        if (meta) insight.append($('<div class="yani-home__item-insight-meta"></div>').text(meta));
+                        $('.yani-home__text', button).append(insight);
+                        button.addClass('yani-home__item--with-insight');
+                    }
+                    var schedule = dashboard.schedule || {};
+                    if (schedule.today && homeButtons.schedule) {
+                        $('.yani-home__count', homeButtons.schedule)
+                            .text(schedule.today > 99 ? '99+' : String(schedule.today))
+                            .attr('aria-hidden', 'false')
+                            .addClass('yani-home__count--visible');
+                    }
+                    if (schedule.preview) {
+                        var releaseDate = new Date(schedule.preview.timestamp);
+                        var releaseTime;
+                        try { releaseTime = releaseDate.toLocaleString(locale(), {weekday: 'short', hour: '2-digit', minute: '2-digit'}); }
+                        catch (error) { releaseTime = releaseDate.toLocaleString(); }
+                        var episode = schedule.preview.episode ? t('episode') + ' ' + schedule.preview.episode : t('release');
+                        if (schedule.preview.total) episode += ' ' + t('of') + ' ' + schedule.preview.total;
+                        preview(homeButtons.schedule, schedule.preview.title, releaseTime + ' · ' + episode);
+                    }
+                    var translation = dashboard.translations && dashboard.translations.preview;
+                    if (translation) {
+                        preview(homeButtons.new_translations, translation.title, [translation.episode, translation.dubbing, translation.source].filter(Boolean).join(' · '));
+                    }
                 }).catch(function (error) {
-                    console.warn('[YummyAnime Home] Feed insights are unavailable', error);
+                    console.warn('[YummyAnime Home] Dashboard insights are unavailable', error);
                 });
             }
         };

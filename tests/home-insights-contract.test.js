@@ -8,12 +8,15 @@ const build = fs.readFileSync('build.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 
 assert.match(build, /src\/ui-home-insights\.js/);
-assert.match(ui, /LampaYaniHomeInsights\.load\(LampaYaniApi\.feed\)/);
+assert.match(ui, /LampaYaniHomeInsights\.dashboard\(\{/);
+assert.match(ui, /schedule: function \(\) \{ return LampaYaniApi\.schedule\(\{\}\); \}/);
 assert.match(ui, /yani-home__count/);
+assert.match(ui, /yani-home__item-insight/);
 assert.match(ui, /if \(destroyed\) return/);
 assert.match(ui, /count > 99 \? '99\+' : String\(count\)/);
 assert.match(css, /\.yani-home__count--visible/);
 assert.match(css, /\.yani-home__item\.focus \.yani-home__count/);
+assert.match(css, /\.yani-home__item-insight-title/);
 
 const context = {window: {}};
 vm.runInNewContext(source, context);
@@ -27,5 +30,23 @@ const result = insights.counts({response: {
 assert.equal(result.new_releases, 2);
 assert.equal(result.new_translations, 2);
 assert.equal(result.collections, 2);
+
+const now = new Date(2026, 7, 11, 10, 0, 0).getTime();
+const schedule = insights.scheduleInsight({response: [
+    {anime_id: 10, title: 'Morning anime', episodes: {aired: 2, count: 12, next_date: (now + 3600000) / 1000}},
+    {anime_id: 11, title: 'Evening anime', episodes: {aired: 7, count: 24, next_date: (now + 7200000) / 1000}}
+]}, now);
+assert.equal(schedule.today, 2);
+assert.equal(schedule.preview.title, 'Morning anime');
+assert.equal(schedule.preview.episode, 3);
+
+const translations = insights.translationInsight({response: {new_videos: [
+    {anime_id: 4, date: 100, anime: {title: 'Older'}},
+    {anime_id: 5, date: 300, anime: {title: 'Newest'}, ep_title: 'Episode 4', dub_title: 'Dub'},
+    {anime_id: 5, date: 200, anime: {title: 'Newest'}}
+]}});
+assert.equal(translations.count, 2);
+assert.equal(translations.preview.title, 'Newest');
+assert.equal(translations.preview.episode, 'Episode 4');
 
 console.log('home insights contract checks passed');

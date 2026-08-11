@@ -600,6 +600,38 @@
 }
 .yani-home__item.focus .yani-home__subtitle { color: rgba(22,21,27,.62); }
 
+.yani-home__item-insight {
+    max-width: 30em;
+    margin-top: .58em;
+    padding-top: .48em;
+    border-top: .08em solid rgba(255,255,255,.12);
+}
+
+.yani-home__item-insight-title {
+    overflow: hidden;
+    color: rgba(255,255,255,.9);
+    font-size: .77em;
+    font-weight: 650;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.yani-home__item-insight-meta {
+    overflow: hidden;
+    margin-top: .24em;
+    color: rgba(255,255,255,.52);
+    font-size: .68em;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.yani-home__item.focus .yani-home__item-insight { border-top-color: rgba(22,21,27,.13); }
+.yani-home__item.focus .yani-home__item-insight-title { color: rgba(22,21,27,.88); }
+.yani-home__item.focus .yani-home__item-insight-meta { color: rgba(22,21,27,.58); }
+.yani-home__episode-flow .yani-home__item--with-insight { min-height: 9.2em; align-items: flex-start; }
+
 .yani-home__arrow {
     margin-left: auto;
     color: rgba(255,255,255,.55);

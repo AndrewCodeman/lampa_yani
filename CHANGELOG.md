@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.36.1 — 2026-08-11
+
+- Added live dashboard previews for the nearest scheduled broadcast and latest available translation.
+- Added today's schedule count alongside the existing feed counters.
+- Kept dashboard rendering resilient when either the schedule or feed API is unavailable.
+
 ## 0.36.0 — 2026-08-11
 
 - Rebuilt the YummyAnime dashboard into clear browse, episode-flow, personal, discovery and service zones.
