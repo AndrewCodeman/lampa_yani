@@ -458,6 +458,7 @@
 .yani-home__item--search .yani-home__icon { background: linear-gradient(135deg, #43b6d8, #2679c2); }
 .yani-home__item--schedule .yani-home__icon { background: linear-gradient(135deg, #42c68a, #218d78); }
 .yani-home__item--new_translations .yani-home__icon { background: linear-gradient(135deg, #49bfe3, #5361d4); }
+.yani-home__item--new_releases .yani-home__icon { background: linear-gradient(135deg, #ff9e54, #e34f6f); }
 .yani-home__item--continue_watching .yani-home__icon { background: linear-gradient(135deg, #f0af54, #d87742); }
 .yani-home__item--status .yani-home__icon { background: linear-gradient(135deg, #48c7a0, #238d8d); }
 .yani-home__item--top_rated .yani-home__icon { background: linear-gradient(135deg, #f5c95e, #d97939); }

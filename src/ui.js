@@ -141,6 +141,7 @@
             Lampa.Component.add('yani_recommended', Recommended);
             Lampa.Component.add('yani_updates', Updates);
             Lampa.Component.add('yani_new_translations', NewTranslations);
+            Lampa.Component.add('yani_new_releases', NewReleases);
             Lampa.Component.add('yani_collections', Collections);
             Lampa.Component.add('yani_collection', CollectionDetail);
             Lampa.Component.add('yani_schedule', Schedule);
@@ -542,6 +543,9 @@
                 openContinueWatching();
             }},
             {key: 'user_lists', title: t('user_lists'), authorized: true, action: openUserLists},
+            {key: 'new_releases', title: t('new_releases'), action: function () {
+                Lampa.Activity.push({url: 'yani/new-releases', title: 'YummyAnime ' + t('new_releases'), component: 'yani_new_releases'});
+            }},
             {key: 'top_rated', title: t('top_rated'), action: function () {
                 Lampa.Activity.push({url: 'yani/top', title: 'YummyAnime ' + t('top_rated'), component: 'yani_top', topMode: true, params: {limit: 30, sort: 'top', sort_forward: true, from_year: 1900}});
             }},
@@ -694,6 +698,7 @@
             search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>',
             schedule: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M7 14h3M14 14h3M7 18h3"/></svg>',
             new_translations: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h10v9H9l-4 4v-4H4zM14 10h6v8h-3l-3 3v-3h-2"/><path d="M7 9h4M16 14h2"/></svg>',
+            new_releases: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 13v7h14v-7M8 17h8"/></svg>',
             continue_watching: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg>',
             status: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h4l2-6 4 12 2-6h6"/></svg>',
             top_rated: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg>',
@@ -743,6 +748,16 @@
         };
         comp.cardRender = bindYummyCardRender;
         return comp;
+    }
+
+    function NewReleases(object) {
+        return LampaYaniReleases.component(object, {
+            t: t,
+            feed: LampaYaniApi.feed,
+            toCard: toCard,
+            cardRender: bindRecommendedCardRender,
+            notice: function (message) { Lampa.Noty.show(message); }
+        });
     }
 
     function Collections(object) {
@@ -4647,6 +4662,7 @@
             ['new_translations', 'new_translations'],
             ['continue_watching', 'continue_watching'],
             ['user_lists', 'user_lists'],
+            ['new_releases', 'new_releases'],
             ['top_rated', 'top_rated'],
             ['for_you', 'for_you'],
             ['updates', 'updates'],

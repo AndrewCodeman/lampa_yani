@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.3 — 2026-08-11
+
+- Add a dedicated New Releases dashboard section backed by the official `/feed` `new` payload.
+- Keep new anime separate from Japanese broadcasts and newly published translations or dubs.
+- Open release cards directly in YummyAnime details and preserve the established My Lists dashboard position.
+- Add release status/type badges, localized empty and error states, and a dedicated dashboard icon.
+
 ## 0.34.2 — 2026-08-11
 
 - Turn the Best dashboard tile into a dedicated YummyAnime Top screen.
