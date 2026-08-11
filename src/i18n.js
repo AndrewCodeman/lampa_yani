@@ -65,6 +65,9 @@
     messages.ru.new_translations_error = 'Не удалось загрузить новые переводы и озвучки';
     messages.ru.collections = 'Коллекции';
     messages.ru.collection = 'Коллекция';
+    messages.ru.collections_load_error = 'Не удалось загрузить коллекции';
+    messages.ru.collection_load_error = 'Не удалось загрузить коллекцию';
+    messages.ru.collection_empty = 'В этой коллекции пока нет тайтлов';
     messages.ru.episodes_short = 'серий';
     messages.ru.episode_information = 'Информация о сериях';
     messages.ru.seasons_short = 'сез.';
@@ -119,6 +122,9 @@
     messages.en.new_translations_error = 'Failed to load new translations and dubs';
     messages.en.collections = 'Collections';
     messages.en.collection = 'Collection';
+    messages.en.collections_load_error = 'Failed to load collections';
+    messages.en.collection_load_error = 'Failed to load the collection';
+    messages.en.collection_empty = 'This collection does not contain any titles yet';
     messages.en.episodes_short = 'episodes';
     messages.en.episode_information = 'Episode information';
     messages.en.seasons_short = 'seasons';
@@ -376,6 +382,9 @@
     messages.uk.for_you = 'Для вас';
     messages.uk.collections = 'Колекції';
     messages.uk.collection = 'Колекція';
+    messages.uk.collections_load_error = 'Не вдалося завантажити колекції';
+    messages.uk.collection_load_error = 'Не вдалося завантажити колекцію';
+    messages.uk.collection_empty = 'У цій колекції поки немає тайтлів';
     messages.uk.episodes_short = 'серій';
     messages.uk.episode_information = 'Інформація про серії';
     messages.uk.seasons_short = 'сез.';

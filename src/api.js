@@ -182,6 +182,21 @@
                 staleFallback: true
             });
         },
+        collectionCatalog: function (limit, offset) {
+            return request('/collection?limit=' + encodeURIComponent(limit || 20) + '&offset=' + encodeURIComponent(offset || 0), {
+                auth: true,
+                cacheTtl: 10 * 60 * 1000,
+                staleFallback: true
+            });
+        },
+        collectionDetail: function (id, limit, offset) {
+            var query = '?limit=' + encodeURIComponent(limit || 30) + '&offset=' + encodeURIComponent(offset || 0);
+            return request('/collection/' + encodeURIComponent(id) + query, {
+                auth: true,
+                cacheTtl: 10 * 60 * 1000,
+                staleFallback: true
+            });
+        },
         episodeInfo: function (malId) {
             if (!malId) return Promise.reject(new Error('MAL id is missing'));
             return externalRequest('https://api.jikan.moe/v4', '/anime/' + encodeURIComponent(malId) + '/episodes').then(function (payload) {

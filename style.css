@@ -463,6 +463,7 @@
 .yani-home__item--top_rated .yani-home__icon { background: linear-gradient(135deg, #f5c95e, #d97939); }
 .yani-home__item--for_you .yani-home__icon { background: linear-gradient(135deg, #ff7b93, #a7427f); }
 .yani-home__item--updates .yani-home__icon { background: linear-gradient(135deg, #5eb7ff, #5861c5); }
+.yani-home__item--collections .yani-home__icon { background: linear-gradient(135deg, #ff8f70, #8f4fd1); }
 .yani-home__item--user_lists .yani-home__icon { background: linear-gradient(135deg, #6f8ff3, #5750bb); }
 .yani-home__item--notifications .yani-home__icon { background: linear-gradient(135deg, #ff8b62, #d74c65); }
 .yani-home__item--account .yani-home__icon { background: linear-gradient(135deg, #e77ab3, #9d4b9c); }
@@ -1010,6 +1011,10 @@
 .yani-card-history { position: absolute; top: 0.35em; right: 0.35em; z-index: 4; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: rgba(239, 100, 112, 0.94); color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .yani-card-history-progress { position: absolute; right: 0; bottom: 0; left: 0; z-index: 5; height: 0.24em; overflow: hidden; background: rgba(255, 255, 255, 0.25); }
 .yani-card-history-progress span { display: block; height: 100%; background: #ef6470; }
+.yani-collection-card__previews { position: absolute; right: .38em; bottom: 2.15em; z-index: 4; display: flex; gap: .22em; }
+.yani-collection-card__previews span { width: 2.15em; height: 3.1em; border: .08em solid rgba(255,255,255,.72); border-radius: .28em; background-position: center; background-size: cover; box-shadow: 0 .25em .7em rgba(0,0,0,.45); }
+.yani-collection-card__meta { position: absolute; right: .35em; bottom: .35em; left: .35em; z-index: 5; overflow: hidden; padding: .3em .45em; border-radius: .32em; background: rgba(21,20,29,.82); color: #fff; font-size: .62em; font-weight: 650; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
+.yani-collection-card.focus .yani-collection-card__meta { background: #ef6470; }
 
 .yani-card-rating {
     display: flex;

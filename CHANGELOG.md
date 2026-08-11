@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.1 — 2026-08-11
+
+- Add a TV-focusable Collections tile to the YummyAnime dashboard while keeping Search as item 3.
+- Load initial collection previews from `/feed` and lazily extend the catalog through `/collection`.
+- Add dedicated, lazily paginated collection pages whose anime cards open directly in YummyAnime details.
+- Show compact poster mosaics, anime counts, views and likes on collection cards when available.
+
 ## 0.34.0 — 2026-08-11
 
 - Keep Search as dashboard item 3 and preserve the existing Schedule screen.

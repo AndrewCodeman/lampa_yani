@@ -140,6 +140,8 @@
             Lampa.Component.add('yani_recommended', Recommended);
             Lampa.Component.add('yani_updates', Updates);
             Lampa.Component.add('yani_new_translations', NewTranslations);
+            Lampa.Component.add('yani_collections', Collections);
+            Lampa.Component.add('yani_collection', CollectionDetail);
             Lampa.Component.add('yani_schedule', Schedule);
             Lampa.Component.add('yani_history', History);
 
@@ -507,6 +509,7 @@
             {key: 'updates', title: t('updates'), action: function () {
                 Lampa.Activity.push({url: 'yani/updates', title: 'YummyAnime ' + t('updates'), component: 'yani_updates'});
             }},
+            {key: 'collections', title: t('collections'), action: openCollections},
             {key: 'notifications', title: t('notifications'), authorized: true, action: openNotifications},
             {key: 'account', title: t('account'), action: openAccount},
             {key: 'status', title: t('status'), action: function () {
@@ -654,6 +657,7 @@
             top_rated: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg>',
             for_you: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S4 15.7 4 9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5c0 6.2-8 11-8 11Z"/><path d="M12 11v5M9.5 13.5h5"/></svg>',
             updates: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="16" r="3"/><path d="M18 14v2l1.3 1"/></svg>',
+            collections: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5 12 3l8 3.5-8 3.5-8-3.5Z"/><path d="m4 11 8 3.5 8-3.5M4 15.5 12 19l8-3.5"/></svg>',
             user_lists: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v5H5zM5 11h14v9H5z"/><path d="M8 6.5h6M8 14h8M8 17h5"/></svg>',
             notifications: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2.2V10a4.5 4.5 0 0 0-9 0v4.8L6 17zM10 20h4"/><path d="M18.5 5.5 20 4M5.5 5.5 4 4"/></svg>',
             account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/></svg>'
@@ -697,6 +701,26 @@
         };
         comp.cardRender = bindYummyCardRender;
         return comp;
+    }
+
+    function Collections(object) {
+        return LampaYaniCollections.catalog(object, {
+            t: t,
+            feed: LampaYaniApi.feed,
+            load: LampaYaniApi.collectionCatalog,
+            open: openCollection,
+            error: function (message) { Lampa.Noty.show(message); }
+        });
+    }
+
+    function CollectionDetail(object) {
+        return LampaYaniCollections.detail(object, {
+            t: t,
+            detail: LampaYaniApi.collectionDetail,
+            toCard: toCard,
+            cardRender: bindRecommendedCardRender,
+            error: function (message) { Lampa.Noty.show(message); }
+        });
     }
 
     function Updates(object) {
@@ -3534,6 +3558,20 @@
         Lampa.Activity.push({url: 'yani/account', title: 'YummyAnime ' + t('account'), component: 'yani_account'});
     }
 
+    function openCollections() {
+        Lampa.Activity.push({url: 'yani/collections', title: 'YummyAnime ' + t('collections'), component: 'yani_collections'});
+    }
+
+    function openCollection(collection) {
+        if (!collection || collection.id === undefined || collection.id === null) return;
+        Lampa.Activity.push({
+            url: 'yani/collection/' + encodeURIComponent(collection.id),
+            title: collection.title || t('collection'),
+            component: 'yani_collection',
+            collectionId: collection.id
+        });
+    }
+
     function toCard(item) {
         item = item || {};
         if (item.anime && typeof item.anime === 'object') {
@@ -4570,6 +4608,7 @@
             ['top_rated', 'top_rated'],
             ['for_you', 'for_you'],
             ['updates', 'updates'],
+            ['collections', 'collections'],
             ['notifications', 'notifications'],
             ['account', 'account'],
             ['status', 'status']
