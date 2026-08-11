@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.37.9 — 2026-08-12
+
+- Merged local and YummyAnime server progress in the dashboard Continue Watching summary.
+- Updated the count, current title and visual preview after the lightweight background refresh.
+- Deduplicated local and remote records and excluded completed or dropped titles.
+- Added a five-minute per-account playback snapshot to keep repeated dashboard visits fast.
+- Reused fresh list exclusions instead of downloading the user library on every visit.
+
 ## 0.37.8 — 2026-08-12
 
 - Distinguished real zero counts from unavailable dashboard data.

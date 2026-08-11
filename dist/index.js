@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.37.8',
+        version: '0.37.9',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -6137,7 +6137,8 @@ function pluginYummyAnime() {
             }
 
             var account = LampaYaniAuth.get();
-            var localEntries = LampaYaniHomeSections.normalizeLocalHistory(playbackHistory());
+            var localHistory = playbackHistory();
+            var localEntries = LampaYaniHomeSections.normalizeLocalHistory(localHistory);
             var continuing = LampaYaniHomeSections.continueWatchingEntries(localEntries, {});
             setIntroMetric('continue', continuing.length, continueMetricDetail(continuing[0]));
 
@@ -6187,14 +6188,45 @@ function pluginYummyAnime() {
                 refreshPriority();
             }
 
-            renderPersonal(readHomeListCounts(account && account.user_id));
+            var personalStats = readHomeListCounts(account && account.user_id);
+            renderPersonal(personalStats);
+
+            function applyPlaybackSnapshot(remoteEntries, excludedAnimeIds) {
+                if (destroyed) return;
+                var merged = LampaYaniHomeSections.mergeHistory(localHistory, remoteEntries || []);
+                continuing = LampaYaniHomeSections.continueWatchingEntries(merged, excludedAnimeIds || {});
+                renderLibraryStrip(LampaYaniHomeInsights.libraryPreview(continuing, 3));
+                renderPersonal(personalStats);
+            }
+
+            var playbackUserKey = account && (account.user_id || account.login) || '';
+            var playbackCache = readHomePlaybackSnapshot(playbackUserKey);
+            if (playbackCache.available) applyPlaybackSnapshot(playbackCache.entries, playbackCache.excluded);
+            if (LampaYaniAuth.token() && playbackUserKey && !playbackCache.fresh) {
+                Promise.all([
+                    LampaYaniApi.watchHistory(30, 0).then(LampaYaniHomeSections.normalizeRemoteHistory).catch(function (error) {
+                        console.warn('[YummyAnime Home] Server playback history is unavailable', error);
+                        return null;
+                    }),
+                    loadContinueWatchingExclusions().catch(function (error) {
+                        console.warn('[YummyAnime Home] Playback exclusions are unavailable', error);
+                        return playbackCache.excluded || {};
+                    })
+                ]).then(function (result) {
+                    if (destroyed || result[0] === null) return;
+                    cacheHomePlaybackSnapshot(playbackUserKey, result[0], result[1]);
+                    applyPlaybackSnapshot(result[0], result[1]);
+                });
+            }
+
             if (LampaYaniAuth.token() && Number(account && account.user_id || 0) && !homeListCountsFresh(account.user_id) && (homeButtons.user_lists || homeButtons.updates)) {
                 LampaYaniApi.userListStats(account.user_id).then(function (stats) {
                     if (destroyed) return;
                     var normalized = LampaYaniHomeInsights.listCounts(stats);
                     var hasCounts = Object.keys(normalized).some(function (key) { return Number(normalized[key] || 0) > 0; });
                     cacheHomeListCounts(account.user_id, hasCounts ? normalized : readHomeListCounts(account.user_id));
-                    renderPersonal(stats);
+                    personalStats = stats;
+                    renderPersonal(personalStats);
                 }).catch(function (error) {
                     console.warn('[YummyAnime Home] Personal list insights are unavailable', error);
                 });
@@ -6566,11 +6598,16 @@ function pluginYummyAnime() {
             try {
                 var cached = Lampa.Storage.get(cacheKey(userId), '{}');
                 if (typeof cached === 'string') cached = JSON.parse(cached || '{}');
-                return cached && cached.ids || {};
-            } catch (error) { return {}; }
+                return {
+                    ids: cached && cached.ids || {},
+                    fresh: Boolean(cached && cached.updated_at && Date.now() - Number(cached.updated_at) < 300000)
+                };
+            } catch (error) { return {ids: {}, fresh: false}; }
         }
 
         return withUserId().then(function (userId) {
+            var cached = readCache(userId);
+            if (cached.fresh) return cached.ids;
             return LampaYaniApi.userLists(userId).then(normalizeUserList).then(function (items) {
                 var excluded = {};
                 [2, 3].forEach(function (listId) {
@@ -6586,8 +6623,7 @@ function pluginYummyAnime() {
                 }
                 return excluded;
             }).catch(function (error) {
-                var cached = readCache(userId);
-                if (Object.keys(cached).length) return cached;
+                if (Object.keys(cached.ids).length) return cached.ids;
                 throw error;
             });
         });
@@ -7165,6 +7201,35 @@ function pluginYummyAnime() {
     var homeNotificationCacheLifetime = 300000;
     var homeDashboardCacheKey = 'yani_home_dashboard_snapshot';
     var homeDashboardCacheLifetime = 86400000;
+    var homePlaybackCacheKey = 'yani_home_playback_snapshot';
+    var homePlaybackCacheLifetime = 300000;
+
+    function readHomePlaybackSnapshot(userKey) {
+        if (!userKey || !Lampa.Storage || !Lampa.Storage.get) return {available: false, fresh: false, entries: [], excluded: {}};
+        try {
+            var cached = Lampa.Storage.get(homePlaybackCacheKey, '{}');
+            if (typeof cached === 'string') cached = JSON.parse(cached || '{}');
+            if (String(cached && cached.user_key || '') !== String(userKey) || !Array.isArray(cached.entries)) {
+                return {available: false, fresh: false, entries: [], excluded: {}};
+            }
+            return {
+                available: true,
+                fresh: Boolean(cached.updated_at && Date.now() - Number(cached.updated_at) < homePlaybackCacheLifetime),
+                entries: cached.entries,
+                excluded: cached.excluded && typeof cached.excluded === 'object' ? cached.excluded : {}
+            };
+        } catch (error) { return {available: false, fresh: false, entries: [], excluded: {}}; }
+    }
+
+    function cacheHomePlaybackSnapshot(userKey, entries, excluded) {
+        if (!userKey || !Lampa.Storage || !Lampa.Storage.set) return;
+        Lampa.Storage.set(homePlaybackCacheKey, JSON.stringify({
+            user_key: String(userKey),
+            updated_at: Date.now(),
+            entries: Array.isArray(entries) ? entries.slice(0, 100) : [],
+            excluded: excluded || {}
+        }));
+    }
 
     function readHomeDashboardSnapshot() {
         if (!Lampa.Storage || !Lampa.Storage.get) return {available: false, updated_at: 0, dashboard: {}};
