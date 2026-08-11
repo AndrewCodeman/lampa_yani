@@ -332,6 +332,7 @@
             var discoverItems;
             var discoverPreview;
             var libraryStrip;
+            var serviceHub;
             var introMetrics = {};
             var sectionRailNodes = {};
             var panels = {};
@@ -404,7 +405,23 @@
                     libraryStrip = $('<div class="yani-home__library-preview" aria-hidden="true"></div>');
                     root.append(libraryStrip);
                 }
-                root.append(content);
+                if (group === 'service') {
+                    var constellation = $('<div class="yani-home__service-constellation"></div>');
+                    serviceHub = $(
+                        '<div class="yani-home__service-hub yani-home__service-hub--loading" aria-live="polite">' +
+                            '<span class="yani-home__service-hub-orbit" aria-hidden="true"><i></i><i></i><i></i></span>' +
+                            '<span class="yani-home__service-hub-logo"></span>' +
+                            '<span class="yani-home__service-hub-copy"><small>YummyAnime</small><b></b><em></em></span>' +
+                        '</div>'
+                    );
+                    serviceHub.find('.yani-home__service-hub-logo').html(yummyAnimeIcon());
+                    serviceHub.find('b').text(t('status'));
+                    serviceHub.find('em').text(t('dashboard_data_cached'));
+                    constellation.append(serviceHub, content);
+                    root.append(constellation);
+                } else {
+                    root.append(content);
+                }
                 grid.append(root);
                 panels[group] = content;
                 return content;
@@ -591,6 +608,14 @@
                 if (!button) return;
                 $('.yani-home__service-state', button).remove();
                 $('<span class="yani-home__service-state yani-home__service-state--' + state + '" aria-hidden="true"></span>').insertBefore($('.yani-home__arrow', button));
+            }
+
+            function setServiceHub(state, title, detail) {
+                if (!serviceHub || !serviceHub.length) return;
+                serviceHub.removeClass('yani-home__service-hub--loading yani-home__service-hub--up yani-home__service-hub--attention yani-home__service-hub--degraded yani-home__service-hub--down')
+                    .addClass('yani-home__service-hub--' + (state || 'loading'));
+                serviceHub.find('b').text(title || t('status'));
+                serviceHub.find('em').text(detail || '');
             }
 
             function setIntroMetric(key, value, detail) {
@@ -819,6 +844,7 @@
             }
 
             var account = LampaYaniAuth.get();
+            setServiceHub('loading', t('status'), account && (account.display_name || account.login) ? account.display_name || account.login : t('not_logged_in'));
             var localHistory = playbackHistory();
             var localEntries = LampaYaniHomeSections.normalizeLocalHistory(localHistory);
             var continuing = LampaYaniHomeSections.continueWatchingEntries(localEntries, {});
@@ -993,6 +1019,7 @@
                     var serviceState = dataState === 'cached' ? 'degraded' : service.degraded ? 'degraded' : service.api ? 'up' : 'down';
                     var serviceTitle = dataState === 'cached' ? t('dashboard_data_cached') : service.degraded ? t('degraded') : service.api ? t('api_ok') : t('api_error');
                     setServiceState(homeButtons.status, serviceState);
+                    setServiceHub(serviceState, serviceTitle, account && (account.display_name || account.login) ? account.display_name || account.login : t('not_logged_in'));
                     setPreview(homeButtons.status, serviceTitle, [service.feed ? 'API' : '', service.schedule ? t('schedule') : ''].filter(Boolean).join(' · '));
                     setIntroDataState(dataState, updatedAt);
                     setCount(homeButtons.schedule, schedule.today);

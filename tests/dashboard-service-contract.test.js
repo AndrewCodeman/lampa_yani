@@ -15,9 +15,13 @@ assert.equal(insights.notificationCount({response: {comments: 2, mentions: 1}}),
 assert.match(ui, /LampaYaniApi\.notificationCounts\(\)/);
 assert.match(ui, /yani_home_notification_count/);
 assert.match(ui, /setServiceState\(homeButtons\.status, serviceState\)/);
+assert.match(ui, /yani-home__service-hub/);
+assert.match(ui, /setServiceHub\(serviceState, serviceTitle/);
 assert.match(css, /\.yani-home__service-state--up/);
 assert.match(css, /\.yani-home__service-state--degraded/);
 assert.match(css, /\.yani-home__service-state--down/);
+assert.match(css, /\.yani-home__service-constellation/);
+assert.match(css, /@keyframes yani-home-service-orbit/);
 
 (async () => {
     const partial = await insights.dashboard({

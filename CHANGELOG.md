@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.39.7 — 2026-08-12
+
+- Redesigned the dashboard service area as a connected profile-and-API constellation.
+- Added a live service hub that reflects API, degraded, cached and unavailable states.
+- Kept account, notification and status actions fully focusable while reducing visual weight.
+- Added responsive and reduced-motion behavior for the new service composition.
+
 ## 0.39.6 — 2026-08-12
 
 - Added compact featured-release and featured-collection previews to the dashboard Discover block.
