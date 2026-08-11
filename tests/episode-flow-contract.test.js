@@ -3,6 +3,7 @@ const fs = require('fs');
 
 const api = fs.readFileSync('src/api.js', 'utf8');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
+const translations = fs.readFileSync('src/ui-translations.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 
 assert.match(api, /feed: function \(\)/);
@@ -12,9 +13,10 @@ assert.match(ui, /component: 'yani_new_translations'/);
 assert.match(ui, /key: 'search'/);
 assert.match(ui, /group: 'episode_flow'/);
 assert.ok(ui.indexOf("key: 'search'") < ui.indexOf("key: 'schedule'"), 'Search must remain before the episode flow');
-assert.match(ui, /response\.new_videos/);
-assert.match(ui, /video\.dub_title/);
-assert.match(ui, /yani_update_label/);
+assert.match(ui, /LampaYaniTranslations\.component/);
+assert.match(translations, /value\.new_videos/);
+assert.match(translations, /video\.dub_title/);
+assert.match(translations, /yani_update_label/);
 assert.match(ui, /item\.poster\.big/);
 assert.match(ui, /item\.poster\.mega/);
 assert.match(css, /\.yani-home__episode-flow/);

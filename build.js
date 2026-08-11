@@ -3,7 +3,7 @@ const path = require('path');
 const {execFileSync} = require('child_process');
 
 const root = __dirname;
-const modules = ['src/config.js', 'src/i18n.js', 'src/auth.js', 'src/api.js', 'src/catalog.js', 'src/stream-resolver.js', 'src/aniskip.js', 'src/ui-utils.js', 'src/yani-resolver.js', 'src/lampac-resolver.js', 'src/ui-media.js', 'src/ui-navigation.js', 'src/ui-schedule.js', 'src/ui-notifications.js', 'src/ui-auth.js', 'src/ui-status.js', 'src/ui-player.js', 'src/ui-account-lists.js', 'src/ui-home-sections.js', 'src/ui-collections.js', 'src/ui-releases.js', 'src/ui-recommendations.js', 'src/ui-updates.js', 'src/ui.js'];
+const modules = ['src/config.js', 'src/i18n.js', 'src/auth.js', 'src/api.js', 'src/catalog.js', 'src/stream-resolver.js', 'src/aniskip.js', 'src/ui-utils.js', 'src/yani-resolver.js', 'src/lampac-resolver.js', 'src/ui-media.js', 'src/ui-navigation.js', 'src/ui-schedule.js', 'src/ui-notifications.js', 'src/ui-auth.js', 'src/ui-status.js', 'src/ui-player.js', 'src/ui-account-lists.js', 'src/ui-home-sections.js', 'src/ui-collections.js', 'src/ui-releases.js', 'src/ui-recommendations.js', 'src/ui-updates.js', 'src/ui-translations.js', 'src/ui.js'];
 modules.forEach((file) => execFileSync(process.execPath, ['--check', path.join(root, file)], {stdio: 'inherit'}));
 const body = modules.map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
 const css = fs.readFileSync(path.join(root, 'style.css'), 'utf8');

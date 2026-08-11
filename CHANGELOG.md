@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.7 — 2026-08-11
+
+- Deduplicate New Translations so each anime appears only once with its latest feed event.
+- Sort translation cards by event time and show episode, dubbing and player on the newest entry.
+- Display a compact additional-update count when the feed contains multiple events for one title.
+- Move translation feed logic out of the main UI module and add a localized empty state.
+
 ## 0.34.6 — 2026-08-11
 
 - Group New Releases, Top Rated, For You and Collections into one wide Discover block on the dashboard.

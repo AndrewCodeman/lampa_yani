@@ -746,29 +746,13 @@
     }
 
     function NewTranslations(object) {
-        var comp = new Lampa.InteractionCategory(object);
-        comp.create = function () {
-            var self = this;
-            this.activity.loader(true);
-            LampaYaniApi.feed().then(function (payload) {
-                var response = payload && payload.response ? payload.response : payload || {};
-                var videos = Array.isArray(response.new_videos) ? response.new_videos : [];
-                var cards = videos.map(function (video) {
-                    var card = toCard(video);
-                    var labels = [video.ep_title, video.dub_title, video.player_title].filter(Boolean);
-                    card.yani_update_label = labels.join(' · ');
-                    card.overview = [video.description, video.dub_title, video.player_title].filter(Boolean).join(' · ');
-                    return card;
-                }).filter(function (card) { return Boolean(card.yani_id); });
-                self.build({results: cards, total_pages: 1, title: t('new_translations')});
-            }).catch(function (error) {
-                console.error('[YummyAnime New Translations]', error);
-                self.activity.loader(false);
-                Lampa.Noty.show(t('new_translations_error'));
-            });
-        };
-        comp.cardRender = bindYummyCardRender;
-        return comp;
+        return LampaYaniTranslations.component(object, {
+            t: t,
+            feed: LampaYaniApi.feed,
+            toCard: toCard,
+            cardRender: bindRecommendedCardRender,
+            notice: function (message) { Lampa.Noty.show(message); }
+        });
     }
 
     function NewReleases(object) {

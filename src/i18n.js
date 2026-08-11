@@ -71,6 +71,7 @@
     messages.ru.new_translations = 'Новые переводы';
     messages.ru.translations_and_dubs = 'Переводы и озвучки';
     messages.ru.new_translations_error = 'Не удалось загрузить новые переводы и озвучки';
+    messages.ru.new_translations_empty = 'Новых переводов и озвучек пока нет';
     messages.ru.new_releases = 'Новые релизы';
     messages.ru.new_releases_empty = 'Новых релизов пока нет';
     messages.ru.new_releases_error = 'Не удалось загрузить новые релизы';
@@ -138,6 +139,7 @@
     messages.en.new_translations = 'New translations';
     messages.en.translations_and_dubs = 'Translations and dubs';
     messages.en.new_translations_error = 'Failed to load new translations and dubs';
+    messages.en.new_translations_empty = 'There are no new translations or dubs yet';
     messages.en.new_releases = 'New releases';
     messages.en.new_releases_empty = 'There are no new releases yet';
     messages.en.new_releases_error = 'Failed to load new releases';
@@ -387,6 +389,7 @@
     messages.uk.new_translations = 'Нові переклади';
     messages.uk.translations_and_dubs = 'Переклади та озвучення';
     messages.uk.new_translations_error = 'Не вдалося завантажити нові переклади та озвучення';
+    messages.uk.new_translations_empty = 'Нових перекладів та озвучень поки немає';
     messages.uk.new_releases = 'Нові релізи';
     messages.uk.new_releases_empty = 'Нових релізів поки немає';
     messages.uk.new_releases_error = 'Не вдалося завантажити нові релізи';
