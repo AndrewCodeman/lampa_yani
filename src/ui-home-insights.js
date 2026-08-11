@@ -308,6 +308,15 @@
         return options.authorized ? {key: 'for_you', label: 'recommended_now'} : {key: 'catalog', label: 'start_catalog'};
     }
 
+    function dashboardInitialFocus(savedKey, priorityKey, availableKeys) {
+        availableKeys = Array.isArray(availableKeys) ? availableKeys.map(String) : [];
+        savedKey = String(savedKey || '');
+        priorityKey = String(priorityKey || '');
+        if (savedKey && availableKeys.indexOf(savedKey) >= 0) return savedKey;
+        if (priorityKey && availableKeys.indexOf(priorityKey) >= 0) return priorityKey;
+        return availableKeys[0] || '';
+    }
+
     function mergeDashboardSnapshot(cached, live) {
         cached = cached && typeof cached === 'object' ? cached : {};
         live = live && typeof live === 'object' ? live : {};
@@ -380,6 +389,7 @@
         libraryPreview: libraryPreview,
         notificationCount: notificationCount,
         dashboardPriority: dashboardPriority,
+        dashboardInitialFocus: dashboardInitialFocus,
         mergeDashboardSnapshot: mergeDashboardSnapshot,
         posterOf: posterOf,
         timestampMilliseconds: timestampMilliseconds,

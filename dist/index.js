@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.37.4',
+        version: '0.37.5',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -4735,6 +4735,15 @@ function pluginYummyAnime() {
         return options.authorized ? {key: 'for_you', label: 'recommended_now'} : {key: 'catalog', label: 'start_catalog'};
     }
 
+    function dashboardInitialFocus(savedKey, priorityKey, availableKeys) {
+        availableKeys = Array.isArray(availableKeys) ? availableKeys.map(String) : [];
+        savedKey = String(savedKey || '');
+        priorityKey = String(priorityKey || '');
+        if (savedKey && availableKeys.indexOf(savedKey) >= 0) return savedKey;
+        if (priorityKey && availableKeys.indexOf(priorityKey) >= 0) return priorityKey;
+        return availableKeys[0] || '';
+    }
+
     function mergeDashboardSnapshot(cached, live) {
         cached = cached && typeof cached === 'object' ? cached : {};
         live = live && typeof live === 'object' ? live : {};
@@ -4807,6 +4816,7 @@ function pluginYummyAnime() {
         libraryPreview: libraryPreview,
         notificationCount: notificationCount,
         dashboardPriority: dashboardPriority,
+        dashboardInitialFocus: dashboardInitialFocus,
         mergeDashboardSnapshot: mergeDashboardSnapshot,
         posterOf: posterOf,
         timestampMilliseconds: timestampMilliseconds,
@@ -5711,6 +5721,7 @@ function pluginYummyAnime() {
         var homeFocusStorageKey = 'yani_home_last_focus';
         var destroyed = false;
         var currentEpisodeFlow;
+        var preferredHomeKey = 'catalog';
         var renderIntroContext = function () {};
         var updateEpisodeCountdown = function () {};
         var navigatorInfo = window.navigator || {};
@@ -6044,6 +6055,7 @@ function pluginYummyAnime() {
                 var priority = LampaYaniHomeInsights.dashboardPriority(prioritySignals);
                 var button = homeButtons[priority.key];
                 html.find('.yani-home__item--priority').removeClass('yani-home__item--priority').find('.yani-home__priority').remove();
+                preferredHomeKey = button ? priority.key : homeButtons.catalog ? 'catalog' : Object.keys(homeButtons)[0] || '';
                 if (!button) return;
                 button.addClass('yani-home__item--priority');
                 $('<span class="yani-home__priority" aria-hidden="true"></span>').text(t(priority.label)).appendTo(button);
@@ -6288,11 +6300,18 @@ function pluginYummyAnime() {
                 toggle: function () {
                     Lampa.Controller.collectionSet(scroll.render());
                     var target = last && document.documentElement.contains(last) ? last : false;
-                    if (!target && Lampa.Storage && Lampa.Storage.get) {
-                        var savedKey = String(Lampa.Storage.get(homeFocusStorageKey, '') || '');
-                        scroll.render().find('.selector').each(function () {
-                            if (!target && String($(this).attr('data-yani-home-key') || '') === savedKey) target = this;
+                    if (!target) {
+                        var savedKey = Lampa.Storage && Lampa.Storage.get ? String(Lampa.Storage.get(homeFocusStorageKey, '') || '') : '';
+                        var availableKeys = [];
+                        var availableNodes = {};
+                        scroll.render().find('.selector[data-yani-home-key]').each(function () {
+                            var key = String($(this).attr('data-yani-home-key') || '');
+                            if (!key) return;
+                            availableKeys.push(key);
+                            availableNodes[key] = this;
                         });
+                        var focusKey = LampaYaniHomeInsights.dashboardInitialFocus(savedKey, preferredHomeKey, availableKeys);
+                        target = availableNodes[focusKey] || false;
                     }
                     if (!target) target = scroll.render().find('.selector')[0] || false;
                     Lampa.Controller.collectionFocus(target, scroll.render());
@@ -6315,6 +6334,7 @@ function pluginYummyAnime() {
             destroyed = true;
             homeButtons = {};
             currentEpisodeFlow = null;
+            preferredHomeKey = 'catalog';
             renderIntroContext = function () {};
             updateEpisodeCountdown = function () {};
             scroll.destroy();

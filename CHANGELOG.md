@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.37.5 — 2026-08-12
+
+- Added a smart initial dashboard focus based on the existing priority signal.
+- Preferred continue watching, unread notifications, fresh translations or recommendations on a fresh visit.
+- Preserved the user's last valid dashboard position ahead of the automatic choice.
+- Kept asynchronous data refreshes from moving focus after the dashboard is already active.
+- Added fallbacks for hidden or disabled dashboard sections.
+
 ## 0.37.4 — 2026-08-12
 
 - Enriched the existing dashboard summary instead of adding duplicate navigation blocks.
