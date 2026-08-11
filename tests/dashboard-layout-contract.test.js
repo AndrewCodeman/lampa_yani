@@ -33,5 +33,7 @@ assert.match(css, /\.yani-home__item--catalog\.focus \.yani-home__explore-art--c
 assert.match(css, /\.yani-home__item--genres\.focus \.yani-home__explore-art--genres/);
 assert.match(css, /\.yani-home__item--search\.focus \.yani-home__explore-art--search/);
 assert.match(css, /\.yani-home__item > \.yani-home__explore-art\s*\{[^}]*position: absolute/);
+assert.match(css, /\.yani-home__explore-art--catalog i:nth-child\(1\)[^}]*176,132,239/);
+assert.match(css, /\.yani-home__explore-art--catalog i:nth-child\(4\)[^}]*100,224,178/);
 
 console.log('dashboard layout contract checks passed');

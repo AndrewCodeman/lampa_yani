@@ -480,10 +480,10 @@
 .yani-home__item > .yani-home__explore-art { position: absolute; z-index: 1; right: .85em; top: 50%; width: 4.1em; height: 4.6em; transform: translateY(-50%); pointer-events: none; }
 .yani-home__item > .yani-home__explore-art--catalog { right: 1em; width: 6.8em; perspective: 12em; }
 .yani-home__explore-art--catalog i { position: absolute; top: .35em; width: 2.15em; height: 3.45em; border: .07em solid rgba(255,255,255,.2); border-radius: .34em .18em .3em .2em; background: linear-gradient(155deg, rgba(255,255,255,.28), rgba(255,255,255,.055)); box-shadow: 0 .4em .8em rgba(0,0,0,.18); transform-origin: bottom center; transition: transform .3s cubic-bezier(.2,.8,.2,1), border-color .2s ease; }
-.yani-home__explore-art--catalog i:nth-child(1) { left: .1em; transform: translateY(.38em) rotate(-10deg); }
+.yani-home__explore-art--catalog i:nth-child(1) { left: .1em; transform: translateY(.38em) rotate(-10deg); background: linear-gradient(155deg, rgba(176,132,239,.38), rgba(98,72,171,.13)); }
 .yani-home__explore-art--catalog i:nth-child(2) { left: 1.55em; transform: translateY(.08em) rotate(-3deg); background: linear-gradient(155deg, rgba(255,139,118,.44), rgba(184,76,160,.16)); }
 .yani-home__explore-art--catalog i:nth-child(3) { left: 3.05em; transform: translateY(.02em) rotate(4deg); background: linear-gradient(155deg, rgba(114,199,255,.36), rgba(83,97,212,.14)); }
-.yani-home__explore-art--catalog i:nth-child(4) { left: 4.5em; transform: translateY(.42em) rotate(11deg); }
+.yani-home__explore-art--catalog i:nth-child(4) { left: 4.5em; transform: translateY(.42em) rotate(11deg); background: linear-gradient(155deg, rgba(100,224,178,.34), rgba(38,132,129,.12)); }
 .yani-home__explore-art--catalog b { position: absolute; left: .48em; right: .42em; bottom: .15em; height: .12em; border-radius: 99em; background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent); filter: blur(.04em); }
 .yani-home__item--catalog.focus .yani-home__explore-art--catalog i:nth-child(1) { transform: translate(-.22em,.25em) rotate(-14deg); }
 .yani-home__item--catalog.focus .yani-home__explore-art--catalog i:nth-child(2) { transform: translate(-.08em,-.14em) rotate(-5deg); }

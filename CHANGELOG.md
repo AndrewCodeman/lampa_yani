@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.39.12 — 2026-08-12
+
+- Recolored the Catalog card-stack illustration to violet, coral, blue, and mint.
+- Removed the repeated white cards and avoided flag-like color associations.
+
 ## 0.39.11 — 2026-08-12
 
 - Added lightweight section-aware dashboard atmosphere for clearer TV remote navigation context.
