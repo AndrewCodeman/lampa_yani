@@ -334,7 +334,7 @@
             var introMetrics = {};
             var sectionRailNodes = {};
             var panels = {};
-            var sectionRail = $('<div class="yani-home__section-rail" aria-hidden="true"></div>');
+            var sectionRail = $('<div class="yani-home__section-rail"></div>');
             var sectionDefinitions = [
                 {key: 'explore', title: t('dashboard_browse')},
                 {key: 'episode_flow', title: t('episode_flow')},
@@ -457,6 +457,30 @@
                 } else {
                     grid.append(button);
                 }
+            });
+
+            function homeCollection() {
+                return scroll.render().add(sectionRail);
+            }
+
+            sectionDefinitions.forEach(function (definition) {
+                var node = sectionRailNodes[definition.key];
+                var target = items.filter(function (item) { return item.group === definition.key && homeButtons[item.key]; })[0];
+                if (!node || !target) return;
+                node.addClass('selector').attr({role: 'button', tabindex: '-1', 'aria-label': definition.title});
+                node.data('yani-home-target-key', target.key);
+                node.on('hover:focus', function (event) {
+                    var focused = event.currentTarget || event.target;
+                    last = focused;
+                    if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, target.key);
+                    html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
+                    homeButtons[target.key].closest('.yani-home__panel').addClass('yani-home__panel--active');
+                    renderIntroContext(homeButtons[target.key]);
+                    scroll.update($(focused), true);
+                });
+                node.on('hover:enter click.yaniHomeRail', function () {
+                    target.action();
+                });
             });
             if (!homeButtons.schedule) introMetrics.today.remove();
             if (!homeButtons.new_translations) introMetrics.translations.remove();
@@ -956,13 +980,14 @@
         this.start = function () {
             Lampa.Controller.add('content', {
                 toggle: function () {
-                    Lampa.Controller.collectionSet(scroll.render());
+                    var collection = homeCollection();
+                    Lampa.Controller.collectionSet(collection);
                     var target = last && document.documentElement.contains(last) ? last : false;
                     if (!target) {
                         var savedKey = Lampa.Storage && Lampa.Storage.get ? String(Lampa.Storage.get(homeFocusStorageKey, '') || '') : '';
                         var availableKeys = [];
                         var availableNodes = {};
-                        scroll.render().find('.selector[data-yani-home-key]').each(function () {
+                        collection.find('.selector[data-yani-home-key]').each(function () {
                             var key = String($(this).attr('data-yani-home-key') || '');
                             if (!key) return;
                             availableKeys.push(key);
@@ -971,8 +996,8 @@
                         var focusKey = LampaYaniHomeInsights.dashboardInitialFocus(savedKey, preferredHomeKey, availableKeys);
                         target = availableNodes[focusKey] || false;
                     }
-                    if (!target) target = scroll.render().find('.selector')[0] || false;
-                    Lampa.Controller.collectionFocus(target, scroll.render());
+                    if (!target) target = collection.find('.selector')[0] || false;
+                    Lampa.Controller.collectionFocus(target, collection);
                     if (target) {
                         renderIntroContext($(target));
                         scroll.update($(target), true);

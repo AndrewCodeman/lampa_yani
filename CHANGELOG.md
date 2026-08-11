@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.39.4 — 2026-08-12
+
+- Made the dashboard section rail focusable and usable with a TV remote.
+- Added direct jumps to the first action in each dashboard group.
+- Added an explicit rail focus state and included the rail in Lampa's focus collection.
+
 ## 0.39.3 — 2026-08-12
 
 - Fixed Up navigation from the first account-list card row to the sorting button.
