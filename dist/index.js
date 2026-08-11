@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.34.4',
+        version: '0.34.5',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -142,6 +142,8 @@ function pluginYummyAnime() {
     messages.ru.popular_fallback = 'Популярное сейчас';
     messages.ru.updates = 'Обновления';
     messages.ru.updates_error = 'Не удалось загрузить обновления';
+    messages.ru.updates_empty = 'Для выбранных списков и подписок новых обновлений пока нет';
+    messages.ru.upcoming_release = 'Ожидается выпуск';
     messages.ru.subscriptions = 'Подписки на новые серии';
     messages.ru.subscriptions_empty = 'Подписок на новые серии нет';
     messages.ru.subscriptions_error = 'Не удалось загрузить подписки';
@@ -206,6 +208,8 @@ function pluginYummyAnime() {
     messages.en.popular_fallback = 'Popular now';
     messages.en.updates = 'Updates';
     messages.en.updates_error = 'Failed to load updates';
+    messages.en.updates_empty = 'There are no new updates for your selected lists and subscriptions';
+    messages.en.upcoming_release = 'Upcoming release';
     messages.en.subscriptions = 'New episode subscriptions';
     messages.en.subscriptions_empty = 'There are no episode subscriptions';
     messages.en.subscriptions_error = 'Failed to load subscriptions';
@@ -477,6 +481,8 @@ function pluginYummyAnime() {
     messages.uk.popular_fallback = 'Популярне зараз';
     messages.uk.updates = 'Оновлення';
     messages.uk.updates_error = 'Не вдалося завантажити оновлення';
+    messages.uk.updates_empty = 'Для вибраних списків і підписок нових оновлень поки немає';
+    messages.uk.upcoming_release = 'Очікується випуск';
     messages.uk.subscriptions = 'Підписки на нові серії';
     messages.uk.subscriptions_empty = 'Підписок на нові серії немає';
     messages.uk.subscriptions_error = 'Не вдалося завантажити підписки';
@@ -3211,8 +3217,6 @@ function pluginYummyAnime() {
 (function (window) {
     'use strict';
 
-    function updates(object, deps) { var comp = new Lampa.InteractionCategory(object); comp.create = function () { var self = this; this.activity.loader(true); if (!LampaYaniAuth.token()) return self.build({results: [], total_pages: 1, title: deps.t('updates')}); LampaYaniApi.profile().then(function (payload) { var profile = payload && payload.response ? payload.response : payload; return Promise.all([LampaYaniApi.userLists(profile.id).then(deps.normalizeList).catch(function () { return []; }), LampaYaniApi.subscriptions(profile.id).then(function (response) { var value = response && response.response ? response.response : response, items = Array.isArray(value) ? value : value && (value.items || value.data || value.subscriptions || value.anime) || []; return items.map(function (item) { var source = item && (item.anime || item.title_data || item.object) || item; return source && (source.anime_id || source.id || source.title) ? deps.toCard(source) : null; }).filter(Boolean); }).catch(function () { return []; }), LampaYaniApi.schedule().then(LampaYaniApi.normalize).catch(function () { return []; })]); }).then(function (result) { var cards = result[0].filter(function (item) { var list = item.user && item.user.list && item.user.list.list; return list && [0, 1, 5].indexOf(Number(list.id)) >= 0; }).map(deps.toCard).concat(result[1]), schedule = {}; result[2].forEach(function (item) { schedule[String(item.anime_id || item.id)] = item.episodes || {}; }); var seen = {}; cards = cards.filter(function (card) { var key = String(card.yani_id || card.title); if (seen[key]) return false; seen[key] = true; var episode = schedule[key] || {}; card.yani_update_date = Number(episode.prev_date || episode.next_date || 0); card.yani_update_episode = Number(episode.aired || 0) || null; return true; }).sort(function (a, b) { return Number(b.yani_update_date || 0) - Number(a.yani_update_date || 0); }); self.build({results: cards.slice(0, 20), total_pages: 1, title: deps.t('updates')}); }).catch(function (error) { console.error('[YummyAnime Updates]', error); self.activity.loader(false); Lampa.Noty.show(deps.t('updates_error')); }); }; comp.cardRender = deps.cardRender; return comp; }
-
     function historyPayloadItems(payload) {
         var value = payload && payload.response !== undefined ? payload.response : payload;
         if (Array.isArray(value)) return value;
@@ -3459,7 +3463,6 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.HomeSections = window.LampaYaniHomeSections = {
-        updates: updates,
         history: history,
         normalizeRemoteHistory: normalizeRemoteHistory,
         normalizeLocalHistory: normalizeLocalHistory,
@@ -3891,6 +3894,135 @@ function pluginYummyAnime() {
         payloadItems: payloadItems,
         recentSources: recentSources,
         cardsFromRows: cardsFromRows
+    };
+}(window));
+
+(function (window) {
+    'use strict';
+
+    function responseItems(payload, fields) {
+        var value = payload && payload.response !== undefined ? payload.response : payload;
+        if (Array.isArray(value)) return value;
+        fields = fields || [];
+        for (var index = 0; value && index < fields.length; index += 1) {
+            if (Array.isArray(value[fields[index]])) return value[fields[index]];
+        }
+        return [];
+    }
+
+    function animeSource(item) {
+        return item && (item.anime || item.title_data || item.object) || item || {};
+    }
+
+    function animeId(item) {
+        var source = animeSource(item);
+        return source.anime_id || source.animeId || source.yani_id || source.id || '';
+    }
+
+    function listId(item) {
+        var source = animeSource(item);
+        var state = source.user && source.user.list || item && item.user && item.user.list || source.user_list || source.list_state;
+        var list = state && state.list && typeof state.list === 'object' ? state.list : state;
+        return list && typeof list.id !== 'undefined' ? Number(list.id) : null;
+    }
+
+    function relevantTitles(listItems, subscriptionPayload) {
+        var values = {};
+        (listItems || []).forEach(function (item) {
+            if ([0, 1, 5].indexOf(listId(item)) < 0) return;
+            var id = String(animeId(item));
+            if (id) values[id] = animeSource(item);
+        });
+        responseItems(subscriptionPayload, ['items', 'data', 'subscriptions', 'anime']).forEach(function (item) {
+            var id = String(animeId(item));
+            if (id && !values[id]) values[id] = animeSource(item);
+        });
+        return values;
+    }
+
+    function latestVideoEvents(feedPayload) {
+        var events = responseItems(feedPayload, ['new_videos']).slice().sort(function (a, b) {
+            return Number(b && b.date || 0) - Number(a && a.date || 0);
+        });
+        var latest = {};
+        events.forEach(function (event) {
+            var id = String(animeId(event));
+            if (id && !latest[id]) latest[id] = event;
+        });
+        return latest;
+    }
+
+    function updateLabel(event, episodes, t) {
+        if (event) {
+            return [event.ep_title || event.number && t('episode') + ' ' + event.number, event.dub_title, event.player_title]
+                .filter(Boolean).join(' · ');
+        }
+        if (episodes && Number(episodes.aired || 0)) return t('episode') + ' ' + Number(episodes.aired);
+        return t('upcoming_release');
+    }
+
+    function cards(listItems, subscriptionPayload, schedulePayload, feedPayload, deps) {
+        var relevant = relevantTitles(listItems, subscriptionPayload);
+        var schedule = {};
+        deps.normalize(schedulePayload).forEach(function (item) {
+            var id = String(animeId(item));
+            if (id) schedule[id] = item;
+        });
+        var events = latestVideoEvents(feedPayload);
+        var results = Object.keys(relevant).map(function (id) {
+            var scheduled = schedule[id] || {};
+            var event = events[id] || null;
+            var source = Object.assign({}, relevant[id], scheduled, event || {});
+            var card = deps.toCard(source);
+            var episodes = scheduled.episodes || source.episodes || {};
+            card.yani_update_date = Number(event && event.date || episodes.prev_date || episodes.next_date || 0);
+            card.yani_update_label = updateLabel(event, episodes, deps.t);
+            return card;
+        }).filter(function (card) { return Boolean(card.yani_id && card.yani_update_date); });
+        return results.sort(function (a, b) {
+            return Number(b.yani_update_date || 0) - Number(a.yani_update_date || 0);
+        }).slice(0, 40);
+    }
+
+    function component(object, deps) {
+        var comp = new Lampa.InteractionCategory(object);
+        comp.create = function () {
+            var self = this;
+            this.activity.loader(true);
+            if (!deps.authorized()) {
+                self.build({results: [], total_pages: 1, title: deps.t('updates')});
+                deps.notice(deps.t('login_required'));
+                return;
+            }
+            deps.resolveUserId().then(function (userId) {
+                return Promise.all([
+                    deps.loadLists(userId),
+                    deps.subscriptions(userId).catch(function () { return []; }),
+                    deps.schedule().catch(function () { return []; }),
+                    deps.feed().catch(function () { return {}; })
+                ]);
+            }).then(function (result) {
+                var resultCards = cards(result[0], result[1], result[2], result[3], deps);
+                self.build({results: resultCards, total_pages: 1, title: deps.t('updates')});
+                if (!resultCards.length) deps.notice(deps.t('updates_empty'));
+            }).catch(function (error) {
+                console.error('[YummyAnime Updates]', error);
+                self.activity.loader(false);
+                deps.notice(deps.t('updates_error'));
+            });
+        };
+        comp.cardRender = deps.cardRender;
+        return comp;
+    }
+
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.Updates = window.LampaYaniUpdates = {
+        component: component,
+        animeId: animeId,
+        listId: listId,
+        relevantTitles: relevantTitles,
+        latestVideoEvents: latestVideoEvents,
+        cards: cards
     };
 }(window));
 
@@ -4688,7 +4820,19 @@ function pluginYummyAnime() {
     }
 
     function Updates(object) {
-        return LampaYaniHomeSections.updates(object, {t: t, toCard: toCard, normalizeList: normalizeUserList, cardRender: bindYummyCardRender});
+        return LampaYaniUpdates.component(object, {
+            t: t,
+            authorized: function () { return Boolean(LampaYaniAuth.token()); },
+            resolveUserId: resolveUserListsUserId,
+            loadLists: loadUserListsSnapshot,
+            subscriptions: LampaYaniApi.subscriptions,
+            schedule: LampaYaniApi.schedule,
+            feed: LampaYaniApi.feed,
+            normalize: LampaYaniApi.normalize,
+            toCard: toCard,
+            cardRender: bindYummyCardRender,
+            notice: function (message) { Lampa.Noty.show(message); }
+        });
     }
 
     function History(object) {

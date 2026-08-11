@@ -792,7 +792,19 @@
     }
 
     function Updates(object) {
-        return LampaYaniHomeSections.updates(object, {t: t, toCard: toCard, normalizeList: normalizeUserList, cardRender: bindYummyCardRender});
+        return LampaYaniUpdates.component(object, {
+            t: t,
+            authorized: function () { return Boolean(LampaYaniAuth.token()); },
+            resolveUserId: resolveUserListsUserId,
+            loadLists: loadUserListsSnapshot,
+            subscriptions: LampaYaniApi.subscriptions,
+            schedule: LampaYaniApi.schedule,
+            feed: LampaYaniApi.feed,
+            normalize: LampaYaniApi.normalize,
+            toCard: toCard,
+            cardRender: bindYummyCardRender,
+            notice: function (message) { Lampa.Noty.show(message); }
+        });
     }
 
     function History(object) {

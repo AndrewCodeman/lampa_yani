@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.5 — 2026-08-11
+
+- Rebuild Updates around Watching, Planned, Postponed and subscribed titles only.
+- Combine user lists, subscriptions, schedule and `/feed` `new_videos` into one latest-change timeline.
+- Exclude Completed and Dropped titles and keep only the newest video event per anime.
+- Show episode, dubbing and source details while reusing the cached account-list snapshot.
+
 ## 0.34.4 — 2026-08-11
 
 - Personalize For You with both local playback and authorized YummyAnime watch history.

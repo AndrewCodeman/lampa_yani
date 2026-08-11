@@ -91,6 +91,8 @@
     messages.ru.popular_fallback = 'Популярное сейчас';
     messages.ru.updates = 'Обновления';
     messages.ru.updates_error = 'Не удалось загрузить обновления';
+    messages.ru.updates_empty = 'Для выбранных списков и подписок новых обновлений пока нет';
+    messages.ru.upcoming_release = 'Ожидается выпуск';
     messages.ru.subscriptions = 'Подписки на новые серии';
     messages.ru.subscriptions_empty = 'Подписок на новые серии нет';
     messages.ru.subscriptions_error = 'Не удалось загрузить подписки';
@@ -155,6 +157,8 @@
     messages.en.popular_fallback = 'Popular now';
     messages.en.updates = 'Updates';
     messages.en.updates_error = 'Failed to load updates';
+    messages.en.updates_empty = 'There are no new updates for your selected lists and subscriptions';
+    messages.en.upcoming_release = 'Upcoming release';
     messages.en.subscriptions = 'New episode subscriptions';
     messages.en.subscriptions_empty = 'There are no episode subscriptions';
     messages.en.subscriptions_error = 'Failed to load subscriptions';
@@ -426,6 +430,8 @@
     messages.uk.popular_fallback = 'Популярне зараз';
     messages.uk.updates = 'Оновлення';
     messages.uk.updates_error = 'Не вдалося завантажити оновлення';
+    messages.uk.updates_empty = 'Для вибраних списків і підписок нових оновлень поки немає';
+    messages.uk.upcoming_release = 'Очікується випуск';
     messages.uk.subscriptions = 'Підписки на нові серії';
     messages.uk.subscriptions_empty = 'Підписок на нові серії немає';
     messages.uk.subscriptions_error = 'Не вдалося завантажити підписки';
