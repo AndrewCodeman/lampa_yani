@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.39.0 — 2026-08-12
+
+- Added local sorting to every YummyAnime account list: recently added, progress, rating, release year and title.
+- Replaced a multi-button toolbar concept with one compact TV-friendly sorting panel.
+- Made the panel reachable with Up from the first card row and Down returns to the previously focused card.
+- Kept the selected mode separately for each user list and applied it without another API request.
+- Preserved pagination after sorting and added Russian, English and Ukrainian labels.
+
 ## 0.38.2 — 2026-08-12
 
 - Cached successful YummyAnime-to-TMDB card matches for 30 days.

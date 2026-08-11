@@ -4,6 +4,7 @@ const vm = require('vm');
 
 const ui = fs.readFileSync('src/ui.js', 'utf8');
 const lists = fs.readFileSync('src/ui-account-lists.js', 'utf8');
+const listControls = fs.readFileSync('src/ui-account-list-controls.js', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 
 assert.match(ui, /Lampa\.Component\.add\('yani_user_lists', UserLists\)/);
@@ -14,6 +15,12 @@ assert.match(ui, /component: 'yani_user_lists'/);
 
 assert.match(lists, /function userLists\(object, deps\)/);
 assert.match(lists, /var pageSize = 30/);
+assert.match(lists, /LampaYaniAccountListControls\.create/);
+assert.match(lists, /items = controls\.sort/);
+assert.match(lists, /controls\.install\(items\.length\)/);
+assert.match(lists, /showSelect: deps\.showSelect/);
+assert.match(listControls, /yani-account-list-sort-trigger selector/);
+assert.match(listControls, /yani_account_list_sort_/);
 assert.match(lists, /object\.page = 1/);
 assert.match(lists, /items\.slice\(start, start \+ pageSize\)\.map\(deps\.toCard\)/);
 assert.match(lists, /object\.lazy && deps\.loadItems/);

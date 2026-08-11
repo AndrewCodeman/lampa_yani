@@ -63,6 +63,22 @@
         var pageSize = 30;
         var totalPages = 1;
         var destroyed = false;
+        var controls = LampaYaniAccountListControls.create({
+            comp: comp,
+            object: object,
+            t: deps.t,
+            showSelect: deps.showSelect,
+            onSelect: function (sort) {
+                var next = Object.assign({}, object, {
+                    url: String(object.url || 'yani/account/list').replace(/\/sort\/[^/]+$/, '') + '/sort/' + sort,
+                    sort: sort,
+                    page: 1,
+                    lazy: false,
+                    items: items
+                });
+                Lampa.Activity.replace(next);
+            }
+        });
 
         function pageCards(page) {
             var start = Math.max(0, (page - 1) * pageSize);
@@ -77,9 +93,10 @@
                 : Promise.resolve(object.items || []);
             source.then(function (loaded) {
                 if (destroyed) return;
-                items = Array.isArray(loaded) ? loaded : [];
+                items = controls.sort(Array.isArray(loaded) ? loaded : []);
                 totalPages = Math.max(1, Math.ceil(items.length / pageSize));
                 self.build({results: pageCards(1), total_pages: totalPages, title: object.title});
+                controls.install(items.length);
             }).catch(function (error) {
                 if (destroyed) return;
                 console.error('[YummyAnime User List]', error);

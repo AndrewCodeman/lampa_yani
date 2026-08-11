@@ -2036,6 +2036,8 @@
 
     function AccountList(object) {
         return LampaYaniAccountLists.accountList(object, {
+            t: t,
+            showSelect: showYummySelect,
             toCard: toCard,
             cardRender: bindYummyCardRender,
             loadItems: loadUserListShortcutItems,
