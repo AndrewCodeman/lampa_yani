@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.36.9 — 2026-08-11
+
+- Added current release and featured collection previews to the dashboard discovery panel.
+- Added feed-derived titles, metadata, collection size and poster artwork without extra requests.
+- Preserved discovery previews in the resilient dashboard snapshot during API outages.
+- Kept artwork disabled on reduced-motion, low-memory and low-CPU devices.
+
 ## 0.36.8 — 2026-08-11
 
 - Added a resilient 24-hour local snapshot for dashboard schedule and feed insights.

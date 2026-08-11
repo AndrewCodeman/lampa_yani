@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.36.8',
+        version: '0.36.9',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -4567,6 +4567,46 @@ function pluginYummyAnime() {
         };
     }
 
+    function valueLabel(value) {
+        if (!value) return '';
+        if (typeof value === 'string' || typeof value === 'number') return String(value);
+        return value.title || value.name || value.shortname || value.alias || '';
+    }
+
+    function discoveryPoster(item) {
+        var poster = posterOf(item);
+        if (poster) return poster;
+        var previews = item && Array.isArray(item.poster_previews) ? item.poster_previews : [];
+        if (previews.length) return posterOf({poster: previews[0]});
+        var animes = item && Array.isArray(item.animes) ? item.animes : [];
+        return animes.length ? posterOf(animes[0]) : '';
+    }
+
+    function discoveryInsights(payload) {
+        var value = response(payload);
+        var releases = Array.isArray(value.new) ? value.new.slice() : [];
+        releases.sort(function (a, b) {
+            var aTime = timestampMilliseconds(a && (a.updated_at || a.created_at || a.date));
+            var bTime = timestampMilliseconds(b && (b.updated_at || b.created_at || b.date));
+            return bTime - aTime;
+        });
+        var collections = Array.isArray(value.collections) ? value.collections : [];
+        var release = releases[0] || null;
+        var collection = collections[0] || null;
+        return {
+            new_release: release ? {
+                title: titleOf(release),
+                poster: discoveryPoster(release),
+                meta: [valueLabel(release.year || release.release_year), valueLabel(release.anime_status || release.status), valueLabel(release.type)].filter(Boolean).join(' · ')
+            } : null,
+            collection: collection ? {
+                title: titleOf(collection),
+                poster: discoveryPoster(collection),
+                count: Array.isArray(collection.animes) ? collection.animes.length : Math.max(0, Number(collection.anime_count || collection.count || 0))
+            } : null
+        };
+    }
+
     function episodeFlow(schedulePayload, feedPayload, now) {
         now = Number(now || Date.now());
         var releases = scheduleReleases(schedulePayload);
@@ -4691,6 +4731,7 @@ function pluginYummyAnime() {
             counts: service.feed ? live.counts || {} : cached.counts || live.counts || {},
             schedule: service.schedule ? live.schedule || {} : cached.schedule || live.schedule || {},
             translations: service.feed ? live.translations || {} : cached.translations || live.translations || {},
+            discovery: service.feed ? live.discovery || {} : cached.discovery || live.discovery || {},
             episode_flow: {
                 japan: service.schedule ? liveFlow.japan : cachedFlow.japan || liveFlow.japan,
                 waiting: service.feed && service.schedule ? liveFlow.waiting : cachedFlow.waiting || liveFlow.waiting,
@@ -4722,6 +4763,7 @@ function pluginYummyAnime() {
                 counts: counts(feed.data),
                 schedule: scheduleInsight(schedule.data, options.now),
                 translations: translationInsight(feed.data),
+                discovery: discoveryInsights(feed.data),
                 episode_flow: episodeFlow(schedule.data, feed.data, options.now),
                 service: {
                     api: feed.ok || schedule.ok,
@@ -4740,6 +4782,7 @@ function pluginYummyAnime() {
         dashboard: dashboard,
         scheduleInsight: scheduleInsight,
         translationInsight: translationInsight,
+        discoveryInsights: discoveryInsights,
         episodeFlow: episodeFlow,
         scheduleReleases: scheduleReleases,
         translationEntries: translationEntries,
@@ -6074,6 +6117,23 @@ function pluginYummyAnime() {
                     } else {
                         setPreview(homeButtons.new_translations, '', '');
                         setArtwork(homeButtons.new_translations, '');
+                    }
+                    var discovery = dashboard.discovery || {};
+                    var newRelease = discovery.new_release;
+                    if (newRelease) {
+                        setPreview(homeButtons.new_releases, newRelease.title, newRelease.meta);
+                        setArtwork(homeButtons.new_releases, newRelease.poster);
+                    } else {
+                        setPreview(homeButtons.new_releases, '', '');
+                        setArtwork(homeButtons.new_releases, '');
+                    }
+                    var featuredCollection = discovery.collection;
+                    if (featuredCollection) {
+                        setPreview(homeButtons.collections, featuredCollection.title, featuredCollection.count ? featuredCollection.count + ' ' + t('anime_count') : '');
+                        setArtwork(homeButtons.collections, featuredCollection.poster);
+                    } else {
+                        setPreview(homeButtons.collections, '', '');
+                        setArtwork(homeButtons.collections, '');
                     }
                     refreshPriority();
                 }

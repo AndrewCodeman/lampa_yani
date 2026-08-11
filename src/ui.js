@@ -689,6 +689,23 @@
                         setPreview(homeButtons.new_translations, '', '');
                         setArtwork(homeButtons.new_translations, '');
                     }
+                    var discovery = dashboard.discovery || {};
+                    var newRelease = discovery.new_release;
+                    if (newRelease) {
+                        setPreview(homeButtons.new_releases, newRelease.title, newRelease.meta);
+                        setArtwork(homeButtons.new_releases, newRelease.poster);
+                    } else {
+                        setPreview(homeButtons.new_releases, '', '');
+                        setArtwork(homeButtons.new_releases, '');
+                    }
+                    var featuredCollection = discovery.collection;
+                    if (featuredCollection) {
+                        setPreview(homeButtons.collections, featuredCollection.title, featuredCollection.count ? featuredCollection.count + ' ' + t('anime_count') : '');
+                        setArtwork(homeButtons.collections, featuredCollection.poster);
+                    } else {
+                        setPreview(homeButtons.collections, '', '');
+                        setArtwork(homeButtons.collections, '');
+                    }
                     refreshPriority();
                 }
 
