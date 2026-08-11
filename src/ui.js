@@ -330,6 +330,7 @@
             var episodeFlowTimeline;
             var discover;
             var discoverItems;
+            var discoverPreview;
             var libraryStrip;
             var introMetrics = {};
             var sectionRailNodes = {};
@@ -446,8 +447,9 @@
                     episodeFlowItems.append(button);
                 } else if (item.group === 'discover') {
                     if (!discover) {
-                        discover = $('<div class="yani-home__panel yani-home__panel--discover yani-home__discover"><div class="yani-home__discover-head"><span class="yani-home__discover-title"></span><span class="yani-home__discover-mark" aria-hidden="true"><i></i><i></i><i></i></span></div><div class="yani-home__discover-items"></div></div>');
+                        discover = $('<div class="yani-home__panel yani-home__panel--discover yani-home__discover"><div class="yani-home__discover-head"><span class="yani-home__discover-title"></span><span class="yani-home__discover-mark" aria-hidden="true"><i></i><i></i><i></i></span></div><div class="yani-home__discover-preview"></div><div class="yani-home__discover-items"></div></div>');
                         discover.find('.yani-home__discover-title').text(t('discover'));
+                        discoverPreview = discover.find('.yani-home__discover-preview');
                         discoverItems = discover.find('.yani-home__discover-items');
                         grid.append(discover);
                     }
@@ -648,6 +650,74 @@
                     .prependTo(button);
                 button.addClass('yani-home__item--artwork');
                 refreshIntroContext(button);
+            }
+
+            function renderDiscoveryPreviews(discovery) {
+                if (!discoverPreview || !discoverPreview.length) return;
+                discoverPreview.empty();
+                discovery = discovery || {};
+
+                function appendPreview(options) {
+                    if (!options || !options.id) return;
+                    var node = $('<div class="yani-home__discover-preview-card yani-home__discover-preview-card--' + options.kind + ' selector" role="button" tabindex="-1"></div>');
+                    var poster = String(options.poster || '');
+                    if (!lowMemoryDevice && !lowCpuDevice && /^https?:\/\//i.test(poster)) {
+                        node.append($('<span class="yani-home__discover-preview-art" aria-hidden="true"></span>').css('background-image', 'url("' + poster.replace(/["\\]/g, '') + '")'));
+                    }
+                    node.append(
+                        $('<span class="yani-home__discover-preview-kicker"></span>').text(options.kicker),
+                        $('<b></b>').text(options.title || t('untitled')),
+                        $('<small></small>').text(options.meta || ''),
+                        $('<i aria-hidden="true">›</i>')
+                    );
+                    node.data('yani-home-context-key', options.targetKey);
+                    node.data('yani-home-group', 'discover');
+                    node.data('yani-home-title', options.kicker);
+                    node.data('yani-home-insight-title', options.title || '');
+                    node.data('yani-home-insight-meta', options.meta || '');
+                    node.data('yani-home-poster', poster);
+                    node.on('hover:focus', function (event) {
+                        var focused = event.currentTarget || event.target;
+                        last = focused;
+                        if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, options.targetKey);
+                        html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
+                        discover.addClass('yani-home__panel--active');
+                        renderIntroContext($(focused));
+                        scroll.update($(focused), true);
+                    });
+                    node.on('hover:enter click.yaniHomeDiscoveryPreview', options.action);
+                    discoverPreview.append(node);
+                }
+
+                var release = discovery.new_release;
+                if (release && release.anime_id) {
+                    appendPreview({
+                        id: release.anime_id,
+                        kind: 'release',
+                        targetKey: 'new_releases',
+                        kicker: t('new_releases'),
+                        title: release.title,
+                        meta: release.meta,
+                        poster: release.poster,
+                        action: function () {
+                            openYummyDetail(toCard({anime_id: release.anime_id, title: release.title, poster: release.poster, year: release.year, type: release.type}), false);
+                        }
+                    });
+                }
+                var collection = discovery.collection;
+                if (collection && collection.id !== '' && collection.id !== null && collection.id !== undefined) {
+                    appendPreview({
+                        id: collection.id,
+                        kind: 'collection',
+                        targetKey: 'collections',
+                        kicker: t('collection'),
+                        title: collection.title,
+                        meta: collection.count ? collection.count + ' ' + t('anime_count') : '',
+                        poster: collection.poster,
+                        action: function () { openCollection({id: collection.id, title: collection.title}); }
+                    });
+                }
+                discoverPreview.toggleClass('yani-home__discover-preview--visible', Boolean(discoverPreview.children().length));
             }
 
             var prioritySignals = {
@@ -955,6 +1025,7 @@
                         setIntroMetric('translations', translationsKnown ? translations.count : null, '');
                     }
                     var discovery = dashboard.discovery || {};
+                    renderDiscoveryPreviews(discovery);
                     var newRelease = discovery.new_release;
                     if (newRelease) {
                         setPreview(homeButtons.new_releases, newRelease.title, newRelease.meta);

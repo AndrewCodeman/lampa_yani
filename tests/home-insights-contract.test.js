@@ -55,6 +55,15 @@ assert.equal(translations.count, 2);
 assert.equal(translations.preview.title, 'Newest');
 assert.equal(translations.preview.episode, 'Episode 4');
 
+const discovery = insights.discoveryInsights({response: {
+    new: [{anime_id: 42, title: 'Newest release', year: 2026, type: 'TV', updated_at: 200}],
+    collections: [{id: 7, title: 'Weekend picks', anime_count: 12}]
+}});
+assert.equal(discovery.new_release.anime_id, 42);
+assert.equal(discovery.new_release.year, '2026');
+assert.equal(discovery.collection.id, 7);
+assert.equal(discovery.collection.count, 12);
+
 const flow = insights.episodeFlow({response: [
     {anime_id: 10, title: 'Awaiting dub', episodes: {aired: 2, count: 12, prev_date: (now - 3600000) / 1000, next_date: (now + 86400000) / 1000}},
     {anime_id: 11, title: 'Next broadcast', episodes: {aired: 4, count: 12, next_date: (now + 1800000) / 1000}}

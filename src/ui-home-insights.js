@@ -181,13 +181,18 @@
         var collections = Array.isArray(value.collections) ? value.collections : [];
         var release = releases[0] || null;
         var collection = collections[0] || null;
+        var releaseAnime = release && release.anime && typeof release.anime === 'object' ? release.anime : {};
         return {
             new_release: release ? {
+                anime_id: release.anime_id || release.animeId || releaseAnime.anime_id || releaseAnime.id || release.id || '',
                 title: titleOf(release),
                 poster: discoveryPoster(release),
+                year: valueLabel(release.year || release.release_year || releaseAnime.year || releaseAnime.release_year),
+                type: valueLabel(release.type || releaseAnime.type),
                 meta: [valueLabel(release.year || release.release_year), valueLabel(release.anime_status || release.status), valueLabel(release.type)].filter(Boolean).join(' · ')
             } : null,
             collection: collection ? {
+                id: collection.collection_id || collection.id || collection._id || '',
                 title: titleOf(collection),
                 poster: discoveryPoster(collection),
                 count: Array.isArray(collection.animes) ? collection.animes.length : Math.max(0, Number(collection.anime_count || collection.count || 0))

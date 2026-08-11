@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.39.6 — 2026-08-12
+
+- Added compact featured-release and featured-collection previews to the dashboard Discover block.
+- Made both previews focusable and directly actionable from a TV remote.
+- Reused the existing dashboard feed snapshot without adding API requests.
+- Preserved responsive and low-memory behavior for preview artwork.
+
 ## 0.39.5 — 2026-08-12
 
 - Made the episode-flow stages focusable from a TV remote.
