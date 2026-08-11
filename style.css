@@ -192,12 +192,21 @@
 }
 
 .yani-home__grid {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(3, minmax(12em, 1fr));
     gap: 1.05em;
     padding: 2.2em;
     max-width: 94em;
     margin: 0 auto;
+}
+
+.yani-home__grid::before {
+    content: '';
+    position: absolute;
+    inset: 7% 5% 10%;
+    pointer-events: none;
+    background: radial-gradient(circle at 20% 20%, rgba(239,100,112,.12), transparent 38%), radial-gradient(circle at 82% 70%, rgba(90,147,255,.1), transparent 42%);
 }
 
 .yani-home__item {
@@ -215,6 +224,38 @@
     transition: transform .18s ease, background .18s ease, border-color .18s ease;
 }
 
+.yani-home__item::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    top: -80%;
+    bottom: -80%;
+    left: -45%;
+    width: 24%;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);
+    transform: rotate(18deg) translateX(-220%);
+    transition: transform .48s ease;
+}
+
+.yani-home__item > * { position: relative; z-index: 1; }
+.yani-home--motion .yani-home__item { animation: yani-home-reveal .34s ease-out backwards; }
+.yani-home--motion .yani-home__item:nth-child(2) { animation-delay: .035s; }
+.yani-home--motion .yani-home__item:nth-child(3) { animation-delay: .07s; }
+.yani-home--motion .yani-home__item:nth-child(4) { animation-delay: .105s; }
+.yani-home--motion .yani-home__item:nth-child(5) { animation-delay: .14s; }
+.yani-home--motion .yani-home__item:nth-child(6) { animation-delay: .175s; }
+.yani-home--motion .yani-home__item:nth-child(7) { animation-delay: .21s; }
+.yani-home--motion .yani-home__item:nth-child(8) { animation-delay: .245s; }
+.yani-home--motion .yani-home__item:nth-child(9) { animation-delay: .28s; }
+.yani-home--motion .yani-home__item:nth-child(10) { animation-delay: .315s; }
+.yani-home--motion .yani-home__item:nth-child(11) { animation-delay: .35s; }
+
+@keyframes yani-home-reveal {
+    from { opacity: 0; transform: translateY(.65em) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .yani-home__item.focus {
     background: linear-gradient(135deg, #fff, rgba(255,255,255,.82));
     color: #16151b;
@@ -222,6 +263,8 @@
     box-shadow: 0 0 0 .18em rgba(255,255,255,.22), 0 1em 2.4em rgba(0,0,0,.25);
     transform: translateY(-.12em) scale(1.015);
 }
+
+.yani-home--motion .yani-home__item.focus::before { transform: rotate(18deg) translateX(680%); }
 
 .yani-home__icon {
     flex: 0 0 3.35em;
@@ -234,6 +277,7 @@
     background: rgba(0,0,0,.18);
     color: #fff;
     box-shadow: inset 0 0 0 .08em rgba(255,255,255,.12);
+    transition: transform .24s ease, box-shadow .24s ease;
 }
 
 .yani-home__icon svg {
@@ -258,6 +302,7 @@
     color: rgba(255,255,255,.55);
     font-size: 2em;
     line-height: 1;
+    transition: transform .2s ease, color .2s ease;
 }
 
 .yani-home__item.focus .yani-home__arrow {
@@ -272,12 +317,27 @@
 .yani-home__item--continue_watching .yani-home__icon { background: linear-gradient(135deg, #f0af54, #d87742); }
 .yani-home__item--status .yani-home__icon { background: linear-gradient(135deg, #48c7a0, #238d8d); }
 .yani-home__item--top_rated .yani-home__icon { background: linear-gradient(135deg, #f5c95e, #d97939); }
+.yani-home__item--for_you .yani-home__icon { background: linear-gradient(135deg, #ff7b93, #a7427f); }
+.yani-home__item--updates .yani-home__icon { background: linear-gradient(135deg, #5eb7ff, #5861c5); }
 .yani-home__item--user_lists .yani-home__icon { background: linear-gradient(135deg, #6f8ff3, #5750bb); }
 .yani-home__item--account .yani-home__icon { background: linear-gradient(135deg, #e77ab3, #9d4b9c); }
 
 .yani-home__item.focus .yani-home__icon {
     color: #fff;
     box-shadow: 0 .35em .8em rgba(0,0,0,.2);
+    transform: rotate(-3deg) scale(1.1);
+}
+
+.yani-home--reduced-motion .yani-home__item,
+.yani-home--reduced-motion .yani-home__item::before,
+.yani-home--reduced-motion .yani-home__icon,
+.yani-home--reduced-motion .yani-home__arrow { animation: none; transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .yani-home__item,
+    .yani-home__item::before,
+    .yani-home__icon,
+    .yani-home__arrow { animation: none !important; transition: none !important; }
 }
 
 .yani-policy {

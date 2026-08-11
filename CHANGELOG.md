@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.13 — 2026-08-11
+
+- Add staggered tile entrance animations and subtle dashboard ambient highlights.
+- Add focus shine, icon movement and smoother arrow feedback to YummyAnime Home.
+- Disable dashboard motion on reduced-motion, low-memory and two-core devices.
+
 ## 0.33.12 — 2026-08-11
 
 - Add a focusable personal-rating action to the YummyAnime title page.

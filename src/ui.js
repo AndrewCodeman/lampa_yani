@@ -475,6 +475,11 @@
         var html = $('<div class="yani-home"></div>');
         var grid = $('<div class="yani-home__grid"></div>');
         var last;
+        var navigatorInfo = window.navigator || {};
+        var reducedMotion = Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        var lowMemoryDevice = Number(navigatorInfo.deviceMemory || 0) > 0 && Number(navigatorInfo.deviceMemory) <= 2;
+        var lowCpuDevice = Number(navigatorInfo.hardwareConcurrency || 0) > 0 && Number(navigatorInfo.hardwareConcurrency) <= 2;
+        html.addClass(reducedMotion || lowMemoryDevice || lowCpuDevice ? 'yani-home--reduced-motion' : 'yani-home--motion');
 
         var items = [
             {key: 'catalog', title: t('catalog'), action: function () {
