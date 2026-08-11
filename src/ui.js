@@ -322,6 +322,7 @@
             );
             var episodeFlow;
             var episodeFlowItems;
+            var episodeFlowTimeline;
             var discover;
             var discoverItems;
             var panels = {};
@@ -378,8 +379,9 @@
                 button.on('hover:enter click.yaniHome', item.action);
                 if (item.group === 'episode_flow') {
                     if (!episodeFlow) {
-                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__episode-flow-title"></span><span class="yani-home__episode-flow-live"><i></i></span></div><div class="yani-home__episode-flow-items"></div><div class="yani-home__episode-flow-wave" aria-hidden="true"><svg viewBox="0 0 240 44" preserveAspectRatio="none"><path d="M2 28 C58 2 83 43 121 23 S185 4 238 25"/><circle cx="121" cy="23" r="4"/></svg></div></div>');
+                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__episode-flow-title"></span><span class="yani-home__episode-flow-live"><i></i></span></div><div class="yani-home__episode-timeline" aria-hidden="true"></div><div class="yani-home__episode-flow-items"></div></div>');
                         episodeFlow.find('.yani-home__episode-flow-title').text(t('episode_flow'));
+                        episodeFlowTimeline = episodeFlow.find('.yani-home__episode-timeline');
                         episodeFlowItems = episodeFlow.find('.yani-home__episode-flow-items');
                         grid.append(episodeFlow);
                     }
@@ -421,6 +423,41 @@
                 if (meta) insight.append($('<div class="yani-home__item-insight-meta"></div>').text(meta));
                 $('.yani-home__text', button).append(insight);
                 button.addClass('yani-home__item--with-insight');
+            }
+
+            function renderEpisodeTimeline(flow) {
+                if (!episodeFlowTimeline) return;
+                flow = flow || {};
+                var stages = [
+                    {key: 'japan', label: t('japan_broadcast')},
+                    {key: 'waiting', label: t('translation_waiting')},
+                    {key: 'available', label: t('new_translations')}
+                ];
+                episodeFlowTimeline.empty();
+                stages.forEach(function (definition, index) {
+                    var data = flow[definition.key] || {};
+                    var state = definition.key === 'japan' ? (data.timestamp && data.timestamp <= Date.now() ? 'ready' : 'scheduled') : data.status || 'idle';
+                    var node = $('<div class="yani-home__episode-stage yani-home__episode-stage--' + state + '"></div>');
+                    var marker = $('<div class="yani-home__episode-stage-marker"></div>').html(homeFlowIcon(definition.key));
+                    var copy = $('<div class="yani-home__episode-stage-copy"></div>');
+                    copy.append($('<div class="yani-home__episode-stage-label"></div>').text(definition.label));
+                    copy.append($('<div class="yani-home__episode-stage-title"></div>').text(data.title || t('flow_no_data')));
+                    var meta = [];
+                    if (data.episode_label) meta.push(String(data.episode_label));
+                    else if (data.episode) meta.push(t('episode') + ' ' + data.episode);
+                    if (definition.key === 'japan' && data.timestamp) {
+                        var date = new Date(data.timestamp);
+                        try { meta.push(date.toLocaleString(locale(), {weekday: 'short', hour: '2-digit', minute: '2-digit'})); }
+                        catch (error) { meta.push(date.toLocaleString()); }
+                    }
+                    if (definition.key === 'waiting' && data.status === 'waiting') meta.push(t('translation_pending'));
+                    if (definition.key === 'waiting' && data.status === 'ready') meta.push(t('available_now'));
+                    if (definition.key === 'available') meta = meta.concat([data.dubbing, data.source].filter(Boolean));
+                    copy.append($('<div class="yani-home__episode-stage-meta"></div>').text(meta.join(' · ') || '—'));
+                    node.append(marker, copy);
+                    if (index) node.prepend('<span class="yani-home__episode-stage-link"><i></i></span>');
+                    episodeFlowTimeline.append(node);
+                });
             }
 
             var account = LampaYaniAuth.get();
@@ -472,6 +509,7 @@
                         setCount(homeButtons[key], dashboard.counts[key]);
                     });
                     var schedule = dashboard.schedule || {};
+                    renderEpisodeTimeline(dashboard.episode_flow);
                     setCount(homeButtons.schedule, schedule.today);
                     if (schedule.preview) {
                         var releaseDate = new Date(schedule.preview.timestamp);
@@ -593,6 +631,15 @@
             account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/></svg>'
         };
         return icons[key] || icons.catalog;
+    }
+
+    function homeFlowIcon(key) {
+        var icons = {
+            japan: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 0 1 14 0M8 12a4 4 0 0 1 8 0"/><circle cx="12" cy="12" r="1.5"/><path d="M12 13.5V21"/></svg>',
+            waiting: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg>',
+            available: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg>'
+        };
+        return icons[key] || icons.waiting;
     }
 
     function lampaIcon() {

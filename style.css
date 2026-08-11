@@ -409,6 +409,54 @@
     gap: 1.05em;
 }
 
+.yani-home__episode-timeline {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .72em;
+    margin: .1em 0 .9em;
+}
+
+.yani-home__episode-stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    min-height: 4.15em;
+    padding: .62em .72em;
+    border: .07em solid rgba(255,255,255,.1);
+    border-radius: .95em .58em .9em .62em;
+    background: rgba(10,18,28,.22);
+    box-sizing: border-box;
+}
+
+.yani-home__episode-stage-marker {
+    display: flex;
+    flex: 0 0 2.15em;
+    align-items: center;
+    justify-content: center;
+    width: 2.15em;
+    height: 2.15em;
+    margin-right: .65em;
+    border: .08em solid rgba(255,255,255,.18);
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    color: rgba(255,255,255,.62);
+}
+
+.yani-home__episode-stage-marker svg { width: 1.25em; height: 1.25em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.yani-home__episode-stage--scheduled .yani-home__episode-stage-marker { border-color: rgba(75,184,225,.42); background: rgba(75,184,225,.14); color: #7bd8f0; }
+.yani-home__episode-stage--waiting .yani-home__episode-stage-marker { border-color: rgba(244,176,76,.48); background: rgba(244,176,76,.14); color: #ffc568; }
+.yani-home__episode-stage--ready .yani-home__episode-stage-marker { border-color: rgba(68,202,146,.48); background: rgba(68,202,146,.14); color: #6ee0ad; }
+.yani-home__episode-stage-copy { min-width: 0; }
+.yani-home__episode-stage-label { color: rgba(255,255,255,.48); font-size: .58em; font-weight: 750; letter-spacing: .04em; line-height: 1.15; text-transform: uppercase; }
+.yani-home__episode-stage-title { overflow: hidden; margin-top: .22em; color: rgba(255,255,255,.88); font-size: .72em; font-weight: 650; line-height: 1.16; text-overflow: ellipsis; white-space: nowrap; }
+.yani-home__episode-stage-meta { overflow: hidden; margin-top: .2em; color: rgba(255,255,255,.48); font-size: .6em; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.yani-home__episode-stage-link { position: absolute; top: 50%; left: -.74em; width: .74em; height: .15em; background: rgba(255,255,255,.14); transform: translateY(-50%); }
+.yani-home__episode-stage-link i { position: absolute; right: -.02em; top: 50%; width: .3em; height: .3em; border-top: .08em solid rgba(255,255,255,.4); border-right: .08em solid rgba(255,255,255,.4); transform: translateY(-50%) rotate(45deg); }
+.yani-home--motion .yani-home__episode-stage--waiting .yani-home__episode-stage-marker { animation: yani-home-stage-wait 2.8s ease-in-out infinite; }
+
 .yani-home__discover {
     position: relative;
     grid-column: span 12;
@@ -475,25 +523,14 @@
 .yani-home__discover .yani-home__title { font-size: 1.02em; }
 .yani-home__discover .yani-home__arrow { font-size: 1.55em; }
 
-.yani-home__episode-flow-wave {
-    position: absolute;
-    z-index: 2;
-    top: 48%;
-    left: calc(50% - 2.7em);
-    width: 5.4em;
-    height: 2.2em;
-    pointer-events: none;
-    opacity: .72;
-}
-
-.yani-home__episode-flow-wave svg { width: 100%; height: 100%; overflow: visible; }
-.yani-home__episode-flow-wave path { fill: none; stroke: rgba(255,255,255,.48); stroke-width: 2; stroke-linecap: round; }
-.yani-home__episode-flow-wave circle { fill: #ef6470; stroke: rgba(255,255,255,.8); stroke-width: 1.5; }
-.yani-home--motion .yani-home__episode-flow-wave circle { animation: yani-home-flow-pulse 2.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-
 @keyframes yani-home-flow-pulse {
     0%, 100% { opacity: .55; transform: scale(.8); }
     50% { opacity: 1; transform: scale(1.3); }
+}
+
+@keyframes yani-home-stage-wait {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(244,176,76,0); }
+    50% { box-shadow: 0 0 0 .28em rgba(244,176,76,.10); }
 }
 
 .yani-home__item::before {
@@ -693,7 +730,7 @@
 .yani-home--reduced-motion .yani-home__arrow,
 .yani-home--reduced-motion .yani-home__wave,
 .yani-home--reduced-motion .yani-home__pulse { animation: none; transition: none; }
-.yani-home--reduced-motion .yani-home__episode-flow-wave circle { animation: none; }
+.yani-home--reduced-motion .yani-home__episode-stage-marker { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
     .yani-home__item,
@@ -702,7 +739,7 @@
     .yani-home__arrow,
     .yani-home__wave,
     .yani-home__pulse { animation: none !important; transition: none !important; }
-    .yani-home__episode-flow-wave circle { animation: none !important; }
+    .yani-home__episode-stage-marker { animation: none !important; }
 }
 
 .yani-policy {
@@ -757,6 +794,11 @@
     .yani-home__discover-items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .yani-home__item { min-height: 7em; padding: 1em; }
     .yani-home__icon { flex-basis: 2.8em; width: 2.8em; height: 2.8em; }
+    .yani-home__episode-stage { padding: .55em; }
+    .yani-home__episode-stage-marker { flex-basis: 1.8em; width: 1.8em; height: 1.8em; margin-right: .45em; }
+    .yani-home__episode-stage-label { font-size: .5em; }
+    .yani-home__episode-stage-title { font-size: .62em; }
+    .yani-home__episode-stage-meta { font-size: .52em; }
 }
 
 @media (min-width: 701px) and (max-width: 1100px) {

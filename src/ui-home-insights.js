@@ -46,16 +46,17 @@
             item.anime && titleOf(item.anime) || '';
     }
 
-    function scheduleInsight(payload, now) {
+    function episodeNumber(value) {
+        if (typeof value === 'number') return value;
+        var match = String(value || '').match(/(\d+(?:\.\d+)?)/);
+        return match ? Number(match[1]) : 0;
+    }
+
+    function scheduleReleases(payload) {
         var items = payload && payload.response !== undefined ? payload.response : payload;
         items = Array.isArray(items) ? items : items && (items.items || items.data) || [];
-        now = Number(now || Date.now());
-        var today = new Date(now);
-        var dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-        var dayEnd = dayStart + 86400000;
         var releases = [];
         var seen = {};
-
         items.forEach(function (item) {
             var episodes = item && item.episodes || {};
             [
@@ -64,10 +65,12 @@
             ].forEach(function (release) {
                 var timestamp = timestampMilliseconds(release.value);
                 if (!timestamp) return;
-                var key = String(item.anime_id || item.id || titleOf(item)) + ':' + timestamp;
+                var animeId = item.anime_id || item.id || '';
+                var key = String(animeId || titleOf(item)) + ':' + timestamp;
                 if (seen[key]) return;
                 seen[key] = true;
                 releases.push({
+                    anime_id: animeId,
                     title: titleOf(item),
                     timestamp: timestamp,
                     episode: release.aired ? Number(episodes.aired || 0) : Number(episodes.aired || 0) + 1,
@@ -76,7 +79,30 @@
                 });
             });
         });
-        releases.sort(function (a, b) { return a.timestamp - b.timestamp; });
+        return releases.sort(function (a, b) { return a.timestamp - b.timestamp; });
+    }
+
+    function translationEntries(payload) {
+        var value = response(payload);
+        return (Array.isArray(value.new_videos) ? value.new_videos : []).map(function (video) {
+            return {
+                anime_id: video.anime_id || video.animeId || video.anime && (video.anime.anime_id || video.anime.id) || '',
+                title: titleOf(video),
+                episode: episodeNumber(video.episode || video.number || video.ep_title || video.episode_title),
+                episode_label: video.ep_title || video.episode_title || video.episode || video.number || '',
+                dubbing: video.dub_title || video.dubbing || '',
+                source: video.player_title || video.player || '',
+                timestamp: timestampMilliseconds(video.date || video.updated_at || video.created_at)
+            };
+        }).sort(function (a, b) { return Number(b.timestamp || 0) - Number(a.timestamp || 0); });
+    }
+
+    function scheduleInsight(payload, now) {
+        now = Number(now || Date.now());
+        var today = new Date(now);
+        var dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+        var dayEnd = dayStart + 86400000;
+        var releases = scheduleReleases(payload);
         var upcoming = releases.filter(function (release) { return release.timestamp >= now; });
         var preview = upcoming[0] || releases[releases.length - 1] || null;
         return {
@@ -86,21 +112,44 @@
     }
 
     function translationInsight(payload) {
-        var value = response(payload);
-        var videos = Array.isArray(value.new_videos) ? value.new_videos.slice() : [];
-        videos.sort(function (a, b) { return Number(b && b.date || 0) - Number(a && a.date || 0); });
+        var videos = translationEntries(payload);
         var video = videos[0] || null;
         if (!video) return {count: 0, preview: null};
         return {
             count: uniqueCount(videos, function (item) {
-                return item.anime_id || item.animeId || item.anime && (item.anime.anime_id || item.anime.id);
+                return item.anime_id;
             }),
             preview: {
                 title: titleOf(video),
-                episode: video.ep_title || video.episode_title || video.episode || video.number || '',
-                dubbing: video.dub_title || video.dubbing || '',
-                source: video.player_title || video.player || ''
+                episode: video.episode_label || video.episode || '',
+                dubbing: video.dubbing || '',
+                source: video.source || ''
             }
+        };
+    }
+
+    function episodeFlow(schedulePayload, feedPayload, now) {
+        now = Number(now || Date.now());
+        var releases = scheduleReleases(schedulePayload);
+        var videos = translationEntries(feedPayload);
+        var upcoming = releases.filter(function (release) { return release.timestamp >= now; });
+        var aired = releases.filter(function (release) { return release.aired && release.timestamp <= now; }).sort(function (a, b) {
+            return b.timestamp - a.timestamp;
+        });
+
+        function translated(release) {
+            return videos.some(function (video) {
+                if (!release.anime_id || String(video.anime_id) !== String(release.anime_id)) return false;
+                return !release.episode || !video.episode || Number(video.episode) === Number(release.episode);
+            });
+        }
+
+        var pending = aired.filter(function (release) { return !translated(release); })[0] || null;
+        var latestAired = aired[0] || null;
+        return {
+            japan: upcoming[0] || releases[releases.length - 1] || null,
+            waiting: pending ? Object.assign({status: 'waiting'}, pending) : latestAired ? Object.assign({status: translated(latestAired) ? 'ready' : 'waiting'}, latestAired) : null,
+            available: videos[0] ? Object.assign({status: 'ready'}, videos[0]) : null
         };
     }
 
@@ -162,7 +211,8 @@
             return {
                 counts: counts(result[0]),
                 schedule: scheduleInsight(result[1], options.now),
-                translations: translationInsight(result[0])
+                translations: translationInsight(result[0]),
+                episode_flow: episodeFlow(result[1], result[0], options.now)
             };
         });
     }
@@ -174,6 +224,9 @@
         dashboard: dashboard,
         scheduleInsight: scheduleInsight,
         translationInsight: translationInsight,
+        episodeFlow: episodeFlow,
+        scheduleReleases: scheduleReleases,
+        translationEntries: translationEntries,
         listCounts: listCounts,
         personalInsight: personalInsight,
         timestampMilliseconds: timestampMilliseconds,

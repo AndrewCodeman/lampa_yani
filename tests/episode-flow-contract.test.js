@@ -12,6 +12,8 @@ assert.match(ui, /component: 'yani_schedule'/);
 assert.match(ui, /component: 'yani_new_translations'/);
 assert.match(ui, /key: 'search'/);
 assert.match(ui, /group: 'episode_flow'/);
+assert.match(ui, /yani-home__episode-timeline/);
+assert.match(ui, /renderEpisodeTimeline\(dashboard\.episode_flow\)/);
 assert.ok(ui.indexOf("key: 'search'") < ui.indexOf("key: 'schedule'"), 'Search must remain before the episode flow');
 assert.match(ui, /LampaYaniTranslations\.component/);
 assert.match(translations, /value\.new_videos/);
@@ -21,6 +23,7 @@ assert.match(ui, /item\.poster\.big/);
 assert.match(ui, /item\.poster\.mega/);
 assert.match(css, /\.yani-home__episode-flow/);
 assert.match(css, /\.yani-home__episode-flow-items/);
+assert.match(css, /\.yani-home__episode-stage-marker/);
 assert.match(css, /@keyframes yani-home-flow-pulse/);
 assert.match(css, /\.yani-card-update[^}]*text-overflow: ellipsis/);
 

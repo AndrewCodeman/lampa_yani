@@ -21,6 +21,8 @@ assert.match(ui, /count > 99 \? '99\+' : String\(count\)/);
 assert.match(css, /\.yani-home__count--visible/);
 assert.match(css, /\.yani-home__item\.focus \.yani-home__count/);
 assert.match(css, /\.yani-home__item-insight-title/);
+assert.match(css, /\.yani-home__episode-timeline/);
+assert.match(css, /\.yani-home__episode-stage--waiting/);
 
 const context = {window: {}};
 vm.runInNewContext(source, context);
@@ -52,6 +54,20 @@ const translations = insights.translationInsight({response: {new_videos: [
 assert.equal(translations.count, 2);
 assert.equal(translations.preview.title, 'Newest');
 assert.equal(translations.preview.episode, 'Episode 4');
+
+const flow = insights.episodeFlow({response: [
+    {anime_id: 10, title: 'Awaiting dub', episodes: {aired: 2, count: 12, prev_date: (now - 3600000) / 1000, next_date: (now + 86400000) / 1000}},
+    {anime_id: 11, title: 'Next broadcast', episodes: {aired: 4, count: 12, next_date: (now + 1800000) / 1000}}
+]}, {response: {new_videos: [
+    {anime_id: 10, date: (now - 7200000) / 1000, anime: {title: 'Awaiting dub'}, ep_title: 'Episode 1', dub_title: 'Old dub'},
+    {anime_id: 7, date: (now - 1000) / 1000, anime: {title: 'Available now'}, ep_title: 'Episode 5', dub_title: 'Fresh dub'}
+]}}, now);
+assert.equal(flow.japan.title, 'Next broadcast');
+assert.equal(flow.waiting.title, 'Awaiting dub');
+assert.equal(flow.waiting.episode, 2);
+assert.equal(flow.waiting.status, 'waiting');
+assert.equal(flow.available.title, 'Available now');
+assert.equal(flow.available.episode, 5);
 
 const personal = insights.personalInsight([
     {title: 'Older', number: '2', updated_at: 100},

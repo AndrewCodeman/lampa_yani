@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.36.3 — 2026-08-11
+
+- Added a compact three-stage episode flow from Japanese broadcast through translation wait to an available dub.
+- Matched recent broadcasts against translation feed events by YummyAnime title and episode identifiers.
+- Added localized fallback states and a reduced-motion-safe visual timeline without adding TV focus stops.
+
 ## 0.36.2 — 2026-08-11
 
 - Added local continue-watching counts and the latest resumable title to the dashboard.
