@@ -404,9 +404,11 @@
                 var title = group === 'explore' ? t('dashboard_browse') :
                     group === 'library' ? t('dashboard_library') :
                     group === 'service' ? t('dashboard_service') : '';
+                var chapter = group === 'explore' ? '01' : group === 'library' ? '03' : group === 'service' ? '05' : '';
                 var root = $('<div class="yani-home__panel yani-home__panel--' + group + '"></div>');
-                var head = $('<div class="yani-home__panel-head"><span class="yani-home__panel-title"></span><span class="yani-home__panel-line" aria-hidden="true"></span></div>');
+                var head = $('<div class="yani-home__panel-head"><span class="yani-home__panel-chapter" aria-hidden="true"></span><span class="yani-home__panel-title"></span><span class="yani-home__panel-line" aria-hidden="true"></span></div>');
                 var content = $('<div class="yani-home__panel-items"></div>');
+                head.find('.yani-home__panel-chapter').text(chapter);
                 head.find('.yani-home__panel-title').text(title);
                 root.append(head);
                 if (group === 'library') {
@@ -474,7 +476,7 @@
                 button.on('hover:enter click.yaniHome', item.action);
                 if (item.group === 'episode_flow') {
                     if (!episodeFlow) {
-                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__episode-flow-title"></span><span class="yani-home__episode-flow-live" aria-hidden="true"><i></i><b></b></span></div><div class="yani-home__episode-timeline"></div><div class="yani-home__episode-flow-items"></div></div>');
+                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__panel-chapter" aria-hidden="true">02</span><span class="yani-home__episode-flow-title"></span><span class="yani-home__episode-flow-live" aria-hidden="true"><i></i><b></b></span></div><div class="yani-home__episode-timeline"></div><div class="yani-home__episode-flow-items"></div></div>');
                         episodeFlow.find('.yani-home__episode-flow-title').text(t('episode_flow'));
                         episodeFlowTimeline = episodeFlow.find('.yani-home__episode-timeline');
                         episodeFlowItems = episodeFlow.find('.yani-home__episode-flow-items');
@@ -483,7 +485,7 @@
                     episodeFlowItems.append(button);
                 } else if (item.group === 'discover') {
                     if (!discover) {
-                        discover = $('<div class="yani-home__panel yani-home__panel--discover yani-home__discover"><div class="yani-home__discover-head"><span class="yani-home__discover-title"></span><span class="yani-home__discover-mark" aria-hidden="true"><i></i><i></i><i></i></span></div><div class="yani-home__discover-preview"></div><div class="yani-home__discover-items"></div></div>');
+                        discover = $('<div class="yani-home__panel yani-home__panel--discover yani-home__discover"><div class="yani-home__discover-head"><span class="yani-home__panel-chapter" aria-hidden="true">04</span><span class="yani-home__discover-title"></span><span class="yani-home__discover-mark" aria-hidden="true"><i></i><i></i><i></i></span></div><div class="yani-home__discover-preview"></div><div class="yani-home__discover-items"></div></div>');
                         discover.find('.yani-home__discover-title').text(t('discover'));
                         discoverPreview = discover.find('.yani-home__discover-preview');
                         discoverItems = discover.find('.yani-home__discover-items');

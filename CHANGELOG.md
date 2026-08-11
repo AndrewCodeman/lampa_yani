@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.39.14 — 2026-08-12
+
+- Structured the dashboard as five stable visual chapters.
+- Added compact color-coded chapter markers to every dashboard section.
+- Highlighted the current chapter without adding focusable controls or API work.
+
 ## 0.39.13 — 2026-08-12
 
 - Added a live section breadcrumb to the dashboard header.

@@ -483,6 +483,12 @@
 .yani-home[data-yani-section="discover"] .yani-home__panel--active { border-color: rgba(191,114,233,.37); box-shadow: inset 0 .08em 0 rgba(255,255,255,.08), 0 .75em 2.2em rgba(142,67,184,.11); }
 .yani-home[data-yani-section="service"] .yani-home__panel--active { border-color: rgba(236,176,85,.34); box-shadow: inset 0 .08em 0 rgba(255,255,255,.08), 0 .75em 2.2em rgba(177,118,42,.09); }
 .yani-home__panel-head { display: flex; align-items: center; gap: .8em; min-height: 1.7em; margin: 0 .25em .75em; }
+.yani-home__panel-chapter { flex: 0 0 auto; min-width: 2.15em; padding: .26em .44em; box-sizing: border-box; border: .07em solid rgba(255,141,150,.34); border-radius: .62em .28em .56em .34em; background: rgba(239,100,112,.12); color: #ff8d96; font-size: .62em; font-weight: 850; letter-spacing: .12em; line-height: 1; text-align: center; box-shadow: inset 0 .06em 0 rgba(255,255,255,.08); transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease; }
+.yani-home__panel--episode-flow .yani-home__panel-chapter { border-color: rgba(98,184,255,.34); background: rgba(98,184,255,.11); color: #79c4ff; }
+.yani-home__panel--library .yani-home__panel-chapter { border-color: rgba(85,215,149,.34); background: rgba(85,215,149,.11); color: #6de2a9; }
+.yani-home__panel--discover .yani-home__panel-chapter { border-color: rgba(191,114,233,.34); background: rgba(191,114,233,.11); color: #cf8cf2; }
+.yani-home__panel--service .yani-home__panel-chapter { border-color: rgba(236,176,85,.34); background: rgba(236,176,85,.1); color: #f0bd70; }
+.yani-home__panel--active .yani-home__panel-chapter { border-color: currentColor; background: rgba(255,255,255,.13); transform: translateY(-.08em); }
 .yani-home__panel-title { flex: 0 0 auto; color: rgba(255,255,255,.82); font-size: 1.08em; font-weight: 680; letter-spacing: .015em; }
 .yani-home__panel-line { height: .08em; flex: 1; background: linear-gradient(90deg, rgba(255,255,255,.18), transparent); }
 .yani-home__panel-items { display: grid; gap: .8em; }
