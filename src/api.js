@@ -175,6 +175,13 @@
                 staleFallback: true
             });
         },
+        feed: function () {
+            return request('/feed', {
+                auth: true,
+                cacheTtl: 5 * 60 * 1000,
+                staleFallback: true
+            });
+        },
         episodeInfo: function (malId) {
             if (!malId) return Promise.reject(new Error('MAL id is missing'));
             return externalRequest('https://api.jikan.moe/v4', '/anime/' + encodeURIComponent(malId) + '/episodes').then(function (payload) {

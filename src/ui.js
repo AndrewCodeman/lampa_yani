@@ -139,6 +139,7 @@
 
             Lampa.Component.add('yani_recommended', Recommended);
             Lampa.Component.add('yani_updates', Updates);
+            Lampa.Component.add('yani_new_translations', NewTranslations);
             Lampa.Component.add('yani_schedule', Schedule);
             Lampa.Component.add('yani_history', History);
 
@@ -487,8 +488,11 @@
             }},
             {key: 'genres', title: t('genres'), action: openGenres},
             {key: 'search', title: t('search'), action: openSearch},
-            {key: 'schedule', title: t('schedule'), action: function () {
+            {key: 'schedule', title: t('schedule'), subtitle: t('japan_broadcast'), group: 'episode_flow', action: function () {
                 Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime ' + t('schedule'), component: 'yani_schedule'});
+            }},
+            {key: 'new_translations', title: t('new_translations'), subtitle: t('translations_and_dubs'), group: 'episode_flow', action: function () {
+                Lampa.Activity.push({url: 'yani/new-translations', title: 'YummyAnime ' + t('new_translations'), component: 'yani_new_translations'});
             }},
             {key: 'continue_watching', title: t('continue_watching'), action: function () {
                 openContinueWatching();
@@ -524,15 +528,31 @@
                     '<span class="yani-home__pulse yani-home__pulse--two"></span>' +
                 '</div>'
             );
+            var episodeFlow;
+            var episodeFlowItems;
             items.forEach(function (item) {
-                var button = $('<div class="yani-home__item yani-home__item--' + item.key + ' selector"><div class="yani-home__icon">' + homeIcon(item.key) + '</div><div class="yani-home__title">' + item.title + '</div><div class="yani-home__arrow">›</div></div>');
+                var text = $('<div class="yani-home__text"></div>');
+                text.append($('<div class="yani-home__title"></div>').text(item.title));
+                if (item.subtitle) text.append($('<div class="yani-home__subtitle"></div>').text(item.subtitle));
+                var button = $('<div class="yani-home__item yani-home__item--' + item.key + ' selector"></div>');
+                button.append($('<div class="yani-home__icon"></div>').html(homeIcon(item.key)), text, $('<div class="yani-home__arrow">›</div>'));
                 button.on('hover:focus', function (event) {
                     var target = event.currentTarget || event.target;
                     last = target;
                     scroll.update($(target), true);
                 });
                 button.on('hover:enter', item.action);
-                grid.append(button);
+                if (item.group === 'episode_flow') {
+                    if (!episodeFlow) {
+                        episodeFlow = $('<div class="yani-home__episode-flow"><div class="yani-home__episode-flow-title"></div><div class="yani-home__episode-flow-items"></div><div class="yani-home__episode-flow-wave" aria-hidden="true"><svg viewBox="0 0 240 44" preserveAspectRatio="none"><path d="M2 28 C58 2 83 43 121 23 S185 4 238 25"/><circle cx="121" cy="23" r="4"/></svg></div></div>');
+                        episodeFlow.find('.yani-home__episode-flow-title').text(t('episode_flow'));
+                        episodeFlowItems = episodeFlow.find('.yani-home__episode-flow-items');
+                        grid.append(episodeFlow);
+                    }
+                    episodeFlowItems.append(button);
+                } else {
+                    grid.append(button);
+                }
             });
             scroll.append(grid);
             html.append(waves);
@@ -628,6 +648,7 @@
             genres: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg>',
             search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>',
             schedule: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M7 14h3M14 14h3M7 18h3"/></svg>',
+            new_translations: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h10v9H9l-4 4v-4H4zM14 10h6v8h-3l-3 3v-3h-2"/><path d="M7 9h4M16 14h2"/></svg>',
             continue_watching: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg>',
             status: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h4l2-6 4 12 2-6h6"/></svg>',
             top_rated: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg>',
@@ -650,6 +671,32 @@
 
     function Recommended(object) {
         return LampaYaniHomeSections.recommended(object, {t: t, history: playbackHistory, toCard: toCard, cardRender: bindRecommendedCardRender});
+    }
+
+    function NewTranslations(object) {
+        var comp = new Lampa.InteractionCategory(object);
+        comp.create = function () {
+            var self = this;
+            this.activity.loader(true);
+            LampaYaniApi.feed().then(function (payload) {
+                var response = payload && payload.response ? payload.response : payload || {};
+                var videos = Array.isArray(response.new_videos) ? response.new_videos : [];
+                var cards = videos.map(function (video) {
+                    var card = toCard(video);
+                    var labels = [video.ep_title, video.dub_title, video.player_title].filter(Boolean);
+                    card.yani_update_label = labels.join(' · ');
+                    card.overview = [video.description, video.dub_title, video.player_title].filter(Boolean).join(' · ');
+                    return card;
+                }).filter(function (card) { return Boolean(card.yani_id); });
+                self.build({results: cards, total_pages: 1, title: t('new_translations')});
+            }).catch(function (error) {
+                console.error('[YummyAnime New Translations]', error);
+                self.activity.loader(false);
+                Lampa.Noty.show(t('new_translations_error'));
+            });
+        };
+        comp.cardRender = bindYummyCardRender;
+        return comp;
     }
 
     function Updates(object) {
@@ -902,11 +949,12 @@
     }
 
     function addCardUpdateBadge(element, card) {
-        if (!card || !card.yani_update_episode) return;
+        if (!card || (!card.yani_update_episode && !card.yani_update_label)) return;
         var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length || view.find('.yani-card-update').length) return;
-        view.append($('<span class="yani-card-update"></span>').text(t('episode') + ' ' + card.yani_update_episode));
+        var label = card.yani_update_label || t('episode') + ' ' + card.yani_update_episode;
+        view.append($('<span class="yani-card-update"></span>').text(label));
     }
 
     function addCardListBadge(element, card) {
@@ -3500,7 +3548,7 @@
         var cover = item.cover && typeof item.cover === 'object' ? item.cover : {};
         var poster = typeof item.poster === 'string' ? item.poster : typeof item.cover === 'string' ? item.cover : typeof item.image === 'string' ? item.image : item.poster_url ||
             image.medium || image.large || image.url || image.original || cover.medium || cover.large || cover.url || cover.original || '';
-        if (!poster && item.poster) poster = item.poster.medium || item.poster.large || item.poster.huge || item.poster.fullsize || item.poster.url || item.poster.original || '';
+        if (!poster && item.poster) poster = item.poster.medium || item.poster.big || item.poster.large || item.poster.mega || item.poster.huge || item.poster.fullsize || item.poster.small || item.poster.url || item.poster.original || '';
         if (typeof poster !== 'string') poster = '';
         if (poster.indexOf('//') === 0) poster = 'https:' + poster;
         var rating = typeof item.rating === 'object' ? item.rating.average : item.rating;
@@ -4516,6 +4564,7 @@
             ['genres', 'genres'],
             ['search', 'search'],
             ['schedule', 'schedule'],
+            ['new_translations', 'new_translations'],
             ['continue_watching', 'continue_watching'],
             ['user_lists', 'user_lists'],
             ['top_rated', 'top_rated'],

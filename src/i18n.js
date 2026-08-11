@@ -58,6 +58,11 @@
     messages.ru.reviews_empty = 'Отзывов пока нет';
     messages.ru.reviews_error = 'Не удалось загрузить отзывы';
     messages.ru.for_you = 'Для вас';
+    messages.ru.episode_flow = 'Выход серий';
+    messages.ru.japan_broadcast = 'Эфир в Японии';
+    messages.ru.new_translations = 'Новые переводы';
+    messages.ru.translations_and_dubs = 'Переводы и озвучки';
+    messages.ru.new_translations_error = 'Не удалось загрузить новые переводы и озвучки';
     messages.ru.collections = 'Коллекции';
     messages.ru.collection = 'Коллекция';
     messages.ru.episodes_short = 'серий';
@@ -107,6 +112,11 @@
     messages.en.reviews_empty = 'There are no reviews yet';
     messages.en.reviews_error = 'Failed to load reviews';
     messages.en.for_you = 'For you';
+    messages.en.episode_flow = 'Episode releases';
+    messages.en.japan_broadcast = 'Japanese broadcast';
+    messages.en.new_translations = 'New translations';
+    messages.en.translations_and_dubs = 'Translations and dubs';
+    messages.en.new_translations_error = 'Failed to load new translations and dubs';
     messages.en.collections = 'Collections';
     messages.en.collection = 'Collection';
     messages.en.episodes_short = 'episodes';
@@ -334,6 +344,11 @@
         login_name: 'Увійти до YummyAnime', refresh_name: 'Оновити токен YummyAnime', login_first: 'Спочатку увійдіть до YummyAnime', token_refreshed: 'Токен YummyAnime оновлено', token_refresh_error: 'Не вдалося оновити токен YummyAnime', logout_name: 'Вийти з YummyAnime', logged_out: 'Ви вийшли з YummyAnime', api_check_name: 'Перевірити YummyAnime API', api_ok: 'YummyAnime API працює', api_error: 'YummyAnime API недоступний або публічний токен неправильний', email_prompt: 'Нікнейм або Email', email_required: 'Введіть нікнейм або email YummyAnime', password_prompt: 'Пароль YummyAnime', password_required: 'Введіть пароль YummyAnime', login_ok: 'Вхід до YummyAnime виконано', login_error: 'Помилка входу до YummyAnime', comments_title: 'Коментарі YummyAnime', comments_error: 'Не вдалося завантажити коментарі', kinopoisk: 'Кінопошук'
     });
     messages.uk.back_to_lampa = 'Повернутися до Lampa';
+    messages.uk.episode_flow = 'Вихід серій';
+    messages.uk.japan_broadcast = 'Ефір у Японії';
+    messages.uk.new_translations = 'Нові переклади';
+    messages.uk.translations_and_dubs = 'Переклади та озвучення';
+    messages.uk.new_translations_error = 'Не вдалося завантажити нові переклади та озвучення';
     messages.uk.notifications_title = 'Сповіщення YummyAnime';
     messages.uk.notifications_empty = 'Нових сповіщень немає';
     messages.uk.notifications_error = 'Не вдалося завантажити сповіщення';

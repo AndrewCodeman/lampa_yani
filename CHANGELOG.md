@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.0 — 2026-08-11
+
+- Keep Search as dashboard item 3 and preserve the existing Schedule screen.
+- Visually pair Schedule and New Translations in a wide TV-focusable episode-flow block.
+- Add a New Translations screen backed by the YummyAnime `/feed` `new_videos` data.
+- Show episode, dubbing and player information on new-translation cards when available.
+
 ## 0.33.15 — 2026-08-11
 
 - Move My Lists to position 6 on the YummyAnime dashboard.
