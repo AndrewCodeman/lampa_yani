@@ -431,6 +431,34 @@
                 $('<span class="yani-home__service-state yani-home__service-state--' + state + '" aria-hidden="true"></span>').insertBefore($('.yani-home__arrow', button));
             }
 
+            function setArtwork(button, poster) {
+                if (!button || reducedMotion || lowMemoryDevice || lowCpuDevice) return;
+                poster = String(poster || '');
+                if (!/^https?:\/\//i.test(poster)) return;
+                $('.yani-home__item-art', button).remove();
+                poster = poster.replace(/["\\]/g, '');
+                $('<span class="yani-home__item-art" aria-hidden="true"></span>')
+                    .css('background-image', 'linear-gradient(90deg, rgba(22,20,29,.98) 3%, rgba(22,20,29,.72) 48%, rgba(22,20,29,.12) 100%), url("' + poster + '")')
+                    .prependTo(button);
+                button.addClass('yani-home__item--artwork');
+            }
+
+            var prioritySignals = {
+                authorized: Boolean(LampaYaniAuth.token()),
+                continue_count: 0,
+                notification_count: 0,
+                has_translation: false
+            };
+
+            function refreshPriority() {
+                var priority = LampaYaniHomeInsights.dashboardPriority(prioritySignals);
+                var button = homeButtons[priority.key];
+                html.find('.yani-home__item--priority').removeClass('yani-home__item--priority').find('.yani-home__priority').remove();
+                if (!button) return;
+                button.addClass('yani-home__item--priority');
+                $('<span class="yani-home__priority" aria-hidden="true"></span>').text(t(priority.label)).appendTo(button);
+            }
+
             function renderEpisodeTimeline(flow) {
                 if (!episodeFlowTimeline) return;
                 flow = flow || {};
@@ -473,12 +501,14 @@
             function renderPersonal(stats) {
                 if (destroyed) return;
                 var personal = LampaYaniHomeInsights.personalInsight(continuing, account, stats);
+                prioritySignals.continue_count = personal.continue_count;
                 setCount(homeButtons.continue_watching, personal.continue_count);
                 if (personal.continue_preview) {
                     var resume = personal.continue_preview;
                     var resumeMeta = resume.number ? t('episode') + ' ' + resume.number : '';
                     if (resume.duration > 0) resumeMeta += (resumeMeta ? ' · ' : '') + Math.min(99, Math.round(resume.time / resume.duration * 100)) + '%';
                     setPreview(homeButtons.continue_watching, resume.title, resumeMeta);
+                    setArtwork(homeButtons.continue_watching, resume.poster);
                 }
                 if (personal.account_name) setPreview(homeButtons.account, personal.account_name, t('authorized'));
                 if (personal.list_total) {
@@ -489,6 +519,7 @@
                     setCount(homeButtons.updates, personal.tracked_total);
                     setPreview(homeButtons.updates, t('watching') + ' ' + personal.lists.watching, t('postponed') + ' ' + personal.lists.postponed);
                 }
+                refreshPriority();
             }
 
             renderPersonal(readHomeListCounts(account && account.user_id));
@@ -509,9 +540,11 @@
             function renderNotifications(count) {
                 if (!homeButtons.notifications || count === null || count === undefined) return;
                 count = Math.max(0, Number(count) || 0);
+                prioritySignals.notification_count = count;
                 setCount(homeButtons.notifications, count);
                 setPreview(homeButtons.notifications, count ? String(count) + ' ' + t('unread') : t('no_unread_notifications'), t('authorized'));
                 setServiceState(homeButtons.notifications, count ? 'attention' : 'up');
+                refreshPriority();
             }
             if (notificationCache.available) renderNotifications(notificationCache.count);
             if (LampaYaniAuth.token() && homeButtons.notifications && !notificationCache.fresh) {
@@ -551,11 +584,15 @@
                         var episode = schedule.preview.episode ? t('episode') + ' ' + schedule.preview.episode : t('release');
                         if (schedule.preview.total) episode += ' ' + t('of') + ' ' + schedule.preview.total;
                         setPreview(homeButtons.schedule, schedule.preview.title, releaseTime + ' · ' + episode);
+                        setArtwork(homeButtons.schedule, schedule.preview.poster);
                     }
                     var translation = dashboard.translations && dashboard.translations.preview;
                     if (translation) {
+                        prioritySignals.has_translation = true;
                         setPreview(homeButtons.new_translations, translation.title, [translation.episode, translation.dubbing, translation.source].filter(Boolean).join(' · '));
+                        setArtwork(homeButtons.new_translations, translation.poster);
                     }
+                    refreshPriority();
                 }).catch(function (error) {
                     console.warn('[YummyAnime Home] Dashboard insights are unavailable', error);
                 });

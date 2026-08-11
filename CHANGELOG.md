@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.36.5 — 2026-08-11
+
+- Added poster artwork to the active schedule, translation and continue-watching dashboard tiles.
+- Added a deterministic personal priority accent for resume, notifications, fresh translations and recommendations.
+- Disabled dashboard artwork on reduced-motion, low-memory and low-CPU devices.
+- Reused existing schedule, feed and local-history payloads without adding API data requests.
+
 ## 0.36.4 — 2026-08-11
 
 - Added cached unread-notification counts to the dashboard for signed-in users.

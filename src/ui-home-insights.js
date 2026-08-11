@@ -46,6 +46,15 @@
             item.anime && titleOf(item.anime) || '';
     }
 
+    function posterOf(item) {
+        item = item || {};
+        var poster = item.poster || item.image || item.img || '';
+        if (!poster && item.anime) return posterOf(item.anime);
+        if (poster && typeof poster === 'object') poster = poster.medium || poster.big || poster.mega || poster.fullsize || poster.full || poster.small || '';
+        poster = String(poster || '');
+        return poster.indexOf('//') === 0 ? 'https:' + poster : poster;
+    }
+
     function episodeNumber(value) {
         if (typeof value === 'number') return value;
         var match = String(value || '').match(/(\d+(?:\.\d+)?)/);
@@ -72,6 +81,7 @@
                 releases.push({
                     anime_id: animeId,
                     title: titleOf(item),
+                    poster: posterOf(item),
                     timestamp: timestamp,
                     episode: release.aired ? Number(episodes.aired || 0) : Number(episodes.aired || 0) + 1,
                     total: Number(episodes.count || 0),
@@ -88,6 +98,7 @@
             return {
                 anime_id: video.anime_id || video.animeId || video.anime && (video.anime.anime_id || video.anime.id) || '',
                 title: titleOf(video),
+                poster: posterOf(video),
                 episode: episodeNumber(video.episode || video.number || video.ep_title || video.episode_title),
                 episode_label: video.ep_title || video.episode_title || video.episode || video.number || '',
                 dubbing: video.dub_title || video.dubbing || '',
@@ -123,7 +134,8 @@
                 title: titleOf(video),
                 episode: video.episode_label || video.episode || '',
                 dubbing: video.dubbing || '',
-                source: video.source || ''
+                source: video.source || '',
+                poster: video.poster || ''
             }
         };
     }
@@ -215,6 +227,14 @@
         }, 0);
     }
 
+    function dashboardPriority(options) {
+        options = options || {};
+        if (Number(options.continue_count || 0) > 0) return {key: 'continue_watching', label: 'continue_now'};
+        if (Number(options.notification_count || 0) > 0) return {key: 'notifications', label: 'notifications_new'};
+        if (options.has_translation) return {key: 'new_translations', label: 'fresh_translation'};
+        return options.authorized ? {key: 'for_you', label: 'recommended_now'} : {key: 'catalog', label: 'start_catalog'};
+    }
+
     function load(feed) {
         return feed().then(counts);
     }
@@ -260,6 +280,8 @@
         listCounts: listCounts,
         personalInsight: personalInsight,
         notificationCount: notificationCount,
+        dashboardPriority: dashboardPriority,
+        posterOf: posterOf,
         timestampMilliseconds: timestampMilliseconds,
         uniqueCount: uniqueCount
     };
