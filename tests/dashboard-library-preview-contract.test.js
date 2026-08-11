@@ -31,11 +31,15 @@ assert.match(ui, /data-yani-home-key/);
 assert.match(ui, /yani_home_last_focus/);
 assert.match(ui, /renderLibraryStrip\(LampaYaniHomeInsights\.libraryPreview\(continuing, 3\)\)/);
 assert.match(ui, /yani-home__library-mini selector/);
+assert.match(ui, /yani-home__library-pulse/);
+assert.match(ui, /personal\.continue_count \+ ' \/ ' \+ personal\.tracked_total/);
 assert.match(ui, /mini\.on\('hover:enter click\.yaniHomeResume'/);
 assert.match(ui, /openVideos\(card, true\)/);
 assert.match(ui, /if \(target\) \{[\s\S]{0,180}renderIntroContext\(\$\(target\)\);[\s\S]{0,120}scroll\.update\(\$\(target\), true\);/);
 assert.match(css, /\.yani-home__library-preview--visible \{ display: grid; \}/);
 assert.match(css, /\.yani-home__library-mini-progress i/);
 assert.match(css, /\.yani-home__library-mini\.focus/);
+assert.match(css, /\.yani-home__library-pulse--active/);
+assert.match(css, /@keyframes yani-home-library-pulse/);
 
 console.log('dashboard library preview contract checks passed');

@@ -332,6 +332,7 @@
             var discoverItems;
             var discoverPreview;
             var libraryStrip;
+            var libraryPulse;
             var serviceHub;
             var introMetrics = {};
             var sectionRailNodes = {};
@@ -402,6 +403,16 @@
                 head.find('.yani-home__panel-title').text(title);
                 root.append(head);
                 if (group === 'library') {
+                    libraryPulse = $(
+                        '<div class="yani-home__library-pulse" aria-live="polite">' +
+                            '<span class="yani-home__library-pulse-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>' +
+                            '<span class="yani-home__library-pulse-copy"><small></small><b>—</b><em></em></span>' +
+                            '<span class="yani-home__library-pulse-meter" aria-hidden="true"><i></i></span>' +
+                        '</div>'
+                    );
+                    libraryPulse.find('small').text(t('dashboard_library'));
+                    libraryPulse.find('em').text(t('continue_watching'));
+                    root.append(libraryPulse);
                     libraryStrip = $('<div class="yani-home__library-preview" aria-hidden="true"></div>');
                     root.append(libraryStrip);
                 }
@@ -916,6 +927,14 @@
             function renderPersonal(stats) {
                 if (destroyed) return;
                 var personal = LampaYaniHomeInsights.personalInsight(continuing, account, stats);
+                if (libraryPulse && libraryPulse.length) {
+                    var libraryActivity = personal.continue_count + personal.tracked_total;
+                    var resumeShare = libraryActivity ? Math.round(personal.continue_count / libraryActivity * 100) : 0;
+                    libraryPulse.toggleClass('yani-home__library-pulse--active', Boolean(libraryActivity));
+                    libraryPulse.find('b').text(libraryActivity ? personal.continue_count + ' / ' + personal.tracked_total : '—');
+                    libraryPulse.find('em').text(t('continue_watching') + ' ' + personal.continue_count + ' · ' + t('updates') + ' ' + personal.tracked_total);
+                    libraryPulse.find('.yani-home__library-pulse-meter i').css('width', String(resumeShare) + '%');
+                }
                 prioritySignals.continue_count = personal.continue_count;
                 setCount(homeButtons.continue_watching, personal.continue_count);
                 setIntroMetric('continue', personal.continue_count, continueMetricDetail(personal.continue_preview));

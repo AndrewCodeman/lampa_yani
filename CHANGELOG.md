@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.39.9 — 2026-08-12
+
+- Redesigned My Library as a connected activity stream rather than a plain card stack.
+- Added a live library pulse summarizing resumable and tracked titles.
+- Added focus-aware timeline nodes for Continue Watching, My Lists and Updates.
+- Reused existing personal snapshots without adding API traffic.
+
 ## 0.39.8 — 2026-08-12
 
 - Gave Catalog, Genres and Search distinct visual identities on the dashboard.
