@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.37.2 — 2026-08-11
+
+- Added a localized countdown to the nearest Japanese broadcast in the episode-flow header.
+- Switched the indicator to an aired state when the cached or live release time has passed.
+- Recalculated the countdown whenever focus returns to the dashboard without a permanent timer.
+- Reused the existing schedule payload and dashboard snapshot without extra API requests.
+
 ## 0.37.1 — 2026-08-11
 
 - Added a non-focusable curved section rail for orientation on the long dashboard.

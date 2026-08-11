@@ -122,6 +122,21 @@
         };
     }
 
+    function releaseCountdown(timestamp, now) {
+        var target = timestampMilliseconds(timestamp);
+        now = Number(now || Date.now());
+        if (!target) return {state: 'unknown', days: 0, hours: 0, minutes: 0};
+        var delta = target - now;
+        if (delta <= 0) return {state: 'aired', days: 0, hours: 0, minutes: 0};
+        var totalMinutes = Math.max(1, Math.ceil(delta / 60000));
+        return {
+            state: 'upcoming',
+            days: Math.floor(totalMinutes / 1440),
+            hours: Math.floor(totalMinutes % 1440 / 60),
+            minutes: totalMinutes % 60
+        };
+    }
+
     function translationInsight(payload) {
         var videos = translationEntries(payload);
         var video = videos[0] || null;
@@ -354,6 +369,7 @@
         load: load,
         dashboard: dashboard,
         scheduleInsight: scheduleInsight,
+        releaseCountdown: releaseCountdown,
         translationInsight: translationInsight,
         discoveryInsights: discoveryInsights,
         episodeFlow: episodeFlow,

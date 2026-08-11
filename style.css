@@ -451,8 +451,14 @@
     letter-spacing: .02em;
 }
 
-.yani-home__episode-flow-live { margin-left: auto; display: flex; align-items: center; justify-content: center; width: 1.55em; height: 1.55em; border-radius: 50%; background: rgba(239,100,112,.12); }
+.yani-home__episode-flow-live { margin-left: auto; display: none; align-items: center; justify-content: center; gap: .38em; max-width: 54%; padding: .32em .52em; border: .07em solid rgba(239,100,112,.35); border-radius: 999px; background: rgba(239,100,112,.1); }
+.yani-home__episode-flow-live--visible { display: flex; }
 .yani-home__episode-flow-live i { width: .48em; height: .48em; border-radius: 50%; background: #ef6470; box-shadow: 0 0 0 .28em rgba(239,100,112,.12), 0 0 1em rgba(239,100,112,.55); }
+.yani-home__episode-flow-live b { overflow: hidden; color: rgba(255,255,255,.76); font-size: .58em; font-weight: 650; line-height: 1; text-overflow: ellipsis; white-space: nowrap; }
+.yani-home__episode-flow-live--upcoming { border-color: rgba(98,184,255,.34); background: rgba(98,184,255,.1); }
+.yani-home__episode-flow-live--upcoming i { background: #62b8ff; box-shadow: 0 0 .8em rgba(98,184,255,.65); }
+.yani-home__episode-flow-live--aired { border-color: rgba(85,215,149,.34); background: rgba(85,215,149,.1); }
+.yani-home__episode-flow-live--aired i { background: #55d795; box-shadow: 0 0 .8em rgba(85,215,149,.62); }
 .yani-home--motion .yani-home__episode-flow-live i { animation: yani-home-flow-pulse 2.4s ease-in-out infinite; }
 
 .yani-home__episode-flow-items {

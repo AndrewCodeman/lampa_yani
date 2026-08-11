@@ -324,6 +324,7 @@
             var episodeFlow;
             var episodeFlowItems;
             var episodeFlowTimeline;
+            var currentEpisodeFlow;
             var discover;
             var discoverItems;
             var libraryStrip;
@@ -424,12 +425,13 @@
                     html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
                     $(target).closest('.yani-home__panel').addClass('yani-home__panel--active');
                     renderIntroContext($(target));
+                    if (currentEpisodeFlow) updateEpisodeCountdown(currentEpisodeFlow.japan);
                     scroll.update($(target), true);
                 });
                 button.on('hover:enter click.yaniHome', item.action);
                 if (item.group === 'episode_flow') {
                     if (!episodeFlow) {
-                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__episode-flow-title"></span><span class="yani-home__episode-flow-live"><i></i></span></div><div class="yani-home__episode-timeline" aria-hidden="true"></div><div class="yani-home__episode-flow-items"></div></div>');
+                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__episode-flow-title"></span><span class="yani-home__episode-flow-live" aria-hidden="true"><i></i><b></b></span></div><div class="yani-home__episode-timeline" aria-hidden="true"></div><div class="yani-home__episode-flow-items"></div></div>');
                         episodeFlow.find('.yani-home__episode-flow-title').text(t('episode_flow'));
                         episodeFlowTimeline = episodeFlow.find('.yani-home__episode-timeline');
                         episodeFlowItems = episodeFlow.find('.yani-home__episode-flow-items');
@@ -599,6 +601,8 @@
             function renderEpisodeTimeline(flow) {
                 if (!episodeFlowTimeline) return;
                 flow = flow || {};
+                currentEpisodeFlow = flow;
+                updateEpisodeCountdown(flow.japan);
                 var stages = [
                     {key: 'japan', label: t('japan_broadcast')},
                     {key: 'waiting', label: t('translation_waiting')},
@@ -629,6 +633,25 @@
                     if (index) node.prepend('<span class="yani-home__episode-stage-link"><i></i></span>');
                     episodeFlowTimeline.append(node);
                 });
+            }
+
+            function updateEpisodeCountdown(release) {
+                if (!episodeFlow) return;
+                var indicator = episodeFlow.find('.yani-home__episode-flow-live');
+                var countdown = LampaYaniHomeInsights.releaseCountdown(release && release.timestamp, Date.now());
+                indicator.removeClass('yani-home__episode-flow-live--upcoming yani-home__episode-flow-live--aired yani-home__episode-flow-live--visible');
+                if (countdown.state === 'unknown') return indicator.find('b').text('');
+                var text;
+                if (countdown.state === 'aired') {
+                    text = t('broadcast_started');
+                } else {
+                    var parts = [];
+                    if (countdown.days) parts.push(countdown.days + t('days_short'));
+                    if (countdown.hours) parts.push(countdown.hours + t('hours_short'));
+                    if (countdown.minutes && !countdown.days) parts.push(countdown.minutes + t('minutes_short'));
+                    text = t('next_broadcast') + ' · ' + (parts.join(' ') || '1' + t('minutes_short'));
+                }
+                indicator.addClass('yani-home__episode-flow-live--visible yani-home__episode-flow-live--' + countdown.state).find('b').text(text);
             }
 
             var account = LampaYaniAuth.get();
