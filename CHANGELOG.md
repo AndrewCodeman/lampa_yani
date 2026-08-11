@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.39.5 — 2026-08-12
+
+- Made the episode-flow stages focusable from a TV remote.
+- Added direct navigation from Japan broadcast and waiting stages to Schedule.
+- Added direct navigation from the available translation stage to New Translations.
+- Added focus styling and accessible labels for the flow actions.
+
 ## 0.39.4 — 2026-08-12
 
 - Made the dashboard section rail focusable and usable with a TV remote.

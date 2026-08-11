@@ -531,6 +531,10 @@
 .yani-home__episode-stage-label { color: rgba(255,255,255,.48); font-size: .58em; font-weight: 750; letter-spacing: .04em; line-height: 1.15; text-transform: uppercase; }
 .yani-home__episode-stage-title { overflow: hidden; margin-top: .22em; color: rgba(255,255,255,.88); font-size: .72em; font-weight: 650; line-height: 1.16; text-overflow: ellipsis; white-space: nowrap; }
 .yani-home__episode-stage-meta { overflow: hidden; margin-top: .2em; color: rgba(255,255,255,.48); font-size: .6em; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.yani-home__episode-stage.selector { cursor: pointer; transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+.yani-home__episode-stage.selector.focus { z-index: 3; border-color: rgba(255,255,255,.9); background: rgba(255,255,255,.14); box-shadow: 0 0 0 .14em rgba(255,255,255,.2), 0 .45em 1em rgba(0,0,0,.18); transform: translateY(-.08em) scale(1.02); }
+.yani-home__episode-stage.selector.focus .yani-home__episode-stage-title { color: #fff; }
+.yani-home__episode-stage.selector.focus .yani-home__episode-stage-marker { border-color: #fff; box-shadow: 0 0 0 .18em rgba(255,255,255,.16); }
 .yani-home__episode-stage-link { position: absolute; top: 50%; left: -.74em; width: .74em; height: .15em; background: rgba(255,255,255,.14); transform: translateY(-50%); }
 .yani-home__episode-stage-link i { position: absolute; right: -.02em; top: 50%; width: .3em; height: .3em; border-top: .08em solid rgba(255,255,255,.4); border-right: .08em solid rgba(255,255,255,.4); transform: translateY(-50%) rotate(45deg); }
 .yani-home--motion .yani-home__episode-stage--waiting .yani-home__episode-stage-marker { animation: yani-home-stage-wait 2.8s ease-in-out infinite; }

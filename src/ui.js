@@ -437,7 +437,7 @@
                 button.on('hover:enter click.yaniHome', item.action);
                 if (item.group === 'episode_flow') {
                     if (!episodeFlow) {
-                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__episode-flow-title"></span><span class="yani-home__episode-flow-live" aria-hidden="true"><i></i><b></b></span></div><div class="yani-home__episode-timeline" aria-hidden="true"></div><div class="yani-home__episode-flow-items"></div></div>');
+                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__episode-flow-title"></span><span class="yani-home__episode-flow-live" aria-hidden="true"><i></i><b></b></span></div><div class="yani-home__episode-timeline"></div><div class="yani-home__episode-flow-items"></div></div>');
                         episodeFlow.find('.yani-home__episode-flow-title').text(t('episode_flow'));
                         episodeFlowTimeline = episodeFlow.find('.yani-home__episode-timeline');
                         episodeFlowItems = episodeFlow.find('.yani-home__episode-flow-items');
@@ -677,6 +677,22 @@
                     {key: 'waiting', label: t('translation_waiting')},
                     {key: 'available', label: t('new_translations')}
                 ];
+                function bindEpisodeStage(node, targetKey, definition, data, meta) {
+                    var target = homeButtons[targetKey];
+                    if (!target) return;
+                    node.addClass('selector').attr({role: 'button', tabindex: '-1', 'aria-label': [definition.label, data.title || t('flow_no_data'), meta.join(' · ')].filter(Boolean).join(': ')});
+                    node.data('yani-home-context-key', targetKey);
+                    node.on('hover:focus', function (event) {
+                        var focused = event.currentTarget || event.target;
+                        last = focused;
+                        if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, targetKey);
+                        html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
+                        target.closest('.yani-home__panel').addClass('yani-home__panel--active');
+                        renderIntroContext(target);
+                        scroll.update($(focused), true);
+                    });
+                    node.on('hover:enter click.yaniHomeFlow', target.action);
+                }
                 episodeFlowTimeline.empty();
                 stages.forEach(function (definition, index) {
                     var data = flow[definition.key] || {};
@@ -700,6 +716,7 @@
                     copy.append($('<div class="yani-home__episode-stage-meta"></div>').text(meta.join(' · ') || '—'));
                     node.append(marker, copy);
                     if (index) node.prepend('<span class="yani-home__episode-stage-link"><i></i></span>');
+                    bindEpisodeStage(node, definition.key === 'available' ? 'new_translations' : 'schedule', definition, data, meta);
                     episodeFlowTimeline.append(node);
                 });
             }
