@@ -42,6 +42,36 @@
         return 'system';
     }
 
+    function notificationTimestamp(notification) {
+        var value = notification && (notification.date || notification.date_seconds || notification.dateSeconds);
+        if (!value) return 0;
+        if (typeof value === 'number' || /^\d+$/.test(String(value))) {
+            var numeric = Number(value) || 0;
+            return numeric > 0 && numeric < 100000000000 ? numeric * 1000 : numeric;
+        }
+        return Date.parse(value) || 0;
+    }
+
+    function notificationDayGroup(notification, now) {
+        var timestamp = notificationTimestamp(notification);
+        if (!timestamp) return 'earlier';
+        var current = new Date(now || Date.now());
+        var target = new Date(timestamp);
+        var currentDay = new Date(current.getFullYear(), current.getMonth(), current.getDate()).getTime();
+        var targetDay = new Date(target.getFullYear(), target.getMonth(), target.getDate()).getTime();
+        var difference = Math.round((currentDay - targetDay) / 86400000);
+        if (difference <= 0) return 'today';
+        if (difference === 1) return 'yesterday';
+        return 'earlier';
+    }
+
+    function isOpenable(notification) {
+        return Boolean(notification && (
+            notification.anime_id || notification.animeId ||
+            notification.kind === 'episode' && notification.anime_slug
+        ));
+    }
+
     function normalize(payload) {
         return responseItems(payload).map(function (source) {
             source = source || {};
@@ -79,6 +109,7 @@
         var pageSize = 30;
         var destroyed = false;
         var opening = false;
+        var lastDayGroup = '';
         scroll.minus();
 
         function focusable(element) {
@@ -148,6 +179,7 @@
             item.data('yani-notification', notification);
             item.addClass('yani-notification--' + notification.kind);
             item.toggleClass('unread', notification.unread).toggleClass('read', !notification.unread);
+            item.toggleClass('is-actionable', isOpenable(notification));
 
             var visual = $('<div class="yani-notification__visual"></div>').html(icon(notification.kind));
             var body = $('<div class="yani-notification__body"></div>');
@@ -161,13 +193,20 @@
 
             var footer = $('<div class="yani-notification__footer"></div>');
             footer.append($('<span class="yani-notification__state"></span>').text(deps.t(notification.unread ? 'notification_unread' : 'notification_read')));
-            if (notification.kind === 'episode' && (notification.anime_slug || notification.anime_id || notification.animeId)) {
+            if (isOpenable(notification)) {
                 footer.append($('<span class="yani-notification__open"></span>').text(deps.t('notification_open_anime')));
             }
             body.append(footer);
-            item.append($('<span class="yani-notification__dot"></span>'), visual, body, $('<span class="yani-notification__chevron">›</span>'));
+            item.append($('<span class="yani-notification__dot"></span>'), visual, body);
+            if (isOpenable(notification)) item.append($('<span class="yani-notification__chevron">›</span>'));
             item.on('hover:enter click.yaniNotification', function () { openNotification(notification, item); });
             return item;
+        }
+
+        function appendDayGroup(key) {
+            if (!key || key === lastDayGroup) return;
+            lastDayGroup = key;
+            list.append($('<div class="yani-notifications__day"></div>').text(deps.t('notifications_' + key)));
         }
 
         function emptyState() {
@@ -180,8 +219,14 @@
 
         function appendItems(items, append) {
             list.find('.yani-notifications__more').remove();
-            if (!append) list.empty();
-            items.forEach(function (notification) { list.append(notificationCard(notification)); });
+            if (!append) {
+                list.empty();
+                lastDayGroup = '';
+            }
+            items.forEach(function (notification) {
+                appendDayGroup(notificationDayGroup(notification));
+                list.append(notificationCard(notification));
+            });
             if (!list.children('.yani-notification').length) {
                 list.append(emptyState());
                 updateSummary();
@@ -293,6 +338,8 @@
         normalize: normalize,
         htmlToText: htmlToText,
         extractAnimeSlug: extractAnimeSlug,
-        notificationKind: notificationKind
+        notificationKind: notificationKind,
+        notificationDayGroup: notificationDayGroup,
+        isOpenable: isOpenable
     };
 }(window));

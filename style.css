@@ -1608,6 +1608,18 @@
 .yani-notifications__action.focus > span { color: #fff; background: #e84f6a; }
 
 .yani-notifications__list { display: grid; gap: .72em; }
+.yani-notifications__day {
+    display: flex;
+    align-items: center;
+    gap: .7em;
+    margin: .55em .15em -.08em;
+    color: rgba(225,236,245,.66);
+    font-size: .76em;
+    font-weight: 750;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.yani-notifications__day:after { content: ''; flex: 1; height: .08em; background: linear-gradient(90deg, rgba(255,255,255,.14), transparent); }
 .yani-notification {
     --notification-accent: #9db0c2;
     --notification-accent-soft: rgba(157,176,194,.14);
@@ -1647,6 +1659,7 @@
 .yani-notification.unread .yani-notification__state { color: #ff9bad; background: rgba(255,103,130,.13); }
 .yani-notification__open { color: var(--notification-accent); }
 .yani-notification__chevron { color: #71879a; font-size: 2em; line-height: 1; }
+.yani-notification:not(.is-actionable) { grid-template-columns: 3.4em minmax(0, 1fr); }
 .yani-notification.loading:after,
 .yani-notifications__more.loading:after { content: ''; position: absolute; inset: 0; background: rgba(12,20,29,.38); }
 .yani-notification.focus { color: #152535; background: #fff; border-color: #fff; box-shadow: 0 0 0 .17em var(--notification-accent), 0 .8em 2em rgba(0,0,0,.25); }

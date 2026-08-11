@@ -59,6 +59,9 @@
     messages.ru.notification_kind_social = 'Сообщество';
     messages.ru.notification_kind_news = 'Новость';
     messages.ru.notification_kind_system = 'Система';
+    messages.ru.notifications_today = 'Сегодня';
+    messages.ru.notifications_yesterday = 'Вчера';
+    messages.ru.notifications_earlier = 'Ранее';
     messages.ru.sync_history = 'Синхронизировать просмотр';
     messages.ru.sync_history_description = 'Отправить локальную историю в аккаунт YummyAnime';
     messages.ru.sync_history_ok = 'История просмотра синхронизирована';
@@ -149,6 +152,9 @@
     messages.en.notification_kind_social = 'Community';
     messages.en.notification_kind_news = 'News';
     messages.en.notification_kind_system = 'System';
+    messages.en.notifications_today = 'Today';
+    messages.en.notifications_yesterday = 'Yesterday';
+    messages.en.notifications_earlier = 'Earlier';
     messages.en.sync_history = 'Sync watch history';
     messages.en.sync_history_description = 'Send local history to your YummyAnime account';
     messages.en.sync_history_ok = 'Watch history synchronized';
@@ -523,6 +529,9 @@
     messages.uk.notification_kind_social = 'Спільнота';
     messages.uk.notification_kind_news = 'Новина';
     messages.uk.notification_kind_system = 'Система';
+    messages.uk.notifications_today = 'Сьогодні';
+    messages.uk.notifications_yesterday = 'Учора';
+    messages.uk.notifications_earlier = 'Раніше';
     messages.uk.sync_history = 'Синхронізувати перегляд';
     messages.uk.sync_history_description = 'Надіслати локальну історію до облікового запису YummyAnime';
     messages.uk.sync_history_ok = 'Історію перегляду синхронізовано';

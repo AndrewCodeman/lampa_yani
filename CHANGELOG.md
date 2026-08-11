@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.38.1 — 2026-08-12
+
+- Grouped notifications into Today, Yesterday and Earlier sections.
+- Displayed navigation arrows only for notifications that can really open an anime title.
+- Kept informational and system notifications focusable for scrolling without implying a broken link.
+- Preserved date grouping while loading additional notification pages.
+
 ## 0.38.0 — 2026-08-12
 
 - Rebuilt notifications as clear TV-friendly cards with type icons, hierarchy and unread state.
