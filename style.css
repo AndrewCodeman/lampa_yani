@@ -191,8 +191,82 @@
     background: center / contain no-repeat url('./assets/yummyanime.svg');
 }
 
+.yani-home {
+    position: relative;
+    min-height: calc(100vh - 5.5em);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.yani-home__waves {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: .9;
+}
+
+.yani-home__waves::before {
+    content: '';
+    position: absolute;
+    width: 42em;
+    height: 42em;
+    left: -12em;
+    top: -19em;
+    border-radius: 44% 56% 63% 37% / 38% 42% 58% 62%;
+    background: radial-gradient(circle at 62% 68%, rgba(239,100,112,.22), rgba(145,50,104,.08) 43%, transparent 69%);
+    transform: rotate(-14deg);
+}
+
+.yani-home__waves::after {
+    content: '';
+    position: absolute;
+    width: 52em;
+    height: 34em;
+    right: -18em;
+    bottom: -17em;
+    border-radius: 61% 39% 35% 65% / 57% 64% 36% 43%;
+    background: radial-gradient(circle at 25% 28%, rgba(73,155,255,.16), rgba(92,75,180,.06) 47%, transparent 70%);
+    transform: rotate(11deg);
+}
+
+.yani-home__waves svg {
+    position: absolute;
+    width: 112%;
+    height: 100%;
+    left: -6%;
+    top: 0;
+    overflow: visible;
+}
+
+.yani-home__wave {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+    stroke-dasharray: 1900;
+    stroke-dashoffset: 0;
+}
+
+.yani-home__wave--far { stroke: rgba(255,255,255,.09); stroke-width: 34; }
+.yani-home__wave--middle { stroke: rgba(239,100,112,.16); stroke-width: 70; }
+.yani-home__wave--near { stroke: rgba(93,153,255,.11); stroke-width: 110; }
+
+.yani-home__pulse {
+    position: absolute;
+    width: .55em;
+    height: .55em;
+    border: .12em solid rgba(255,255,255,.32);
+    border-radius: 50%;
+    box-shadow: 0 0 0 .45em rgba(239,100,112,.05), 0 0 1.4em rgba(239,100,112,.2);
+}
+
+.yani-home__pulse--one { left: 12%; top: 66%; }
+.yani-home__pulse--two { right: 14%; top: 19%; }
+
 .yani-home__grid {
     position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: repeat(3, minmax(12em, 1fr));
     gap: 1.05em;
@@ -201,45 +275,39 @@
     margin: 0 auto;
 }
 
-.yani-home__grid::before {
-    content: '';
-    position: absolute;
-    inset: 7% 5% 10%;
-    pointer-events: none;
-    background: radial-gradient(circle at 20% 20%, rgba(239,100,112,.12), transparent 38%), radial-gradient(circle at 82% 70%, rgba(90,147,255,.1), transparent 42%);
-}
-
 .yani-home__item {
     position: relative;
     min-height: 8.3em;
     padding: 1.35em 1.5em;
     border: 0.08em solid rgba(255, 255, 255, 0.12);
-    border-radius: 1em;
-    background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+    border-radius: 1.55em .85em 1.45em .9em;
+    background: linear-gradient(128deg, rgba(255,255,255,.16), rgba(255,255,255,.055) 72%);
     box-shadow: 0 0.7em 1.8em rgba(0, 0, 0, .12), inset 0 0.08em 0 rgba(255,255,255,.12);
     display: flex;
     align-items: center;
     gap: 1em;
     overflow: hidden;
-    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    transition: transform .2s ease, background .2s ease, border-color .2s ease, border-radius .28s ease;
 }
 
 .yani-home__item::before {
     content: '';
     position: absolute;
     z-index: 0;
-    top: -80%;
-    bottom: -80%;
-    left: -45%;
-    width: 24%;
+    width: 72%;
+    height: 160%;
+    right: -58%;
+    bottom: -116%;
     pointer-events: none;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);
-    transform: rotate(18deg) translateX(-220%);
-    transition: transform .48s ease;
+    border: .18em solid rgba(255,255,255,.22);
+    border-radius: 42% 58% 67% 33% / 55% 38% 62% 45%;
+    background: rgba(239,100,112,.09);
+    transform: rotate(-18deg) scale(.8);
+    transition: transform .42s cubic-bezier(.2,.8,.2,1), border-radius .42s ease;
 }
 
 .yani-home__item > * { position: relative; z-index: 1; }
-.yani-home--motion .yani-home__item { animation: yani-home-reveal .34s ease-out backwards; }
+.yani-home--motion .yani-home__item { animation: yani-home-reveal .46s cubic-bezier(.18,.82,.22,1) backwards; }
 .yani-home--motion .yani-home__item:nth-child(2) { animation-delay: .035s; }
 .yani-home--motion .yani-home__item:nth-child(3) { animation-delay: .07s; }
 .yani-home--motion .yani-home__item:nth-child(4) { animation-delay: .105s; }
@@ -252,8 +320,24 @@
 .yani-home--motion .yani-home__item:nth-child(11) { animation-delay: .35s; }
 
 @keyframes yani-home-reveal {
-    from { opacity: 0; transform: translateY(.65em) scale(.985); }
+    from { opacity: 0; transform: translateY(1.2em) rotate(.6deg); }
     to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.yani-home--motion .yani-home__wave { animation: yani-home-wave-draw 1.15s cubic-bezier(.24,.76,.28,1) backwards; }
+.yani-home--motion .yani-home__wave--middle { animation-delay: .08s; }
+.yani-home--motion .yani-home__wave--near { animation-delay: .16s; }
+.yani-home--motion .yani-home__pulse { animation: yani-home-pulse 3.2s ease-in-out infinite; }
+.yani-home--motion .yani-home__pulse--two { animation-delay: -1.6s; }
+
+@keyframes yani-home-wave-draw {
+    from { opacity: 0; stroke-dashoffset: 1900; transform: translateY(1.5em); }
+    to { opacity: 1; stroke-dashoffset: 0; transform: translateY(0); }
+}
+
+@keyframes yani-home-pulse {
+    0%, 100% { opacity: .28; transform: scale(.8); }
+    50% { opacity: .8; transform: scale(1.18); }
 }
 
 .yani-home__item.focus {
@@ -262,9 +346,13 @@
     border-color: rgba(255,255,255,.95);
     box-shadow: 0 0 0 .18em rgba(255,255,255,.22), 0 1em 2.4em rgba(0,0,0,.25);
     transform: translateY(-.12em) scale(1.015);
+    border-radius: .85em 1.55em .9em 1.45em;
 }
 
-.yani-home--motion .yani-home__item.focus::before { transform: rotate(18deg) translateX(680%); }
+.yani-home--motion .yani-home__item.focus::before {
+    transform: translate(-42%, -34%) rotate(22deg) scale(1.08);
+    border-radius: 66% 34% 41% 59% / 45% 62% 38% 55%;
+}
 
 .yani-home__icon {
     flex: 0 0 3.35em;
@@ -331,13 +419,17 @@
 .yani-home--reduced-motion .yani-home__item,
 .yani-home--reduced-motion .yani-home__item::before,
 .yani-home--reduced-motion .yani-home__icon,
-.yani-home--reduced-motion .yani-home__arrow { animation: none; transition: none; }
+.yani-home--reduced-motion .yani-home__arrow,
+.yani-home--reduced-motion .yani-home__wave,
+.yani-home--reduced-motion .yani-home__pulse { animation: none; transition: none; }
 
 @media (prefers-reduced-motion: reduce) {
     .yani-home__item,
     .yani-home__item::before,
     .yani-home__icon,
-    .yani-home__arrow { animation: none !important; transition: none !important; }
+    .yani-home__arrow,
+    .yani-home__wave,
+    .yani-home__pulse { animation: none !important; transition: none !important; }
 }
 
 .yani-policy {

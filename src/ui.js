@@ -512,6 +512,17 @@
         });
 
         this.create = function () {
+            var waves = $(
+                '<div class="yani-home__waves" aria-hidden="true">' +
+                    '<svg viewBox="0 0 1440 760" preserveAspectRatio="none" focusable="false">' +
+                        '<path class="yani-home__wave yani-home__wave--far" d="M-120 190 C 120 25 315 335 555 188 S 940 48 1135 215 S 1450 292 1570 115"/>' +
+                        '<path class="yani-home__wave yani-home__wave--middle" d="M-110 445 C 115 235 330 565 565 380 S 925 245 1130 420 S 1455 505 1560 330"/>' +
+                        '<path class="yani-home__wave yani-home__wave--near" d="M-100 650 C 170 430 350 735 625 560 S 1015 430 1210 585 S 1465 660 1570 505"/>' +
+                    '</svg>' +
+                    '<span class="yani-home__pulse yani-home__pulse--one"></span>' +
+                    '<span class="yani-home__pulse yani-home__pulse--two"></span>' +
+                '</div>'
+            );
             items.forEach(function (item) {
                 var button = $('<div class="yani-home__item yani-home__item--' + item.key + ' selector"><div class="yani-home__icon">' + homeIcon(item.key) + '</div><div class="yani-home__title">' + item.title + '</div><div class="yani-home__arrow">›</div></div>');
                 button.on('hover:focus', function (event) {
@@ -523,6 +534,7 @@
                 grid.append(button);
             });
             scroll.append(grid);
+            html.append(waves);
             html.append(scroll.render(true));
             this.activity.loader(false);
             this.activity.toggle();

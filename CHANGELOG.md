@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.33.14 — 2026-08-11
+
+- Replace the generic dashboard glow with layered curved YummyAnime wave artwork.
+- Animate wave drawing and small ambient pulses when the dashboard opens.
+- Give dashboard tiles a softer asymmetric shape and organic focus response.
+- Keep all decorative motion disabled on reduced-motion and low-power devices.
+
 ## 0.33.13 — 2026-08-11
 
 - Add staggered tile entrance animations and subtle dashboard ambient highlights.
