@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.6 — 2026-08-11
+
+- Group New Releases, Top Rated, For You and Collections into one wide Discover block on the dashboard.
+- Keep every destination independently focusable by TV remote and independently configurable in settings.
+- Use a compact four-column layout on large screens and a two-column layout on narrow devices.
+- Add lightweight organic decoration without introducing image or animation overhead on low-power devices.
+
 ## 0.34.5 — 2026-08-11
 
 - Rebuild Updates around Watching, Planned, Postponed and subscribed titles only.

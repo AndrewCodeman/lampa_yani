@@ -543,19 +543,19 @@
                 openContinueWatching();
             }},
             {key: 'user_lists', title: t('user_lists'), authorized: true, action: openUserLists},
-            {key: 'new_releases', title: t('new_releases'), action: function () {
+            {key: 'new_releases', title: t('new_releases'), group: 'discover', action: function () {
                 Lampa.Activity.push({url: 'yani/new-releases', title: 'YummyAnime ' + t('new_releases'), component: 'yani_new_releases'});
             }},
-            {key: 'top_rated', title: t('top_rated'), action: function () {
+            {key: 'top_rated', title: t('top_rated'), group: 'discover', action: function () {
                 Lampa.Activity.push({url: 'yani/top', title: 'YummyAnime ' + t('top_rated'), component: 'yani_top', topMode: true, params: {limit: 30, sort: 'top', sort_forward: true, from_year: 1900}});
             }},
-            {key: 'for_you', title: t('for_you'), action: function () {
+            {key: 'for_you', title: t('for_you'), group: 'discover', action: function () {
                 Lampa.Activity.push({url: 'yani/for-you', title: 'YummyAnime ' + t('for_you'), component: 'yani_recommended'});
             }},
             {key: 'updates', title: t('updates'), action: function () {
                 Lampa.Activity.push({url: 'yani/updates', title: 'YummyAnime ' + t('updates'), component: 'yani_updates'});
             }},
-            {key: 'collections', title: t('collections'), action: openCollections},
+            {key: 'collections', title: t('collections'), group: 'discover', action: openCollections},
             {key: 'notifications', title: t('notifications'), authorized: true, action: openNotifications},
             {key: 'account', title: t('account'), action: openAccount},
             {key: 'status', title: t('status'), action: function () {
@@ -579,6 +579,8 @@
             );
             var episodeFlow;
             var episodeFlowItems;
+            var discover;
+            var discoverItems;
             items.forEach(function (item) {
                 var text = $('<div class="yani-home__text"></div>');
                 text.append($('<div class="yani-home__title"></div>').text(item.title));
@@ -599,6 +601,14 @@
                         grid.append(episodeFlow);
                     }
                     episodeFlowItems.append(button);
+                } else if (item.group === 'discover') {
+                    if (!discover) {
+                        discover = $('<div class="yani-home__discover"><div class="yani-home__discover-head"><span class="yani-home__discover-title"></span><span class="yani-home__discover-mark" aria-hidden="true"><i></i><i></i><i></i></span></div><div class="yani-home__discover-items"></div></div>');
+                        discover.find('.yani-home__discover-title').text(t('discover'));
+                        discoverItems = discover.find('.yani-home__discover-items');
+                        grid.append(discover);
+                    }
+                    discoverItems.append(button);
                 } else {
                     grid.append(button);
                 }

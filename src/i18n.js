@@ -74,6 +74,7 @@
     messages.ru.new_releases = 'Новые релизы';
     messages.ru.new_releases_empty = 'Новых релизов пока нет';
     messages.ru.new_releases_error = 'Не удалось загрузить новые релизы';
+    messages.ru.discover = 'Открывайте новое';
     messages.ru.collections = 'Коллекции';
     messages.ru.collection = 'Коллекция';
     messages.ru.collections_load_error = 'Не удалось загрузить коллекции';
@@ -140,6 +141,7 @@
     messages.en.new_releases = 'New releases';
     messages.en.new_releases_empty = 'There are no new releases yet';
     messages.en.new_releases_error = 'Failed to load new releases';
+    messages.en.discover = 'Discover something new';
     messages.en.collections = 'Collections';
     messages.en.collection = 'Collection';
     messages.en.collections_load_error = 'Failed to load collections';
@@ -388,6 +390,7 @@
     messages.uk.new_releases = 'Нові релізи';
     messages.uk.new_releases_empty = 'Нових релізів поки немає';
     messages.uk.new_releases_error = 'Не вдалося завантажити нові релізи';
+    messages.uk.discover = 'Відкривайте нове';
     messages.uk.notifications_title = 'Сповіщення YummyAnime';
     messages.uk.notifications_empty = 'Нових сповіщень немає';
     messages.uk.notifications_error = 'Не вдалося завантажити сповіщення';
