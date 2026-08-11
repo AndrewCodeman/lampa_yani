@@ -482,7 +482,7 @@
 
             renderIntroContext = function (button) {
                 if (!button || !button.length) return;
-                var key = String(button.attr('data-yani-home-key') || 'catalog');
+                var key = String(button.data('yani-home-context-key') || button.attr('data-yani-home-key') || 'catalog');
                 setSectionRail(String(button.data('yani-home-group') || 'explore'));
                 var title = String(button.data('yani-home-title') || t('dashboard_title'));
                 var insight = String(button.data('yani-home-insight-title') || '');
@@ -686,21 +686,62 @@
 
             function renderLibraryStrip(entries) {
                 if (!libraryStrip) return;
-                libraryStrip.empty().removeClass('yani-home__library-preview--visible');
+                if (last && $(last).hasClass('yani-home__library-mini')) last = homeButtons.continue_watching && homeButtons.continue_watching[0] || null;
+                libraryStrip.empty().removeClass('yani-home__library-preview--visible').attr('aria-hidden', 'true');
                 if (!entries || !entries.length) return;
                 entries.forEach(function (entry) {
-                    var mini = $('<div class="yani-home__library-mini"></div>');
+                    if (!entry.anime_id) return;
+                    var mini = $('<div class="yani-home__library-mini selector" role="button"></div>');
                     var art = $('<span class="yani-home__library-mini-art"></span>');
                     var poster = String(entry.poster || '').replace(/["\\]/g, '');
+                    var meta = [];
+                    if (entry.episode) meta.push(t('episode') + ' ' + entry.episode);
+                    if (entry.progress) meta.push(entry.progress + '%');
+                    mini.attr('data-yani-anime-id', String(entry.anime_id));
+                    mini.attr('aria-label', [t('continue_watching'), entry.title, meta.join(' · ')].filter(Boolean).join(': '));
+                    mini.data('yani-home-context-key', 'continue_watching');
+                    mini.data('yani-home-title', t('continue_watching'));
+                    mini.data('yani-home-group', 'library');
+                    mini.data('yani-home-insight-title', entry.title || 'YummyAnime');
+                    mini.data('yani-home-insight-meta', meta.join(' · '));
+                    mini.data('yani-home-poster', poster);
                     if (!reducedMotion && !lowMemoryDevice && !lowCpuDevice && /^https?:\/\//i.test(poster)) art.css('background-image', 'url("' + poster + '")');
                     mini.append(art, $('<span class="yani-home__library-mini-shade"></span>'));
                     if (entry.episode) mini.append($('<span class="yani-home__library-mini-episode"></span>').text(t('episode') + ' ' + entry.episode));
+                    mini.append($('<span class="yani-home__library-mini-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>'));
                     mini.append($('<span class="yani-home__library-mini-title"></span>').text(entry.title || 'YummyAnime'));
                     mini.append($('<span class="yani-home__library-mini-progress"><i></i></span>'));
                     mini.find('.yani-home__library-mini-progress i').css('width', String(entry.progress || 0) + '%');
+                    mini.on('hover:focus', function (event) {
+                        var target = event.currentTarget || event.target;
+                        last = target;
+                        if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, 'continue_watching');
+                        html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
+                        $(target).closest('.yani-home__panel').addClass('yani-home__panel--active');
+                        renderIntroContext($(target));
+                        scroll.update($(target), true);
+                    });
+                    mini.on('hover:enter click.yaniHomeResume', function () {
+                        var source = Object.assign({}, entry.card || {}, {
+                            anime_id: entry.anime_id,
+                            title: entry.title || entry.card && entry.card.title || t('untitled'),
+                            poster: entry.poster || entry.card && entry.card.poster || ''
+                        });
+                        var card = toCard(source);
+                        card.yani_resume = {
+                            number: String(entry.episode || ''),
+                            video_id: entry.video_id || '',
+                            time: Number(entry.time || 0),
+                            duration: Number(entry.duration || 0),
+                            player: entry.player || '',
+                            voice: entry.voice || '',
+                            updated_at: Number(entry.updated_at || 0)
+                        };
+                        openVideos(card, true);
+                    });
                     libraryStrip.append(mini);
                 });
-                libraryStrip.addClass('yani-home__library-preview--visible');
+                if (libraryStrip.children().length) libraryStrip.addClass('yani-home__library-preview--visible').attr('aria-hidden', 'false');
             }
 
             renderLibraryStrip(LampaYaniHomeInsights.libraryPreview(continuing, 3));

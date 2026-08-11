@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.39.1 — 2026-08-12
+
+- Turned the three dashboard Continue Watching previews into TV-focusable quick-resume actions.
+- Opened the saved episode and playback position directly while retaining the full Continue Watching section.
+- Added a clear play affordance, progress state, focus styling and contextual header details.
+- Reused the merged local and YummyAnime history snapshot without adding another API request.
+
 ## 0.39.0 — 2026-08-12
 
 - Added local sorting to every YummyAnime account list: recently added, progress, rating, release year and title.

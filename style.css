@@ -412,14 +412,19 @@
 .yani-home__panel--library .yani-home__icon { flex-basis: 2.65em; width: 2.65em; height: 2.65em; }
 .yani-home__library-preview { display: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .42em; margin: -.05em .15em .72em; }
 .yani-home__library-preview--visible { display: grid; }
-.yani-home__library-mini { position: relative; min-width: 0; height: 4.15em; overflow: hidden; border: .07em solid rgba(255,255,255,.13); border-radius: .72em .42em .68em .48em; background: linear-gradient(145deg, rgba(239,100,112,.19), rgba(45,35,61,.72)); box-shadow: inset 0 .06em 0 rgba(255,255,255,.1); }
+.yani-home__library-mini { position: relative; min-width: 0; height: 4.15em; overflow: hidden; border: .07em solid rgba(255,255,255,.13); border-radius: .72em .42em .68em .48em; background: linear-gradient(145deg, rgba(239,100,112,.19), rgba(45,35,61,.72)); box-shadow: inset 0 .06em 0 rgba(255,255,255,.1); cursor: pointer; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
 .yani-home__library-mini-art, .yani-home__library-mini-shade { position: absolute; inset: 0; pointer-events: none; }
 .yani-home__library-mini-art { background-position: center 22%; background-repeat: no-repeat; background-size: cover; opacity: .76; }
 .yani-home__library-mini-shade { background: linear-gradient(180deg, rgba(12,10,18,.08), rgba(12,10,18,.94)); }
-.yani-home__library-mini-title { position: absolute; z-index: 1; left: .45em; right: .35em; bottom: .48em; overflow: hidden; color: #fff; font-size: .57em; font-weight: 650; line-height: 1.18; text-overflow: ellipsis; white-space: nowrap; }
+.yani-home__library-mini-title { position: absolute; z-index: 1; left: .45em; right: 1.65em; bottom: .48em; overflow: hidden; color: #fff; font-size: .57em; font-weight: 650; line-height: 1.18; text-overflow: ellipsis; white-space: nowrap; }
 .yani-home__library-mini-episode { position: absolute; z-index: 1; top: .35em; left: .38em; max-width: calc(100% - .76em); overflow: hidden; padding: .13em .3em; border-radius: .3em; background: rgba(12,10,18,.7); color: rgba(255,255,255,.86); font-size: .47em; line-height: 1; text-overflow: ellipsis; white-space: nowrap; }
+.yani-home__library-mini-play { position: absolute; z-index: 3; right: .4em; bottom: .38em; display: flex; align-items: center; justify-content: center; width: 1.05em; height: 1.05em; border: .06em solid rgba(255,255,255,.4); border-radius: 50%; background: rgba(12,10,18,.72); color: #fff; }
+.yani-home__library-mini-play svg { width: .58em; height: .58em; margin-left: .08em; fill: currentColor; }
 .yani-home__library-mini-progress { position: absolute; z-index: 2; left: .4em; right: .4em; bottom: .22em; height: .11em; overflow: hidden; border-radius: 1em; background: rgba(255,255,255,.18); }
 .yani-home__library-mini-progress i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #ef6470, #ffb36b); }
+.yani-home__library-mini.focus { z-index: 4; border-color: rgba(255,255,255,.95); box-shadow: 0 0 0 .15em rgba(255,255,255,.3), 0 .55em 1.3em rgba(0,0,0,.32); transform: translateY(-.12em) scale(1.035); }
+.yani-home__library-mini.focus .yani-home__library-mini-play { border-color: #ef6470; background: #ef6470; box-shadow: 0 0 0 .18em rgba(239,100,112,.22); }
+.yani-home__library-mini.focus .yani-home__library-mini-progress i { background: linear-gradient(90deg, #fff, #ffd2a5); }
 .yani-home__panel--service { grid-column: span 12; }
 .yani-home__panel--service .yani-home__panel-items { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .yani-home__panel--service .yani-home__item { min-height: 5.4em; padding: .85em 1em; }

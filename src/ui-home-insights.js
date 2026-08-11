@@ -276,10 +276,18 @@
             var duration = Math.max(0, Number(item.duration || 0));
             var time = Math.max(0, Number(item.time || 0));
             return {
+                anime_id: item.anime_id || item.animeId || item.id || '',
+                video_id: item.video_id || item.videoId || '',
                 title: titleOf(item),
                 poster: posterOf(item),
                 episode: item.number || item.episode || '',
-                progress: duration > 0 ? Math.max(0, Math.min(99, Math.round(time / duration * 100))) : 0
+                progress: duration > 0 ? Math.max(0, Math.min(99, Math.round(time / duration * 100))) : 0,
+                time: time,
+                duration: duration,
+                player: item.player || '',
+                voice: item.voice || '',
+                updated_at: Number(item.updated_at || 0),
+                card: item.card || null
             };
         });
     }

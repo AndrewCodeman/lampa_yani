@@ -11,7 +11,7 @@ const insights = context.window.LampaYaniHomeInsights;
 
 const preview = insights.libraryPreview([
     {title: 'Old', updated_at: 1, duration: 100, time: 20},
-    {title: 'Newest', updated_at: 4, duration: 100, time: 200, poster: '//cdn.example/new.jpg', number: 7},
+    {anime_id: 42, video_id: 4207, title: 'Newest', updated_at: 4, duration: 100, time: 200, poster: '//cdn.example/new.jpg', number: 7, player: 'Kodik'},
     {title: 'Third', updated_at: 2},
     {title: 'Second', updated_at: 3}
 ], 3);
@@ -20,13 +20,22 @@ assert.deepEqual(preview.map((item) => item.title), ['Newest', 'Second', 'Third'
 assert.equal(preview[0].poster, 'https://cdn.example/new.jpg');
 assert.equal(preview[0].episode, 7);
 assert.equal(preview[0].progress, 99);
+assert.equal(preview[0].anime_id, 42);
+assert.equal(preview[0].video_id, 4207);
+assert.equal(preview[0].time, 200);
+assert.equal(preview[0].duration, 100);
+assert.equal(preview[0].player, 'Kodik');
 assert.equal(insights.libraryPreview([], 3).length, 0);
 
 assert.match(ui, /data-yani-home-key/);
 assert.match(ui, /yani_home_last_focus/);
 assert.match(ui, /renderLibraryStrip\(LampaYaniHomeInsights\.libraryPreview\(continuing, 3\)\)/);
+assert.match(ui, /yani-home__library-mini selector/);
+assert.match(ui, /mini\.on\('hover:enter click\.yaniHomeResume'/);
+assert.match(ui, /openVideos\(card, true\)/);
 assert.match(ui, /if \(target\) \{[\s\S]{0,180}renderIntroContext\(\$\(target\)\);[\s\S]{0,120}scroll\.update\(\$\(target\), true\);/);
 assert.match(css, /\.yani-home__library-preview--visible \{ display: grid; \}/);
 assert.match(css, /\.yani-home__library-mini-progress i/);
+assert.match(css, /\.yani-home__library-mini\.focus/);
 
 console.log('dashboard library preview contract checks passed');
