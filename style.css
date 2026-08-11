@@ -363,7 +363,7 @@
 .yani-home__intro-data--cached i { background: #62b8ff; box-shadow: 0 0 .7em rgba(98,184,255,.42); }
 .yani-home__intro-data--offline i { background: #d84e63; box-shadow: 0 0 .7em rgba(216,78,99,.5); }
 .yani-home__intro-summary { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .52em; width: min(38em, 48%); margin-left: auto; }
-.yani-home__intro-metric { min-width: 0; display: flex; align-items: center; gap: .52em; padding: .58em .68em; box-sizing: border-box; border: .07em solid rgba(255,255,255,.12); border-radius: .72em .42em .68em .46em; background: linear-gradient(132deg, rgba(255,255,255,.11), rgba(255,255,255,.045)); box-shadow: inset 0 .06em 0 rgba(255,255,255,.09); }
+.yani-home__intro-metric { min-width: 0; display: flex; align-items: center; gap: .52em; padding: .58em .68em; box-sizing: border-box; border: .07em solid rgba(255,255,255,.12); border-radius: .72em .42em .68em .46em; background: linear-gradient(132deg, rgba(255,255,255,.11), rgba(255,255,255,.045)); box-shadow: inset 0 .06em 0 rgba(255,255,255,.09); cursor: pointer; transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease; }
 .yani-home__intro-metric-icon { flex: 0 0 1.65em; width: 1.65em; height: 1.65em; display: flex; align-items: center; justify-content: center; border-radius: .48em .28em .44em .32em; background: rgba(239,100,112,.17); color: #ff8d96; }
 .yani-home__intro-metric-icon svg { width: .92em; height: .92em; fill: currentColor; }
 .yani-home__intro-metric-copy { min-width: 0; display: flex; flex-direction: column; }
@@ -371,9 +371,16 @@
 .yani-home__intro-metric-copy b { margin-top: .08em; color: rgba(255,255,255,.46); font-size: 1.02em; font-weight: 760; line-height: 1; }
 .yani-home__intro-metric-copy em { display: none; max-width: 12em; overflow: hidden; margin-top: .28em; color: rgba(255,255,255,.5); font-size: .42em; font-style: normal; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
 .yani-home__intro-metric-copy em.yani-home__intro-metric-detail--visible { display: block; }
+.yani-home__intro-metric-arrow { flex: 0 0 auto; margin-left: auto; color: rgba(255,255,255,.38); font-size: 1.15em; line-height: 1; opacity: 0; transform: translateX(-.2em); transition: opacity .16s ease, transform .16s ease; }
 .yani-home__intro-metric--ready .yani-home__intro-metric-copy b { color: #fff; }
 .yani-home__intro-metric--active { border-color: rgba(255,255,255,.2); background: linear-gradient(132deg, rgba(255,255,255,.15), rgba(255,255,255,.065)); }
 .yani-home__intro-metric--unknown { border-style: dashed; opacity: .62; }
+.yani-home__intro-metric.focus { z-index: 3; border-color: rgba(255,255,255,.96); background: linear-gradient(132deg, #fff, rgba(255,255,255,.86)); box-shadow: 0 0 0 .16em rgba(255,255,255,.22), 0 .6em 1.4em rgba(0,0,0,.26); opacity: 1; transform: translateY(-.12em) scale(1.025); }
+.yani-home__intro-metric.focus .yani-home__intro-metric-copy small,
+.yani-home__intro-metric.focus .yani-home__intro-metric-copy b,
+.yani-home__intro-metric.focus .yani-home__intro-metric-copy em { color: rgba(22,21,27,.84); }
+.yani-home__intro-metric.focus .yani-home__intro-metric-icon { box-shadow: 0 .22em .55em rgba(0,0,0,.16); }
+.yani-home__intro-metric.focus .yani-home__intro-metric-arrow { color: #a92f53; opacity: 1; transform: translateX(0); }
 .yani-home__intro-metric--today .yani-home__intro-metric-icon { background: rgba(98,184,255,.17); color: #7bc7ff; }
 .yani-home__intro-metric--translations .yani-home__intro-metric-icon { background: rgba(188,119,255,.17); color: #cfa0ff; }
 .yani-home__intro-metric--continue .yani-home__intro-metric-icon { background: rgba(85,215,149,.15); color: #6be1a5; }

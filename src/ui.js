@@ -351,7 +351,7 @@
                 sectionRail.append(node);
             });
             var intro = $(
-                '<div class="yani-home__intro" aria-hidden="true">' +
+                '<div class="yani-home__intro">' +
                     '<span class="yani-home__intro-context-art"></span>' +
                     '<div class="yani-home__intro-mark"></div>' +
                     '<div class="yani-home__intro-copy">' +
@@ -366,20 +366,22 @@
             intro.find('.yani-home__intro-mark').html(yummyAnimeIcon());
             intro.find('.yani-home__intro-title').text(t('dashboard_title'));
             intro.find('.yani-home__intro-subtitle').text(t('dashboard_subtitle'));
-            var introSummary = $('<div class="yani-home__intro-summary" aria-hidden="true"></div>');
+            var introSummary = $('<div class="yani-home__intro-summary"></div>');
             [
                 {key: 'today', label: t('broadcasts_today'), icon: homeIcon('schedule')},
                 {key: 'translations', label: t('new_translations'), icon: homeIcon('new_translations')},
                 {key: 'continue', label: t('continue_watching'), icon: homeIcon('continue_watching')}
             ].forEach(function (metric) {
                 var node = $('<div class="yani-home__intro-metric yani-home__intro-metric--' + metric.key + '"></div>');
+                node.data('yani-home-metric-label', metric.label);
                 node.append(
                     $('<span class="yani-home__intro-metric-icon"></span>').html(metric.icon),
                     $('<span class="yani-home__intro-metric-copy"></span>').append(
                         $('<small></small>').text(metric.label),
                         $('<b></b>').text('—'),
                         $('<em></em>')
-                    )
+                    ),
+                    $('<span class="yani-home__intro-metric-arrow" aria-hidden="true">›</span>')
                 );
                 introMetrics[metric.key] = node;
                 introSummary.append(node);
@@ -459,6 +461,30 @@
             if (!homeButtons.schedule) introMetrics.today.remove();
             if (!homeButtons.new_translations) introMetrics.translations.remove();
             if (!homeButtons.continue_watching) introMetrics.continue.remove();
+
+            function bindIntroMetric(metricKey, targetKey) {
+                var metric = introMetrics[metricKey];
+                var target = homeButtons[targetKey];
+                var definition = items.filter(function (item) { return item.key === targetKey; })[0];
+                if (!metric || !metric.length || !target || !definition) return;
+                metric.addClass('selector').attr({role: 'button', tabindex: '-1'});
+                metric.data('yani-home-target-key', targetKey);
+                metric.on('hover:focus', function (event) {
+                    var focused = event.currentTarget || event.target;
+                    last = focused;
+                    if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, targetKey);
+                    html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
+                    target.closest('.yani-home__panel').addClass('yani-home__panel--active');
+                    renderIntroContext(target);
+                    if (currentEpisodeFlow) updateEpisodeCountdown(currentEpisodeFlow.japan);
+                    scroll.update($(focused), true);
+                });
+                metric.on('hover:enter click.yaniHomeMetric', definition.action);
+            }
+
+            bindIntroMetric('today', 'schedule');
+            bindIntroMetric('translations', 'new_translations');
+            bindIntroMetric('continue', 'continue_watching');
             scroll.append(grid);
             html.append(waves);
             html.append(scroll.render(true));
@@ -545,16 +571,19 @@
                 var metric = introMetrics[key];
                 if (!metric || !metric.length) return;
                 var known = value !== null && value !== undefined && value !== '';
+                var metricLabel = String(metric.data('yani-home-metric-label') || '');
                 metric.removeClass('yani-home__intro-metric--active yani-home__intro-metric--ready yani-home__intro-metric--unknown');
                 if (!known) {
                     metric.addClass('yani-home__intro-metric--unknown');
                     metric.find('b').text('—');
                     metric.find('em').text('').removeClass('yani-home__intro-metric-detail--visible');
+                    metric.attr('aria-label', metricLabel);
                     return;
                 }
                 value = Math.max(0, Number(value) || 0);
                 metric.find('b').text(value > 99 ? '99+' : String(value));
                 metric.find('em').text(String(detail || '')).toggleClass('yani-home__intro-metric-detail--visible', Boolean(detail));
+                metric.attr('aria-label', [metricLabel, value, detail].filter(function (part) { return part !== ''; }).join(': '));
                 metric.addClass('yani-home__intro-metric--ready');
                 if (value) metric.addClass('yani-home__intro-metric--active');
             }

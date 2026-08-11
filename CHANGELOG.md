@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.39.2 — 2026-08-12
+
+- Made the dashboard summary metrics focusable quick actions for a TV remote.
+- Linked broadcasts today, new translations and Continue Watching directly to their full sections.
+- Added clear focus, arrow and accessibility states while keeping the compact summary layout.
+- Restored the corresponding main dashboard tile as the saved focus destination.
+
 ## 0.39.1 — 2026-08-12
 
 - Turned the three dashboard Continue Watching previews into TV-focusable quick-resume actions.
