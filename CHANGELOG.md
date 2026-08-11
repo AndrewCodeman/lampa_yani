@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.39.11 — 2026-08-12
+
+- Added lightweight section-aware dashboard atmosphere for clearer TV remote navigation context.
+- Dashboard waves and color accents now follow Browse, Episode Flow, Library, Discover, and Service focus groups.
+- Kept the new visual transitions disabled in reduced-motion mode and covered the behavior with regression tests.
+
 ## 0.39.10 — 2026-08-12
 
 - Fixed the dashboard startup crash caused by the controller collection helper being scoped inside `create()`.

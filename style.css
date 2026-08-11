@@ -248,8 +248,57 @@
     transform: rotate(11deg);
 }
 
+.yani-home__ambient {
+    position: absolute;
+    z-index: 0;
+    inset: -5%;
+    opacity: 0;
+    transform: scale(1.025);
+    transition: opacity .48s ease, transform .65s ease;
+}
+
+.yani-home__ambient--explore {
+    background:
+        radial-gradient(ellipse at 18% 38%, rgba(239,100,112,.18), transparent 43%),
+        radial-gradient(ellipse at 86% 55%, rgba(73,155,255,.12), transparent 46%);
+}
+
+.yani-home__ambient--episode_flow {
+    background:
+        radial-gradient(ellipse at 27% 46%, rgba(67,171,255,.18), transparent 44%),
+        radial-gradient(ellipse at 82% 34%, rgba(126,100,237,.14), transparent 45%);
+}
+
+.yani-home__ambient--library {
+    background:
+        radial-gradient(ellipse at 26% 48%, rgba(85,215,149,.16), transparent 43%),
+        radial-gradient(ellipse at 83% 58%, rgba(54,185,188,.12), transparent 46%);
+}
+
+.yani-home__ambient--discover {
+    background:
+        radial-gradient(ellipse at 22% 42%, rgba(191,114,233,.17), transparent 43%),
+        radial-gradient(ellipse at 80% 55%, rgba(239,100,151,.13), transparent 46%);
+}
+
+.yani-home__ambient--service {
+    background:
+        radial-gradient(ellipse at 23% 43%, rgba(236,176,85,.13), transparent 43%),
+        radial-gradient(ellipse at 84% 55%, rgba(92,155,190,.11), transparent 47%);
+}
+
+.yani-home[data-yani-section="explore"] .yani-home__ambient--explore,
+.yani-home[data-yani-section="episode_flow"] .yani-home__ambient--episode_flow,
+.yani-home[data-yani-section="library"] .yani-home__ambient--library,
+.yani-home[data-yani-section="discover"] .yani-home__ambient--discover,
+.yani-home[data-yani-section="service"] .yani-home__ambient--service {
+    opacity: 1;
+    transform: scale(1);
+}
+
 .yani-home__waves svg {
     position: absolute;
+    z-index: 1;
     width: 112%;
     height: 100%;
     left: -6%;
@@ -263,14 +312,25 @@
     stroke-linecap: round;
     stroke-dasharray: 1900;
     stroke-dashoffset: 0;
+    transition: stroke .48s ease;
 }
 
 .yani-home__wave--far { stroke: rgba(255,255,255,.09); stroke-width: 34; }
 .yani-home__wave--middle { stroke: rgba(239,100,112,.16); stroke-width: 70; }
 .yani-home__wave--near { stroke: rgba(93,153,255,.11); stroke-width: 110; }
 
+.yani-home[data-yani-section="episode_flow"] .yani-home__wave--middle { stroke: rgba(67,171,255,.17); }
+.yani-home[data-yani-section="episode_flow"] .yani-home__wave--near { stroke: rgba(126,100,237,.12); }
+.yani-home[data-yani-section="library"] .yani-home__wave--middle { stroke: rgba(85,215,149,.16); }
+.yani-home[data-yani-section="library"] .yani-home__wave--near { stroke: rgba(54,185,188,.11); }
+.yani-home[data-yani-section="discover"] .yani-home__wave--middle { stroke: rgba(191,114,233,.16); }
+.yani-home[data-yani-section="discover"] .yani-home__wave--near { stroke: rgba(239,100,151,.11); }
+.yani-home[data-yani-section="service"] .yani-home__wave--middle { stroke: rgba(236,176,85,.14); }
+.yani-home[data-yani-section="service"] .yani-home__wave--near { stroke: rgba(92,155,190,.1); }
+
 .yani-home__pulse {
     position: absolute;
+    z-index: 2;
     width: .55em;
     height: .55em;
     border: .12em solid rgba(255,255,255,.32);
@@ -992,6 +1052,7 @@
 .yani-home--reduced-motion .yani-home__library-mini-art { display: none; }
 .yani-home--reduced-motion .yani-home__intro-metric { transition: none; }
 .yani-home--reduced-motion .yani-home__intro-context-art { display: none; }
+.yani-home--reduced-motion .yani-home__ambient { transition: none; transform: none; }
 .yani-home--reduced-motion .yani-home__section-rail-node i,
 .yani-home--reduced-motion .yani-home__section-rail-node b { transition: none; }
 .yani-home--reduced-motion .yani-home__section-rail { background: rgba(13,14,22,.78); backdrop-filter: none; }
@@ -1003,6 +1064,7 @@
     .yani-home__arrow,
     .yani-home__wave,
     .yani-home__pulse { animation: none !important; transition: none !important; }
+    .yani-home__ambient { transition: none !important; transform: none !important; }
     .yani-home__episode-stage-marker { animation: none !important; }
 }
 

@@ -259,7 +259,7 @@
     function Home(object) {
         var scroll = new Lampa.Scroll({mask: true, over: true, step: 250});
         scroll.minus();
-        var html = $('<div class="yani-home"></div>');
+        var html = $('<div class="yani-home" data-yani-section="explore"></div>');
         var grid = $('<div class="yani-home__grid"></div>');
         var last;
         var homeButtons = {};
@@ -317,6 +317,11 @@
         this.create = function () {
             var waves = $(
                 '<div class="yani-home__waves" aria-hidden="true">' +
+                    '<span class="yani-home__ambient yani-home__ambient--explore"></span>' +
+                    '<span class="yani-home__ambient yani-home__ambient--episode_flow"></span>' +
+                    '<span class="yani-home__ambient yani-home__ambient--library"></span>' +
+                    '<span class="yani-home__ambient yani-home__ambient--discover"></span>' +
+                    '<span class="yani-home__ambient yani-home__ambient--service"></span>' +
                     '<svg viewBox="0 0 1440 760" preserveAspectRatio="none" focusable="false">' +
                         '<path class="yani-home__wave yani-home__wave--far" d="M-120 190 C 120 25 315 335 555 188 S 940 48 1135 215 S 1450 292 1570 115"/>' +
                         '<path class="yani-home__wave yani-home__wave--middle" d="M-110 445 C 115 235 330 565 565 380 S 925 245 1130 420 S 1455 505 1560 330"/>' +
@@ -581,12 +586,19 @@
             };
 
             function setSectionRail(group) {
+                var activeGroup = 'explore';
+                sectionDefinitions.some(function (definition) {
+                    if (definition.key !== group) return false;
+                    activeGroup = definition.key;
+                    return true;
+                });
+                html.attr('data-yani-section', activeGroup);
                 var reached = true;
                 sectionDefinitions.forEach(function (definition) {
                     var node = sectionRailNodes[definition.key];
                     if (!node) return;
                     node.removeClass('yani-home__section-rail-node--active yani-home__section-rail-node--passed');
-                    if (definition.key === group) {
+                    if (definition.key === activeGroup) {
                         node.addClass('yani-home__section-rail-node--active');
                         reached = false;
                     } else if (reached) {
