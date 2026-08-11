@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.39.15 — 2026-08-12
+
+- Redesigned the dashboard section rail as a numbered chapter spine.
+- Expanded the active chapter into a color-coded capsule while keeping inactive chapters compact.
+- Preserved TV focus labels and added a matching service chapter accent.
+
 ## 0.39.14 — 2026-08-12
 
 - Structured the dashboard as five stable visual chapters.

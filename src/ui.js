@@ -345,16 +345,17 @@
             var panels = {};
             var sectionRail = $('<div class="yani-home__section-rail"></div>');
             var sectionDefinitions = [
-                {key: 'explore', title: t('dashboard_browse')},
-                {key: 'episode_flow', title: t('episode_flow')},
-                {key: 'library', title: t('dashboard_library')},
-                {key: 'discover', title: t('discover')},
-                {key: 'service', title: t('dashboard_service')}
+                {key: 'explore', chapter: '01', title: t('dashboard_browse')},
+                {key: 'episode_flow', chapter: '02', title: t('episode_flow')},
+                {key: 'library', chapter: '03', title: t('dashboard_library')},
+                {key: 'discover', chapter: '04', title: t('discover')},
+                {key: 'service', chapter: '05', title: t('dashboard_service')}
             ];
             sectionDefinitions.forEach(function (definition) {
                 var available = items.some(function (item) { return item.group === definition.key; });
                 if (!available) return;
-                var node = $('<span class="yani-home__section-rail-node yani-home__section-rail-node--' + definition.key + '"><i></i><b></b></span>');
+                var node = $('<span class="yani-home__section-rail-node yani-home__section-rail-node--' + definition.key + '"><i><small></small></i><b></b></span>');
+                node.find('small').text(definition.chapter);
                 node.find('b').text(definition.title);
                 sectionRailNodes[definition.key] = node;
                 sectionRail.append(node);

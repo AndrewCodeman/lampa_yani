@@ -358,16 +358,20 @@
 .yani-home__section-rail-node:nth-child(2) { margin-right: .16em; }
 .yani-home__section-rail-node:nth-child(3) { margin-right: .28em; }
 .yani-home__section-rail-node:nth-child(4) { margin-right: .15em; }
-.yani-home__section-rail-node i { position: relative; z-index: 1; display: block; width: .48em; height: .48em; border: .09em solid rgba(255,255,255,.36); border-radius: 50%; background: #242735; box-sizing: border-box; transition: transform .2s ease, background .2s ease, box-shadow .2s ease; }
-.yani-home__section-rail-node b { position: absolute; right: 1.15em; max-width: 0; overflow: hidden; padding: .25em 0; border-radius: .36em; color: rgba(255,255,255,.82); font-size: .52em; font-weight: 650; line-height: 1; opacity: 0; text-overflow: ellipsis; white-space: nowrap; transition: max-width .22s ease, padding .22s ease, opacity .18s ease; }
+.yani-home__section-rail-node i { position: relative; z-index: 1; display: flex; width: .48em; height: .48em; align-items: center; justify-content: center; border: .09em solid rgba(255,255,255,.36); border-radius: 50%; background: #242735; box-sizing: border-box; transition: width .22s ease, height .22s ease, border-radius .22s ease, transform .2s ease, background .2s ease, box-shadow .2s ease; }
+.yani-home__section-rail-node i small { display: block; color: #17151c; font-size: .4em; font-style: normal; font-weight: 900; letter-spacing: .08em; line-height: 1; opacity: 0; transform: translateY(.02em); transition: opacity .14s ease; }
+.yani-home__section-rail-node b { position: absolute; right: 1.15em; max-width: 0; overflow: hidden; padding: .25em 0; border-radius: .36em; color: rgba(255,255,255,.82); font-size: .52em; font-weight: 650; line-height: 1; opacity: 0; text-overflow: ellipsis; white-space: nowrap; transition: right .22s ease, max-width .22s ease, padding .22s ease, opacity .18s ease; }
 .yani-home__section-rail-node--passed i { border-color: rgba(255,255,255,.52); background: rgba(255,255,255,.38); }
-.yani-home__section-rail-node--active i { border-color: #fff; background: #ef6470; box-shadow: 0 0 0 .24em rgba(239,100,112,.14), 0 0 1em rgba(239,100,112,.55); transform: scale(1.35); }
-.yani-home__section-rail-node--active b { max-width: 13em; padding: .3em .55em; background: rgba(18,19,29,.82); opacity: 1; }
-.yani-home__section-rail-node.focus i { border-color: #fff; background: #fff; box-shadow: 0 0 0 .28em rgba(255,255,255,.22), 0 0 1.1em rgba(255,255,255,.62); transform: scale(1.5); }
-.yani-home__section-rail-node.focus b { max-width: 13em; padding: .3em .55em; background: #fff; color: #17151c; opacity: 1; }
+.yani-home__section-rail-node--active i { width: 1.82em; height: 1.02em; border-color: #fff; border-radius: .68em .32em .62em .38em; background: #ef6470; box-shadow: 0 0 0 .16em rgba(239,100,112,.12), 0 0 1em rgba(239,100,112,.55); }
+.yani-home__section-rail-node--active i small { opacity: 1; }
+.yani-home__section-rail-node--active b { right: 2.48em; max-width: 13em; padding: .3em .55em; background: rgba(18,19,29,.82); opacity: 1; }
+.yani-home__section-rail-node.focus i { width: 2.02em; height: 1.12em; border-color: #fff; border-radius: .72em .34em .66em .4em; background: #fff; box-shadow: 0 0 0 .2em rgba(255,255,255,.18), 0 0 1.1em rgba(255,255,255,.62); transform: translateX(-.08em); }
+.yani-home__section-rail-node.focus i small { opacity: 1; }
+.yani-home__section-rail-node.focus b { right: 2.72em; max-width: 13em; padding: .3em .55em; background: #fff; color: #17151c; opacity: 1; }
 .yani-home__section-rail-node--episode_flow.yani-home__section-rail-node--active i { background: #62b8ff; box-shadow: 0 0 0 .24em rgba(98,184,255,.14), 0 0 1em rgba(98,184,255,.5); }
 .yani-home__section-rail-node--library.yani-home__section-rail-node--active i { background: #55d795; box-shadow: 0 0 0 .24em rgba(85,215,149,.14), 0 0 1em rgba(85,215,149,.5); }
 .yani-home__section-rail-node--discover.yani-home__section-rail-node--active i { background: #bf72e9; box-shadow: 0 0 0 .24em rgba(191,114,233,.14), 0 0 1em rgba(191,114,233,.5); }
+.yani-home__section-rail-node--service.yani-home__section-rail-node--active i { background: #ecb055; box-shadow: 0 0 0 .16em rgba(236,176,85,.12), 0 0 1em rgba(236,176,85,.45); }
 
 .yani-home__intro {
     position: relative;
