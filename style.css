@@ -362,6 +362,16 @@
 .yani-home__panel--library .yani-home__panel-items { grid-template-columns: 1fr; }
 .yani-home__panel--library .yani-home__item { min-height: 5.65em; padding: .9em 1em; border-radius: .95em .55em .9em .62em; }
 .yani-home__panel--library .yani-home__icon { flex-basis: 2.65em; width: 2.65em; height: 2.65em; }
+.yani-home__library-preview { display: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .42em; margin: -.05em .15em .72em; }
+.yani-home__library-preview--visible { display: grid; }
+.yani-home__library-mini { position: relative; min-width: 0; height: 4.15em; overflow: hidden; border: .07em solid rgba(255,255,255,.13); border-radius: .72em .42em .68em .48em; background: linear-gradient(145deg, rgba(239,100,112,.19), rgba(45,35,61,.72)); box-shadow: inset 0 .06em 0 rgba(255,255,255,.1); }
+.yani-home__library-mini-art, .yani-home__library-mini-shade { position: absolute; inset: 0; pointer-events: none; }
+.yani-home__library-mini-art { background-position: center 22%; background-repeat: no-repeat; background-size: cover; opacity: .76; }
+.yani-home__library-mini-shade { background: linear-gradient(180deg, rgba(12,10,18,.08), rgba(12,10,18,.94)); }
+.yani-home__library-mini-title { position: absolute; z-index: 1; left: .45em; right: .35em; bottom: .48em; overflow: hidden; color: #fff; font-size: .57em; font-weight: 650; line-height: 1.18; text-overflow: ellipsis; white-space: nowrap; }
+.yani-home__library-mini-episode { position: absolute; z-index: 1; top: .35em; left: .38em; max-width: calc(100% - .76em); overflow: hidden; padding: .13em .3em; border-radius: .3em; background: rgba(12,10,18,.7); color: rgba(255,255,255,.86); font-size: .47em; line-height: 1; text-overflow: ellipsis; white-space: nowrap; }
+.yani-home__library-mini-progress { position: absolute; z-index: 2; left: .4em; right: .4em; bottom: .22em; height: .11em; overflow: hidden; border-radius: 1em; background: rgba(255,255,255,.18); }
+.yani-home__library-mini-progress i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #ef6470, #ffb36b); }
 .yani-home__panel--service { grid-column: span 12; }
 .yani-home__panel--service .yani-home__panel-items { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .yani-home__panel--service .yani-home__item { min-height: 5.4em; padding: .85em 1em; }
@@ -784,6 +794,7 @@
 .yani-home--reduced-motion .yani-home__pulse { animation: none; transition: none; }
 .yani-home--reduced-motion .yani-home__episode-stage-marker { animation: none; }
 .yani-home--reduced-motion .yani-home__item-art { display: none; }
+.yani-home--reduced-motion .yani-home__library-mini-art { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
     .yani-home__item,

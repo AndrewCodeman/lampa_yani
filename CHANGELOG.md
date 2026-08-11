@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.36.6 — 2026-08-11
+
+- Added a compact three-title continue-watching preview to the personal dashboard panel.
+- Restored the last focused dashboard tile and its visible scroll position after returning from a section.
+- Kept the preview non-focusable and disabled its poster artwork on constrained devices.
+- Added coverage for preview ordering, progress bounds, empty history and focus persistence.
+
 ## 0.36.5 — 2026-08-11
 
 - Added poster artwork to the active schedule, translation and continue-watching dashboard tiles.

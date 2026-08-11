@@ -263,6 +263,7 @@
         var grid = $('<div class="yani-home__grid"></div>');
         var last;
         var homeButtons = {};
+        var homeFocusStorageKey = 'yani_home_last_focus';
         var destroyed = false;
         var navigatorInfo = window.navigator || {};
         var reducedMotion = Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -325,6 +326,7 @@
             var episodeFlowTimeline;
             var discover;
             var discoverItems;
+            var libraryStrip;
             var panels = {};
             var intro = $(
                 '<div class="yani-home__intro" aria-hidden="true">' +
@@ -351,7 +353,12 @@
                 var head = $('<div class="yani-home__panel-head"><span class="yani-home__panel-title"></span><span class="yani-home__panel-line" aria-hidden="true"></span></div>');
                 var content = $('<div class="yani-home__panel-items"></div>');
                 head.find('.yani-home__panel-title').text(title);
-                root.append(head, content);
+                root.append(head);
+                if (group === 'library') {
+                    libraryStrip = $('<div class="yani-home__library-preview" aria-hidden="true"></div>');
+                    root.append(libraryStrip);
+                }
+                root.append(content);
                 grid.append(root);
                 panels[group] = content;
                 return content;
@@ -362,6 +369,7 @@
                 text.append($('<div class="yani-home__title"></div>').text(item.title));
                 if (item.subtitle) text.append($('<div class="yani-home__subtitle"></div>').text(item.subtitle));
                 var button = $('<div class="yani-home__item yani-home__item--' + item.key + ' selector"></div>');
+                button.attr('data-yani-home-key', item.key);
                 button.append(
                     $('<div class="yani-home__icon"></div>').html(homeIcon(item.key)),
                     text,
@@ -372,6 +380,7 @@
                 button.on('hover:focus', function (event) {
                     var target = event.currentTarget || event.target;
                     last = target;
+                    if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, String($(target).attr('data-yani-home-key') || ''));
                     html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
                     $(target).closest('.yani-home__panel').addClass('yani-home__panel--active');
                     scroll.update($(target), true);
@@ -498,6 +507,27 @@
             var localEntries = LampaYaniHomeSections.normalizeLocalHistory(playbackHistory());
             var continuing = LampaYaniHomeSections.continueWatchingEntries(localEntries, {});
 
+            function renderLibraryStrip(entries) {
+                if (!libraryStrip) return;
+                libraryStrip.empty().removeClass('yani-home__library-preview--visible');
+                if (!entries || !entries.length) return;
+                entries.forEach(function (entry) {
+                    var mini = $('<div class="yani-home__library-mini"></div>');
+                    var art = $('<span class="yani-home__library-mini-art"></span>');
+                    var poster = String(entry.poster || '').replace(/["\\]/g, '');
+                    if (!reducedMotion && !lowMemoryDevice && !lowCpuDevice && /^https?:\/\//i.test(poster)) art.css('background-image', 'url("' + poster + '")');
+                    mini.append(art, $('<span class="yani-home__library-mini-shade"></span>'));
+                    if (entry.episode) mini.append($('<span class="yani-home__library-mini-episode"></span>').text(t('episode') + ' ' + entry.episode));
+                    mini.append($('<span class="yani-home__library-mini-title"></span>').text(entry.title || 'YummyAnime'));
+                    mini.append($('<span class="yani-home__library-mini-progress"><i></i></span>'));
+                    mini.find('.yani-home__library-mini-progress i').css('width', String(entry.progress || 0) + '%');
+                    libraryStrip.append(mini);
+                });
+                libraryStrip.addClass('yani-home__library-preview--visible');
+            }
+
+            renderLibraryStrip(LampaYaniHomeInsights.libraryPreview(continuing, 3));
+
             function renderPersonal(stats) {
                 if (destroyed) return;
                 var personal = LampaYaniHomeInsights.personalInsight(continuing, account, stats);
@@ -603,8 +633,16 @@
             Lampa.Controller.add('content', {
                 toggle: function () {
                     Lampa.Controller.collectionSet(scroll.render());
-                    var target = last && document.documentElement.contains(last) ? last : scroll.render().find('.selector')[0] || false;
+                    var target = last && document.documentElement.contains(last) ? last : false;
+                    if (!target && Lampa.Storage && Lampa.Storage.get) {
+                        var savedKey = String(Lampa.Storage.get(homeFocusStorageKey, '') || '');
+                        scroll.render().find('.selector').each(function () {
+                            if (!target && String($(this).attr('data-yani-home-key') || '') === savedKey) target = this;
+                        });
+                    }
+                    if (!target) target = scroll.render().find('.selector')[0] || false;
                     Lampa.Controller.collectionFocus(target, scroll.render());
+                    if (target) scroll.update($(target), true);
                 },
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },

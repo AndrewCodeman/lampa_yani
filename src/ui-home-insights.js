@@ -211,6 +211,24 @@
         };
     }
 
+    function libraryPreview(continuing, limit) {
+        continuing = Array.isArray(continuing) ? continuing.slice() : [];
+        limit = Math.max(1, Number(limit || 3));
+        return continuing.sort(function (a, b) {
+            return Number(b && b.updated_at || 0) - Number(a && a.updated_at || 0);
+        }).slice(0, limit).map(function (item) {
+            item = item || {};
+            var duration = Math.max(0, Number(item.duration || 0));
+            var time = Math.max(0, Number(item.time || 0));
+            return {
+                title: titleOf(item),
+                poster: posterOf(item),
+                episode: item.number || item.episode || '',
+                progress: duration > 0 ? Math.max(0, Math.min(99, Math.round(time / duration * 100))) : 0
+            };
+        });
+    }
+
     function notificationCount(payload) {
         var value = response(payload);
         if (!value || typeof value !== 'object') return Math.max(0, Number(value) || 0);
@@ -279,6 +297,7 @@
         translationEntries: translationEntries,
         listCounts: listCounts,
         personalInsight: personalInsight,
+        libraryPreview: libraryPreview,
         notificationCount: notificationCount,
         dashboardPriority: dashboardPriority,
         posterOf: posterOf,
