@@ -2,6 +2,8 @@ const assert = require('assert');
 const fs = require('fs');
 
 const ui = fs.readFileSync('src/ui.js', 'utf8');
+const trailers = fs.readFileSync('src/ui-trailers.js', 'utf8');
+const sources = ui + '\n' + trailers;
 
 assert.match(ui, /function transientNavigationSnapshot\(\)[\s\S]{0,700}controller: currentControllerName\(\) \|\| 'content'/);
 assert.match(ui, /function restoreTransientInteraction\(snapshot\)[\s\S]{0,1800}Lampa\.Controller\.toggle\(controller\)[\s\S]{0,500}collectionFocus\(element/);
@@ -20,9 +22,9 @@ assert.strictEqual(directSelectCalls.length, 1, 'temporary lists must go through
     'legacyOpenTrailers',
     'renderCommentList'
 ].forEach((name) => {
-    const start = ui.indexOf('function ' + name);
+    const start = sources.indexOf('function ' + name);
     assert.ok(start >= 0, name + ' must exist');
-    assert.ok(ui.slice(start, start + 7000).includes('showYummySelect('), name + ' must use restorable Select');
+    assert.ok(sources.slice(start, start + 7000).includes('showYummySelect('), name + ' must use restorable Select');
 });
 
 console.log('transient navigation contract checks passed');

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.35.2 — 2026-08-11
+
+- Extracted trailer loading, rendering and TV navigation into a dedicated UI module.
+- Preserved external YouTube routing, offline icons and restorable selection dialogs.
+- Reduced the main UI monolith without changing detail-page trailer behavior.
+
 ## 0.35.1 — 2026-08-11
 
 - Extracted catalog sorting, filtering and TV remote navigation into a dedicated UI module.
