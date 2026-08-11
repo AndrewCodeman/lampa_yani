@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.36.7 — 2026-08-11
+
+- Added an at-a-glance dashboard summary for today's releases, new translations and unfinished viewing.
+- Reused existing schedule, feed and local-history data without adding network requests.
+- Hid summary metrics for dashboard sections disabled in settings.
+- Kept the summary non-focusable and compact on narrow screens.
+
 ## 0.36.6 — 2026-08-11
 
 - Added a compact three-title continue-watching preview to the personal dashboard panel.

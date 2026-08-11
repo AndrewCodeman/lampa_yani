@@ -327,6 +327,7 @@
             var discover;
             var discoverItems;
             var libraryStrip;
+            var introMetrics = {};
             var panels = {};
             var intro = $(
                 '<div class="yani-home__intro" aria-hidden="true">' +
@@ -342,6 +343,24 @@
             intro.find('.yani-home__intro-mark').html(yummyAnimeIcon());
             intro.find('.yani-home__intro-title').text(t('dashboard_title'));
             intro.find('.yani-home__intro-subtitle').text(t('dashboard_subtitle'));
+            var introSummary = $('<div class="yani-home__intro-summary" aria-hidden="true"></div>');
+            [
+                {key: 'today', label: t('today'), icon: homeIcon('schedule')},
+                {key: 'translations', label: t('new_translations'), icon: homeIcon('new_translations')},
+                {key: 'continue', label: t('continue_watching'), icon: homeIcon('continue_watching')}
+            ].forEach(function (metric) {
+                var node = $('<div class="yani-home__intro-metric yani-home__intro-metric--' + metric.key + '"></div>');
+                node.append(
+                    $('<span class="yani-home__intro-metric-icon"></span>').html(metric.icon),
+                    $('<span class="yani-home__intro-metric-copy"></span>').append(
+                        $('<small></small>').text(metric.label),
+                        $('<b></b>').text('—')
+                    )
+                );
+                introMetrics[metric.key] = node;
+                introSummary.append(node);
+            });
+            intro.append(introSummary);
             grid.append(intro);
 
             function panel(group) {
@@ -409,6 +428,9 @@
                     grid.append(button);
                 }
             });
+            if (!homeButtons.schedule) introMetrics.today.remove();
+            if (!homeButtons.new_translations) introMetrics.translations.remove();
+            if (!homeButtons.continue_watching) introMetrics.continue.remove();
             scroll.append(grid);
             html.append(waves);
             html.append(scroll.render(true));
@@ -438,6 +460,13 @@
                 if (!button) return;
                 $('.yani-home__service-state', button).remove();
                 $('<span class="yani-home__service-state yani-home__service-state--' + state + '" aria-hidden="true"></span>').insertBefore($('.yani-home__arrow', button));
+            }
+
+            function setIntroMetric(key, value) {
+                var metric = introMetrics[key];
+                if (!metric || !metric.length) return;
+                metric.find('b').text(Number(value || 0) > 99 ? '99+' : String(Math.max(0, Number(value) || 0)));
+                metric.addClass('yani-home__intro-metric--ready');
             }
 
             function setArtwork(button, poster) {
@@ -506,6 +535,7 @@
             var account = LampaYaniAuth.get();
             var localEntries = LampaYaniHomeSections.normalizeLocalHistory(playbackHistory());
             var continuing = LampaYaniHomeSections.continueWatchingEntries(localEntries, {});
+            setIntroMetric('continue', continuing.length);
 
             function renderLibraryStrip(entries) {
                 if (!libraryStrip) return;
@@ -599,6 +629,8 @@
                         setCount(homeButtons[key], dashboard.counts[key]);
                     });
                     var schedule = dashboard.schedule || {};
+                    setIntroMetric('today', schedule.today);
+                    setIntroMetric('translations', dashboard.translations && dashboard.translations.count);
                     renderEpisodeTimeline(dashboard.episode_flow);
                     var service = dashboard.service || {};
                     var serviceState = service.degraded ? 'degraded' : service.api ? 'up' : 'down';

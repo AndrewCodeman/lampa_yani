@@ -329,6 +329,17 @@
 .yani-home__intro-brand { color: #ff8d96; font-size: .78em; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
 .yani-home__intro-title { margin-top: .16em; font-size: 1.75em; font-weight: 720; line-height: 1.08; }
 .yani-home__intro-subtitle { margin-top: .42em; color: rgba(255,255,255,.6); font-size: .88em; }
+.yani-home__intro-summary { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .52em; width: min(32em, 42%); margin-left: auto; }
+.yani-home__intro-metric { min-width: 0; display: flex; align-items: center; gap: .52em; padding: .58em .68em; box-sizing: border-box; border: .07em solid rgba(255,255,255,.12); border-radius: .72em .42em .68em .46em; background: linear-gradient(132deg, rgba(255,255,255,.11), rgba(255,255,255,.045)); box-shadow: inset 0 .06em 0 rgba(255,255,255,.09); }
+.yani-home__intro-metric-icon { flex: 0 0 1.65em; width: 1.65em; height: 1.65em; display: flex; align-items: center; justify-content: center; border-radius: .48em .28em .44em .32em; background: rgba(239,100,112,.17); color: #ff8d96; }
+.yani-home__intro-metric-icon svg { width: .92em; height: .92em; fill: currentColor; }
+.yani-home__intro-metric-copy { min-width: 0; display: flex; flex-direction: column; }
+.yani-home__intro-metric-copy small { overflow: hidden; color: rgba(255,255,255,.55); font-size: .48em; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.yani-home__intro-metric-copy b { margin-top: .08em; color: rgba(255,255,255,.46); font-size: 1.02em; font-weight: 760; line-height: 1; }
+.yani-home__intro-metric--ready .yani-home__intro-metric-copy b { color: #fff; }
+.yani-home__intro-metric--today .yani-home__intro-metric-icon { background: rgba(98,184,255,.17); color: #7bc7ff; }
+.yani-home__intro-metric--translations .yani-home__intro-metric-icon { background: rgba(188,119,255,.17); color: #cfa0ff; }
+.yani-home__intro-metric--continue .yani-home__intro-metric-icon { background: rgba(85,215,149,.15); color: #6be1a5; }
 
 .yani-home__intro-orbit { position: absolute; right: 2em; top: 50%; width: 12em; height: 12em; transform: translateY(-50%) rotate(-12deg); border: .1em solid rgba(255,255,255,.08); border-radius: 48% 52% 44% 56% / 58% 42% 58% 42%; }
 .yani-home__intro-orbit::before { content: ''; position: absolute; inset: 2.2em; border: .1em solid rgba(239,100,112,.18); border-radius: 58% 42% 52% 48% / 44% 60% 40% 56%; }
@@ -795,6 +806,7 @@
 .yani-home--reduced-motion .yani-home__episode-stage-marker { animation: none; }
 .yani-home--reduced-motion .yani-home__item-art { display: none; }
 .yani-home--reduced-motion .yani-home__library-mini-art { display: none; }
+.yani-home--reduced-motion .yani-home__intro-metric { transition: none; }
 
 @media (prefers-reduced-motion: reduce) {
     .yani-home__item,
@@ -851,6 +863,11 @@
     .yani-home__intro-mark { flex-basis: 3.6em; width: 3.6em; height: 3.6em; }
     .yani-home__intro-title { font-size: 1.35em; }
     .yani-home__intro-subtitle, .yani-home__intro-orbit { display: none; }
+    .yani-home__intro-summary { width: auto; margin-left: auto; gap: .3em; }
+    .yani-home__intro-metric { padding: .45em; }
+    .yani-home__intro-metric-icon { flex-basis: 1.45em; width: 1.45em; height: 1.45em; }
+    .yani-home__intro-metric-copy small { display: none; }
+    .yani-home__intro-metric-copy b { font-size: .82em; }
     .yani-home__panel--explore, .yani-home__episode-flow, .yani-home__panel--library, .yani-home__discover, .yani-home__panel--service { grid-column: span 12; }
     .yani-home__panel--explore .yani-home__panel-items, .yani-home__episode-flow-items, .yani-home__discover-items, .yani-home__panel--service .yani-home__panel-items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .yani-home__panel--explore .yani-home__item--catalog { grid-column: span 2; }
@@ -866,6 +883,8 @@
 }
 
 @media (min-width: 701px) and (max-width: 1100px) {
+    .yani-home__intro-summary { width: min(28em, 48%); }
+    .yani-home__intro-metric-copy small { font-size: .43em; }
     .yani-home__episode-flow, .yani-home__panel--library { grid-column: span 12; }
     .yani-home__panel--library .yani-home__panel-items { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
