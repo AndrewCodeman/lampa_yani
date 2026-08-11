@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.2 — 2026-08-11
+
+- Turn the Best dashboard tile into a dedicated YummyAnime Top screen.
+- Add TV-focusable Overall, TV series, Movies and ONA categories.
+- Keep each category lazily paginated and ranked through the official `/anime` top sorting parameters.
+- Add distinct category icons and Russian, English and Ukrainian labels.
+
 ## 0.34.1 — 2026-08-11
 
 - Add a TV-focusable Collections tile to the YummyAnime dashboard while keeping Search as item 3.

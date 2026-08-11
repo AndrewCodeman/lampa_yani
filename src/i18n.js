@@ -29,8 +29,16 @@
 
     messages.ru.version_name = 'YummyAnime';
     messages.ru.version_label = 'Версия';
+    messages.ru.top_all = 'Общий топ';
+    messages.ru.top_tv = 'Сериалы';
+    messages.ru.top_movies = 'Фильмы';
+    messages.ru.top_ona = 'ONA';
     messages.en.version_name = 'YummyAnime';
     messages.en.version_label = 'Version';
+    messages.en.top_all = 'Overall';
+    messages.en.top_tv = 'TV series';
+    messages.en.top_movies = 'Movies';
+    messages.en.top_ona = 'ONA';
     messages.ru.back_to_lampa = 'Вернуться в Lampa';
     messages.en.back_to_lampa = 'Return to Lampa';
     messages.ru.notifications_title = 'Уведомления YummyAnime';
@@ -350,6 +358,10 @@
         login_name: 'Увійти до YummyAnime', refresh_name: 'Оновити токен YummyAnime', login_first: 'Спочатку увійдіть до YummyAnime', token_refreshed: 'Токен YummyAnime оновлено', token_refresh_error: 'Не вдалося оновити токен YummyAnime', logout_name: 'Вийти з YummyAnime', logged_out: 'Ви вийшли з YummyAnime', api_check_name: 'Перевірити YummyAnime API', api_ok: 'YummyAnime API працює', api_error: 'YummyAnime API недоступний або публічний токен неправильний', email_prompt: 'Нікнейм або Email', email_required: 'Введіть нікнейм або email YummyAnime', password_prompt: 'Пароль YummyAnime', password_required: 'Введіть пароль YummyAnime', login_ok: 'Вхід до YummyAnime виконано', login_error: 'Помилка входу до YummyAnime', comments_title: 'Коментарі YummyAnime', comments_error: 'Не вдалося завантажити коментарі', kinopoisk: 'Кінопошук'
     });
     messages.uk.back_to_lampa = 'Повернутися до Lampa';
+    messages.uk.top_all = 'Загальний топ';
+    messages.uk.top_tv = 'Серіали';
+    messages.uk.top_movies = 'Фільми';
+    messages.uk.top_ona = 'ONA';
     messages.uk.episode_flow = 'Вихід серій';
     messages.uk.japan_broadcast = 'Ефір у Японії';
     messages.uk.new_translations = 'Нові переклади';

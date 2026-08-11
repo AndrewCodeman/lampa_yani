@@ -136,6 +136,7 @@
             Lampa.Component.add('yani_home', Home);
 
             Lampa.Component.add('yani_catalog', Catalog);
+            Lampa.Component.add('yani_top', Top);
 
             Lampa.Component.add('yani_recommended', Recommended);
             Lampa.Component.add('yani_updates', Updates);
@@ -165,8 +166,15 @@
         }
     };
 
+    function Top(object) {
+        object.topMode = true;
+        object.params = Object.assign({limit: 30, sort: 'top', sort_forward: true, from_year: 1900}, object.params || {});
+        return Catalog(object);
+    }
+
     function Catalog(object) {
         var comp = new Lampa.InteractionCategory(object);
+        var topMode = Boolean(object.topMode);
         var baseParams = copyParams(object.params || {limit: 30, sort: 'top', sort_forward: false});
         var limit = Number(baseParams.limit || 30);
         var maxPages = Math.ceil(20000 / limit) + 1;
@@ -187,6 +195,13 @@
             {key: 'title', sort: 'title', forward: true, title: t('catalog_sort_title')},
             {key: 'random', sort: 'random', forward: false, title: t('catalog_sort_random')}
         ];
+        var topDefinitions = [
+            {key: 'all', types: '', title: t('top_all')},
+            {key: 'tv', types: 'tv', title: t('top_tv')},
+            {key: 'movie', types: 'movie', title: t('top_movies')},
+            {key: 'ona', types: 'ona', title: t('top_ona')}
+        ];
+        var controlDefinitions = topMode ? topDefinitions : sortDefinitions;
 
         object.page = 1;
         baseParams.limit = limit;
@@ -195,6 +210,7 @@
         baseParams.sort_forward = baseParams.sort_forward === true || baseParams.sort_forward === 'true';
 
         function activeSort(definition) {
+            if (topMode) return String(baseParams.types || '') === definition.types;
             return definition.sort === baseParams.sort && definition.forward === baseParams.sort_forward;
         }
 
@@ -202,6 +218,22 @@
             if (activeSort(definition) && definition.key !== 'random') return;
             var params = copyParams(baseParams);
             params.offset = 0;
+            if (topMode) {
+                params.sort = 'top';
+                params.sort_forward = true;
+                params.from_year = 1900;
+                if (definition.types) params.types = definition.types;
+                else delete params.types;
+                var topRoute = String(object.url || 'yani/top').replace(/\/type\/[^/]+$/, '');
+                Lampa.Activity.replace({
+                    url: topRoute + '/type/' + definition.key,
+                    title: object.title || ('YummyAnime ' + t('top_rated')),
+                    component: 'yani_top',
+                    topMode: true,
+                    params: params
+                });
+                return;
+            }
             params.sort = definition.sort;
             params.sort_forward = definition.forward;
             var route = String(object.url || 'yani/catalog').replace(/\/sort\/[^/]+$/, '');
@@ -338,10 +370,10 @@
             topButton.on('hover:focus', function () { toolbarFocused = true; });
             topButton.on('hover:enter click.yaniCatalogTop', scrollToTop);
             toolbarTrack.append(topButton);
-            sortDefinitions.forEach(function (definition) {
+            controlDefinitions.forEach(function (definition) {
                 var button = $('<div class="yani-catalog-sort selector"></div>');
                 button.toggleClass('yani-catalog-sort--active', activeSort(definition));
-                button.append($('<span class="yani-catalog-sort__icon"></span>').html(catalogSortIcon(definition.key)));
+                button.append($('<span class="yani-catalog-sort__icon"></span>').html(topMode ? topTypeIcon(definition.key) : catalogSortIcon(definition.key)));
                 button.append($('<span class="yani-catalog-sort__title"></span>').text(definition.title));
                 button.on('hover:focus', function () {
                     toolbarFocused = true;
@@ -422,7 +454,7 @@
                     var results = mapUniqueCards(raw, seen);
                     requestedOffsets[baseParams.offset] = true;
                     if (raw.length < limit) object.page = maxPages;
-                    self.build({results: results, total_pages: maxPages, title: t('anime')});
+                    self.build({results: results, total_pages: maxPages, title: t(topMode ? 'top_rated' : 'anime')});
                     installControls();
                 })
                 .catch(function (error) {
@@ -435,7 +467,7 @@
             var params = copyParams(baseParams);
             params.offset = baseParams.offset + (requestObject.page - 1) * limit;
             if (requestedOffsets[params.offset]) {
-                resolve({results: [], total_pages: maxPages, title: t('anime')});
+                resolve({results: [], total_pages: maxPages, title: t(topMode ? 'top_rated' : 'anime')});
                 return;
             }
             requestedOffsets[params.offset] = true;
@@ -444,7 +476,7 @@
                 var raw = LampaYaniApi.normalize(payload);
                 var results = mapUniqueCards(raw, seen);
                 if (raw.length < limit) requestObject.page = maxPages;
-                resolve({results: results, total_pages: maxPages, title: t('anime')});
+                resolve({results: results, total_pages: maxPages, title: t(topMode ? 'top_rated' : 'anime')});
             }).catch(function (error) {
                 delete requestedOffsets[params.offset];
                 requestObject.page = Math.max(1, requestObject.page - 1);
@@ -470,6 +502,16 @@
             random: '<svg viewBox="0 0 24 24"><path d="M4 7h3c5 0 5 10 10 10h3M17 4l3 3-3 3M4 17h3c2.5 0 3.7-2.5 5-5M17 14l3 3-3 3"/></svg>'
         };
         return icons[key] || icons.top;
+    }
+
+    function topTypeIcon(key) {
+        var icons = {
+            all: '<svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.4 6 .9-4.3 4.2 1 6-5.4-2.9-5.4 2.9 1-6-4.3-4.2 6-.9z"/></svg>',
+            tv: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="m8 3 4 3 4-3M9 22h6"/></svg>',
+            movie: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M7 5l3 5M14 5l3 5"/></svg>',
+            ona: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4zM4 12h2M18 12h2"/></svg>'
+        };
+        return icons[key] || icons.all;
     }
 
     function Home(object) {
@@ -501,7 +543,7 @@
             }},
             {key: 'user_lists', title: t('user_lists'), authorized: true, action: openUserLists},
             {key: 'top_rated', title: t('top_rated'), action: function () {
-                Lampa.Activity.push({url: 'yani/top-rated', title: 'YummyAnime ' + t('top_rated'), component: 'yani_catalog', params: {limit: 30, sort: 'rating', sort_forward: false}});
+                Lampa.Activity.push({url: 'yani/top', title: 'YummyAnime ' + t('top_rated'), component: 'yani_top', topMode: true, params: {limit: 30, sort: 'top', sort_forward: true, from_year: 1900}});
             }},
             {key: 'for_you', title: t('for_you'), action: function () {
                 Lampa.Activity.push({url: 'yani/for-you', title: 'YummyAnime ' + t('for_you'), component: 'yani_recommended'});
