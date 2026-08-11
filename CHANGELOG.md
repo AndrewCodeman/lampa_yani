@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.38.2 — 2026-08-12
+
+- Cached successful YummyAnime-to-TMDB card matches for 30 days.
+- Cached unresolved titles briefly to prevent repeated request storms while retaining automatic retries.
+- Deduplicated concurrent native-card lookups triggered by repeated TV input or Lampa events.
+- Limited the persistent native-card cache and rejected invalid cached TMDB identifiers.
+
 ## 0.38.1 — 2026-08-12
 
 - Grouped notifications into Today, Yesterday and Earlier sections.

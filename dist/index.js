@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.38.1',
+        version: '0.38.2',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -8782,6 +8782,87 @@ function pluginYummyAnime() {
         });
     }
 
+    var standardNativeCacheStorageKey = 'yani_standard_native_matches_v1';
+    var standardNativeCacheLimit = 60;
+    var standardNativePositiveTtl = 30 * 24 * 60 * 60 * 1000;
+    var standardNativeNegativeTtl = 10 * 60 * 1000;
+    var standardNativeCache = null;
+    var standardNativePending = {};
+
+    function standardNativeLookupKey(card) {
+        var id = getYummyId(card);
+        if (id) return 'id:' + String(id);
+        var title = LampaYaniUiUtils.standardSearchTitles(card)[0] || '';
+        var year = String(card && (card.release_date || card.first_air_date || card.year) || '').slice(0, 4);
+        return 'title:' + LampaYaniUiUtils.normalizeMatchTitle(title) + '|' + year;
+    }
+
+    function loadStandardNativeCache() {
+        if (standardNativeCache) return standardNativeCache;
+        standardNativeCache = {};
+        if (!Lampa.Storage || !Lampa.Storage.get) return standardNativeCache;
+        try {
+            var stored = JSON.parse(Lampa.Storage.get(standardNativeCacheStorageKey, '{}'));
+            if (stored && typeof stored === 'object' && !Array.isArray(stored)) standardNativeCache = stored;
+        } catch (error) {
+            console.warn('[YummyAnime] Could not read native card cache', error);
+        }
+        return standardNativeCache;
+    }
+
+    function saveStandardNativeCache() {
+        if (!Lampa.Storage || !Lampa.Storage.set) return;
+        var cache = loadStandardNativeCache();
+        var keys = Object.keys(cache).sort(function (a, b) {
+            return Number(cache[b] && cache[b].updated || 0) - Number(cache[a] && cache[a].updated || 0);
+        });
+        keys.slice(standardNativeCacheLimit).forEach(function (key) { delete cache[key]; });
+        try { Lampa.Storage.set(standardNativeCacheStorageKey, JSON.stringify(cache)); } catch (error) {
+            console.warn('[YummyAnime] Could not save native card cache', error);
+        }
+    }
+
+    function cachedStandardNativeMatch(key) {
+        var cache = loadStandardNativeCache();
+        var entry = cache[key];
+        if (!entry) return {hit: false, match: null};
+        if (Number(entry.expires || 0) <= Date.now()) {
+            delete cache[key];
+            saveStandardNativeCache();
+            return {hit: false, match: null};
+        }
+        if (entry.empty) return {hit: true, match: null};
+        if (!entry.match || !entry.match.card || !isValidNativeId(entry.match.card.id) || !entry.match.method) {
+            delete cache[key];
+            saveStandardNativeCache();
+            return {hit: false, match: null};
+        }
+        return {hit: true, match: entry.match};
+    }
+
+    function compactStandardNativeMatch(match) {
+        if (!match || !match.card || !isValidNativeId(match.card.id) || !match.method) return null;
+        var source = match.card;
+        var card = {id: source.id, source: source.source || 'tmdb'};
+        ['title', 'name', 'original_title', 'original_name', 'release_date', 'first_air_date', 'poster_path', 'backdrop_path', 'vote_average', 'genre_ids'].forEach(function (key) {
+            if (source[key] !== undefined && source[key] !== null) card[key] = source[key];
+        });
+        return {method: match.method, card: card};
+    }
+
+    function rememberStandardNativeMatch(key, match) {
+        var compact = compactStandardNativeMatch(match);
+        var now = Date.now();
+        loadStandardNativeCache()[key] = {
+            updated: now,
+            expires: now + (compact ? standardNativePositiveTtl : standardNativeNegativeTtl),
+            empty: !compact,
+            match: compact
+        };
+        saveStandardNativeCache();
+        return compact;
+    }
+
     function findStandardLampaCard(card) {
         // Use the same public resolver as Lampa's own search screen. Calling
         // individual API endpoints skipped parts of the active TMDB source
@@ -8789,6 +8870,14 @@ function pluginYummyAnime() {
         // Online plugins which work with Cub TMDB Proxy use this source. The
         // proxy may decorate it while leaving Lampa.TMDB untouched, so prefer
         // it and retain the public object as a fallback for newer builds.
+        var cacheKey = standardNativeLookupKey(card);
+        var cached = cachedStandardNativeMatch(cacheKey);
+        if (cached.hit) {
+            console.info('[YummyAnime] Native TMDB cache hit', {yaniId: getYummyId(card), matched: !!cached.match});
+            return Promise.resolve(cached.match);
+        }
+        if (standardNativePending[cacheKey]) return standardNativePending[cacheKey];
+
         var tmdb = Lampa.Api && Lampa.Api.sources && Lampa.Api.sources.tmdb || Lampa.TMDB;
         if (!tmdb || (!tmdb.search && !tmdb.get)) return Promise.resolve(null);
         var titles = LampaYaniUiUtils.standardSearchTitles(card).filter(function (title, index, list) {
@@ -8815,7 +8904,7 @@ function pluginYummyAnime() {
             return next(0);
         }
 
-        return resolveTitles(titles).then(function (match) {
+        standardNativePending[cacheKey] = resolveTitles(titles).then(function (match) {
             if (match) return match;
             var remoteIds = card.yani_remote_ids || {};
             var malId = remoteIds.myanimelist_id || remoteIds.mal_id;
@@ -8846,8 +8935,15 @@ function pluginYummyAnime() {
             } else {
                 console.warn('[YummyAnime] Native TMDB resolver found no matching card', {yaniId: getYummyId(card), titles: titles});
             }
+            return rememberStandardNativeMatch(cacheKey, match);
+        }).then(function (match) {
+            delete standardNativePending[cacheKey];
             return match;
+        }, function (error) {
+            delete standardNativePending[cacheKey];
+            throw error;
         });
+        return standardNativePending[cacheKey];
     }
 
     function searchTmdbTitle(tmdb, title) {
