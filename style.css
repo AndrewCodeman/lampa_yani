@@ -408,6 +408,7 @@
 .yani-home__item--for_you .yani-home__icon { background: linear-gradient(135deg, #ff7b93, #a7427f); }
 .yani-home__item--updates .yani-home__icon { background: linear-gradient(135deg, #5eb7ff, #5861c5); }
 .yani-home__item--user_lists .yani-home__icon { background: linear-gradient(135deg, #6f8ff3, #5750bb); }
+.yani-home__item--notifications .yani-home__icon { background: linear-gradient(135deg, #ff8b62, #d74c65); }
 .yani-home__item--account .yani-home__icon { background: linear-gradient(135deg, #e77ab3, #9d4b9c); }
 
 .yani-home__item.focus .yani-home__icon {

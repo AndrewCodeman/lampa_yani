@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.33.15 — 2026-08-11
+
+- Move My Lists to position 6 on the YummyAnime dashboard.
+- Add the existing Notifications screen as dashboard item 10 for signed-in users.
+- Place Account at position 11 and Status at position 12.
+
 ## 0.33.14 — 2026-08-11
 
 - Replace the generic dashboard glow with layered curved YummyAnime wave artwork.

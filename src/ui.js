@@ -493,9 +493,7 @@
             {key: 'continue_watching', title: t('continue_watching'), action: function () {
                 openContinueWatching();
             }},
-            {key: 'status', title: t('status'), action: function () {
-                Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime ' + t('status'), component: 'yani_status'});
-            }},
+            {key: 'user_lists', title: t('user_lists'), authorized: true, action: openUserLists},
             {key: 'top_rated', title: t('top_rated'), action: function () {
                 Lampa.Activity.push({url: 'yani/top-rated', title: 'YummyAnime ' + t('top_rated'), component: 'yani_catalog', params: {limit: 30, sort: 'rating', sort_forward: false}});
             }},
@@ -505,8 +503,11 @@
             {key: 'updates', title: t('updates'), action: function () {
                 Lampa.Activity.push({url: 'yani/updates', title: 'YummyAnime ' + t('updates'), component: 'yani_updates'});
             }},
-            {key: 'user_lists', title: t('user_lists'), authorized: true, action: openUserLists},
-            {key: 'account', title: t('account'), action: openAccount}
+            {key: 'notifications', title: t('notifications'), authorized: true, action: openNotifications},
+            {key: 'account', title: t('account'), action: openAccount},
+            {key: 'status', title: t('status'), action: function () {
+                Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime ' + t('status'), component: 'yani_status'});
+            }}
         ].filter(function (item) {
             return (!item.authorized || LampaYaniAuth.token()) && homeSectionEnabled(item.key);
         });
@@ -633,6 +634,7 @@
             for_you: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S4 15.7 4 9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5c0 6.2-8 11-8 11Z"/><path d="M12 11v5M9.5 13.5h5"/></svg>',
             updates: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="16" r="3"/><path d="M18 14v2l1.3 1"/></svg>',
             user_lists: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v5H5zM5 11h14v9H5z"/><path d="M8 6.5h6M8 14h8M8 17h5"/></svg>',
+            notifications: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2.2V10a4.5 4.5 0 0 0-9 0v4.8L6 17zM10 20h4"/><path d="M18.5 5.5 20 4M5.5 5.5 4 4"/></svg>',
             account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/></svg>'
         };
         return icons[key] || icons.catalog;
@@ -4515,12 +4517,13 @@
             ['search', 'search'],
             ['schedule', 'schedule'],
             ['continue_watching', 'continue_watching'],
-            ['status', 'status'],
+            ['user_lists', 'user_lists'],
             ['top_rated', 'top_rated'],
             ['for_you', 'for_you'],
             ['updates', 'updates'],
-            ['user_lists', 'user_lists'],
-            ['account', 'account']
+            ['notifications', 'notifications'],
+            ['account', 'account'],
+            ['status', 'status']
         ].forEach(function (section) {
             Lampa.SettingsApi.addParam({
                 component: 'yani',
