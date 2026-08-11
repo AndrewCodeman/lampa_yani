@@ -360,11 +360,11 @@
                 sectionRail.append(node);
             });
             var intro = $(
-                '<div class="yani-home__intro">' +
+                '<div class="yani-home__intro" data-yani-section="explore">' +
                     '<span class="yani-home__intro-context-art"></span>' +
                     '<div class="yani-home__intro-mark"></div>' +
                     '<div class="yani-home__intro-copy">' +
-                        '<div class="yani-home__intro-brand">YummyAnime</div>' +
+                        '<div class="yani-home__intro-brand"><span>YummyAnime</span><i aria-hidden="true"></i><em></em></div>' +
                         '<div class="yani-home__intro-title"></div>' +
                         '<div class="yani-home__intro-subtitle"></div>' +
                         '<div class="yani-home__intro-data" aria-hidden="true"><i></i><span></span></div>' +
@@ -373,6 +373,7 @@
                 '</div>'
             );
             intro.find('.yani-home__intro-mark').html(yummyAnimeIcon());
+            intro.find('.yani-home__intro-brand em').text(t('dashboard_browse'));
             intro.find('.yani-home__intro-title').text(t('dashboard_title'));
             intro.find('.yani-home__intro-subtitle').text(t('dashboard_subtitle'));
             var introSummary = $('<div class="yani-home__intro-summary"></div>');
@@ -587,12 +588,16 @@
 
             function setSectionRail(group) {
                 var activeGroup = 'explore';
+                var activeTitle = t('dashboard_browse');
                 sectionDefinitions.some(function (definition) {
                     if (definition.key !== group) return false;
                     activeGroup = definition.key;
+                    activeTitle = definition.title;
                     return true;
                 });
                 html.attr('data-yani-section', activeGroup);
+                intro.attr('data-yani-section', activeGroup);
+                intro.find('.yani-home__intro-brand em').text(activeTitle);
                 var reached = true;
                 sectionDefinitions.forEach(function (definition) {
                     var node = sectionRailNodes[definition.key];

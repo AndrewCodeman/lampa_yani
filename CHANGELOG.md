@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.39.13 — 2026-08-12
+
+- Added a live section breadcrumb to the dashboard header.
+- Synchronized header, active-panel and background accents with the focused dashboard group.
+- Kept the new context entirely local with no additional API requests.
+
 ## 0.39.12 — 2026-08-12
 
 - Recolored the Catalog card-stack illustration to violet, coral, blue, and mint.
