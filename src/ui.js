@@ -265,6 +265,9 @@
         var homeButtons = {};
         var homeFocusStorageKey = 'yani_home_last_focus';
         var destroyed = false;
+        var currentEpisodeFlow;
+        var renderIntroContext = function () {};
+        var updateEpisodeCountdown = function () {};
         var navigatorInfo = window.navigator || {};
         var reducedMotion = Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
         var lowMemoryDevice = Number(navigatorInfo.deviceMemory || 0) > 0 && Number(navigatorInfo.deviceMemory) <= 2;
@@ -324,7 +327,6 @@
             var episodeFlow;
             var episodeFlowItems;
             var episodeFlowTimeline;
-            var currentEpisodeFlow;
             var discover;
             var discoverItems;
             var libraryStrip;
@@ -476,7 +478,7 @@
                     .addClass('yani-home__count--visible');
             }
 
-            function renderIntroContext(button) {
+            renderIntroContext = function (button) {
                 if (!button || !button.length) return;
                 var key = String(button.attr('data-yani-home-key') || 'catalog');
                 setSectionRail(String(button.data('yani-home-group') || 'explore'));
@@ -492,7 +494,7 @@
                 if (!reducedMotion && !lowMemoryDevice && !lowCpuDevice && /^https?:\/\//i.test(poster)) {
                     art.css('background-image', 'url("' + poster + '")').addClass('yani-home__intro-context-art--visible');
                 }
-            }
+            };
 
             function setSectionRail(group) {
                 var reached = true;
@@ -635,7 +637,7 @@
                 });
             }
 
-            function updateEpisodeCountdown(release) {
+            updateEpisodeCountdown = function (release) {
                 if (!episodeFlow) return;
                 var indicator = episodeFlow.find('.yani-home__episode-flow-live');
                 var countdown = LampaYaniHomeInsights.releaseCountdown(release && release.timestamp, Date.now());
@@ -652,7 +654,7 @@
                     text = t('next_broadcast') + ' · ' + (parts.join(' ') || '1' + t('minutes_short'));
                 }
                 indicator.addClass('yani-home__episode-flow-live--visible yani-home__episode-flow-live--' + countdown.state).find('b').text(text);
-            }
+            };
 
             var account = LampaYaniAuth.get();
             var localEntries = LampaYaniHomeSections.normalizeLocalHistory(playbackHistory());
@@ -849,7 +851,15 @@
         };
 
         this.render = function (js) { return js ? html[0] : html; };
-        this.destroy = function () { destroyed = true; homeButtons = {}; scroll.destroy(); html.remove(); };
+        this.destroy = function () {
+            destroyed = true;
+            homeButtons = {};
+            currentEpisodeFlow = null;
+            renderIntroContext = function () {};
+            updateEpisodeCountdown = function () {};
+            scroll.destroy();
+            html.remove();
+        };
     }
 
     function UsagePolicy(object) {

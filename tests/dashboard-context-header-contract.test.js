@@ -4,7 +4,8 @@ const fs = require('fs');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 
-assert.match(ui, /function renderIntroContext\(button\)/);
+assert.match(ui, /var renderIntroContext = function \(\) \{\};/);
+assert.match(ui, /renderIntroContext = function \(button\)/);
 assert.match(ui, /button\.data\('yani-home-title', item\.title\)/);
 assert.match(ui, /yani-home-insight-title/);
 assert.match(ui, /yani-home-insight-meta/);

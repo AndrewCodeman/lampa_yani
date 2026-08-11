@@ -19,7 +19,8 @@ assert.equal(insights.releaseCountdown(now - 1, now).state, 'aired');
 assert.equal(insights.releaseCountdown(0, now).state, 'unknown');
 assert.equal(insights.releaseCountdown(now + 1, now).minutes, 1);
 
-assert.match(ui, /function updateEpisodeCountdown\(release\)/);
+assert.match(ui, /var updateEpisodeCountdown = function \(\) \{\};/);
+assert.match(ui, /updateEpisodeCountdown = function \(release\)/);
 assert.match(ui, /releaseCountdown\(release && release\.timestamp, Date\.now\(\)\)/);
 assert.match(ui, /if \(currentEpisodeFlow\) updateEpisodeCountdown\(currentEpisodeFlow\.japan\)/);
 assert.match(ui, /t\('next_broadcast'\)/);

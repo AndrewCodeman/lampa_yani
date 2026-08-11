@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.37.3 — 2026-08-12
+
+- Fixed the dashboard crash after returning from Collections and other child screens.
+- Kept contextual-header and broadcast-countdown callbacks in the full Home component lifecycle.
+- Cleared retained dashboard callbacks and release data when Home is destroyed.
+- Added a regression contract for callback visibility from the Lampa controller `start()` handler.
+
 ## 0.37.2 — 2026-08-11
 
 - Added a localized countdown to the nearest Japanese broadcast in the episode-flow header.
