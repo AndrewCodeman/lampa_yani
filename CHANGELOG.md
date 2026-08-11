@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.36.8 — 2026-08-11
+
+- Added a resilient 24-hour local snapshot for dashboard schedule and feed insights.
+- Preserved cached schedule or translation data when only one YummyAnime endpoint responds.
+- Added clear live, partial, cached and offline freshness indicators to the dashboard header.
+- Prevented stale counters, previews and artwork from surviving a successful empty refresh.
+
 ## 0.36.7 — 2026-08-11
 
 - Added an at-a-glance dashboard summary for today's releases, new translations and unfinished viewing.

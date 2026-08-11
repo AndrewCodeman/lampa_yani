@@ -253,6 +253,27 @@
         return options.authorized ? {key: 'for_you', label: 'recommended_now'} : {key: 'catalog', label: 'start_catalog'};
     }
 
+    function mergeDashboardSnapshot(cached, live) {
+        cached = cached && typeof cached === 'object' ? cached : {};
+        live = live && typeof live === 'object' ? live : {};
+        var service = live.service || {};
+        var cachedFlow = cached.episode_flow || {};
+        var liveFlow = live.episode_flow || {};
+        var hasCached = Boolean(cached.counts || cached.schedule || cached.translations || cached.episode_flow);
+        return {
+            counts: service.feed ? live.counts || {} : cached.counts || live.counts || {},
+            schedule: service.schedule ? live.schedule || {} : cached.schedule || live.schedule || {},
+            translations: service.feed ? live.translations || {} : cached.translations || live.translations || {},
+            episode_flow: {
+                japan: service.schedule ? liveFlow.japan : cachedFlow.japan || liveFlow.japan,
+                waiting: service.feed && service.schedule ? liveFlow.waiting : cachedFlow.waiting || liveFlow.waiting,
+                available: service.feed ? liveFlow.available : cachedFlow.available || liveFlow.available
+            },
+            service: service,
+            used_cache: hasCached && (!service.feed || !service.schedule)
+        };
+    }
+
     function load(feed) {
         return feed().then(counts);
     }
@@ -300,6 +321,7 @@
         libraryPreview: libraryPreview,
         notificationCount: notificationCount,
         dashboardPriority: dashboardPriority,
+        mergeDashboardSnapshot: mergeDashboardSnapshot,
         posterOf: posterOf,
         timestampMilliseconds: timestampMilliseconds,
         uniqueCount: uniqueCount

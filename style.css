@@ -329,6 +329,13 @@
 .yani-home__intro-brand { color: #ff8d96; font-size: .78em; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
 .yani-home__intro-title { margin-top: .16em; font-size: 1.75em; font-weight: 720; line-height: 1.08; }
 .yani-home__intro-subtitle { margin-top: .42em; color: rgba(255,255,255,.6); font-size: .88em; }
+.yani-home__intro-data { display: none; align-items: center; gap: .38em; margin-top: .48em; color: rgba(255,255,255,.52); font-size: .57em; line-height: 1; }
+.yani-home__intro-data--visible { display: flex; }
+.yani-home__intro-data i { flex: 0 0 .48em; width: .48em; height: .48em; border-radius: 50%; background: #8390a6; box-shadow: 0 0 .7em rgba(131,144,166,.3); }
+.yani-home__intro-data--live i { background: #55d795; box-shadow: 0 0 .7em rgba(85,215,149,.55); }
+.yani-home__intro-data--partial i { background: #f0b45e; box-shadow: 0 0 .7em rgba(240,180,94,.48); }
+.yani-home__intro-data--cached i { background: #62b8ff; box-shadow: 0 0 .7em rgba(98,184,255,.42); }
+.yani-home__intro-data--offline i { background: #d84e63; box-shadow: 0 0 .7em rgba(216,78,99,.5); }
 .yani-home__intro-summary { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .52em; width: min(32em, 42%); margin-left: auto; }
 .yani-home__intro-metric { min-width: 0; display: flex; align-items: center; gap: .52em; padding: .58em .68em; box-sizing: border-box; border: .07em solid rgba(255,255,255,.12); border-radius: .72em .42em .68em .46em; background: linear-gradient(132deg, rgba(255,255,255,.11), rgba(255,255,255,.045)); box-shadow: inset 0 .06em 0 rgba(255,255,255,.09); }
 .yani-home__intro-metric-icon { flex: 0 0 1.65em; width: 1.65em; height: 1.65em; display: flex; align-items: center; justify-content: center; border-radius: .48em .28em .44em .32em; background: rgba(239,100,112,.17); color: #ff8d96; }
