@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.37.1 — 2026-08-11
+
+- Added a non-focusable curved section rail for orientation on the long dashboard.
+- Highlighted browse, episode flow, library, discovery and service as focus moves.
+- Restored the correct rail position together with the last dashboard focus.
+- Hid the rail on narrow screens and removed its transitions in reduced-motion mode.
+
 ## 0.37.0 — 2026-08-11
 
 - Turned the dashboard header into a contextual view of the currently focused section.

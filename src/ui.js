@@ -328,7 +328,24 @@
             var discoverItems;
             var libraryStrip;
             var introMetrics = {};
+            var sectionRailNodes = {};
             var panels = {};
+            var sectionRail = $('<div class="yani-home__section-rail" aria-hidden="true"></div>');
+            var sectionDefinitions = [
+                {key: 'explore', title: t('dashboard_browse')},
+                {key: 'episode_flow', title: t('episode_flow')},
+                {key: 'library', title: t('dashboard_library')},
+                {key: 'discover', title: t('discover')},
+                {key: 'service', title: t('dashboard_service')}
+            ];
+            sectionDefinitions.forEach(function (definition) {
+                var available = items.some(function (item) { return item.group === definition.key; });
+                if (!available) return;
+                var node = $('<span class="yani-home__section-rail-node yani-home__section-rail-node--' + definition.key + '"><i></i><b></b></span>');
+                node.find('b').text(definition.title);
+                sectionRailNodes[definition.key] = node;
+                sectionRail.append(node);
+            });
             var intro = $(
                 '<div class="yani-home__intro" aria-hidden="true">' +
                     '<span class="yani-home__intro-context-art"></span>' +
@@ -392,6 +409,7 @@
                 var button = $('<div class="yani-home__item yani-home__item--' + item.key + ' selector"></div>');
                 button.attr('data-yani-home-key', item.key);
                 button.data('yani-home-title', item.title);
+                button.data('yani-home-group', item.group || 'explore');
                 button.append(
                     $('<div class="yani-home__icon"></div>').html(homeIcon(item.key)),
                     text,
@@ -438,6 +456,7 @@
             scroll.append(grid);
             html.append(waves);
             html.append(scroll.render(true));
+            html.append(sectionRail);
             this.activity.loader(false);
             this.activity.toggle();
 
@@ -458,6 +477,7 @@
             function renderIntroContext(button) {
                 if (!button || !button.length) return;
                 var key = String(button.attr('data-yani-home-key') || 'catalog');
+                setSectionRail(String(button.data('yani-home-group') || 'explore'));
                 var title = String(button.data('yani-home-title') || t('dashboard_title'));
                 var insight = String(button.data('yani-home-insight-title') || '');
                 var meta = String(button.data('yani-home-insight-meta') || '');
@@ -470,6 +490,21 @@
                 if (!reducedMotion && !lowMemoryDevice && !lowCpuDevice && /^https?:\/\//i.test(poster)) {
                     art.css('background-image', 'url("' + poster + '")').addClass('yani-home__intro-context-art--visible');
                 }
+            }
+
+            function setSectionRail(group) {
+                var reached = true;
+                sectionDefinitions.forEach(function (definition) {
+                    var node = sectionRailNodes[definition.key];
+                    if (!node) return;
+                    node.removeClass('yani-home__section-rail-node--active yani-home__section-rail-node--passed');
+                    if (definition.key === group) {
+                        node.addClass('yani-home__section-rail-node--active');
+                        reached = false;
+                    } else if (reached) {
+                        node.addClass('yani-home__section-rail-node--passed');
+                    }
+                });
             }
 
             function refreshIntroContext(button) {
