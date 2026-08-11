@@ -85,6 +85,10 @@
     messages.ru.episodes_aired = 'Вышло';
     messages.ru.episodes_watched = 'Просмотрено';
     messages.ru.recommendations_empty = 'Рекомендации появятся после просмотра тайтлов';
+    messages.ru.recommendations_error = 'Не удалось загрузить рекомендации';
+    messages.ru.because_you_watched = 'После просмотра';
+    messages.ru.recommended_for_you = 'Рекомендовано для вас';
+    messages.ru.popular_fallback = 'Популярное сейчас';
     messages.ru.updates = 'Обновления';
     messages.ru.updates_error = 'Не удалось загрузить обновления';
     messages.ru.subscriptions = 'Подписки на новые серии';
@@ -145,6 +149,10 @@
     messages.en.episodes_aired = 'Aired';
     messages.en.episodes_watched = 'Watched';
     messages.en.recommendations_empty = 'Recommendations will appear after you watch some anime';
+    messages.en.recommendations_error = 'Failed to load recommendations';
+    messages.en.because_you_watched = 'Because you watched';
+    messages.en.recommended_for_you = 'Recommended for you';
+    messages.en.popular_fallback = 'Popular now';
     messages.en.updates = 'Updates';
     messages.en.updates_error = 'Failed to load updates';
     messages.en.subscriptions = 'New episode subscriptions';
@@ -412,6 +420,10 @@
     messages.uk.episodes_aired = 'Вийшло';
     messages.uk.episodes_watched = 'Переглянуто';
     messages.uk.recommendations_empty = 'Рекомендації з’являться після перегляду тайтлів';
+    messages.uk.recommendations_error = 'Не вдалося завантажити рекомендації';
+    messages.uk.because_you_watched = 'Після перегляду';
+    messages.uk.recommended_for_you = 'Рекомендовано для вас';
+    messages.uk.popular_fallback = 'Популярне зараз';
     messages.uk.updates = 'Оновлення';
     messages.uk.updates_error = 'Не вдалося завантажити оновлення';
     messages.uk.subscriptions = 'Підписки на нові серії';

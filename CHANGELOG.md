@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.4 — 2026-08-11
+
+- Personalize For You with both local playback and authorized YummyAnime watch history.
+- Deduplicate source titles and recommendations while limiting recommendation fan-out for low-power TV devices.
+- Explain recommendations with compact “Because you watched” poster badges.
+- Fall back to the official global top only when no personalized recommendations are available.
+
 ## 0.34.3 — 2026-08-11
 
 - Add a dedicated New Releases dashboard section backed by the official `/feed` `new` payload.

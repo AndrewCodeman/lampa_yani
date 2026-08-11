@@ -721,7 +721,18 @@
     }
 
     function Recommended(object) {
-        return LampaYaniHomeSections.recommended(object, {t: t, history: playbackHistory, toCard: toCard, cardRender: bindRecommendedCardRender});
+        return LampaYaniRecommendations.component(object, {
+            t: t,
+            history: playbackHistory,
+            authorized: function () { return Boolean(LampaYaniAuth.token()); },
+            watchHistory: LampaYaniApi.watchHistory,
+            recommendations: LampaYaniApi.recommendations,
+            catalog: LampaYaniApi.catalog,
+            normalize: LampaYaniApi.normalize,
+            toCard: toCard,
+            cardRender: bindRecommendedCardRender,
+            notice: function (message) { Lampa.Noty.show(message); }
+        });
     }
 
     function NewTranslations(object) {
@@ -944,6 +955,7 @@
         addCardRatings(element, card);
         addCardMediaBadges(element, card);
         addCardUpdateBadge(element, card);
+        addCardRecommendationBadge(element, card);
         addCardListBadge(element, card);
         LampaYaniMedia.attachPosterFallback(element, card);
         // Some Lampa versions clone the card object after cardRender. Keep a
@@ -1036,6 +1048,14 @@
         if (!view.length || view.find('.yani-card-update').length) return;
         var label = card.yani_update_label || t('episode') + ' ' + card.yani_update_episode;
         view.append($('<span class="yani-card-update"></span>').text(label));
+    }
+
+    function addCardRecommendationBadge(element, card) {
+        if (!card || !card.yani_recommendation_label) return;
+        var render = cardRenderElement(element, card);
+        var view = $('.card__view', render).first();
+        if (!view.length || view.find('.yani-card-recommendation').length) return;
+        view.append($('<span class="yani-card-recommendation"></span>').text(card.yani_recommendation_label));
     }
 
     function addCardListBadge(element, card) {
