@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.39.3 — 2026-08-12
+
+- Fixed Up navigation from the first account-list card row to the sorting button.
+- Used the last real card focus when a Lampa build places its focus class on another element.
+- Replaced fragile above-card detection with stable first-row geometry.
+- Passed the sorting button DOM node directly to Lampa's focus controller.
+
 ## 0.39.2 — 2026-08-12
 
 - Made the dashboard summary metrics focusable quick actions for a TV remote.

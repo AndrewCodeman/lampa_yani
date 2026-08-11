@@ -133,11 +133,11 @@
         }
 
         function focusPanel() {
-            var focused = focusedCard();
+            var focused = focusedCard() || lastCard;
             if (focused) lastCard = focused;
             panelFocused = true;
             syncNavigation();
-            Lampa.Controller.collectionFocus(button, root(), true);
+            Lampa.Controller.collectionFocus(button[0], root(), true);
         }
 
         function focusCards() {
@@ -147,19 +147,16 @@
             Lampa.Controller.collectionFocus(target || false, root(), true);
         }
 
-        function hasCardAbove(current) {
+        function isFirstCardRow(current) {
             if (!current) return false;
             var rect = current.getBoundingClientRect();
-            var center = rect.left + rect.width / 2;
-            var found = false;
+            var firstTop = rect.top;
             cards().each(function () {
                 if (this === current || this.offsetParent === null) return;
                 var candidate = this.getBoundingClientRect();
-                var above = candidate.bottom <= rect.top + Math.max(12, rect.height * .2);
-                var aligned = Math.abs((candidate.left + candidate.width / 2) - center) < Math.max(rect.width, candidate.width);
-                if (above && aligned) found = true;
+                if (candidate.width > 0 && candidate.height > 0) firstTop = Math.min(firstTop, candidate.top);
             });
-            return found;
+            return rect.top <= firstTop + Math.max(18, rect.height * .35);
         }
 
         function choose(item) {
@@ -230,8 +227,8 @@
             };
             controller.up = function () {
                 if (panelFocused) return Lampa.Controller.toggle('head');
-                var current = focusedCard();
-                if (current && !hasCardAbove(current)) return focusPanel();
+                var current = focusedCard() || lastCard;
+                if (current && isFirstCardRow(current)) return focusPanel();
                 if (originalUp) originalUp();
             };
             controller.down = function () {

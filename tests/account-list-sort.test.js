@@ -20,8 +20,10 @@ assert.deepStrictEqual(Array.from(controls.sortItems(items, 'year'), (item) => i
 assert.deepStrictEqual(Array.from(controls.sortItems(items, 'title'), (item) => item.anime_id), [2, 1, 3]);
 assert.deepStrictEqual(items.map((item) => item.anime_id), [1, 2, 3], 'sorting must not mutate the cached API list');
 
-assert.match(source, /function hasCardAbove\(current\)/);
-assert.match(source, /if \(current && !hasCardAbove\(current\)\) return focusPanel\(\)/);
+assert.match(source, /function isFirstCardRow\(current\)/);
+assert.match(source, /var current = focusedCard\(\) \|\| lastCard/);
+assert.match(source, /if \(current && isFirstCardRow\(current\)\) return focusPanel\(\)/);
+assert.match(source, /collectionFocus\(button\[0\], root\(\), true\)/);
 assert.match(source, /if \(panelFocused\) return focusCards\(\)/);
 assert.match(source, /showSelect/);
 assert.doesNotMatch(source, /yani-catalog-toolbar/);
