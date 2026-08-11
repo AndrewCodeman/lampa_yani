@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.36.4 — 2026-08-11
+
+- Added cached unread-notification counts to the dashboard for signed-in users.
+- Added live operational, degraded and unavailable states to the YummyAnime status tile.
+- Reused feed and schedule requests for health signals instead of adding another API request.
+- Kept service indicators non-focusable and resilient to partial endpoint failures.
+
 ## 0.36.3 — 2026-08-11
 
 - Added a compact three-stage episode flow from Japanese broadcast through translation wait to an available dub.

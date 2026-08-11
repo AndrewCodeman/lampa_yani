@@ -425,6 +425,12 @@
                 button.addClass('yani-home__item--with-insight');
             }
 
+            function setServiceState(button, state) {
+                if (!button) return;
+                $('.yani-home__service-state', button).remove();
+                $('<span class="yani-home__service-state yani-home__service-state--' + state + '" aria-hidden="true"></span>').insertBefore($('.yani-home__arrow', button));
+            }
+
             function renderEpisodeTimeline(flow) {
                 if (!episodeFlowTimeline) return;
                 flow = flow || {};
@@ -498,7 +504,28 @@
                 });
             }
 
-            if (homeButtons.schedule || homeButtons.new_translations || homeButtons.new_releases || homeButtons.collections) {
+            var notificationUserKey = account && (account.user_id || account.login) || '';
+            var notificationCache = readHomeNotificationCount(notificationUserKey);
+            function renderNotifications(count) {
+                if (!homeButtons.notifications || count === null || count === undefined) return;
+                count = Math.max(0, Number(count) || 0);
+                setCount(homeButtons.notifications, count);
+                setPreview(homeButtons.notifications, count ? String(count) + ' ' + t('unread') : t('no_unread_notifications'), t('authorized'));
+                setServiceState(homeButtons.notifications, count ? 'attention' : 'up');
+            }
+            if (notificationCache.available) renderNotifications(notificationCache.count);
+            if (LampaYaniAuth.token() && homeButtons.notifications && !notificationCache.fresh) {
+                LampaYaniApi.notificationCounts().then(function (payload) {
+                    if (destroyed) return;
+                    var count = LampaYaniHomeInsights.notificationCount(payload);
+                    cacheHomeNotificationCount(notificationUserKey, count);
+                    renderNotifications(count);
+                }).catch(function (error) {
+                    console.warn('[YummyAnime Home] Notification count is unavailable', error);
+                });
+            }
+
+            if (homeButtons.schedule || homeButtons.new_translations || homeButtons.new_releases || homeButtons.collections || homeButtons.status) {
                 LampaYaniHomeInsights.dashboard({
                     feed: LampaYaniApi.feed,
                     schedule: function () { return LampaYaniApi.schedule({}); },
@@ -510,6 +537,11 @@
                     });
                     var schedule = dashboard.schedule || {};
                     renderEpisodeTimeline(dashboard.episode_flow);
+                    var service = dashboard.service || {};
+                    var serviceState = service.degraded ? 'degraded' : service.api ? 'up' : 'down';
+                    var serviceTitle = service.degraded ? t('degraded') : service.api ? t('api_ok') : t('api_error');
+                    setServiceState(homeButtons.status, serviceState);
+                    setPreview(homeButtons.status, serviceTitle, [service.feed ? 'API' : '', service.schedule ? t('schedule') : ''].filter(Boolean).join(' · '));
                     setCount(homeButtons.schedule, schedule.today);
                     if (schedule.preview) {
                         var releaseDate = new Date(schedule.preview.timestamp);
@@ -1355,6 +1387,31 @@
     var userListsSnapshot = null;
     var homeListCountsCacheKey = 'yani_home_list_counts';
     var homeListCountsCacheLifetime = 300000;
+    var homeNotificationCacheKey = 'yani_home_notification_count';
+    var homeNotificationCacheLifetime = 300000;
+
+    function readHomeNotificationCount(userKey) {
+        if (!userKey || !Lampa.Storage || !Lampa.Storage.get) return {available: false, fresh: false, count: 0};
+        try {
+            var cached = Lampa.Storage.get(homeNotificationCacheKey, '{}');
+            if (typeof cached === 'string') cached = JSON.parse(cached || '{}');
+            if (String(cached && cached.user_key || '') !== String(userKey)) return {available: false, fresh: false, count: 0};
+            return {
+                available: cached.count !== undefined,
+                fresh: Boolean(cached.updated_at && Date.now() - Number(cached.updated_at) < homeNotificationCacheLifetime),
+                count: Math.max(0, Number(cached.count) || 0)
+            };
+        } catch (error) { return {available: false, fresh: false, count: 0}; }
+    }
+
+    function cacheHomeNotificationCount(userKey, count) {
+        if (!userKey || !Lampa.Storage || !Lampa.Storage.set) return;
+        Lampa.Storage.set(homeNotificationCacheKey, JSON.stringify({
+            user_key: String(userKey),
+            updated_at: Date.now(),
+            count: Math.max(0, Number(count) || 0)
+        }));
+    }
 
     function homeListCountsCache(userId) {
         if (!userId || !Lampa.Storage || !Lampa.Storage.get) return {};

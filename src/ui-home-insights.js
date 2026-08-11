@@ -199,20 +199,50 @@
         };
     }
 
+    function notificationCount(payload) {
+        var value = response(payload);
+        if (!value || typeof value !== 'object') return Math.max(0, Number(value) || 0);
+        var nested = value.notifications && typeof value.notifications === 'object' ? value.notifications : {};
+        var explicit = value.unread_count;
+        if (explicit === undefined) explicit = value.unread;
+        if (explicit === undefined) explicit = value.count;
+        if (explicit === undefined) explicit = nested.unread_count;
+        if (explicit === undefined) explicit = nested.unread;
+        if (explicit === undefined) explicit = nested.count;
+        if (explicit !== undefined) return Math.max(0, Number(explicit) || 0);
+        return Object.keys(value).reduce(function (sum, key) {
+            return sum + (typeof value[key] === 'number' ? Math.max(0, value[key]) : 0);
+        }, 0);
+    }
+
     function load(feed) {
         return feed().then(counts);
     }
 
     function dashboard(options) {
         options = options || {};
-        var feedRequest = options.feed ? options.feed().catch(function () { return null; }) : Promise.resolve(null);
-        var scheduleRequest = options.schedule ? options.schedule().catch(function () { return null; }) : Promise.resolve(null);
+        function settle(request) {
+            if (!request) return Promise.resolve({ok: false, data: null});
+            try {
+                return request().then(function (data) { return {ok: true, data: data}; }).catch(function () { return {ok: false, data: null}; });
+            } catch (error) { return Promise.resolve({ok: false, data: null}); }
+        }
+        var feedRequest = settle(options.feed);
+        var scheduleRequest = settle(options.schedule);
         return Promise.all([feedRequest, scheduleRequest]).then(function (result) {
+            var feed = result[0];
+            var schedule = result[1];
             return {
-                counts: counts(result[0]),
-                schedule: scheduleInsight(result[1], options.now),
-                translations: translationInsight(result[0]),
-                episode_flow: episodeFlow(result[1], result[0], options.now)
+                counts: counts(feed.data),
+                schedule: scheduleInsight(schedule.data, options.now),
+                translations: translationInsight(feed.data),
+                episode_flow: episodeFlow(schedule.data, feed.data, options.now),
+                service: {
+                    api: feed.ok || schedule.ok,
+                    degraded: feed.ok !== schedule.ok,
+                    feed: feed.ok,
+                    schedule: schedule.ok
+                }
             };
         });
     }
@@ -229,6 +259,7 @@
         translationEntries: translationEntries,
         listCounts: listCounts,
         personalInsight: personalInsight,
+        notificationCount: notificationCount,
         timestampMilliseconds: timestampMilliseconds,
         uniqueCount: uniqueCount
     };

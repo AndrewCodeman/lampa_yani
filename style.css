@@ -697,6 +697,24 @@
 .yani-home__item.focus .yani-home__count { border-color: rgba(239,100,112,.32); background: rgba(239,100,112,.14); color: #a92f53; }
 .yani-home__discover .yani-home__count { font-size: .64em; }
 
+.yani-home__service-state {
+    display: block;
+    flex: 0 0 .62em;
+    width: .62em;
+    height: .62em;
+    margin-left: auto;
+    border: .08em solid rgba(255,255,255,.34);
+    border-radius: 50%;
+    background: rgba(255,255,255,.28);
+    box-shadow: 0 0 0 .2em rgba(255,255,255,.04);
+}
+.yani-home__service-state + .yani-home__arrow { margin-left: .45em; }
+.yani-home__service-state--up { background: #55d795; box-shadow: 0 0 0 .2em rgba(85,215,149,.11), 0 0 .75em rgba(85,215,149,.32); }
+.yani-home__service-state--attention { background: #ef6470; box-shadow: 0 0 0 .2em rgba(239,100,112,.11), 0 0 .75em rgba(239,100,112,.32); }
+.yani-home__service-state--degraded { background: #f0b45e; box-shadow: 0 0 0 .2em rgba(240,180,94,.11), 0 0 .75em rgba(240,180,94,.3); }
+.yani-home__service-state--down { background: #d84e63; box-shadow: 0 0 0 .2em rgba(216,78,99,.12), 0 0 .75em rgba(216,78,99,.35); }
+.yani-home__item.focus .yani-home__service-state { border-color: rgba(22,21,27,.34); }
+
 .yani-home__item.focus .yani-home__arrow {
     color: #ef6470;
     transform: translateX(.15em);

@@ -74,6 +74,7 @@
     messages.ru.translation_pending = 'перевод ожидается';
     messages.ru.available_now = 'уже доступно';
     messages.ru.flow_no_data = 'Нет свежих данных';
+    messages.ru.no_unread_notifications = 'Новых уведомлений нет';
     messages.ru.new_translations_error = 'Не удалось загрузить новые переводы и озвучки';
     messages.ru.new_translations_empty = 'Новых переводов и озвучек пока нет';
     messages.ru.new_releases = 'Новые релизы';
@@ -146,6 +147,7 @@
     messages.en.translation_pending = 'translation pending';
     messages.en.available_now = 'available now';
     messages.en.flow_no_data = 'No recent data';
+    messages.en.no_unread_notifications = 'No new notifications';
     messages.en.new_translations_error = 'Failed to load new translations and dubs';
     messages.en.new_translations_empty = 'There are no new translations or dubs yet';
     messages.en.new_releases = 'New releases';
@@ -447,6 +449,7 @@
     messages.uk.translation_pending = 'переклад очікується';
     messages.uk.available_now = 'вже доступно';
     messages.uk.flow_no_data = 'Немає свіжих даних';
+    messages.uk.no_unread_notifications = 'Нових сповіщень немає';
     messages.uk.new_translations_error = 'Не вдалося завантажити нові переклади та озвучення';
     messages.uk.new_translations_empty = 'Нових перекладів та озвучень поки немає';
     messages.uk.new_releases = 'Нові релізи';
