@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.37.4 — 2026-08-12
+
+- Enriched the existing dashboard summary instead of adding duplicate navigation blocks.
+- Added the nearest broadcast time and title to the daily schedule metric.
+- Added the latest title and dubbing to the translation metric.
+- Added the current title, episode and progress to the continue-watching metric.
+- Kept the summary non-focusable and hid secondary text on narrow screens.
+
 ## 0.37.3 — 2026-08-12
 
 - Fixed the dashboard crash after returning from Collections and other child screens.

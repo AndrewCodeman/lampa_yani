@@ -369,7 +369,10 @@
 .yani-home__intro-metric-copy { min-width: 0; display: flex; flex-direction: column; }
 .yani-home__intro-metric-copy small { overflow: hidden; color: rgba(255,255,255,.55); font-size: .48em; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
 .yani-home__intro-metric-copy b { margin-top: .08em; color: rgba(255,255,255,.46); font-size: 1.02em; font-weight: 760; line-height: 1; }
+.yani-home__intro-metric-copy em { display: none; max-width: 12em; overflow: hidden; margin-top: .28em; color: rgba(255,255,255,.5); font-size: .42em; font-style: normal; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.yani-home__intro-metric-copy em.yani-home__intro-metric-detail--visible { display: block; }
 .yani-home__intro-metric--ready .yani-home__intro-metric-copy b { color: #fff; }
+.yani-home__intro-metric--active { border-color: rgba(255,255,255,.2); background: linear-gradient(132deg, rgba(255,255,255,.15), rgba(255,255,255,.065)); }
 .yani-home__intro-metric--today .yani-home__intro-metric-icon { background: rgba(98,184,255,.17); color: #7bc7ff; }
 .yani-home__intro-metric--translations .yani-home__intro-metric-icon { background: rgba(188,119,255,.17); color: #cfa0ff; }
 .yani-home__intro-metric--continue .yani-home__intro-metric-icon { background: rgba(85,215,149,.15); color: #6be1a5; }
@@ -911,6 +914,7 @@
     .yani-home__intro-metric { padding: .45em; }
     .yani-home__intro-metric-icon { flex-basis: 1.45em; width: 1.45em; height: 1.45em; }
     .yani-home__intro-metric-copy small { display: none; }
+    .yani-home__intro-metric-copy em { display: none !important; }
     .yani-home__intro-metric-copy b { font-size: .82em; }
     .yani-home__panel--explore, .yani-home__episode-flow, .yani-home__panel--library, .yani-home__discover, .yani-home__panel--service { grid-column: span 12; }
     .yani-home__panel--explore .yani-home__panel-items, .yani-home__episode-flow-items, .yani-home__discover-items, .yani-home__panel--service .yani-home__panel-items { grid-template-columns: repeat(2, minmax(0, 1fr)); }

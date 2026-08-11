@@ -376,7 +376,8 @@
                     $('<span class="yani-home__intro-metric-icon"></span>').html(metric.icon),
                     $('<span class="yani-home__intro-metric-copy"></span>').append(
                         $('<small></small>').text(metric.label),
-                        $('<b></b>').text('—')
+                        $('<b></b>').text('—'),
+                        $('<em></em>')
                     )
                 );
                 introMetrics[metric.key] = node;
@@ -539,11 +540,14 @@
                 $('<span class="yani-home__service-state yani-home__service-state--' + state + '" aria-hidden="true"></span>').insertBefore($('.yani-home__arrow', button));
             }
 
-            function setIntroMetric(key, value) {
+            function setIntroMetric(key, value, detail) {
                 var metric = introMetrics[key];
                 if (!metric || !metric.length) return;
-                metric.find('b').text(Number(value || 0) > 99 ? '99+' : String(Math.max(0, Number(value) || 0)));
-                metric.addClass('yani-home__intro-metric--ready');
+                value = Math.max(0, Number(value) || 0);
+                metric.find('b').text(value > 99 ? '99+' : String(value));
+                metric.find('em').text(String(detail || '')).toggleClass('yani-home__intro-metric-detail--visible', Boolean(detail));
+                metric.removeClass('yani-home__intro-metric--active').addClass('yani-home__intro-metric--ready');
+                if (value) metric.addClass('yani-home__intro-metric--active');
             }
 
             function setIntroDataState(state, updatedAt) {
@@ -656,10 +660,18 @@
                 indicator.addClass('yani-home__episode-flow-live--visible yani-home__episode-flow-live--' + countdown.state).find('b').text(text);
             };
 
+            function continueMetricDetail(entry) {
+                entry = entry || {};
+                var meta = [];
+                if (entry.number || entry.episode) meta.push(t('episode') + ' ' + (entry.number || entry.episode));
+                if (Number(entry.duration || 0) > 0) meta.push(Math.min(99, Math.round(Number(entry.time || 0) / Number(entry.duration) * 100)) + '%');
+                return [entry.title || '', meta.join(' · ')].filter(Boolean).join(' · ');
+            }
+
             var account = LampaYaniAuth.get();
             var localEntries = LampaYaniHomeSections.normalizeLocalHistory(playbackHistory());
             var continuing = LampaYaniHomeSections.continueWatchingEntries(localEntries, {});
-            setIntroMetric('continue', continuing.length);
+            setIntroMetric('continue', continuing.length, continueMetricDetail(continuing[0]));
 
             function renderLibraryStrip(entries) {
                 if (!libraryStrip) return;
@@ -687,6 +699,7 @@
                 var personal = LampaYaniHomeInsights.personalInsight(continuing, account, stats);
                 prioritySignals.continue_count = personal.continue_count;
                 setCount(homeButtons.continue_watching, personal.continue_count);
+                setIntroMetric('continue', personal.continue_count, continueMetricDetail(personal.continue_preview));
                 if (personal.continue_preview) {
                     var resume = personal.continue_preview;
                     var resumeMeta = resume.number ? t('episode') + ' ' + resume.number : '';
@@ -751,8 +764,6 @@
                         setCount(homeButtons[key], dashboard.counts[key]);
                     });
                     var schedule = dashboard.schedule || {};
-                    setIntroMetric('today', schedule.today);
-                    setIntroMetric('translations', dashboard.translations && dashboard.translations.count);
                     renderEpisodeTimeline(dashboard.episode_flow);
                     var service = dashboard.service || {};
                     var serviceState = dataState === 'cached' ? 'degraded' : service.degraded ? 'degraded' : service.api ? 'up' : 'down';
@@ -770,18 +781,22 @@
                         if (schedule.preview.total) episode += ' ' + t('of') + ' ' + schedule.preview.total;
                         setPreview(homeButtons.schedule, schedule.preview.title, releaseTime + ' · ' + episode);
                         setArtwork(homeButtons.schedule, schedule.preview.poster);
+                        setIntroMetric('today', schedule.today, [releaseTime, schedule.preview.title].filter(Boolean).join(' · '));
                     } else {
                         setPreview(homeButtons.schedule, '', '');
                         setArtwork(homeButtons.schedule, '');
+                        setIntroMetric('today', schedule.today, '');
                     }
                     var translation = dashboard.translations && dashboard.translations.preview;
                     prioritySignals.has_translation = Boolean(translation);
                     if (translation) {
                         setPreview(homeButtons.new_translations, translation.title, [translation.episode, translation.dubbing, translation.source].filter(Boolean).join(' · '));
                         setArtwork(homeButtons.new_translations, translation.poster);
+                        setIntroMetric('translations', dashboard.translations && dashboard.translations.count, [translation.title, translation.dubbing].filter(Boolean).join(' · '));
                     } else {
                         setPreview(homeButtons.new_translations, '', '');
                         setArtwork(homeButtons.new_translations, '');
+                        setIntroMetric('translations', dashboard.translations && dashboard.translations.count, '');
                     }
                     var discovery = dashboard.discovery || {};
                     var newRelease = discovery.new_release;
