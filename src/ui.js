@@ -2406,35 +2406,37 @@
         });
     }
 
-    function registerSearchSource() {
-        if (!Lampa.Search || !Lampa.Search.addSource || window.yummyanime_search_source_ready) return;
-        window.yummyanime_search_source_ready = true;
+    var searchController;
 
-        Lampa.Search.addSource({
-            title: 'YummyAnime',
-            search: function (params, oncomplite) {
-                var query = decodeURIComponent(params && params.query || '').trim();
-                if (!query) return oncomplite([]);
-
-                LampaYaniApi.search(query, {limit: 20}).then(function (payload) {
-                    var results = LampaYaniApi.normalize(payload).map(toCard);
-                    oncomplite(results.length ? [{
-                        title: 'YummyAnime',
-                        type: 'anime',
-                        results: results,
-                        total: results.length,
-                        total_pages: 1
-                    }] : []);
-                }).catch(function (error) {
+    function getSearchController() {
+        if (!searchController) {
+            searchController = LampaYaniSearch.create({
+                lampa: Lampa,
+                api: LampaYaniApi,
+                utils: LampaYaniUiUtils,
+                toCard: toCard,
+                sourceTitle: 'YummyAnime',
+                searchTitle: t('search_title'),
+                showInput: showYummyInput,
+                openDetail: function (card) { openYummyDetail(card, false); },
+                openResults: function (query) {
+                    Lampa.Activity.push({
+                        url: 'yani/search/' + encodeURIComponent(query),
+                        title: query,
+                        component: 'yani_catalog',
+                        params: {q: query, limit: 30}
+                    });
+                },
+                onError: function (error) {
                     console.warn('[YummyAnime] Global search failed', error);
-                    oncomplite([]);
-                });
-            },
-            onSelect: function (params, close) {
-                close();
-                openYummyDetail(params && params.element, false);
-            }
-        });
+                }
+            });
+        }
+        return searchController;
+    }
+
+    function registerSearchSource() {
+        getSearchController().register();
     }
 
     function openYummyForMovie(movie) {
@@ -3645,20 +3647,7 @@
     }
 
     function openSearch() {
-        showYummyInput({title: t('search_title'), value: ''}, function (query) {
-            query = (query || '').trim();
-            if (query) {
-                Lampa.Activity.push({url: 'yani/search/' + encodeURIComponent(query), title: query, component: 'yani_catalog', params: {q: query, limit: 30}});
-                return;
-            }
-            // Lampa.Input is primarily a settings control and switches to
-            // `settings_component` when it closes. Search is opened from the
-            // Home Activity, so cancelling it must explicitly restore the
-            // existing content controller and its last focused tile.
-            setTimeout(function () {
-                if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle('content');
-            }, 0);
-        });
+        getSearchController().open();
     }
 
     function openAccount() {

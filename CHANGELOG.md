@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.9 — 2026-08-11
+
+- Extracted YummyAnime search integration from the main UI module.
+- Debounced global Lampa search requests by 400 ms and ignored stale responses.
+- Ranked results against all known title aliases and added a bounded short-lived search cache.
+- Preserved dashboard focus when the search input is cancelled.
+
 ## 0.34.8 — 2026-08-11
 
 - Add compact live counts to New Translations, New Releases and Collections dashboard tiles.
