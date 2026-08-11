@@ -404,6 +404,17 @@
     messages.en.remove_rating = 'Remove rating';
     messages.en.rating_removed = 'Rating removed from YummyAnime';
 
+    messages.ru.dashboard_title = 'Ваше аниме — в одном месте';
+    messages.ru.dashboard_subtitle = 'Эфир, новые переводы, списки и открытия без лишних переходов';
+    messages.ru.dashboard_browse = 'Найти аниме';
+    messages.ru.dashboard_library = 'Моё аниме';
+    messages.ru.dashboard_service = 'Профиль и сервис';
+    messages.en.dashboard_title = 'Your anime in one place';
+    messages.en.dashboard_subtitle = 'Broadcasts, new translations, lists and discoveries with fewer steps';
+    messages.en.dashboard_browse = 'Find anime';
+    messages.en.dashboard_library = 'My anime';
+    messages.en.dashboard_service = 'Profile and service';
+
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
         catalog_load_error: 'Не вдалося завантажити каталог YummyAnime', next_page_error: 'Не вдалося завантажити наступну сторінку YummyAnime',
@@ -601,6 +612,11 @@
     messages.uk.set_rating = 'Оцінити тайтл';
     messages.uk.remove_rating = 'Видалити оцінку';
     messages.uk.rating_removed = 'Оцінку видалено з YummyAnime';
+    messages.uk.dashboard_title = 'Ваше аніме — в одному місці';
+    messages.uk.dashboard_subtitle = 'Ефір, нові переклади, списки та відкриття без зайвих переходів';
+    messages.uk.dashboard_browse = 'Знайти аніме';
+    messages.uk.dashboard_library = 'Моє аніме';
+    messages.uk.dashboard_service = 'Профіль і сервіс';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

@@ -7,7 +7,7 @@ const lists = fs.readFileSync('src/ui-account-lists.js', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 
 assert.match(ui, /Lampa\.Component\.add\('yani_user_lists', UserLists\)/);
-assert.match(ui, /key: 'user_lists', title: t\('user_lists'\), authorized: true/);
+assert.match(ui, /key: 'user_lists', title: t\('user_lists'\), group: 'library', authorized: true/);
 assert.match(ui, /!item\.authorized \|\| LampaYaniAuth\.token\(\)/);
 assert.match(ui, /\['user_lists', 'user_lists'\]/);
 assert.match(ui, /component: 'yani_user_lists'/);

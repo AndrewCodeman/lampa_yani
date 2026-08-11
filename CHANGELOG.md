@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.36.0 — 2026-08-11
+
+- Rebuilt the YummyAnime dashboard into clear browse, episode-flow, personal, discovery and service zones.
+- Combined the Japanese schedule and new translation entry points in one prominent release panel while preserving the full schedule screen.
+- Added a visual dashboard header, responsive panel hierarchy and active-panel focus feedback for TV remotes.
+- Restored a deterministic first focus target and added mouse/touch activation to every dashboard tile.
+
 ## 0.35.2 — 2026-08-11
 
 - Extracted trailer loading, rendering and TV navigation into a dedicated UI module.

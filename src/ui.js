@@ -271,21 +271,21 @@
         html.addClass(reducedMotion || lowMemoryDevice || lowCpuDevice ? 'yani-home--reduced-motion' : 'yani-home--motion');
 
         var items = [
-            {key: 'catalog', title: t('catalog'), action: function () {
+            {key: 'catalog', title: t('catalog'), group: 'explore', action: function () {
                 Lampa.Activity.push({url: 'yani/catalog', title: 'YummyAnime ' + t('catalog'), component: 'yani_catalog', params: {limit: 30, sort: 'top', sort_forward: false}});
             }},
-            {key: 'genres', title: t('genres'), action: openGenres},
-            {key: 'search', title: t('search'), action: openSearch},
+            {key: 'genres', title: t('genres'), group: 'explore', action: openGenres},
+            {key: 'search', title: t('search'), group: 'explore', action: openSearch},
             {key: 'schedule', title: t('schedule'), subtitle: t('japan_broadcast'), group: 'episode_flow', action: function () {
                 Lampa.Activity.push({url: 'yani/schedule', title: 'YummyAnime ' + t('schedule'), component: 'yani_schedule'});
             }},
             {key: 'new_translations', title: t('new_translations'), subtitle: t('translations_and_dubs'), group: 'episode_flow', action: function () {
                 Lampa.Activity.push({url: 'yani/new-translations', title: 'YummyAnime ' + t('new_translations'), component: 'yani_new_translations'});
             }},
-            {key: 'continue_watching', title: t('continue_watching'), action: function () {
+            {key: 'continue_watching', title: t('continue_watching'), group: 'library', action: function () {
                 openContinueWatching();
             }},
-            {key: 'user_lists', title: t('user_lists'), authorized: true, action: openUserLists},
+            {key: 'user_lists', title: t('user_lists'), group: 'library', authorized: true, action: openUserLists},
             {key: 'new_releases', title: t('new_releases'), group: 'discover', action: function () {
                 Lampa.Activity.push({url: 'yani/new-releases', title: 'YummyAnime ' + t('new_releases'), component: 'yani_new_releases'});
             }},
@@ -295,13 +295,13 @@
             {key: 'for_you', title: t('for_you'), group: 'discover', action: function () {
                 Lampa.Activity.push({url: 'yani/for-you', title: 'YummyAnime ' + t('for_you'), component: 'yani_recommended'});
             }},
-            {key: 'updates', title: t('updates'), action: function () {
+            {key: 'updates', title: t('updates'), group: 'library', action: function () {
                 Lampa.Activity.push({url: 'yani/updates', title: 'YummyAnime ' + t('updates'), component: 'yani_updates'});
             }},
             {key: 'collections', title: t('collections'), group: 'discover', action: openCollections},
-            {key: 'notifications', title: t('notifications'), authorized: true, action: openNotifications},
-            {key: 'account', title: t('account'), action: openAccount},
-            {key: 'status', title: t('status'), action: function () {
+            {key: 'notifications', title: t('notifications'), group: 'service', authorized: true, action: openNotifications},
+            {key: 'account', title: t('account'), group: 'service', action: openAccount},
+            {key: 'status', title: t('status'), group: 'service', action: function () {
                 Lampa.Activity.push({url: 'yani/status', title: 'YummyAnime ' + t('status'), component: 'yani_status'});
             }}
         ].filter(function (item) {
@@ -324,6 +324,38 @@
             var episodeFlowItems;
             var discover;
             var discoverItems;
+            var panels = {};
+            var intro = $(
+                '<div class="yani-home__intro" aria-hidden="true">' +
+                    '<div class="yani-home__intro-mark"></div>' +
+                    '<div class="yani-home__intro-copy">' +
+                        '<div class="yani-home__intro-brand">YummyAnime</div>' +
+                        '<div class="yani-home__intro-title"></div>' +
+                        '<div class="yani-home__intro-subtitle"></div>' +
+                    '</div>' +
+                    '<div class="yani-home__intro-orbit"><i></i><i></i><i></i></div>' +
+                '</div>'
+            );
+            intro.find('.yani-home__intro-mark').html(yummyAnimeIcon());
+            intro.find('.yani-home__intro-title').text(t('dashboard_title'));
+            intro.find('.yani-home__intro-subtitle').text(t('dashboard_subtitle'));
+            grid.append(intro);
+
+            function panel(group) {
+                if (panels[group]) return panels[group];
+                var title = group === 'explore' ? t('dashboard_browse') :
+                    group === 'library' ? t('dashboard_library') :
+                    group === 'service' ? t('dashboard_service') : '';
+                var root = $('<div class="yani-home__panel yani-home__panel--' + group + '"></div>');
+                var head = $('<div class="yani-home__panel-head"><span class="yani-home__panel-title"></span><span class="yani-home__panel-line" aria-hidden="true"></span></div>');
+                var content = $('<div class="yani-home__panel-items"></div>');
+                head.find('.yani-home__panel-title').text(title);
+                root.append(head, content);
+                grid.append(root);
+                panels[group] = content;
+                return content;
+            }
+
             items.forEach(function (item) {
                 var text = $('<div class="yani-home__text"></div>');
                 text.append($('<div class="yani-home__title"></div>').text(item.title));
@@ -339,12 +371,14 @@
                 button.on('hover:focus', function (event) {
                     var target = event.currentTarget || event.target;
                     last = target;
+                    html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
+                    $(target).closest('.yani-home__panel').addClass('yani-home__panel--active');
                     scroll.update($(target), true);
                 });
-                button.on('hover:enter', item.action);
+                button.on('hover:enter click.yaniHome', item.action);
                 if (item.group === 'episode_flow') {
                     if (!episodeFlow) {
-                        episodeFlow = $('<div class="yani-home__episode-flow"><div class="yani-home__episode-flow-title"></div><div class="yani-home__episode-flow-items"></div><div class="yani-home__episode-flow-wave" aria-hidden="true"><svg viewBox="0 0 240 44" preserveAspectRatio="none"><path d="M2 28 C58 2 83 43 121 23 S185 4 238 25"/><circle cx="121" cy="23" r="4"/></svg></div></div>');
+                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__episode-flow-title"></span><span class="yani-home__episode-flow-live"><i></i></span></div><div class="yani-home__episode-flow-items"></div><div class="yani-home__episode-flow-wave" aria-hidden="true"><svg viewBox="0 0 240 44" preserveAspectRatio="none"><path d="M2 28 C58 2 83 43 121 23 S185 4 238 25"/><circle cx="121" cy="23" r="4"/></svg></div></div>');
                         episodeFlow.find('.yani-home__episode-flow-title').text(t('episode_flow'));
                         episodeFlowItems = episodeFlow.find('.yani-home__episode-flow-items');
                         grid.append(episodeFlow);
@@ -352,12 +386,14 @@
                     episodeFlowItems.append(button);
                 } else if (item.group === 'discover') {
                     if (!discover) {
-                        discover = $('<div class="yani-home__discover"><div class="yani-home__discover-head"><span class="yani-home__discover-title"></span><span class="yani-home__discover-mark" aria-hidden="true"><i></i><i></i><i></i></span></div><div class="yani-home__discover-items"></div></div>');
+                        discover = $('<div class="yani-home__panel yani-home__panel--discover yani-home__discover"><div class="yani-home__discover-head"><span class="yani-home__discover-title"></span><span class="yani-home__discover-mark" aria-hidden="true"><i></i><i></i><i></i></span></div><div class="yani-home__discover-items"></div></div>');
                         discover.find('.yani-home__discover-title').text(t('discover'));
                         discoverItems = discover.find('.yani-home__discover-items');
                         grid.append(discover);
                     }
                     discoverItems.append(button);
+                } else if (item.group) {
+                    panel(item.group).append(button);
                 } else {
                     grid.append(button);
                 }
@@ -389,7 +425,8 @@
             Lampa.Controller.add('content', {
                 toggle: function () {
                     Lampa.Controller.collectionSet(scroll.render());
-                    Lampa.Controller.collectionFocus(last || false, scroll.render());
+                    var target = last && document.documentElement.contains(last) ? last : scroll.render().find('.selector')[0] || false;
+                    Lampa.Controller.collectionFocus(target, scroll.render());
                 },
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },

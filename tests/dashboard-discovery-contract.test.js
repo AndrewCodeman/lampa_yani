@@ -12,8 +12,8 @@ assert.match(ui, /item\.group === 'discover'/);
 assert.match(ui, /yani-home__discover-title/);
 assert.match(ui, /\.text\(t\('discover'\)\)/);
 assert.match(ui, /discoverItems\.append\(button\)/);
-assert.match(css, /\.yani-home__discover\s*\{[\s\S]{0,200}grid-column: span 3/);
+assert.match(css, /\.yani-home__discover\s*\{[\s\S]{0,200}grid-column: span 12/);
 assert.match(css, /\.yani-home__discover-items\s*\{[\s\S]{0,220}grid-template-columns: repeat\(4/);
-assert.match(css, /@media \(max-width: 700px\)[\s\S]{0,500}\.yani-home__discover-items \{ grid-template-columns: repeat\(2/);
+assert.match(css, /@media \(max-width: 700px\)[\s\S]{0,1800}\.yani-home__discover-items \{ grid-template-columns: repeat\(2/);
 
 console.log('dashboard discovery contract checks passed');
