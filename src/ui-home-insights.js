@@ -104,6 +104,52 @@
         };
     }
 
+    function listCounts(payload) {
+        var value = response(payload);
+        var names = ['watching', 'planned', 'completed', 'dropped', 'favorites', 'postponed'];
+        var result = {watching: 0, planned: 0, completed: 0, dropped: 0, favorites: 0, postponed: 0};
+        var items = Array.isArray(value) ? value : value && (value.items || value.data || value.lists);
+
+        if (!Array.isArray(items) && value && typeof value === 'object') {
+            names.forEach(function (name, id) {
+                var direct = value[name];
+                if (direct === undefined) direct = value[id];
+                if (direct !== undefined) result[name] = Math.max(0, Number(direct && (direct.count || direct.total) || direct) || 0);
+            });
+            return result;
+        }
+
+        (items || []).forEach(function (item) {
+            item = item || {};
+            var list = item.list || {};
+            var id = Number(item.list_id !== undefined ? item.list_id : list.id !== undefined ? list.id : item.id);
+            if (id < 0 || id >= names.length) return;
+            var count = item.count;
+            if (count === undefined) count = item.anime_count;
+            if (count === undefined) count = item.items_count;
+            if (count === undefined) count = item.total;
+            if (count === undefined && Array.isArray(item.items)) count = item.items.length;
+            result[names[id]] = Math.max(0, Number(count) || 0);
+        });
+        return result;
+    }
+
+    function personalInsight(continuing, account, stats) {
+        continuing = Array.isArray(continuing) ? continuing.slice() : [];
+        continuing.sort(function (a, b) { return Number(b && b.updated_at || 0) - Number(a && a.updated_at || 0); });
+        var lists = listCounts(stats);
+        var total = lists.watching + lists.planned + lists.completed + lists.dropped + lists.postponed;
+        var tracked = lists.watching + lists.planned + lists.postponed;
+        return {
+            continue_count: continuing.length,
+            continue_preview: continuing[0] || null,
+            account_name: account && (account.display_name || account.login) || '',
+            lists: lists,
+            list_total: total,
+            tracked_total: tracked
+        };
+    }
+
     function load(feed) {
         return feed().then(counts);
     }
@@ -128,6 +174,8 @@
         dashboard: dashboard,
         scheduleInsight: scheduleInsight,
         translationInsight: translationInsight,
+        listCounts: listCounts,
+        personalInsight: personalInsight,
         timestampMilliseconds: timestampMilliseconds,
         uniqueCount: uniqueCount
     };

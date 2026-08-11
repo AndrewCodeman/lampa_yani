@@ -12,6 +12,10 @@ assert.match(ui, /LampaYaniHomeInsights\.dashboard\(\{/);
 assert.match(ui, /schedule: function \(\) \{ return LampaYaniApi\.schedule\(\{\}\); \}/);
 assert.match(ui, /yani-home__count/);
 assert.match(ui, /yani-home__item-insight/);
+assert.match(ui, /LampaYaniHomeInsights\.personalInsight/);
+assert.match(ui, /LampaYaniApi\.userListStats\(account\.user_id\)/);
+assert.match(ui, /yani_home_list_counts/);
+assert.match(ui, /!homeListCountsFresh\(account\.user_id\)/);
 assert.match(ui, /if \(destroyed\) return/);
 assert.match(ui, /count > 99 \? '99\+' : String\(count\)/);
 assert.match(css, /\.yani-home__count--visible/);
@@ -48,5 +52,22 @@ const translations = insights.translationInsight({response: {new_videos: [
 assert.equal(translations.count, 2);
 assert.equal(translations.preview.title, 'Newest');
 assert.equal(translations.preview.episode, 'Episode 4');
+
+const personal = insights.personalInsight([
+    {title: 'Older', number: '2', updated_at: 100},
+    {title: 'Newest', number: '5', updated_at: 300}
+], {display_name: 'codeman'}, {response: [
+    {list: {id: 0}, count: 4},
+    {list: {id: 1}, anime_count: 6},
+    {list: {id: 2}, total: 20},
+    {list: {id: 4}, count: 3},
+    {list: {id: 5}, items_count: 2}
+]});
+assert.equal(personal.continue_count, 2);
+assert.equal(personal.continue_preview.title, 'Newest');
+assert.equal(personal.account_name, 'codeman');
+assert.equal(personal.list_total, 32);
+assert.equal(personal.tracked_total, 12);
+assert.equal(personal.lists.favorites, 3);
 
 console.log('home insights contract checks passed');

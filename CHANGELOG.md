@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.36.2 — 2026-08-11
+
+- Added local continue-watching counts and the latest resumable title to the dashboard.
+- Added cached personal-list and tracked-title counters without loading the full user library.
+- Added the signed-in YummyAnime user name to the account dashboard tile.
+- Kept the last successful personal statistics visible when the YummyAnime API is unavailable.
+
 ## 0.36.1 — 2026-08-11
 
 - Added live dashboard previews for the nearest scheduled broadcast and latest available translation.
