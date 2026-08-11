@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.37.0 — 2026-08-11
+
+- Turned the dashboard header into a contextual view of the currently focused section.
+- Added focused-section titles, live preview metadata, poster backdrops and group color accents.
+- Updated the header when asynchronous dashboard insights arrive while a tile remains focused.
+- Disabled contextual artwork on narrow, reduced-motion, low-memory and low-CPU devices.
+
 ## 0.36.9 — 2026-08-11
 
 - Added current release and featured collection previews to the dashboard discovery panel.

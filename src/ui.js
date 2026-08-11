@@ -331,6 +331,7 @@
             var panels = {};
             var intro = $(
                 '<div class="yani-home__intro" aria-hidden="true">' +
+                    '<span class="yani-home__intro-context-art"></span>' +
                     '<div class="yani-home__intro-mark"></div>' +
                     '<div class="yani-home__intro-copy">' +
                         '<div class="yani-home__intro-brand">YummyAnime</div>' +
@@ -390,6 +391,7 @@
                 if (item.subtitle) text.append($('<div class="yani-home__subtitle"></div>').text(item.subtitle));
                 var button = $('<div class="yani-home__item yani-home__item--' + item.key + ' selector"></div>');
                 button.attr('data-yani-home-key', item.key);
+                button.data('yani-home-title', item.title);
                 button.append(
                     $('<div class="yani-home__icon"></div>').html(homeIcon(item.key)),
                     text,
@@ -403,6 +405,7 @@
                     if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, String($(target).attr('data-yani-home-key') || ''));
                     html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
                     $(target).closest('.yani-home__panel').addClass('yani-home__panel--active');
+                    renderIntroContext($(target));
                     scroll.update($(target), true);
                 });
                 button.on('hover:enter click.yaniHome', item.action);
@@ -452,16 +455,43 @@
                     .addClass('yani-home__count--visible');
             }
 
+            function renderIntroContext(button) {
+                if (!button || !button.length) return;
+                var key = String(button.attr('data-yani-home-key') || 'catalog');
+                var title = String(button.data('yani-home-title') || t('dashboard_title'));
+                var insight = String(button.data('yani-home-insight-title') || '');
+                var meta = String(button.data('yani-home-insight-meta') || '');
+                var poster = String(button.data('yani-home-poster') || '').replace(/["\\]/g, '');
+                intro.attr('data-yani-context', key);
+                intro.find('.yani-home__intro-title').text(title);
+                intro.find('.yani-home__intro-subtitle').text([insight, meta].filter(Boolean).join(' · ') || t('dashboard_subtitle'));
+                var art = intro.find('.yani-home__intro-context-art');
+                art.removeClass('yani-home__intro-context-art--visible').css('background-image', '');
+                if (!reducedMotion && !lowMemoryDevice && !lowCpuDevice && /^https?:\/\//i.test(poster)) {
+                    art.css('background-image', 'url("' + poster + '")').addClass('yani-home__intro-context-art--visible');
+                }
+            }
+
+            function refreshIntroContext(button) {
+                if (button && button.length && last === button[0]) renderIntroContext(button);
+            }
+
             function setPreview(button, title, meta) {
                 if (!button) return;
                 $('.yani-home__item-insight', button).remove();
                 button.removeClass('yani-home__item--with-insight');
-                if (!title) return;
+                button.data('yani-home-insight-title', title || '');
+                button.data('yani-home-insight-meta', meta || '');
+                if (!title) {
+                    refreshIntroContext(button);
+                    return;
+                }
                 var insight = $('<div class="yani-home__item-insight"></div>');
                 insight.append($('<div class="yani-home__item-insight-title"></div>').text(title));
                 if (meta) insight.append($('<div class="yani-home__item-insight-meta"></div>').text(meta));
                 $('.yani-home__text', button).append(insight);
                 button.addClass('yani-home__item--with-insight');
+                refreshIntroContext(button);
             }
 
             function setServiceState(button, state) {
@@ -501,14 +531,18 @@
                 if (!button) return;
                 $('.yani-home__item-art', button).remove();
                 button.removeClass('yani-home__item--artwork');
-                if (reducedMotion || lowMemoryDevice || lowCpuDevice) return;
                 poster = String(poster || '');
-                if (!/^https?:\/\//i.test(poster)) return;
+                button.data('yani-home-poster', /^https?:\/\//i.test(poster) ? poster : '');
+                if (reducedMotion || lowMemoryDevice || lowCpuDevice || !/^https?:\/\//i.test(poster)) {
+                    refreshIntroContext(button);
+                    return;
+                }
                 poster = poster.replace(/["\\]/g, '');
                 $('<span class="yani-home__item-art" aria-hidden="true"></span>')
                     .css('background-image', 'linear-gradient(90deg, rgba(22,20,29,.98) 3%, rgba(22,20,29,.72) 48%, rgba(22,20,29,.12) 100%), url("' + poster + '")')
                     .prependTo(button);
                 button.addClass('yani-home__item--artwork');
+                refreshIntroContext(button);
             }
 
             var prioritySignals = {
@@ -742,7 +776,10 @@
                     }
                     if (!target) target = scroll.render().find('.selector')[0] || false;
                     Lampa.Controller.collectionFocus(target, scroll.render());
-                    if (target) scroll.update($(target), true);
+                    if (target) {
+                        renderIntroContext($(target));
+                        scroll.update($(target), true);
+                    }
                 },
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
