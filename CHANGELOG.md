@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.38.0 — 2026-08-12
+
+- Rebuilt notifications as clear TV-friendly cards with type icons, hierarchy and unread state.
+- Correctly converted YummyAnime `title_html` and `text_html` fields into readable plain text.
+- Added a compact notification summary and grouped bulk actions in a dedicated toolbar.
+- Opened new-episode notifications through their catalog slug instead of treating `object_id` as an anime id.
+- Improved pagination, empty states, focus restoration and read-state feedback.
+
 ## 0.37.9 — 2026-08-12
 
 - Merged local and YummyAnime server progress in the dashboard Continue Watching summary.

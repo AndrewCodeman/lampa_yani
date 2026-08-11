@@ -1521,15 +1521,180 @@
 
 .yani-account__notification-button.focus { background: #287da9; box-shadow: 0 0 0 .14em rgba(98,201,255,.65); }
 .yani-account__notification-button span { color: #72d8ff; }
-.yani-notifications__content { padding: 1.5em 2em 3em; }
-.yani-notifications__title { margin-bottom: .8em; color: #fff; font-size: 1.6em; font-weight: 700; }
-.yani-notification { margin: .7em 0; padding: 1em 1.2em; border-radius: .65em; background: rgba(255,255,255,.08); border: .08em solid rgba(255,255,255,.1); }
-.yani-notification.unread { border-color: #72d8ff; background: rgba(40,125,169,.3); }
-.yani-notification.focus { background: #fff; color: #17222e; box-shadow: 0 0 0 .14em rgba(98,201,255,.75); }
-.yani-notification__title { font-size: 1.15em; font-weight: 700; }
-.yani-notification__text { margin-top: .35em; color: #cbd8e5; }
-.yani-notification.focus .yani-notification__text { color: #41566b; }
-.yani-notification__date { margin-top: .45em; color: #8ea4b8; font-size: .82em; }
+.yani-notifications__content {
+    width: min(78em, calc(100vw - 4em));
+    margin: 0 auto;
+    padding: 1.5em 2em 4em;
+}
+
+.yani-notifications__hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 7.2em;
+    padding: 1.2em 1.5em;
+    overflow: hidden;
+    border: .08em solid rgba(255,255,255,.14);
+    border-radius: 1.05em;
+    background:
+        radial-gradient(circle at 88% 12%, rgba(104,219,255,.24), transparent 30%),
+        linear-gradient(120deg, rgba(243,86,112,.26), rgba(40,69,101,.66));
+    box-shadow: 0 1em 2.6em rgba(0,0,0,.18);
+}
+
+.yani-notifications__hero:after {
+    content: '';
+    position: absolute;
+    right: -3em;
+    bottom: -6em;
+    width: 20em;
+    height: 12em;
+    border: .1em solid rgba(255,255,255,.09);
+    border-radius: 50%;
+    transform: rotate(-12deg);
+}
+
+.yani-notifications__identity { position: relative; z-index: 1; display: flex; align-items: center; gap: 1.1em; min-width: 0; }
+.yani-notifications__hero-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 4.2em;
+    width: 4.2em;
+    height: 4.2em;
+    border-radius: 1.1em;
+    color: #fff;
+    background: linear-gradient(145deg, #ff647b, #c94264);
+    box-shadow: 0 .8em 1.8em rgba(199,47,81,.3);
+}
+.yani-notifications__hero-icon svg { width: 2.15em; height: 2.15em; }
+.yani-notifications__eyebrow { display: block; margin-bottom: .25em; color: #ff9daf; font-size: .7em; font-weight: 800; letter-spacing: .18em; }
+.yani-notifications__title { color: #fff; font-size: 1.7em; font-weight: 750; line-height: 1.05; }
+.yani-notifications__subtitle { margin-top: .38em; color: rgba(230,239,247,.7); font-size: .88em; }
+.yani-notifications__summary {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: baseline;
+    gap: .5em;
+    min-width: 9em;
+    padding: .75em 1em;
+    border-radius: .8em;
+    background: rgba(7,18,30,.42);
+    border: .08em solid rgba(255,255,255,.12);
+}
+.yani-notifications__summary strong { color: #a8eaff; font-size: 1.7em; line-height: 1; }
+.yani-notifications__summary span { color: rgba(230,239,247,.72); font-size: .78em; }
+.yani-notifications__summary.has-unread strong { color: #ff879a; }
+
+.yani-notifications__actions { display: flex; gap: .75em; margin: 1.15em 0 1.35em; }
+.yani-notifications__action {
+    display: flex;
+    align-items: center;
+    gap: .65em;
+    min-height: 2.8em;
+    padding: .55em 1em;
+    border: .08em solid rgba(255,255,255,.14);
+    border-radius: .72em;
+    color: #dce8f3;
+    background: rgba(23,37,52,.72);
+}
+.yani-notifications__action > span { display: flex; align-items: center; justify-content: center; width: 1.45em; height: 1.45em; border-radius: 50%; color: #88dcff; background: rgba(71,190,235,.15); font-weight: 800; }
+.yani-notifications__action strong { font-size: .88em; font-weight: 650; }
+.yani-notifications__action--danger > span { color: #ff879a; background: rgba(255,91,117,.14); }
+.yani-notifications__action.focus { color: #152535; background: #fff; box-shadow: 0 0 0 .16em rgba(116,218,255,.8); }
+.yani-notifications__action.focus > span { color: #fff; background: #e84f6a; }
+
+.yani-notifications__list { display: grid; gap: .72em; }
+.yani-notification {
+    --notification-accent: #9db0c2;
+    --notification-accent-soft: rgba(157,176,194,.14);
+    --notification-accent-border: rgba(157,176,194,.62);
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.4em minmax(0, 1fr) 1.3em;
+    align-items: center;
+    gap: 1em;
+    min-height: 6.4em;
+    padding: 1em 1.15em;
+    overflow: hidden;
+    border: .08em solid rgba(255,255,255,.11);
+    border-radius: .9em;
+    color: #eef5fb;
+    background: linear-gradient(110deg, rgba(22,34,47,.93), rgba(35,50,66,.76));
+    box-shadow: 0 .45em 1.25em rgba(0,0,0,.12);
+}
+.yani-notification--episode { --notification-accent: #ff738b; --notification-accent-soft: rgba(255,115,139,.14); --notification-accent-border: rgba(255,115,139,.62); }
+.yani-notification--comment { --notification-accent: #6fd8ff; --notification-accent-soft: rgba(111,216,255,.14); --notification-accent-border: rgba(111,216,255,.62); }
+.yani-notification--social { --notification-accent: #af92ff; --notification-accent-soft: rgba(175,146,255,.14); --notification-accent-border: rgba(175,146,255,.62); }
+.yani-notification--news { --notification-accent: #ffd166; --notification-accent-soft: rgba(255,209,102,.14); --notification-accent-border: rgba(255,209,102,.62); }
+.yani-notification__dot { position: absolute; top: 0; bottom: 0; left: 0; width: .25em; background: var(--notification-accent); opacity: .35; }
+.yani-notification.unread { border-color: var(--notification-accent-border); background: linear-gradient(110deg, rgba(31,48,65,.97), rgba(43,59,77,.88)); }
+.yani-notification.unread .yani-notification__dot { opacity: 1; }
+.yani-notification__visual { display: flex; align-items: center; justify-content: center; width: 3.4em; height: 3.4em; border-radius: .9em; color: var(--notification-accent); background: var(--notification-accent-soft); }
+.yani-notification__visual svg { width: 1.75em; height: 1.75em; }
+.yani-notification__body { min-width: 0; }
+.yani-notification__meta { display: flex; align-items: center; gap: .65em; margin-bottom: .28em; }
+.yani-notification__kind { color: var(--notification-accent); font-size: .7em; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.yani-notification__date { color: #8297aa; font-size: .72em; }
+.yani-notification__date:before { content: '•'; margin-right: .65em; opacity: .55; }
+.yani-notification__title { overflow: hidden; color: #f7fbff; font-size: 1.08em; font-weight: 750; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.yani-notification__text { display: -webkit-box; margin-top: .28em; overflow: hidden; color: #b8c7d5; font-size: .86em; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.yani-notification__footer { display: flex; gap: .7em; margin-top: .52em; color: #7f94a7; font-size: .68em; font-weight: 650; }
+.yani-notification__state { padding: .18em .5em; border-radius: .38em; background: rgba(255,255,255,.07); }
+.yani-notification.unread .yani-notification__state { color: #ff9bad; background: rgba(255,103,130,.13); }
+.yani-notification__open { color: var(--notification-accent); }
+.yani-notification__chevron { color: #71879a; font-size: 2em; line-height: 1; }
+.yani-notification.loading:after,
+.yani-notifications__more.loading:after { content: ''; position: absolute; inset: 0; background: rgba(12,20,29,.38); }
+.yani-notification.focus { color: #152535; background: #fff; border-color: #fff; box-shadow: 0 0 0 .17em var(--notification-accent), 0 .8em 2em rgba(0,0,0,.25); }
+.yani-notification.focus .yani-notification__title { color: #142333; }
+.yani-notification.focus .yani-notification__text { color: #4d6174; }
+.yani-notification.focus .yani-notification__date,
+.yani-notification.focus .yani-notification__footer { color: #61778a; }
+.yani-notification.focus .yani-notification__visual { background: var(--notification-accent-soft); }
+.yani-notification.focus .yani-notification__chevron { color: #243b4e; transform: translateX(.12em); }
+
+.yani-notifications__more,
+.yani-notifications__empty {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .7em;
+    min-height: 3.6em;
+    margin-top: .35em;
+    border: .08em dashed rgba(255,255,255,.18);
+    border-radius: .85em;
+    color: #c6d5e2;
+    background: rgba(20,32,44,.62);
+}
+.yani-notifications__more > span { color: #72d8ff; font-size: 1.35em; }
+.yani-notifications__more.focus { color: #162636; background: #fff; border-style: solid; box-shadow: 0 0 0 .15em rgba(114,216,255,.75); }
+.yani-notifications__empty { flex-direction: column; min-height: 13em; }
+.yani-notifications__empty-icon { display: flex; align-items: center; justify-content: center; width: 4em; height: 4em; border-radius: 50%; color: #8da5b8; background: rgba(255,255,255,.07); }
+.yani-notifications__empty-icon svg { width: 2em; height: 2em; }
+.yani-notifications__empty strong { font-size: 1.15em; }
+.yani-notifications__empty > span:last-child { color: #879baa; font-size: .8em; }
+.yani-notifications__empty.focus { border-color: rgba(114,216,255,.75); box-shadow: 0 0 0 .12em rgba(114,216,255,.45); }
+
+@media (max-width: 720px) {
+    .yani-notifications__content { width: auto; padding: 1em 1em 3em; }
+    .yani-notifications__hero { min-height: 5.8em; padding: 1em; }
+    .yani-notifications__hero-icon { flex-basis: 3.4em; width: 3.4em; height: 3.4em; }
+    .yani-notifications__title { font-size: 1.35em; }
+    .yani-notifications__subtitle { display: none; }
+    .yani-notifications__summary { min-width: auto; grid-template-columns: auto; gap: .12em; padding: .55em .7em; text-align: center; }
+    .yani-notifications__summary span { font-size: .62em; }
+    .yani-notifications__actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .yani-notifications__action { justify-content: center; padding: .5em .65em; }
+    .yani-notification { grid-template-columns: 2.8em minmax(0,1fr); gap: .75em; padding: .85em; }
+    .yani-notification__visual { width: 2.8em; height: 2.8em; }
+    .yani-notification__chevron { display: none; }
+    .yani-notification__title { white-space: normal; }
+}
 
 .yani-account__profile {
     display: flex;

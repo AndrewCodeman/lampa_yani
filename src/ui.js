@@ -1721,6 +1721,11 @@
             formatDate: formatNotificationDate,
             toCard: toCard,
             openDetail: openYummyDetail,
+            resolveAnime: LampaYaniApi.detail,
+            fetch: LampaYaniApi.notifications,
+            markRead: LampaYaniApi.markNotificationRead,
+            markAllRead: LampaYaniApi.markAllNotificationsRead,
+            deleteAll: LampaYaniApi.deleteAllNotifications,
             goBack: goBack
         });
     }
@@ -2062,9 +2067,7 @@
     }
 
     function normalizeNotifications(payload) {
-        var response = payload && payload.response ? payload.response : payload;
-        var values = Array.isArray(response) ? response : response && (response.notifications || response.items || response.data) || [];
-        return Array.isArray(values) ? values : [];
+        return LampaYaniNotifications.normalize(payload);
     }
 
     function formatNotificationDate(value) {
