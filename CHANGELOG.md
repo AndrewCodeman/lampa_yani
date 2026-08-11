@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.39.8 — 2026-08-12
+
+- Gave Catalog, Genres and Search distinct visual identities on the dashboard.
+- Added a layered title portal, animated genre tags and a focused search beam.
+- Improved the browse panel proportions while preserving all TV actions.
+- Added compact artwork scaling for narrow screens.
+
 ## 0.39.7 — 2026-08-12
 
 - Redesigned the dashboard service area as a connected profile-and-API constellation.

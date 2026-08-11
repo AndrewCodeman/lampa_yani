@@ -18,6 +18,10 @@ const css = fs.readFileSync('style.css', 'utf8');
 });
 
 assert.match(ui, /yani-home__intro-title/);
+assert.match(ui, /homeExploreDecoration\(item\.key\)/);
+assert.match(ui, /yani-home__explore-art--catalog/);
+assert.match(ui, /yani-home__explore-art--genres/);
+assert.match(ui, /yani-home__explore-art--search/);
 assert.match(ui, /yani-home__panel--active/);
 assert.match(ui, /hover:enter click\.yaniHome/);
 assert.match(ui, /last && document\.documentElement\.contains\(last\)/);
@@ -25,5 +29,9 @@ assert.match(css, /\.yani-home__panel--explore\s*\{[\s\S]{0,100}grid-column: spa
 assert.match(css, /\.yani-home__episode-flow\s*\{[\s\S]{0,180}grid-column: span 8/);
 assert.match(css, /\.yani-home__panel--library\s*\{[\s\S]{0,100}grid-column: span 4/);
 assert.match(css, /\.yani-home__panel--service \.yani-home__panel-items\s*\{[\s\S]{0,120}repeat\(3/);
+assert.match(css, /\.yani-home__item--catalog\.focus \.yani-home__explore-art--catalog/);
+assert.match(css, /\.yani-home__item--genres\.focus \.yani-home__explore-art--genres/);
+assert.match(css, /\.yani-home__item--search\.focus \.yani-home__explore-art--search/);
+assert.match(css, /\.yani-home__item > \.yani-home__explore-art\s*\{[^}]*position: absolute/);
 
 console.log('dashboard layout contract checks passed');

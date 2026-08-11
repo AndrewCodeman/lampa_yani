@@ -441,6 +441,7 @@
                     $('<span class="yani-home__count" aria-hidden="true"></span>'),
                     $('<div class="yani-home__arrow">›</div>')
                 );
+                if (item.group === 'explore') button.append(homeExploreDecoration(item.key));
                 homeButtons[item.key] = button;
                 button.on('hover:focus', function (event) {
                     var target = event.currentTarget || event.target;
@@ -1221,6 +1222,19 @@
             account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/></svg>'
         };
         return icons[key] || icons.catalog;
+    }
+
+    function homeExploreDecoration(key) {
+        if (key === 'catalog') {
+            return '<span class="yani-home__explore-art yani-home__explore-art--catalog" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></span>';
+        }
+        if (key === 'genres') {
+            return '<span class="yani-home__explore-art yani-home__explore-art--genres" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></span>';
+        }
+        if (key === 'search') {
+            return '<span class="yani-home__explore-art yani-home__explore-art--search" aria-hidden="true"><i></i><b></b><em></em></span>';
+        }
+        return '';
     }
 
     function homeFlowIcon(key) {
