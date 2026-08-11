@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.39.10 — 2026-08-12
+
+- Fixed the dashboard startup crash caused by the controller collection helper being scoped inside `create()`.
+- Kept the section rail in the Home controller collection after lifecycle transitions.
+- Added a regression contract for Home lifecycle helper scope.
+
 ## 0.39.9 — 2026-08-12
 
 - Redesigned My Library as a connected activity stream rather than a plain card stack.

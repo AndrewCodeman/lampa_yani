@@ -269,6 +269,7 @@
         var preferredHomeKey = 'catalog';
         var renderIntroContext = function () {};
         var updateEpisodeCountdown = function () {};
+        var homeCollection = function () { return scroll.render(); };
         var navigatorInfo = window.navigator || {};
         var reducedMotion = Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
         var lowMemoryDevice = Number(navigatorInfo.deviceMemory || 0) > 0 && Number(navigatorInfo.deviceMemory) <= 2;
@@ -490,9 +491,9 @@
                 }
             });
 
-            function homeCollection() {
+            homeCollection = function () {
                 return scroll.render().add(sectionRail);
-            }
+            };
 
             sectionDefinitions.forEach(function (definition) {
                 var node = sectionRailNodes[definition.key];
@@ -1155,6 +1156,7 @@
             preferredHomeKey = 'catalog';
             renderIntroContext = function () {};
             updateEpisodeCountdown = function () {};
+            homeCollection = function () { return scroll.render(); };
             scroll.destroy();
             html.remove();
         };

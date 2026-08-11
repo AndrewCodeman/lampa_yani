@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.39.9',
+        version: '0.39.10',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -6393,6 +6393,7 @@ function pluginYummyAnime() {
         var preferredHomeKey = 'catalog';
         var renderIntroContext = function () {};
         var updateEpisodeCountdown = function () {};
+        var homeCollection = function () { return scroll.render(); };
         var navigatorInfo = window.navigator || {};
         var reducedMotion = Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
         var lowMemoryDevice = Number(navigatorInfo.deviceMemory || 0) > 0 && Number(navigatorInfo.deviceMemory) <= 2;
@@ -6614,9 +6615,9 @@ function pluginYummyAnime() {
                 }
             });
 
-            function homeCollection() {
+            homeCollection = function () {
                 return scroll.render().add(sectionRail);
-            }
+            };
 
             sectionDefinitions.forEach(function (definition) {
                 var node = sectionRailNodes[definition.key];
@@ -7279,6 +7280,7 @@ function pluginYummyAnime() {
             preferredHomeKey = 'catalog';
             renderIntroContext = function () {};
             updateEpisodeCountdown = function () {};
+            homeCollection = function () { return scroll.render(); };
             scroll.destroy();
             html.remove();
         };
