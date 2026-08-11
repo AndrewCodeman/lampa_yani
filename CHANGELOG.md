@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.37.7 — 2026-08-12
+
+- Widened the dashboard summary area so all three metrics remain understandable on TV screens.
+- Allowed metric labels to wrap to two lines instead of truncating important words.
+- Rebalanced the contextual header and summary widths at desktop and medium breakpoints.
+- Preserved the compact icon-and-count layout on narrow screens.
+
 ## 0.37.6 — 2026-08-12
 
 - Renamed the ambiguous Today dashboard metric to Broadcasts today.

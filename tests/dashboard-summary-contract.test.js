@@ -18,6 +18,8 @@ assert.match(ui, /if \(!homeButtons\.new_translations\) introMetrics\.translatio
 assert.match(ui, /if \(!homeButtons\.continue_watching\) introMetrics\.continue\.remove\(\)/);
 assert.doesNotMatch(ui, /yani-home__intro-metric[^\n]+selector/);
 assert.match(css, /\.yani-home__intro-summary\s*\{/);
+assert.match(css, /\.yani-home__intro-summary[^\n]+width: min\(38em, 48%\)/);
+assert.match(css, /\.yani-home__intro-metric-copy small[^\n]+-webkit-line-clamp: 2/);
 assert.match(css, /\.yani-home__intro-metric--ready/);
 assert.match(css, /\.yani-home__intro-metric--active/);
 assert.match(css, /\.yani-home__intro-metric-copy em\.yani-home__intro-metric-detail--visible/);
