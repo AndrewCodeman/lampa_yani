@@ -521,6 +521,8 @@
         var html = $('<div class="yani-home"></div>');
         var grid = $('<div class="yani-home__grid"></div>');
         var last;
+        var homeButtons = {};
+        var destroyed = false;
         var navigatorInfo = window.navigator || {};
         var reducedMotion = Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
         var lowMemoryDevice = Number(navigatorInfo.deviceMemory || 0) > 0 && Number(navigatorInfo.deviceMemory) <= 2;
@@ -586,7 +588,13 @@
                 text.append($('<div class="yani-home__title"></div>').text(item.title));
                 if (item.subtitle) text.append($('<div class="yani-home__subtitle"></div>').text(item.subtitle));
                 var button = $('<div class="yani-home__item yani-home__item--' + item.key + ' selector"></div>');
-                button.append($('<div class="yani-home__icon"></div>').html(homeIcon(item.key)), text, $('<div class="yani-home__arrow">›</div>'));
+                button.append(
+                    $('<div class="yani-home__icon"></div>').html(homeIcon(item.key)),
+                    text,
+                    $('<span class="yani-home__count" aria-hidden="true"></span>'),
+                    $('<div class="yani-home__arrow">›</div>')
+                );
+                homeButtons[item.key] = button;
                 button.on('hover:focus', function (event) {
                     var target = event.currentTarget || event.target;
                     last = target;
@@ -618,6 +626,22 @@
             html.append(scroll.render(true));
             this.activity.loader(false);
             this.activity.toggle();
+            if (homeButtons.new_translations || homeButtons.new_releases || homeButtons.collections) {
+                LampaYaniHomeInsights.load(LampaYaniApi.feed).then(function (insights) {
+                    if (destroyed) return;
+                    Object.keys(insights).forEach(function (key) {
+                        var button = homeButtons[key];
+                        var count = Number(insights[key] || 0);
+                        if (!button || !count) return;
+                        $('.yani-home__count', button)
+                            .text(count > 99 ? '99+' : String(count))
+                            .attr('aria-hidden', 'false')
+                            .addClass('yani-home__count--visible');
+                    });
+                }).catch(function (error) {
+                    console.warn('[YummyAnime Home] Feed insights are unavailable', error);
+                });
+            }
         };
 
         this.start = function () {
@@ -636,7 +660,7 @@
         };
 
         this.render = function (js) { return js ? html[0] : html; };
-        this.destroy = function () { scroll.destroy(); html.remove(); };
+        this.destroy = function () { destroyed = true; homeButtons = {}; scroll.destroy(); html.remove(); };
     }
 
     function UsagePolicy(object) {

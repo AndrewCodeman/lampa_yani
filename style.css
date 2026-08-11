@@ -514,6 +514,26 @@
     transition: transform .2s ease, color .2s ease;
 }
 
+.yani-home__count {
+    display: none;
+    flex: 0 0 auto;
+    min-width: 1.65em;
+    padding: .24em .42em;
+    border: .08em solid rgba(255,255,255,.2);
+    border-radius: 99em;
+    background: rgba(12,12,18,.34);
+    color: rgba(255,255,255,.9);
+    font-size: .72em;
+    font-weight: 750;
+    line-height: 1;
+    text-align: center;
+    box-shadow: inset 0 .08em 0 rgba(255,255,255,.08);
+}
+
+.yani-home__count--visible { display: inline-block; }
+.yani-home__item.focus .yani-home__count { border-color: rgba(239,100,112,.32); background: rgba(239,100,112,.14); color: #a92f53; }
+.yani-home__discover .yani-home__count { font-size: .64em; }
+
 .yani-home__item.focus .yani-home__arrow {
     color: #ef6470;
     transform: translateX(.15em);

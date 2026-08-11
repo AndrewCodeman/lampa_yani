@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.8 — 2026-08-11
+
+- Add compact live counts to New Translations, New Releases and Collections dashboard tiles.
+- Derive every count from the existing cached `/feed` request without blocking dashboard rendering.
+- Count unique anime and collections instead of raw duplicate feed events.
+- Keep the dashboard silent and fully interactive when feed insights are unavailable.
+
 ## 0.34.7 — 2026-08-11
 
 - Deduplicate New Translations so each anime appears only once with its latest feed event.
