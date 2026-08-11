@@ -76,6 +76,23 @@
     background: linear-gradient(135deg, rgba(239,100,112,.65), rgba(184,64,104,.48));
 }
 
+.yani-catalog-filter__count {
+    position: absolute;
+    right: -.22em;
+    top: -.28em;
+    min-width: 1.25em;
+    height: 1.25em;
+    padding: 0 .24em;
+    border: .12em solid rgba(25,24,32,.9);
+    border-radius: 2em;
+    color: #fff;
+    background: #ef6470;
+    font-size: .68em;
+    font-weight: 700;
+    line-height: 1.05em;
+    text-align: center;
+}
+
 .yani-catalog-sort.focus {
     color: #17151c;
     border-color: #fff;

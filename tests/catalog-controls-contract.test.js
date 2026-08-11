@@ -4,6 +4,7 @@ const fs = require('fs');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
+const filters = fs.readFileSync('src/ui-catalog-filters.js', 'utf8');
 
 assert.match(ui, /Lampa\.Component\.add\('yani_catalog', Catalog\)/);
 assert.match(ui, /function Catalog\(object\)[\s\S]{0,2500}sort: 'top'[\s\S]{0,300}sort: 'year'[\s\S]{0,300}sort: 'rating'[\s\S]{0,300}sort: 'rating_counters'[\s\S]{0,300}sort: 'views'[\s\S]{0,300}sort: 'title'[\s\S]{0,300}sort: 'random'/);
@@ -27,6 +28,13 @@ assert.match(ui, /function toolbarHasFocus\(\)[\s\S]{0,180}toolbarFocused/);
 assert.match(ui, /function focusToolbar\(preferred\)[\s\S]{0,700}lastCatalogCard = focusedCard\[0\][\s\S]{0,500}toolbarFocused = true/);
 assert.match(ui, /function focusCards\(first\)[\s\S]{0,700}lastCatalogCard \|\| comp\.last[\s\S]{0,350}toolbarFocused = false[\s\S]{0,300}Navigator\.add\(target\)/);
 assert.match(ui, /toolbarTrack\.append\(topButton\)/);
+assert.match(ui, /function openFilterMenu\(navigation\)/);
+assert.match(ui, /LampaYaniCatalogFilters\.activeCount\(baseParams\)/);
+assert.match(ui, /yani-catalog-filter selector/);
+assert.match(ui, /replaceWithFilters\(LampaYaniCatalogFilters\.clear\(baseParams\)\)/);
+assert.match(filters, /key: 'type'/);
+assert.match(filters, /key: 'status'/);
+assert.match(filters, /key: 'year'/);
 assert.match(ui, /function toolbarTargetForCard\(card\)[\s\S]{0,1000}Math\.abs[\s\S]{0,400}return target/);
 assert.match(ui, /function shouldEnterToolbarOnRight\(\)[\s\S]{0,2000}rightmostVisible === focused\[0\]/);
 assert.match(ui, /visibleBeforeToolbar = rect\.left \+ rect\.width \/ 2 < toolbarRect\.left/);
@@ -41,9 +49,10 @@ assert.match(css, /\.yani-catalog-toolbar[\s\S]{0,500}backdrop-filter/);
 assert.match(css, /\.yani-catalog-toolbar\s*\{[\s\S]{0,250}position:\s*absolute[\s\S]{0,250}right:\s*\.8em/);
 assert.match(css, /\.yani-catalog-toolbar__track\s*\{[\s\S]{0,180}flex-direction:\s*column/);
 assert.match(css, /@media \(max-width: 700px\)[\s\S]{0,350}flex-direction:\s*row/);
+assert.match(css, /\.yani-catalog-filter__count/);
 
 ['ru', 'en', 'uk'].forEach((language) => {
-    ['catalog_sort_top', 'catalog_sort_new', 'catalog_sort_rating', 'catalog_sort_votes', 'catalog_sort_views', 'catalog_sort_title', 'catalog_sort_random', 'scroll_to_top'].forEach((key) => {
+    ['catalog_sort_top', 'catalog_sort_new', 'catalog_sort_rating', 'catalog_sort_votes', 'catalog_sort_views', 'catalog_sort_title', 'catalog_sort_random', 'scroll_to_top', 'catalog_filters', 'catalog_filter_reset', 'catalog_filter_type', 'catalog_filter_status', 'catalog_filter_year'].forEach((key) => {
         assert.match(i18n, new RegExp(`messages\\.${language}\\.${key}\\s*=`));
     });
 });

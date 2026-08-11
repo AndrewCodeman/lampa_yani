@@ -184,6 +184,7 @@
         var toolbar;
         var toolbarTrack;
         var topButton;
+        var filterButton;
         var controlsReady = false;
         var toolbarFocused = false;
         var lastCatalogCard = null;
@@ -237,13 +238,67 @@
             }
             params.sort = definition.sort;
             params.sort_forward = definition.forward;
-            var route = String(object.url || 'yani/catalog').replace(/\/sort\/[^/]+$/, '');
+            var route = cleanCatalogRoute();
             Lampa.Activity.replace({
                 url: route + '/sort/' + definition.key,
                 title: object.title || ('YummyAnime ' + t('catalog')),
                 component: 'yani_catalog',
                 params: params
             });
+        }
+
+        function cleanCatalogRoute() {
+            return String(object.url || 'yani/catalog').replace(/\/(?:sort|filter)\/[^/]+/g, '');
+        }
+
+        function replaceWithFilters(params) {
+            Lampa.Activity.replace({
+                url: cleanCatalogRoute() + '/filter/' + LampaYaniCatalogFilters.signature(params),
+                title: object.title || ('YummyAnime ' + t('catalog')),
+                component: 'yani_catalog',
+                params: params
+            });
+        }
+
+        function openFilterValues(field, navigation) {
+            showYummySelect({
+                title: field.title,
+                items: field.values.map(function (item) {
+                    var isSelected = LampaYaniCatalogFilters.selected(field, baseParams).key === item.key;
+                    return {
+                        title: item.title,
+                        value: item.value,
+                        subtitle: isSelected ? '✓' : '',
+                        selected: isSelected
+                    };
+                }),
+                onSelect: function (item) {
+                    replaceWithFilters(LampaYaniCatalogFilters.apply(baseParams, field, item.value));
+                },
+                onBack: function () {
+                    setTimeout(function () { openFilterMenu(navigation); }, 0);
+                }
+            }, navigation);
+        }
+
+        function openFilterMenu(navigation) {
+            navigation = navigation || transientNavigationSnapshot();
+            var fields = LampaYaniCatalogFilters.definitions(t, new Date().getFullYear());
+            var items = fields.map(function (field) {
+                var current = LampaYaniCatalogFilters.selected(field, baseParams);
+                return {title: field.title, subtitle: current.title, field: field};
+            });
+            if (LampaYaniCatalogFilters.activeCount(baseParams)) {
+                items.unshift({title: t('catalog_filter_reset'), reset: true});
+            }
+            showYummySelect({
+                title: t('catalog_filters'),
+                items: items,
+                onSelect: function (item) {
+                    if (item.reset) return replaceWithFilters(LampaYaniCatalogFilters.clear(baseParams));
+                    openFilterValues(item.field, navigation);
+                }
+            }, navigation);
         }
 
         function firstCard() {
@@ -371,6 +426,17 @@
             topButton.on('hover:focus', function () { toolbarFocused = true; });
             topButton.on('hover:enter click.yaniCatalogTop', scrollToTop);
             toolbarTrack.append(topButton);
+            if (!topMode) {
+                var activeFilters = LampaYaniCatalogFilters.activeCount(baseParams);
+                filterButton = $('<div class="yani-catalog-sort yani-catalog-filter selector"></div>');
+                filterButton.toggleClass('yani-catalog-sort--active', activeFilters > 0);
+                filterButton.append($('<span class="yani-catalog-sort__icon"></span>').html('<svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>'));
+                if (activeFilters) filterButton.append($('<span class="yani-catalog-filter__count"></span>').text(activeFilters));
+                filterButton.append($('<span class="yani-catalog-sort__title"></span>').text(t('catalog_filters')));
+                filterButton.on('hover:focus', function () { toolbarFocused = true; });
+                filterButton.on('hover:enter click.yaniCatalogFilter', function () { openFilterMenu(); });
+                toolbarTrack.append(filterButton);
+            }
             controlDefinitions.forEach(function (definition) {
                 var button = $('<div class="yani-catalog-sort selector"></div>');
                 button.toggleClass('yani-catalog-sort--active', activeSort(definition));

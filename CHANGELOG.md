@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.35.0 — 2026-08-11
+
+- Added TV-friendly catalog filters for anime type, release status and release period.
+- Added a compact active-filter counter to the existing catalog toolbar.
+- Kept filter definitions and query transformations in a separate testable module.
+
 ## 0.34.9 — 2026-08-11
 
 - Extracted YummyAnime search integration from the main UI module.
