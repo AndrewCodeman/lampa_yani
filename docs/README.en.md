@@ -31,7 +31,8 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 - YummyAnime actions and correctly normalized read-only comments on standard Lampa cards;
 - paginated comments and nested read-only reply threads;
 - YummyAnime service status with availability, latency and per-service history;
-- Russian and English extension interface;
+- Russian, English and Ukrainian extension interface;
+- a compact Available translations panel on title details, with separate voice-team and subtitle lists and no player-name or duplicate clutter;
 - posters, titles, year, rating and description;
 - rating-service logos on cards and detail pages;
 - alternative poster sources through Jikan, Shikimori and AniList;
@@ -46,7 +47,7 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 
 Install the bundled file from GitHub Pages:
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.40.1`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.39`
 
 The `YummyAnime → Status` screen shows YummyStatus history for three hours, one day, one week or one month. GitHub Actions refreshes the monitoring snapshot every five minutes.
 
@@ -66,7 +67,8 @@ Search is passed through the `q` parameter. The selected public application key 
 - `src/api.js` — Yani API client;
 - `src/catalog.js` — catalog module;
 - `src/config.js` — configuration;
-- `src/i18n.js` — Russian and English localization;
+- `src/i18n.js` — Russian, English and Ukrainian localization;
+- `src/ui-detail.js` — title details, translations, ratings, lists, recommendations and comments;
 - `src/ui.js` — Lampa integration;
 - `src/stream-resolver.js` — direct Kodik, CVH, Aksor, Sibnet, Rutube and VK stream resolution;
 - `src/yani-resolver.js` — client for the self-hosted resolver service in `server/`;

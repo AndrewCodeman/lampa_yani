@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.41.39 — 2026-08-13
+
+- Synchronized Russian and English documentation with the current installation URL.
+- Documented Ukrainian localization and the title-detail voice-team and subtitle panel.
+- Updated the documented project structure after extracting the title-detail module.
+
 ## 0.41.38 — 2026-08-13
 
 - Focus the last-watched dubbing in the voice picker when opening Watch, using the previous episode's saved voice when that group is still available.
