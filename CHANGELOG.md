@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.23 — 2026-08-12
+
+- Extracted native Lampa card resolve, reverse Yummy match, and full-detail rating/button decoration into `src/ui-standard-card.js`.
+- Kept `openYummyDetail` and online-source registration in `ui.js`.
+
 ## 0.41.22 — 2026-08-12
 
 - Extracted playback select menus, return-focus helpers, and video URL/player-key utils into `src/ui-playback-menu.js`.
