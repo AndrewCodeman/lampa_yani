@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.40.4 — 2026-08-12
+
+- Replaced the floating catalog toolbar with an integrated horizontal command deck designed for TV remotes.
+- Added predictable navigation from the first card row to sorting and filters, and back to the last focused title.
+- Kept genre title and description above catalog controls and removed the unused right-side layout gap.
+
 ## 0.40.3 — 2026-08-12
 
 - Replaced the sorting popup with an inline five-mode TV rail controlled directly by Up, Down, Left, Right and OK.

@@ -207,45 +207,18 @@
             return focused && focused.length ? focused : $();
         }
 
-        function toolbarTargetForCard(card) {
-            if (!toolbarTrack || !toolbarTrack.length || !card || !card.length) return topButton;
-            var cardRect = card[0].getBoundingClientRect();
-            var cardCenter = cardRect.top + cardRect.height / 2;
-            var target = topButton;
-            var distance = Infinity;
-            toolbarTrack.find('.selector').each(function () {
-                if (this.offsetParent === null) return;
-                var rect = this.getBoundingClientRect();
-                var currentDistance = Math.abs((rect.top + rect.height / 2) - cardCenter);
-                if (currentDistance < distance) {
-                    distance = currentDistance;
-                    target = $(this);
-                }
-            });
-            return target;
-        }
-
-        function shouldEnterToolbarOnRight() {
-            if (!toolbar || !toolbar.length || window.innerWidth <= 700) return false;
+        function isFirstCardRow(card) {
+            if (!card || !card.length) return false;
             var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
-            var focused = focusedCatalogCard();
-            if (!focused || !focused.length) return !Navigator.canmove('right');
-            var currentRect = focused[0].getBoundingClientRect();
-            var toolbarRect = toolbar[0].getBoundingClientRect();
+            var currentRect = card[0].getBoundingClientRect();
             var currentCenter = currentRect.top + currentRect.height / 2;
-            var rightmostVisible = focused[0];
-            var rightmostLeft = currentRect.left;
+            var firstCenter = currentCenter;
             collection.find('.card.selector').each(function () {
                 if (this.offsetParent === null) return;
                 var rect = this.getBoundingClientRect();
-                var sameRow = Math.abs((rect.top + rect.height / 2) - currentCenter) < Math.max(20, currentRect.height * 0.45);
-                var visibleBeforeToolbar = rect.left + rect.width / 2 < toolbarRect.left;
-                if (sameRow && visibleBeforeToolbar && rect.left > rightmostLeft) {
-                    rightmostLeft = rect.left;
-                    rightmostVisible = this;
-                }
+                firstCenter = Math.min(firstCenter, rect.top + rect.height / 2);
             });
-            return rightmostVisible === focused[0] || currentRect.right >= toolbarRect.left - 8;
+            return Math.abs(currentCenter - firstCenter) < Math.max(20, currentRect.height * 0.45);
         }
 
         function scrollToTop() {
@@ -260,8 +233,11 @@
             if (!root || !root.length) return;
             controlsReady = true;
             root.addClass('yani-catalog-view');
-            toolbar = $('<div class="yani-catalog-toolbar"></div>');
-            toolbarTrack = $('<div class="yani-catalog-toolbar__track"></div>');
+            toolbar = $('<div class="yani-catalog-command-deck"></div>');
+            var heading = $('<div class="yani-catalog-command-deck__heading"></div>');
+            heading.append('<span class="yani-catalog-command-deck__mark"></span>');
+            heading.append($('<span class="yani-catalog-command-deck__caption"></span>').text(topMode ? t('top_rated') : t('catalog')));
+            toolbarTrack = $('<div class="yani-catalog-command-deck__rail"></div>');
             topButton = $('<div class="yani-catalog-top selector" aria-label="' + t('scroll_to_top') + '"></div>');
             topButton.append('<span class="yani-catalog-top__icon">↑</span>');
             topButton.append($('<span class="yani-catalog-top__title"></span>').text(t('scroll_to_top')));
@@ -291,9 +267,11 @@
                 button.on('hover:enter click.yaniCatalogSort', function () { changeSort(definition); });
                 toolbarTrack.append(button);
             });
-            toolbar.append(toolbarTrack);
-            root.prepend(toolbar);
-            if (window.innerWidth <= 700 && comp.scroll && comp.scroll.minus) comp.scroll.minus(toolbar);
+            toolbar.append(heading).append(toolbarTrack);
+            var genreHeader = root.find('.yani-genre-catalog-header').first();
+            if (genreHeader.length) toolbar.insertAfter(genreHeader);
+            else root.prepend(toolbar);
+            if (comp.scroll && comp.scroll.minus) comp.scroll.minus(toolbar);
             setTimeout(syncNavigationCollection, 0);
         }
 
@@ -305,30 +283,31 @@
             var originalDown = controller.down;
             controller.yaniCatalogOwner = comp;
             controller.left = function () {
-                if (toolbarHasFocus()) return focusCards(false);
+                if (toolbarHasFocus()) {
+                    if (Navigator.canmove('left')) return Navigator.move('left');
+                    return;
+                }
                 if (originalLeft) originalLeft();
             };
             controller.right = function () {
-                if (toolbarHasFocus()) return;
-                var focusedCard = focusedCatalogCard();
-                if (shouldEnterToolbarOnRight() && topButton) return focusToolbar(toolbarTargetForCard(focusedCard));
-                if (Navigator.canmove('right')) return Navigator.move('right');
-                if (topButton) return focusToolbar(toolbarTargetForCard(focusedCard));
+                if (toolbarHasFocus()) {
+                    if (Navigator.canmove('right')) return Navigator.move('right');
+                    return;
+                }
                 if (originalRight) originalRight();
             };
             controller.up = function () {
                 if (toolbarHasFocus()) {
-                    if (Navigator.canmove('up')) return Navigator.move('up');
                     return Lampa.Controller.toggle('head');
                 }
+                var focusedCard = focusedCatalogCard();
+                if (focusedCard.length && isFirstCardRow(focusedCard)) return focusToolbar();
                 if (Navigator.canmove('up')) return Navigator.move('up');
-                Lampa.Controller.toggle('head');
+                if (toolbarTrack) return focusToolbar();
+                if (originalUp) originalUp();
             };
             controller.down = function () {
-                if (toolbarHasFocus()) {
-                    if (Navigator.canmove('down')) return Navigator.move('down');
-                    return;
-                }
+                if (toolbarHasFocus()) return focusCards(false);
                 if (Navigator.canmove('down')) return Navigator.move('down');
                 if (originalDown) originalDown();
             };
