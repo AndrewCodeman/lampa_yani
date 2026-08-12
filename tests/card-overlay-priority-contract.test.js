@@ -51,6 +51,8 @@ const api = context.window.LampaYaniCardRenderers.create({
 const roomy = api.cardOverlayPriorityPlan({
     width: 240,
     height: 340,
+    emWidth: 15,
+    emHeight: 21,
     list: true,
     playback: true,
     progress: true,
@@ -69,6 +71,8 @@ assert.strictEqual(roomy.update, false);
 const crowded = api.cardOverlayPriorityPlan({
     width: 120,
     height: 180,
+    emWidth: 7.5,
+    emHeight: 11,
     list: true,
     playback: true,
     progress: true,
@@ -84,9 +88,28 @@ assert.strictEqual(crowded.genreTop, true, 'genre top hides before fresh episode
 assert.strictEqual(crowded.voices, true, 'voice count hides before quality block when needed');
 assert.strictEqual(crowded.update, false, 'fresh episode outranks quality/top/ratings');
 
+const largeFontSameShape = api.cardOverlayPriorityPlan({
+    width: 276,
+    height: 414,
+    emWidth: 11.5,
+    emHeight: 17.25,
+    list: true,
+    playback: true,
+    progress: true,
+    ratings: true,
+    update: true,
+    updateFreshness: true,
+    availability: true,
+    voices: true,
+    genreTop: true
+});
+assert.strictEqual(largeFontSameShape.ratings, true, 'font-scaled posters use emWidth, not raw CSS pixels');
+
 const extreme = api.cardOverlayPriorityPlan({
     width: 96,
     height: 150,
+    emWidth: 6,
+    emHeight: 9.4,
     list: true,
     playback: true,
     progress: true,

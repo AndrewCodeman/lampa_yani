@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.31 — 2026-08-13
+
+- Scale card overlay density by font-relative `em` size so Lampa interface scale, 720p, and 4K do not change when badges collapse.
+- Add portrait / short-height / ultra-wide CSS breakpoints for vertical emulator windows, 720p-class viewports, and 4K reading width.
+
 ## 0.41.30 — 2026-08-13
 
 - Add shared section states for skeleton loading, API offline, cached data, truly empty lists, and retry across schedule, notifications, status, releases, translations, updates, recommendations, and collections.

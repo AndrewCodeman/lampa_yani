@@ -244,9 +244,19 @@
             root.classList.toggle('yani-card-view--has-top-end', hasTopEnd);
             root.classList.toggle('yani-card-view--has-top-start', hasTopStart);
 
+            var width = root.clientWidth || root.offsetWidth || 0;
+            var height = root.clientHeight || root.offsetHeight || 0;
+            var fontSize = 16;
+            try {
+                fontSize = parseFloat(window.getComputedStyle(root).fontSize) || fontSize;
+            } catch (error) {}
+            fontSize = Math.max(fontSize, 1);
+
             var plan = cardOverlayPriorityPlan({
-                width: root.clientWidth || root.offsetWidth || 0,
-                height: root.clientHeight || root.offsetHeight || 0,
+                width: width,
+                height: height,
+                emWidth: width / fontSize,
+                emHeight: height / fontSize,
                 list: Boolean(list),
                 playback: Boolean(playback),
                 history: Boolean(history),
@@ -287,15 +297,21 @@
             };
             var width = Number(state.width || 0);
             var height = Number(state.height || 0);
+            // Prefer font-relative size so Lampa interface scale (root em) and
+            // 720p/4K CSS pixels do not change when badges start collapsing.
+            var emWidth = Number(state.emWidth || 0);
+            var emHeight = Number(state.emHeight || 0);
+            if (!(emWidth > 0) && width > 0) emWidth = width / 16;
+            if (!(emHeight > 0) && height > 0) emHeight = height / 16;
             var pressure = 0;
 
-            if (width > 0) {
-                if (width < 185) pressure += 1;
-                if (width < 155) pressure += 1;
-                if (width < 130) pressure += 1;
+            if (emWidth > 0) {
+                if (emWidth < 11.5) pressure += 1;
+                if (emWidth < 9.7) pressure += 1;
+                if (emWidth < 8.1) pressure += 1;
             }
-            if (width > 0 && width < 200) {
-                if (height > 0 && height < 200) pressure += 1;
+            if (emWidth > 0 && emWidth < 12.5) {
+                if (emHeight > 0 && emHeight < 12.5) pressure += 1;
                 if (state.list && (state.playback || state.history)) pressure += 1;
                 if (state.ratings && (state.list || state.playback || state.progress)) pressure += 1;
                 if ((state.availability || state.genreTop) && (state.update || state.history)) pressure += 1;
@@ -316,7 +332,7 @@
 
             for (var index = 0; index < Math.min(pressure, steps.length); index++) steps[index]();
 
-            if (state.update && width > 0 && width < 105 && (state.list || state.playback || state.progress || state.history)) {
+            if (state.update && emWidth > 0 && emWidth < 6.6 && (state.list || state.playback || state.progress || state.history)) {
                 hide.update = true;
             }
 
