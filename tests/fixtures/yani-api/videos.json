@@ -1,0 +1,47 @@
+{
+  "endpoint": "GET /anime/{id}/videos",
+  "anonymized": true,
+  "notes": "Episode/player list. data may be an object or JSON string with dubbing/player fields.",
+  "response": [
+    {
+      "video_id": 50001,
+      "id": 50001,
+      "number": "1",
+      "index": 1,
+      "duration": 1440,
+      "iframe_url": "https://kodik.example/serial/10001/episode/1",
+      "quality": "1080p",
+      "watched": {"end_time": 120},
+      "data": {
+        "dubbing": "Studio Example",
+        "player": "Kodik",
+        "player_id": "kodik",
+        "iframe_url": "https://kodik.example/serial/10001/episode/1"
+      }
+    },
+    {
+      "video_id": 50002,
+      "number": "1",
+      "index": 1,
+      "duration": 1440,
+      "url": "https://video.sibnet.ru/shell.php?videoid=900001",
+      "data": {
+        "dubbing": "Studio Example",
+        "player": "Sibnet",
+        "player_id": "sibnet"
+      }
+    },
+    {
+      "video_id": 50003,
+      "number": "2",
+      "index": 2,
+      "duration": 1420,
+      "player_url": "https://alloha.example/embed/10001/2",
+      "data": {
+        "translation": "Subtitles Team",
+        "player": "Alloha",
+        "player_id": "alloha"
+      }
+    }
+  ]
+}

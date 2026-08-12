@@ -1,0 +1,50 @@
+{
+  "endpoint": "GET /video/watch-history and progress sync bodies",
+  "anonymized": true,
+  "notes": "Remote watch history plus the request shapes used by syncVideoProgress / syncVideoWatches.",
+  "watch_history": {
+    "response": [
+      {
+        "anime_id": 10001,
+        "video_id": 50002,
+        "date": 1786000000,
+        "end_time": 333,
+        "duration": 1440,
+        "title": "Sample Chronicle",
+        "episode": 1,
+        "ep_title": "Beginning",
+        "dub_title": "Studio Example",
+        "player_title": "Sibnet",
+        "poster": {"huge": "https://img.example/history/10001.jpg"},
+        "screenshot": {
+          "episode": 1,
+          "title": "Beginning",
+          "poster": "https://img.example/history/10001-frame.jpg"
+        }
+      },
+      {
+        "animeId": 10002,
+        "videoId": 50010,
+        "updated_at": 1785900000,
+        "time": 90,
+        "duration": 5400,
+        "anime_title": "Quiet Harbor",
+        "number": "1",
+        "player": "Kodik",
+        "dubbing": "Studio Example",
+        "poster": "https://img.example/history/10002.jpg"
+      }
+    ]
+  },
+  "sync_video_progress_body": {
+    "time": 333,
+    "duration": 1440,
+    "times": []
+  },
+  "sync_video_watches_body": {
+    "videos": [
+      {"video_id": 50002, "time": 333, "date": 1786000000},
+      {"video_id": 50010, "time": 90, "date": 1785900000}
+    ]
+  }
+}

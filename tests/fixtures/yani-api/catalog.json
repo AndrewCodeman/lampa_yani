@@ -1,0 +1,62 @@
+{
+  "endpoint": "GET /anime?limit=&offset=",
+  "anonymized": true,
+  "notes": "Catalog/search list envelope. Items may also appear under response.anime|results|items|data.",
+  "response": {
+    "anime": [
+      {
+        "anime_id": 10001,
+        "title": "Sample Chronicle",
+        "original_title": "Sample Chronicle",
+        "other_titles": ["Sample Chronicle JA", "サンプル"],
+        "year": 2024,
+        "type": "tv",
+        "anime_status": {"alias": "ongoing", "title": "Ongoing"},
+        "description": "Anonymized catalog synopsis for contract tests.",
+        "poster": {
+          "medium": "https://img.example/catalog/10001-medium.jpg",
+          "huge": "https://img.example/catalog/10001-huge.jpg"
+        },
+        "rating": {
+          "average": 8.2,
+          "counters": 1200,
+          "kp_rating": 7.4,
+          "shikimori_rating": 8.0,
+          "anidub_rating": 0,
+          "myanimelist_rating": 7.9,
+          "worldart_rating": 0
+        },
+        "episodes": {"aired": 12, "count": 24, "next_date": 1786500000, "prev_date": 1785895200},
+        "genres": [{"id": 1, "title": "Adventure", "url": "adventure"}],
+        "comments_count": 42,
+        "remote_ids": {"myanimelist_id": 900001, "shikimori_id": 900001},
+        "user": {
+          "rate": 9,
+          "list": {
+            "is_fav": true,
+            "list": {"id": 0, "title": "Watching"},
+            "watched_episodes": 5,
+            "progress": 5
+          }
+        }
+      },
+      {
+        "anime_id": 10002,
+        "title": "Quiet Harbor",
+        "original_title": "Quiet Harbor",
+        "year": 2021,
+        "type": "movie",
+        "anime_status": {"alias": "released", "title": "Released"},
+        "poster": "https://img.example/catalog/10002.jpg",
+        "rating": 7.1,
+        "episodes": {"aired": 1, "count": 1},
+        "genres": [{"id": 2, "title": "Drama"}],
+        "comments_count": 3,
+        "remote_ids": {}
+      }
+    ],
+    "total": 2,
+    "limit": 20,
+    "offset": 0
+  }
+}

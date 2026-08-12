@@ -1,0 +1,47 @@
+{
+  "endpoint": "GET /anime/schedule",
+  "anonymized": true,
+  "notes": "Schedule uses episodes.prev_date / episodes.next_date (unix seconds or ms).",
+  "response": [
+    {
+      "anime_id": 10001,
+      "title": "Sample Chronicle",
+      "original_title": "Sample Chronicle",
+      "year": 2024,
+      "type": "tv",
+      "poster": {
+        "medium": "https://img.example/schedule/10001.jpg"
+      },
+      "episodes": {
+        "aired": 12,
+        "count": 24,
+        "prev_date": 1785895200,
+        "next_date": 1786500000
+      }
+    },
+    {
+      "anime_id": 10004,
+      "title": "Harbor Nights",
+      "year": 2025,
+      "type": "tv",
+      "poster": "https://img.example/schedule/10004.jpg",
+      "episodes": {
+        "aired": 0,
+        "count": 12,
+        "next_date": 1786586400
+      }
+    },
+    {
+      "anime_id": 10005,
+      "title": "One-Shot Special",
+      "year": 2023,
+      "type": "special",
+      "poster": "https://img.example/schedule/10005.jpg",
+      "episodes": {
+        "aired": 0,
+        "count": 1,
+        "next_date": 1786672800
+      }
+    }
+  ]
+}

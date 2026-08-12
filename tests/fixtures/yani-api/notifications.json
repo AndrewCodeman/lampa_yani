@@ -1,0 +1,42 @@
+{
+  "endpoint": "GET /profile/notifications",
+  "anonymized": true,
+  "notes": "Notification feed with HTML title/text fields consumed by ui-notifications normalize.",
+  "response": [
+    {
+      "id": 80001,
+      "date": 1786400000,
+      "title_html": "<b>New episode</b> &amp; translation",
+      "text_html": "<p>Episode <strong>4</strong> is available<br>with a new dub</p>",
+      "click_uri": "/catalog/item/sample-chronicle?source=notification",
+      "type": "anime_episode",
+      "sub_type": "new_episode",
+      "viewed": false,
+      "object_id": 10001
+    },
+    {
+      "id": 80002,
+      "date": 1786300000,
+      "titleHtml": "Comment reply",
+      "textHtml": "Someone replied to your comment",
+      "click_uri": "https://example.invalid/catalog/item/quiet-harbor/",
+      "type": "comment_reply",
+      "viewed": true,
+      "object_id": 10002
+    },
+    {
+      "id": 80003,
+      "date": 1786200000,
+      "title": "System notice",
+      "text": "Anonymized system notification without anime target",
+      "type": "system",
+      "viewed": false
+    }
+  ],
+  "counts": {
+    "response": {
+      "unread_count": 2,
+      "count": 3
+    }
+  }
+}

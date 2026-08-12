@@ -1,0 +1,59 @@
+{
+  "endpoint": "GET /anime/{id}",
+  "anonymized": true,
+  "notes": "Title detail payload. Nested under response.",
+  "response": {
+    "anime_id": 10001,
+    "title": "Sample Chronicle",
+    "original_title": "Sample Chronicle",
+    "japanese": "サンプルクロニクル",
+    "other_titles": ["Sample Chronicle EN", "サンプルクロニクル"],
+    "year": 2024,
+    "type": "tv",
+    "anime_status": {"alias": "ongoing", "title": "Ongoing"},
+    "description": "Anonymized detail synopsis used only for API contract checks.",
+    "poster": {
+      "medium": "https://img.example/detail/10001-medium.jpg",
+      "huge": "https://img.example/detail/10001-huge.jpg"
+    },
+    "cover": {
+      "large": "https://img.example/detail/10001-cover.jpg"
+    },
+    "rating": {
+      "average": 8.2,
+      "counters": 1200,
+      "kp_rating": 7.4,
+      "shikimori_rating": 8.0,
+      "anidub_rating": 0,
+      "myanimelist_rating": 7.9,
+      "worldart_rating": 0
+    },
+    "episodes": {"aired": 12, "count": 24, "next_date": 1786500000, "prev_date": 1785895200},
+    "episode_duration": 24,
+    "seasons_count": 1,
+    "genres": [
+      {"id": 1, "title": "Adventure", "url": "adventure"},
+      {"id": 3, "title": "Fantasy", "url": "fantasy"}
+    ],
+    "comments_count": 42,
+    "updated_at": 1786000000,
+    "remote_ids": {
+      "myanimelist_id": 900001,
+      "shikimori_id": 900001,
+      "kinopoisk_id": 800001
+    },
+    "viewing_order": [
+      {"anime_id": 10003, "title": "Sample Chronicle Side Story", "poster": "https://img.example/detail/10003.jpg"}
+    ],
+    "user": {
+      "rate": 9,
+      "list": {
+        "is_fav": false,
+        "list": {"id": 0, "title": "Watching"},
+        "watched_episodes": 5,
+        "progress": 5
+      }
+    },
+    "anime_url": "https://example.invalid/catalog/item/sample-chronicle"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "source": "anonymized YummyAnime API envelopes for offline contract checks",
+  "fixtures": [
+    {"id": "catalog", "file": "catalog.json", "domains": ["catalog", "search"]},
+    {"id": "detail", "file": "detail.json", "domains": ["detail"]},
+    {"id": "videos", "file": "videos.json", "domains": ["videos"]},
+    {"id": "schedule", "file": "schedule.json", "domains": ["schedule"]},
+    {"id": "lists", "file": "lists.json", "domains": ["lists"]},
+    {"id": "comments", "file": "comments.json", "domains": ["comments"]},
+    {"id": "notifications", "file": "notifications.json", "domains": ["notifications"]},
+    {"id": "history-progress", "file": "history-progress.json", "domains": ["history", "progress"]}
+  ]
+}

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.27 — 2026-08-12
+
+- Add anonymized YummyAnime API response fixtures for catalog/detail, videos, schedule, lists, comments, notifications, and history/progress under `tests/fixtures/yani-api/`.
+- Guard those envelopes with a contract test that runs the real normalizers so API shape drift fails CI before a broken release.
+
 ## 0.41.26 — 2026-08-12
 
 - Speed up catalog/dashboard card paints: keep existing rating chips instead of rebuilding them on every Lampa `cardRender`, sync overlay classes once per decorate, and cache local playback history briefly while many cards resolve progress.

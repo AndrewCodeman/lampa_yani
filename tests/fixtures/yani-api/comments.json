@@ -1,0 +1,42 @@
+{
+  "endpoint": "GET /comments/anime/{id} and GET /comments/{id}/children",
+  "anonymized": true,
+  "notes": "Comment threads. normalizeComments accepts response[] or response.comments|items|data.",
+  "comments": {
+    "response": [
+      {
+        "id": 70001,
+        "name": "Viewer One",
+        "text": "Anonymized top-level comment about episode pacing.",
+        "time": 1785900000,
+        "likes": 4,
+        "dislikes": 0,
+        "children_count": 1
+      },
+      {
+        "id": 70002,
+        "author": {"name": "Viewer Two"},
+        "body": "Second anonymized comment without replies.",
+        "time": 1785910000,
+        "likes": 1,
+        "dislikes": 1,
+        "children_count": 0
+      }
+    ]
+  },
+  "children": {
+    "response": {
+      "comments": [
+        {
+          "id": 70011,
+          "name": "Viewer Three",
+          "text": "Anonymized reply under comment 70001.",
+          "time": 1785920000,
+          "likes": 2,
+          "dislikes": 0,
+          "children_count": 0
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "endpoint": "GET /users/{id}/lists and GET /users/{id}/lists/{listId}",
+  "anonymized": true,
+  "notes": "Account lists catalog plus one list page of anime rows.",
+  "lists": {
+    "response": [
+      {"id": 0, "title": "Watching", "count": 2},
+      {"id": 1, "title": "Planned", "count": 1},
+      {"id": 2, "title": "Completed", "count": 0},
+      {"id": 3, "title": "Dropped", "count": 0},
+      {"id": 5, "title": "Postponed", "count": 0}
+    ]
+  },
+  "list_items": {
+    "response": [
+      {
+        "anime_id": 10001,
+        "title": "Sample Chronicle",
+        "year": 2024,
+        "date": 1786000000,
+        "rating": {"average": 8.2},
+        "episodes": {"count": 24, "aired": 12},
+        "poster": {"huge": "https://img.example/lists/10001.jpg"},
+        "user": {
+          "list": {
+            "list": {"id": 0, "title": "Watching"},
+            "progress": 5,
+            "watched_episodes": 5,
+            "is_fav": false
+          },
+          "rate": 9
+        }
+      },
+      {
+        "anime": {
+          "anime_id": 10002,
+          "title": "Quiet Harbor",
+          "year": 2021,
+          "rating": {"average": 7.1},
+          "episodes": {"count": 1, "aired": 1},
+          "poster": "https://img.example/lists/10002.jpg"
+        },
+        "user": {
+          "list": {
+            "list": {"id": 0, "title": "Watching"},
+            "progress": 1,
+            "watched_episodes": 1
+          }
+        },
+        "date": 1785000000
+      }
+    ]
+  },
+  "list_stats": {
+    "response": [
+      {"id": 0, "count": 2, "time": 7200},
+      {"id": 1, "count": 1, "time": 0}
+    ]
+  }
+}
