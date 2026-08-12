@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.15 — 2026-08-12
+
+- Redesigned video quality and dubbing availability as one compact glass-style card indicator.
+- Added lightweight reveal motion with automatic reduced-motion and weak-device fallbacks.
+
 ## 0.41.14 — 2026-08-12
 
 - Added compact episode and playback percentage indicators to YummyAnime cards.

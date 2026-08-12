@@ -1777,8 +1777,34 @@
             topBadge.append($('<b></b>').text('#' + genreTop));
             block.append(topBadge);
         }
-        if (meta.quality) block.append($('<span class="yani-card-media__badge yani-card-media__quality"></span>').text(meta.quality));
-        if (meta.voices) block.append($('<span class="yani-card-media__badge yani-card-media__voices"></span>').text(meta.voices + ' ' + t('voices_short')));
+        if (meta.quality || meta.voices) {
+            var availability = $('<span class="yani-card-media__availability"></span>');
+            if (cardMediaMotionAllowed()) availability.addClass('yani-card-media__availability--motion');
+            if (meta.quality) {
+                var quality = $('<span class="yani-card-media__availability-part yani-card-media__quality"></span>');
+                quality.append('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H4zM8 20h8M12 16.5V20"/></svg>');
+                quality.append($('<b></b>').text(meta.quality));
+                availability.append(quality);
+            }
+            if (meta.voices) {
+                var voicesLabel = meta.voices + ' ' + t('voices_short');
+                var voices = $('<span class="yani-card-media__availability-part yani-card-media__voices"></span>')
+                    .attr({'title': voicesLabel, 'aria-label': voicesLabel});
+                voices.append('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9H5l-3 3 3 3h4l5 4V5L9 9Zm8.5.2a4 4 0 0 1 0 5.6M20 6.5a7.5 7.5 0 0 1 0 11"/></svg>');
+                voices.append($('<b></b>').text(meta.voices));
+                voices.append($('<small></small>').text(t('voices_short')));
+                availability.append(voices);
+            }
+            block.append(availability);
+        }
+    }
+
+    function cardMediaMotionAllowed() {
+        var navigatorInfo = window.navigator || {};
+        var reduced = Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        var lowMemory = Number(navigatorInfo.deviceMemory || 0) > 0 && Number(navigatorInfo.deviceMemory) <= 2;
+        var lowCpu = Number(navigatorInfo.hardwareConcurrency || 0) > 0 && Number(navigatorInfo.hardwareConcurrency) <= 2;
+        return !reduced && !lowMemory && !lowCpu;
     }
 
     function genreTopPosition(card) {

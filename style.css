@@ -1740,8 +1740,18 @@
     line-height: 1.1;
 }
 
-.yani-card-media__quality { background: #f1c40f; color: #171717; }
-.yani-card-media__voices { background: #3b9bd9; }
+.yani-card-media__availability { display: inline-flex; align-items: stretch; overflow: hidden; border: .06em solid rgba(255,255,255,.24); border-radius: .42em; background: linear-gradient(125deg, rgba(19,22,33,.92), rgba(49,42,69,.9)); box-shadow: 0 .22em .65em rgba(0,0,0,.34), inset 0 .06em 0 rgba(255,255,255,.12); color: #fff; font-size: .62em; font-weight: 700; line-height: 1; transition: border-color .18s ease, box-shadow .18s ease; }
+.yani-card-media__availability--motion { animation: yani-card-availability-in .34s cubic-bezier(.2,.8,.2,1) both; }
+.yani-card-media__availability-part { display: inline-flex; align-items: center; gap: .28em; min-height: 1.72em; padding: .24em .42em; white-space: nowrap; }
+.yani-card-media__availability-part + .yani-card-media__availability-part { border-left: .06em solid rgba(255,255,255,.18); }
+.yani-card-media__availability-part svg { width: 1.05em; height: 1.05em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.yani-card-media__availability-part b { font: inherit; letter-spacing: .025em; }
+.yani-card-media__availability-part small { color: rgba(255,255,255,.66); font-size: .82em; font-weight: 600; }
+.yani-card-media__quality { color: #ffe38a; }
+.yani-card-media__voices { color: #91d9ff; }
+.card.focus .yani-card-media__availability { border-color: rgba(255,255,255,.62); box-shadow: 0 .24em .72em rgba(0,0,0,.38), 0 0 .55em rgba(133,193,255,.2), inset 0 .06em 0 rgba(255,255,255,.2); }
+@keyframes yani-card-availability-in { from { opacity: 0; transform: translateY(-.35em) scale(.94); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .yani-card-media__availability { transition: none; } .yani-card-media__availability--motion { animation: none; } }
 .yani-card-media__genre-top { display: inline-flex; align-items: center; gap: .24em; border: 1px solid rgba(255,224,132,.65); background: linear-gradient(135deg, rgba(106,69,18,.96), rgba(206,143,35,.96)); box-shadow: 0 .18em .5em rgba(0,0,0,.3); color: #fff5ce; }
 .yani-card-media__genre-top svg { width: .95em; height: .95em; fill: currentColor; }
 .yani-card-media__genre-top b { font: inherit; letter-spacing: .02em; }
