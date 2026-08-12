@@ -114,6 +114,7 @@
         ];
         var panel;
         var button;
+        var menu;
         var lastCard = null;
         var panelFocused = false;
         var installed = false;
@@ -171,28 +172,74 @@
             return rect.top <= firstTop + Math.max(18, rect.height * .35);
         }
 
+        function closeMenu(restore) {
+            if (!menu) return;
+            menu.remove();
+            menu = null;
+            if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle('content');
+            if (restore) setTimeout(focusPanel, 0);
+        }
+
         function choose(item) {
             var key = item && item.key;
             if (valid.indexOf(key) < 0) return;
-            if (key === active) return setTimeout(focusCards, 0);
+            if (key === active) return closeMenu(true);
             if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(storageKey, key);
+            closeMenu(false);
             options.onSelect(key);
         }
 
         function openMenu() {
-            if (!options.showSelect) return;
-            options.showSelect({
-                title: options.t('list_sort'),
-                items: definitions.map(function (definition) {
-                    return {
-                        title: definition.title,
-                        subtitle: definition.key === active ? '✓' : '',
-                        selected: definition.key === active,
-                        key: definition.key
-                    };
-                }),
-                onSelect: choose
-            }, {controller: 'content', element: button[0], collection: root()});
+            if (menu) return;
+            if (!Lampa.Controller || !Lampa.Controller.add) {
+                if (!options.showSelect) return;
+                return options.showSelect({
+                    title: options.t('list_sort'),
+                    items: definitions.map(function (definition) {
+                        return {title: definition.title, selected: definition.key === active, key: definition.key};
+                    }),
+                    onSelect: choose
+                }, {controller: 'content', element: button[0], collection: root()});
+            }
+
+            menu = $('<div class="yani-account-sort-dialog"><div class="yani-account-sort-dialog__shade"></div><div class="yani-account-sort-dialog__sheet"></div></div>');
+            var sheet = menu.find('.yani-account-sort-dialog__sheet');
+            var heading = $('<div class="yani-account-sort-dialog__heading"></div>');
+            heading.append($('<span class="yani-account-sort-dialog__heading-icon"></span>').html(icon(active)));
+            heading.append($('<div><strong></strong><small></small></div>')
+                .find('strong').text(options.t('list_sort')).end()
+                .find('small').text(definition.title || object.title || '').end());
+            sheet.append(heading);
+
+            definitions.forEach(function (definition, index) {
+                var row = $('<div class="yani-account-sort-dialog__option selector"></div>');
+                row.attr('data-sort', definition.key).toggleClass('active', definition.key === active);
+                row.append($('<span class="yani-account-sort-dialog__number"></span>').text('0' + (index + 1)));
+                row.append($('<span class="yani-account-sort-dialog__option-icon"></span>').html(icon(definition.key)));
+                row.append($('<span class="yani-account-sort-dialog__option-title"></span>').text(definition.title));
+                row.append('<span class="yani-account-sort-dialog__check">✓</span>');
+                row.on('hover:focus', function () { this.scrollIntoView({block: 'nearest'}); });
+                row.on('hover:enter click.yaniAccountSort', function () { choose(definition); });
+                sheet.append(row);
+            });
+
+            menu.find('.yani-account-sort-dialog__shade').on('click.yaniAccountSort', function () { closeMenu(true); });
+            $('body').append(menu);
+            Lampa.Controller.add('yani_account_sort', {
+                toggle: function () {
+                    var collection = menu && menu.find('.selector');
+                    if (!collection || !collection.length) return;
+                    Lampa.Controller.collectionSet(collection);
+                    var selected = collection.filter('[data-sort="' + active + '"]')[0] || collection[0];
+                    Lampa.Controller.collectionFocus(selected, collection);
+                },
+                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); },
+                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); },
+                left: function () { closeMenu(true); },
+                right: function () {},
+                back: function () { closeMenu(true); }
+            });
+            Lampa.Controller.toggle('yani_account_sort');
         }
 
         function install(total) {
@@ -269,7 +316,8 @@
         return {
             active: function () { return active; },
             sort: function (items) { return sortItems(items, active); },
-            install: install
+            install: install,
+            destroy: function () { closeMenu(false); }
         };
     }
 

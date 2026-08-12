@@ -2292,10 +2292,114 @@
     background: #a84374;
 }
 
+.yani-account-sort-dialog {
+    position: fixed;
+    z-index: 120;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3em;
+}
+.yani-account-sort-dialog__shade {
+    position: absolute;
+    inset: 0;
+    background: rgba(7, 8, 13, .72);
+    backdrop-filter: blur(.65em);
+}
+.yani-account-sort-dialog__sheet {
+    position: relative;
+    width: min(35em, 92vw);
+    max-height: 86vh;
+    overflow: hidden auto;
+    padding: 1em;
+    border: .08em solid rgba(255, 255, 255, .14);
+    border-radius: 1.25em;
+    background: linear-gradient(145deg, rgba(37, 38, 51, .98), rgba(25, 22, 34, .98));
+    box-shadow: 0 1.5em 5em rgba(0, 0, 0, .48), inset 0 .08em 0 rgba(255, 255, 255, .08);
+}
+.yani-account-sort-dialog__heading {
+    display: flex;
+    align-items: center;
+    gap: .8em;
+    padding: .35em .45em 1em;
+}
+.yani-account-sort-dialog__heading-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.7em;
+    height: 2.7em;
+    border-radius: .8em;
+    color: #fff;
+    background: linear-gradient(135deg, #ff6878, #8d55dc);
+}
+.yani-account-sort-dialog__heading-icon svg,
+.yani-account-sort-dialog__option-icon svg {
+    width: 1.35em;
+    height: 1.35em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.yani-account-sort-dialog__heading strong,
+.yani-account-sort-dialog__heading small { display: block; }
+.yani-account-sort-dialog__heading strong { font-size: 1.25em; }
+.yani-account-sort-dialog__heading small { margin-top: .18em; color: rgba(255, 255, 255, .5); }
+.yani-account-sort-dialog__option {
+    display: flex;
+    align-items: center;
+    min-height: 3.25em;
+    margin-top: .42em;
+    padding: .35em .7em;
+    border: .08em solid rgba(255, 255, 255, .08);
+    border-radius: .85em;
+    background: rgba(255, 255, 255, .055);
+    transition: transform .14s ease, background .14s ease, color .14s ease;
+}
+.yani-account-sort-dialog__number {
+    width: 2.2em;
+    color: rgba(255, 255, 255, .34);
+    font-size: .72em;
+    font-weight: 700;
+    letter-spacing: .08em;
+}
+.yani-account-sort-dialog__option-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.3em;
+    height: 2.3em;
+    margin-right: .75em;
+    border-radius: .7em;
+    color: #f58a9a;
+    background: rgba(255, 255, 255, .08);
+}
+.yani-account-sort-dialog__option:nth-child(3) .yani-account-sort-dialog__option-icon { color: #63c8ed; }
+.yani-account-sort-dialog__option:nth-child(4) .yani-account-sort-dialog__option-icon { color: #f4c76d; }
+.yani-account-sort-dialog__option:nth-child(5) .yani-account-sort-dialog__option-icon { color: #70d7a7; }
+.yani-account-sort-dialog__option:nth-child(6) .yani-account-sort-dialog__option-icon { color: #b69aef; }
+.yani-account-sort-dialog__option-title { flex: 1 1 auto; font-weight: 600; }
+.yani-account-sort-dialog__check { visibility: hidden; margin-left: .8em; font-size: 1.2em; }
+.yani-account-sort-dialog__option.active .yani-account-sort-dialog__check { visibility: visible; color: #70d7a7; }
+.yani-account-sort-dialog__option.focus {
+    color: #17151c;
+    background: #fff;
+    box-shadow: 0 0 0 .16em rgba(255, 255, 255, .2), 0 .7em 1.5em rgba(0, 0, 0, .24);
+    transform: translateX(.2em);
+}
+.yani-account-sort-dialog__option.focus .yani-account-sort-dialog__number { color: rgba(23, 21, 28, .42); }
+.yani-account-sort-dialog__option.focus .yani-account-sort-dialog__option-icon { color: #fff; background: #a84374; }
+.yani-account-sort-dialog__option.focus .yani-account-sort-dialog__check { color: #278864; }
+
 @media (max-width: 700px) {
     .yani-account-list-sort-panel { margin: .1em .6em .65em; }
     .yani-account-list-sort-trigger { width: 100%; min-height: 3.25em; }
     .yani-account-list-sort-trigger__sort-icon { display: none; }
+    .yani-account-sort-dialog { padding: 1em; }
+    .yani-account-sort-dialog__sheet { width: 100%; }
 }
 
 .yani-account__stats {

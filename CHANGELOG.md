@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.40.2 — 2026-08-12
+
+- Replaced the generic list sorting popup with a dedicated TV-friendly selector.
+- Added distinct icons, colors and a clear current-sort marker for every sorting mode.
+- Restored focus to the sorting card after Back/Left and removed stale sorting overlays when leaving a list.
+
 ## 0.40.1 — 2026-08-12
 
 - Redesigned My Lists with a distinct color and icon for every account list and watch history.

@@ -26,6 +26,11 @@ assert.match(source, /if \(current && isFirstCardRow\(current\)\) return focusPa
 assert.match(source, /collectionFocus\(button\[0\], root\(\), true\)/);
 assert.match(source, /if \(panelFocused\) return focusCards\(\)/);
 assert.match(source, /showSelect/);
+assert.match(source, /yani-account-sort-dialog/);
+assert.match(source, /Controller\.add\('yani_account_sort'/);
+assert.match(source, /left: function \(\) \{ closeMenu\(true\); \}/);
+assert.match(source, /back: function \(\) \{ closeMenu\(true\); \}/);
+assert.match(source, /destroy: function \(\) \{ closeMenu\(false\); \}/);
 assert.match(source, /function listIcon\(key\)/);
 assert.match(source, /yani-account-list-sort-panel--/);
 assert.match(source, /yani-account-list-sort-trigger__sort-icon/);

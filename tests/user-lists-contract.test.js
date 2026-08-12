@@ -18,6 +18,7 @@ assert.match(lists, /var pageSize = 30/);
 assert.match(lists, /LampaYaniAccountListControls\.create/);
 assert.match(lists, /items = controls\.sort/);
 assert.match(lists, /controls\.install\(items\.length\)/);
+assert.match(lists, /controls\.destroy\(\)/);
 assert.match(lists, /showSelect: deps\.showSelect/);
 assert.match(listControls, /yani-account-list-sort-trigger selector/);
 assert.match(listControls, /yani_account_list_sort_/);

@@ -186,6 +186,7 @@
         var originalDestroy = comp.destroy;
         comp.destroy = function () {
             destroyed = true;
+            controls.destroy();
             if (originalDestroy) originalDestroy.apply(this, arguments);
         };
         return comp;
