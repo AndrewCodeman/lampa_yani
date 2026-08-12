@@ -1841,13 +1841,49 @@
         else render.append(metadata);
     }
 
+    function cardUpdateTimestamp(value) {
+        if (value === undefined || value === null || value === '') return 0;
+        var numeric = Number(value);
+        if (isFinite(numeric) && numeric > 0) return numeric < 1000000000000 ? numeric * 1000 : numeric;
+        var parsed = Date.parse(String(value));
+        return isNaN(parsed) ? 0 : parsed;
+    }
+
+    function cardFreshness(value) {
+        var timestamp = cardUpdateTimestamp(value);
+        if (!timestamp) return null;
+        var now = new Date();
+        var updated = new Date(timestamp);
+        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        var updatedDay = new Date(updated.getFullYear(), updated.getMonth(), updated.getDate()).getTime();
+        var days = Math.round((today - updatedDay) / 86400000);
+        if (days < 0) return null;
+        if (days === 0) return {label: t('fresh_today'), recent: true};
+        if (days === 1) return {label: t('fresh_yesterday'), recent: true};
+        try {
+            return {label: updated.toLocaleDateString(locale(), {day: 'numeric', month: 'short'}), recent: days < 7};
+        } catch (error) {
+            var month = updated.getMonth() + 1;
+            return {label: updated.getDate() + '.' + (month < 10 ? '0' : '') + month, recent: days < 7};
+        }
+    }
+
     function addCardUpdateBadge(element, card) {
-        if (!card || (!card.yani_update_episode && !card.yani_update_label)) return;
+        if (!card) return;
+        var freshness = cardFreshness(card.yani_update_date || card.yani_updated_at);
+        if (!card.yani_update_episode && !card.yani_update_label && !freshness) return;
         var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length || view.find('.yani-card-update').length) return;
         var label = card.yani_update_label || t('episode') + ' ' + card.yani_update_episode;
-        view.append($('<span class="yani-card-update"></span>').text(label));
+        var badge = $('<span class="yani-card-update"></span>');
+        if (label) badge.append($('<span class="yani-card-update__label"></span>').text(label));
+        if (freshness) badge.append($('<span class="yani-card-update__freshness"></span>').text(freshness.label));
+        if (freshness && freshness.recent) {
+            badge.addClass('yani-card-update--fresh');
+            render.addClass('yani-card--fresh');
+        }
+        view.append(badge);
     }
 
     function addCardRecommendationBadge(element, card) {
@@ -4735,6 +4771,7 @@
             yani_seasons: Array.isArray(item.seasons) ? item.seasons : null,
             yani_seasons_count: Number(item.seasons_count || item.season_count || 0) || 0,
             yani_episode_duration: Number(item.episode_duration || item.average_episode_duration || item.duration || 0) || 0,
+            yani_update_date: item.yani_update_date || item.updated_at || item.update_date || item.last_update || null,
             yani_remote_ids: item.remote_ids || {}
         };
     }

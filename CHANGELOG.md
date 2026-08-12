@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.13 — 2026-08-12
+
+- Added compact freshness labels to updated title cards: Today, Yesterday, or a localized date.
+- Highlighted recently updated cards without making extra API requests.
+
 ## 0.41.12 — 2026-08-12
 
 - Added distinct compact colors for ongoing, released and announced title states.

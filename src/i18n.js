@@ -33,6 +33,8 @@
     messages.ru.status_released = 'Вышел';
     messages.ru.status_ongoing = 'Онгоинг';
     messages.ru.status_announced = 'Анонс';
+    messages.ru.fresh_today = 'Сегодня';
+    messages.ru.fresh_yesterday = 'Вчера';
     messages.ru.top_all = 'Общий топ';
     messages.ru.top_tv = 'Сериалы';
     messages.ru.top_movies = 'Фильмы';
@@ -42,6 +44,8 @@
     messages.en.status_released = 'Released';
     messages.en.status_ongoing = 'Ongoing';
     messages.en.status_announced = 'Announced';
+    messages.en.fresh_today = 'Today';
+    messages.en.fresh_yesterday = 'Yesterday';
     messages.en.version_label = 'Version';
     messages.en.top_all = 'Overall';
     messages.en.top_tv = 'TV series';
@@ -524,6 +528,8 @@
     messages.uk.status_released = 'Вийшов';
     messages.uk.status_ongoing = 'Онгоїнг';
     messages.uk.status_announced = 'Анонс';
+    messages.uk.fresh_today = 'Сьогодні';
+    messages.uk.fresh_yesterday = 'Учора';
     messages.uk.back_to_lampa = 'Повернутися до Lampa';
     messages.uk.top_all = 'Загальний топ';
     messages.uk.top_tv = 'Серіали';
