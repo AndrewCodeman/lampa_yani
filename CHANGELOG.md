@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.4 — 2026-08-12
+
+- Added a compact TV remote legend to catalog controls and color/number shortcuts for catalog modes, sorting, filters and returning to the first row.
+
 ## 0.41.3 — 2026-08-12
 
 - Fixed catalog remote handlers on Android/TV Lampa builds, where `Controller.enabled()` returns the active controller directly instead of a nested `controller` field.

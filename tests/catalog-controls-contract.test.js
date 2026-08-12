@@ -37,6 +37,12 @@ assert.match(ui, /function toolbarHasFocus\(\)[\s\S]{0,180}toolbarFocused/);
 assert.match(ui, /function focusToolbar\(preferred\)[\s\S]{0,700}lastCatalogCard = focusedCard\[0\][\s\S]{0,500}toolbarFocused = true/);
 assert.match(ui, /function focusCards\(first\)[\s\S]{0,700}lastCatalogCard \|\| comp\.last[\s\S]{0,350}toolbarFocused = false[\s\S]{0,300}Navigator\.add\(target\)[\s\S]{0,450}collectionSet\(collection, false, true\)/);
 assert.match(ui, /toolbarTrack\.append\(topButton\)/);
+assert.match(ui, /function remoteShortcuts\(\)[\s\S]{0,1000}color: 'red'[\s\S]{0,300}color: 'green'[\s\S]{0,300}color: 'yellow'[\s\S]{0,300}color: 'blue'/);
+assert.match(ui, /function handleRemoteShortcut\(event\)[\s\S]{0,900}changeSort\(shortcut\.definition\)/);
+assert.match(ui, /document\.addEventListener\('keydown', shortcutHandler, true\)/);
+assert.match(ui, /document\.removeEventListener\('keydown', shortcutHandler, true\)/);
+assert.match(css, /\.yani-catalog-remote-legend[\s\S]{0,500}border-left/);
+assert.match(css, /\.yani-catalog-remote-key--red/);
 assert.match(ui, /function openFilterMenu\(navigation\)/);
 assert.match(ui, /filterModel\.activeCount\(baseParams\)/);
 assert.match(ui, /yani-catalog-filter selector/);
@@ -66,7 +72,7 @@ assert.match(css, /\.yani-catalog-command-deck__heading/);
 assert.match(css, /\.yani-catalog-filter__count/);
 
 ['ru', 'en', 'uk'].forEach((language) => {
-    ['catalog_sort_top', 'catalog_sort_new', 'catalog_sort_rating', 'catalog_sort_votes', 'catalog_sort_views', 'catalog_sort_title', 'catalog_sort_random', 'scroll_to_top', 'catalog_filters', 'catalog_filter_reset', 'catalog_filter_type', 'catalog_filter_status', 'catalog_filter_year'].forEach((key) => {
+    ['catalog_sort_top', 'catalog_sort_new', 'catalog_sort_rating', 'catalog_sort_votes', 'catalog_sort_views', 'catalog_sort_title', 'catalog_sort_random', 'scroll_to_top', 'catalog_filters', 'catalog_shortcuts_numbers', 'catalog_filter_reset', 'catalog_filter_type', 'catalog_filter_status', 'catalog_filter_year'].forEach((key) => {
         assert.match(i18n, new RegExp(`messages\\.${language}\\.${key}\\s*=`));
     });
 });

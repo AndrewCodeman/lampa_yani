@@ -42,6 +42,7 @@
         var controlsReady = false;
         var toolbarFocused = false;
         var lastCatalogCard = null;
+        var shortcutHandler = null;
         var focusScope = LampaYaniNavigation.createScope({
             id: 'catalog:' + cleanCatalogRoute(),
             root: function () { return comp.render(); },
@@ -66,6 +67,21 @@
             {key: 'ona', types: 'ona', title: t('top_ona')}
         ];
         var controlDefinitions = topMode ? topDefinitions : sortDefinitions;
+
+        function remoteShortcuts() {
+            if (topMode) return [
+                {color: 'red', definition: topDefinitions[0]},
+                {color: 'green', definition: topDefinitions[1]},
+                {color: 'yellow', definition: topDefinitions[2]},
+                {color: 'blue', definition: topDefinitions[3]}
+            ];
+            return [
+                {color: 'red', definition: sortDefinitions[0]},
+                {color: 'green', definition: sortDefinitions[1]},
+                {color: 'yellow', definition: sortDefinitions[2]},
+                {color: 'blue', filter: true, title: t('catalog_filters')}
+            ];
+        }
 
         function activeSort(definition) {
             if (topMode) return String(baseParams.types || '') === definition.types;
@@ -287,6 +303,70 @@
             focusCards(true);
         }
 
+        function shortcutEventName(event) {
+            return String(event && (event.key || event.code || '') || '').toLowerCase();
+        }
+
+        function shortcutColor(event) {
+            var name = shortcutEventName(event);
+            var code = Number(event && (event.keyCode || event.which));
+            if (name === 'colorf0red' || name === 'red' || code === 403) return 'red';
+            if (name === 'colorf1green' || name === 'green' || code === 404) return 'green';
+            if (name === 'colorf2yellow' || name === 'yellow' || code === 405) return 'yellow';
+            if (name === 'colorf3blue' || name === 'blue' || code === 406) return 'blue';
+            return '';
+        }
+
+        function shortcutNumber(event) {
+            var name = shortcutEventName(event);
+            var match = name.match(/(?:digit|numpad)?([0-9])$/);
+            if (match) return Number(match[1]);
+            var code = Number(event && (event.keyCode || event.which));
+            return code >= 48 && code <= 57 ? code - 48 : -1;
+        }
+
+        function shortcutsEnabled(event) {
+            if (!controlsReady || !toolbar || !toolbar.length || !toolbar.is(':visible')) return false;
+            var target = event && event.target;
+            if (!target) return true;
+            var tag = target && String(target.tagName || '').toLowerCase();
+            return tag !== 'input' && tag !== 'textarea' && tag !== 'select' && !$(target).closest('input, textarea, select, [contenteditable=true]').length;
+        }
+
+        function handleRemoteShortcut(event) {
+            if (!shortcutsEnabled(event) || event.defaultPrevented) return;
+            var shortcut = remoteShortcuts().filter(function (item) { return item.color === shortcutColor(event); })[0];
+            var number = shortcutNumber(event);
+            if (!shortcut && number >= 1 && number <= controlDefinitions.length) shortcut = {definition: controlDefinitions[number - 1]};
+            if (!shortcut && number === 0) {
+                event.preventDefault();
+                event.stopPropagation();
+                scrollToTop();
+                return;
+            }
+            if (!shortcut) return;
+            event.preventDefault();
+            event.stopPropagation();
+            if (shortcut.filter) openFilterMenu();
+            else if (shortcut.definition) changeSort(shortcut.definition);
+        }
+
+        function createRemoteLegend() {
+            var legend = $('<div class="yani-catalog-remote-legend" aria-label="Remote shortcuts"></div>');
+            remoteShortcuts().forEach(function (shortcut) {
+                var key = $('<span class="yani-catalog-remote-key yani-catalog-remote-key--' + shortcut.color + '"></span>');
+                key.append('<i aria-hidden="true"></i>');
+                key.append($('<b></b>').text(shortcut.title || shortcut.definition.title));
+                legend.append(key);
+            });
+            var numeric = $('<span class="yani-catalog-remote-numbers"></span>');
+            numeric.append('<i>1–' + controlDefinitions.length + '</i>');
+            numeric.append($('<b></b>').text(t('catalog_shortcuts_numbers')));
+            numeric.append('<em>0 ↑</em>');
+            legend.append(numeric);
+            return legend;
+        }
+
         function install() {
             if (controlsReady) return;
             var root = comp.render();
@@ -328,6 +408,7 @@
                 toolbarTrack.append(button);
             });
             toolbar.append(heading).append(toolbarTrack);
+            toolbar.append(createRemoteLegend());
             var genreHeader = root.find('.yani-genre-catalog-header').first();
             if (genreHeader.length) toolbar.insertAfter(genreHeader);
             else root.prepend(toolbar);
@@ -339,6 +420,8 @@
                 comp.last = lastCatalogCard;
             });
             setTimeout(syncNavigationCollection, 0);
+            shortcutHandler = handleRemoteShortcut;
+            document.addEventListener('keydown', shortcutHandler, true);
         }
 
         function patchCatalogController(controller) {
@@ -400,7 +483,15 @@
             return result;
         };
 
-        return {install: install, sync: syncNavigationCollection, destroy: function () { focusScope.destroy(); }};
+        return {
+            install: install,
+            sync: syncNavigationCollection,
+            destroy: function () {
+                if (shortcutHandler) document.removeEventListener('keydown', shortcutHandler, true);
+                shortcutHandler = null;
+                focusScope.destroy();
+            }
+        };
     }
 
     window.LampaYani = window.LampaYani || {};

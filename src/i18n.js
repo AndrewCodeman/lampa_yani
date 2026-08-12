@@ -384,6 +384,7 @@
     messages.ru.genre_catalog_fallback = 'Аниме жанра «{genre}»: новые релизы, популярные и завершённые тайтлы.';
     messages.ru.scroll_to_top = 'Наверх';
     messages.ru.catalog_filters = 'Фильтры';
+    messages.ru.catalog_shortcuts_numbers = 'Сортировка';
     messages.ru.catalog_filter_reset = 'Сбросить фильтры';
     messages.ru.catalog_filter_all = 'Все';
     messages.ru.catalog_filter_type = 'Тип';
@@ -435,6 +436,7 @@
     messages.en.genre_catalog_fallback = '{genre} anime: new releases, popular and completed titles.';
     messages.en.scroll_to_top = 'Back to top';
     messages.en.catalog_filters = 'Filters';
+    messages.en.catalog_shortcuts_numbers = 'Sort';
     messages.en.catalog_filter_reset = 'Reset filters';
     messages.en.catalog_filter_all = 'All';
     messages.en.catalog_filter_type = 'Type';
@@ -695,6 +697,7 @@
     messages.uk.genre_catalog_fallback = 'Аніме жанру «{genre}»: нові релізи, популярні та завершені тайтли.';
     messages.uk.scroll_to_top = 'Нагору';
     messages.uk.catalog_filters = 'Фільтри';
+    messages.uk.catalog_shortcuts_numbers = 'Сортування';
     messages.uk.catalog_filter_reset = 'Скинути фільтри';
     messages.uk.catalog_filter_all = 'Усі';
     messages.uk.catalog_filter_type = 'Тип';
