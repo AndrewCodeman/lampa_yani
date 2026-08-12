@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.41.2',
+        version: '0.41.3',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -3687,12 +3687,21 @@ function pluginYummyAnime() {
             return root && root.length ? root : (comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render());
         }
 
+        function activeCatalogController() {
+            if (!Lampa.Controller || !Lampa.Controller.enabled) return null;
+            var enabled = Lampa.Controller.enabled();
+            if (!enabled || enabled.name !== 'content') return null;
+            // Lampa exposes the current controller in two different shapes.
+            // Android/TV builds commonly return the controller object itself,
+            // while web builds wrap it in {name, controller}.
+            var controller = enabled.controller || enabled;
+            return controller && (typeof controller.down === 'function' || controller.link === comp) ? controller : null;
+        }
+
         function syncNavigationCollection() {
             if (!controlsReady) return;
-            var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
-            var controller = enabled && enabled.controller;
-            var ownsController = enabled && enabled.name === 'content' && controller &&
-                (controller.yaniCatalogOwner === comp || controller.link === comp);
+            var controller = activeCatalogController();
+            var ownsController = controller && (controller.yaniCatalogOwner === comp || controller.link === comp);
             if (!ownsController) return;
             var selectors = toolbarTrack && toolbarTrack[0] ? Array.prototype.slice.call(toolbarTrack[0].querySelectorAll('.selector')).filter(function (element) {
                 return element.offsetParent !== null;
@@ -3910,8 +3919,7 @@ function pluginYummyAnime() {
         var originalStart = comp.start;
         comp.start = function () {
             var result = originalStart.apply(this, arguments);
-            var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
-            if (enabled && enabled.name === 'content') patchCatalogController(enabled.controller);
+            patchCatalogController(activeCatalogController());
             syncNavigationCollection();
             setTimeout(function () { focusScope.restore(comp.last || firstCard(), false); }, 0);
             return result;

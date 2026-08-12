@@ -20,6 +20,7 @@ assert.match(ui, /function changeSort\(definition\)[\s\S]{0,1600}params\.sort = 
 assert.match(ui, /function scrollToTop\(\)[\s\S]{0,250}comp\.scroll\.reset\(\)[\s\S]{0,150}focusCards\(true\)/);
 assert.match(ui, /comp\.on\('controller'/);
 assert.match(ui, /function navigationCollection\(\)[\s\S]{0,350}comp\.render\(\)/);
+assert.match(ui, /function activeCatalogController\(\)[\s\S]{0,700}enabled\.controller \|\| enabled[\s\S]{0,300}controller\.link === comp/);
 assert.match(ui, /function syncNavigationCollection\(\)[\s\S]{0,700}toolbarTrack\[0\]\.querySelectorAll\('\.selector'\)[\s\S]{0,250}Navigator\.add\(element\)/);
 assert.doesNotMatch(ui, /function syncNavigationCollection\(\)[\s\S]{0,700}Navigator\.setCollection/);
 assert.match(ui, /controller\.yaniCatalogOwner === comp \|\| controller\.link === comp/);
@@ -28,7 +29,7 @@ assert.match(ui, /comp\.on\('scroll'[\s\S]{0,150}syncNavigationCollection/);
 assert.match(ui, /function patchCatalogController\(controller\)/);
 assert.match(ui, /controller\.yaniCatalogOwner = comp/);
 assert.match(ui, /var originalStart = comp\.start/);
-assert.match(ui, /comp\.start = function \(\)[\s\S]{0,500}patchCatalogController\(enabled\.controller\)[\s\S]{0,150}syncNavigationCollection\(\)/);
+assert.match(ui, /comp\.start = function \(\)[\s\S]{0,500}patchCatalogController\(activeCatalogController\(\)\)[\s\S]{0,150}syncNavigationCollection\(\)/);
 assert.match(ui, /function focusToolbar\(preferred\)[\s\S]{0,900}syncNavigationCollection\(\)[\s\S]{0,150}collectionFocus\(target, collection, true\)/);
 assert.match(ui, /var toolbarFocused = false/);
 assert.match(ui, /var lastCatalogCard = null/);

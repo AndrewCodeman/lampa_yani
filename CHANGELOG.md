@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.3 — 2026-08-12
+
+- Fixed catalog remote handlers on Android/TV Lampa builds, where `Controller.enabled()` returns the active controller directly instead of a nested `controller` field.
+
 ## 0.41.2 — 2026-08-12
 
 - Fixed vertical catalog navigation for Lampa builds that do not expose Down links through `Navigator`: the remote now selects the closest poster in the next grid row and scrolls it into view.
