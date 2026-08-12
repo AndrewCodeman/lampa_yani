@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.41.42',
+        version: '0.41.43',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -2717,15 +2717,20 @@ function pluginYummyAnime() {
     }
 
     function itemLabel(node, $) {
-        return $(node).find('.menu__text').first().text().trim();
+        try {
+            var text = $(node).find('.menu__text');
+            if (!text) return '';
+            if (text.eq) return String(text.eq(0).text() || '').trim();
+            if (text.first) return String(text.first().text() || '').trim();
+            if (text.text) return String(text.text() || '').trim();
+            return '';
+        } catch (error) {
+            return '';
+        }
     }
 
     function create(deps) {
         deps = deps || {};
-        var $ = deps.$ || window.$;
-        var Storage = deps.Storage || (window.Lampa && Lampa.Storage);
-        var Menu = deps.Menu || (window.Lampa && Lampa.Menu);
-        var Activity = deps.Activity || (window.Lampa && Lampa.Activity);
         var icon = deps.icon || ICON;
         var title = deps.title || TITLE;
         var action = deps.action || ACTION;
@@ -2733,7 +2738,27 @@ function pluginYummyAnime() {
         var maxAttempts = deps.maxAttempts == null ? 10 : Number(deps.maxAttempts);
         var wait = deps.setTimeout || function (fn, ms) { return window.setTimeout(fn, ms); };
         var cancel = deps.clearTimeout || function (id) { return window.clearTimeout(id); };
-        var onEnter = deps.onEnter || function () {
+        var added = false;
+        var started = false;
+        var item = null;
+        var restoreTimer = 0;
+        var attempts = 0;
+
+        function jq() {
+            return deps.$ || window.$;
+        }
+
+        function storage() {
+            return deps.Storage || (window.Lampa && Lampa.Storage);
+        }
+
+        function activity() {
+            return deps.Activity || (window.Lampa && Lampa.Activity);
+        }
+
+        function onEnter() {
+            if (typeof deps.onEnter === 'function') return deps.onEnter();
+            var Activity = activity();
             if (Activity && Activity.push) {
                 Activity.push({
                     url: 'yani',
@@ -2741,25 +2766,23 @@ function pluginYummyAnime() {
                     component: 'yani_home'
                 });
             }
-        };
-        var added = false;
-        var started = false;
-        var item = null;
-        var restoreTimer = 0;
-        var attempts = 0;
+        }
 
         function emptySet() {
+            var $ = jq();
             return $ && typeof $ === 'function' ? $() : {length: 0};
         }
 
         function listRoot() {
             if (typeof deps.listRoot === 'function') return deps.listRoot();
-            if (!$ || typeof $ !== 'function' || !$.fn) return emptySet();
+            var $ = jq();
+            if (!$ || typeof $ !== 'function') return emptySet();
             return $('.menu .menu__list').eq(0);
         }
 
         function existing() {
-            if (!$ || typeof $ !== 'function' || !$.fn) return emptySet();
+            var $ = jq();
+            if (!$ || typeof $ !== 'function') return emptySet();
             var found = $('.menu__item[data-action="' + action + '"]');
             if (found.length) return found;
             $('.menu .menu__list .menu__item').each(function () {
@@ -2770,6 +2793,7 @@ function pluginYummyAnime() {
 
         function presentTitles(list) {
             var names = [];
+            var $ = jq();
             list.children('.menu__item').each(function () {
                 names.push(itemLabel(this, $));
             });
@@ -2777,26 +2801,34 @@ function pluginYummyAnime() {
         }
 
         function restore(target) {
-            target = target || item;
-            if (!target || !target.length || !Storage || !Storage.get) return;
-            var list = target.parent();
-            if (!list || !list.length) return;
-            var stored = asList(Storage.get('menu_sort', '[]'));
-            var sort = ensureListed(stored, title);
-            if (stored.indexOf(title) === -1 && Storage.set) Storage.set('menu_sort', sort);
-            var hide = asList(Storage.get('menu_hide', '[]'));
-            var before = insertBeforeTitle(sort, presentTitles(list), title);
-            if (before) {
-                list.children('.menu__item').each(function () {
-                    if (itemLabel(this, $) === before) {
-                        target.insertBefore(this);
-                        return false;
-                    }
-                });
-            } else {
-                list.append(target);
+            try {
+                target = target || item;
+                var Storage = storage();
+                if (!target || !target.length || !Storage || !Storage.get) return;
+                var list = target.parent();
+                if (!list || !list.length) return;
+                var stored = asList(Storage.get('menu_sort', '[]'));
+                var sort = ensureListed(stored, title);
+                if (stored.indexOf(title) === -1 && Storage.set) Storage.set('menu_sort', sort);
+                var hide = asList(Storage.get('menu_hide', '[]'));
+                var before = insertBeforeTitle(sort, presentTitles(list), title);
+                var $ = jq();
+                if (before) {
+                    list.children('.menu__item').each(function () {
+                        if (itemLabel(this, $) === before) {
+                            target.insertBefore(this);
+                            return false;
+                        }
+                    });
+                } else {
+                    list.append(target);
+                }
+                target.toggleClass('hidden', isHidden(hide, title));
+            } catch (error) {
+                if (typeof console !== 'undefined' && console.error) {
+                    console.error('[YummyAnime] Sidebar restore failed', error);
+                }
             }
-            target.toggleClass('hidden', isHidden(hide, title));
         }
 
         function scheduleRestore(target) {
@@ -2807,43 +2839,44 @@ function pluginYummyAnime() {
         }
 
         function buildItem() {
+            var $ = jq();
             var node = $('<li class="menu__item selector" data-action="' + action + '"><div class="menu__ico">' + icon + '</div><div class="menu__text">' + title + '</div></li>');
             node.on('hover:enter', onEnter);
             return node;
         }
 
         function add() {
-            if (added) {
-                scheduleRestore(item);
-                return true;
-            }
-            var found = existing();
-            if (found && found.length) {
-                item = found.eq(0);
-                if (item.attr) item.attr('data-action', action);
-                found.slice(1).remove();
+            try {
+                if (added) {
+                    scheduleRestore(item);
+                    return true;
+                }
+                var found = existing();
+                if (found && found.length) {
+                    item = found.eq(0);
+                    if (item.attr) item.attr('data-action', action);
+                    if (found.slice) found.slice(1).remove();
+                    added = true;
+                    scheduleRestore(item);
+                    return true;
+                }
+                var list = listRoot();
+                if (!list || !list.length) return false;
+                var $ = jq();
+                if (!$ || typeof $ !== 'function') return false;
+                item = buildItem();
+                list.append(item);
+                if (!item || !item.length) return false;
+                if (item.parent && !item.parent().length) return false;
                 added = true;
                 scheduleRestore(item);
                 return true;
+            } catch (error) {
+                if (typeof console !== 'undefined' && console.error) {
+                    console.error('[YummyAnime] Sidebar item failed', error);
+                }
+                return false;
             }
-            var list = listRoot();
-            var canAddElement = Menu && typeof Menu.addElement === 'function';
-            var canAddButton = Menu && typeof Menu.addButton === 'function';
-            if (!canAddElement && !(list && list.length) && !canAddButton) return false;
-
-            item = buildItem();
-            if (canAddElement) Menu.addElement(item);
-            else if (list && list.length) list.append(item);
-            else {
-                item = Menu.addButton(icon, title, onEnter);
-                if (item && item.attr) item.attr('data-action', action);
-            }
-            if (!item || !item.length) return false;
-            if ((!item.parent || !item.parent().length) && list && list.length) list.append(item);
-            if (!item.parent || !item.parent().length) return false;
-            added = true;
-            scheduleRestore(item);
-            return true;
         }
 
         function retry() {
@@ -2855,7 +2888,7 @@ function pluginYummyAnime() {
         function start(listener) {
             if (started) {
                 add();
-                return;
+                return added;
             }
             started = true;
             add();
@@ -2868,6 +2901,7 @@ function pluginYummyAnime() {
                     if (event && (event.type === 'start' || event.type === 'end')) add();
                 });
             }
+            return added;
         }
 
         return {
@@ -10896,15 +10930,7 @@ function pluginYummyAnime() {
             }
 
             var settingsReady = false;
-            var sidebar = window.LampaYaniMenu.create({
-                onEnter: function () {
-                    Lampa.Activity.push({
-                        url: 'yani',
-                        title: window.LampaYaniMenu.TITLE,
-                        component: 'yani_home'
-                    });
-                }
-            });
+            var sidebar = null;
 
             function addInterface() {
                 if (settingsReady) return;
@@ -10920,14 +10946,6 @@ function pluginYummyAnime() {
                 if (account.token && LampaYaniAuth.refreshIfNeeded) {
                     LampaYaniAuth.refreshIfNeeded();
                 }
-            }
-
-            sidebar.start(Lampa.Listener);
-            if (window.appready) addInterface();
-            else if (Lampa.Listener && Lampa.Listener.follow) {
-                Lampa.Listener.follow('app', function (event) {
-                    if (event.type === 'ready') addInterface();
-                });
             }
 
             Lampa.Component.add('yani_home', Home);
@@ -10959,6 +10977,30 @@ function pluginYummyAnime() {
 
             installUndefinedTmdbGuard();
             installFullRating();
+
+            if (window.appready) addInterface();
+            else if (Lampa.Listener && Lampa.Listener.follow) {
+                Lampa.Listener.follow('app', function (event) {
+                    if (event.type === 'ready') addInterface();
+                });
+            }
+
+            try {
+                if (window.LampaYaniMenu && typeof LampaYaniMenu.create === 'function') {
+                    sidebar = LampaYaniMenu.create({
+                        onEnter: function () {
+                            Lampa.Activity.push({
+                                url: 'yani',
+                                title: window.LampaYaniMenu.TITLE,
+                                component: 'yani_home'
+                            });
+                        }
+                    });
+                    sidebar.start(Lampa.Listener);
+                }
+            } catch (menuError) {
+                console.error('[YummyAnime] Sidebar registration failed', menuError);
+            }
 
             console.log('[YummyAnime] Extension registered');
         }
