@@ -21,14 +21,28 @@
             return String(group && (group.player || group.title) || '').toLowerCase();
         };
         var videoSourceUrl = deps.videoSourceUrl || function () { return ''; };
+        var historyCache = null;
+        var historyCacheAt = 0;
+        var HISTORY_CACHE_MS = 500;
 
         function playbackHistory() {
             if (!window.Lampa || !window.Lampa.Storage) return {};
+            var now = Date.now();
+            if (historyCache && now - historyCacheAt < HISTORY_CACHE_MS) return historyCache;
             try {
                 var value = window.Lampa.Storage.get('yani_playback_history', '{}');
-                if (value && typeof value === 'object') return value;
-                return JSON.parse(value || '{}');
-            } catch (error) { return {}; }
+                if (value && typeof value === 'object') historyCache = value;
+                else historyCache = JSON.parse(value || '{}');
+            } catch (error) {
+                historyCache = {};
+            }
+            historyCacheAt = now;
+            return historyCache;
+        }
+
+        function invalidatePlaybackHistoryCache() {
+            historyCache = null;
+            historyCacheAt = 0;
         }
 
         function getPlayback(animeId) {
@@ -67,6 +81,7 @@
             });
             ids.slice(100).forEach(function (id) { delete history[id]; });
             window.Lampa.Storage.set('yani_playback_history', JSON.stringify(history));
+            invalidatePlaybackHistoryCache();
             return saved;
         }
 
@@ -108,6 +123,7 @@
             });
             $('[data-yani-card-id="' + String(card.yani_id).replace(/"/g, '') + '"]').not('.yani-history-card').each(function () {
                 addCardPlaybackProgress($(this), card);
+                syncCardOverlayLayout($(this), card);
             });
         }
 

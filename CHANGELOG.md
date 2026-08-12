@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.26 — 2026-08-12
+
+- Speed up catalog/dashboard card paints: keep existing rating chips instead of rebuilding them on every Lampa `cardRender`, sync overlay classes once per decorate, and cache local playback history briefly while many cards resolve progress.
+- Drop per-chip focus shadows that were expensive on weak TV WebViews.
+
 ## 0.41.25 — 2026-08-12
 
 - Gate GitHub Pages deploy on JavaScript syntax checks, the full contract-test suite, a fresh `node build.js`, and a `dist/index.js` freshness check against sources.

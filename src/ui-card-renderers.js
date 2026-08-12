@@ -217,12 +217,14 @@
             var render = cardRenderElement(element, card);
             var view = $('.card__view', render).first();
             if (!view.length) return view;
-            var hasFooter = view.find('.yani-card-list, .yani-card-playback, .yani-card-history').length > 0;
-            var hasProgress = view.find('.yani-card-playback-progress, .yani-card-history-progress').length > 0;
-            var hasRatings = view.find('.yani-card-ratings').length > 0;
-            view.toggleClass('yani-card-view--has-footer', hasFooter);
-            view.toggleClass('yani-card-view--has-progress', hasProgress);
-            view.toggleClass('yani-card-view--has-ratings', hasRatings);
+            var root = view[0];
+            if (!root || !root.classList) return view;
+            var hasFooter = !!root.querySelector('.yani-card-list, .yani-card-playback, .yani-card-history');
+            var hasProgress = !!root.querySelector('.yani-card-playback-progress, .yani-card-history-progress');
+            var hasRatings = !!root.querySelector('.yani-card-ratings');
+            root.classList.toggle('yani-card-view--has-footer', hasFooter);
+            root.classList.toggle('yani-card-view--has-progress', hasProgress);
+            root.classList.toggle('yani-card-view--has-ratings', hasRatings);
             return view;
         }
 
@@ -237,7 +239,6 @@
             var label = labels[card.yani_list_id] || '';
             if (card.yani_is_favorite) label = label ? label + ' · ♥' : '♥';
             badge.text(label);
-            syncCardOverlayLayout(render, card);
         }
 
         function cardPlaybackState(card) {
@@ -261,11 +262,12 @@
             var render = cardRenderElement(element, card);
             var view = $('.card__view', render).first();
             if (!view.length) return;
-            view.find('.yani-card-playback, .yani-card-playback-progress').remove();
+            var existing = view.find('.yani-card-playback, .yani-card-playback-progress');
             if (!state) {
-                syncCardOverlayLayout(render, card);
+                if (existing.length) existing.remove();
                 return;
             }
+            existing.remove();
             var parts = [];
             if (state.episode) parts.push(t('episode') + ' ' + state.episode);
             if (state.percent) parts.push(state.percent + '%');
@@ -274,7 +276,6 @@
                 view.append($('<span class="yani-card-playback-progress"><span></span></span>')
                     .find('span').css('width', state.percent + '%').end());
             }
-            syncCardOverlayLayout(render, card);
         }
 
         function formatRating(value) {
@@ -306,7 +307,9 @@
             var render = cardRenderElement(element, card);
             var view = $('.card__view', render).first();
             if (!view.length) return;
-            view.find('.yani-card-ratings').remove();
+            // Lampa may call cardRender repeatedly for the same node. Keep the
+            // first compact panel instead of rebuilding chips on every paint.
+            if (view.find('.yani-card-ratings').length) return;
 
             $('.card__vote', render).hide();
             var block = $('<div class="yani-card-ratings" role="group" aria-label="ratings"></div>');
@@ -318,7 +321,6 @@
                 block.append(badge);
             });
             view.append(block);
-            syncCardOverlayLayout(render, card);
         }
 
         function decorate(element, card) {

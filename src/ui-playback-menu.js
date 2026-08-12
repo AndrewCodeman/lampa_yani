@@ -14,6 +14,7 @@
         var commentsMenu = deps.commentsMenu || function () {};
         var openSettingsLogin = deps.openSettingsLogin || function () {};
         var addCardListBadge = deps.addCardListBadge || function () {};
+        var syncCardOverlayLayout = deps.syncCardOverlayLayout || function () {};
         var getPlayback = deps.getPlayback || function () { return null; };
         var voiceOptionSubtitle = deps.voiceOptionSubtitle || function () { return ''; };
         var videoQualityLabel = deps.videoQualityLabel || function () { return ''; };
@@ -180,6 +181,7 @@
                         if (item.action === 'favorite') card.yani_is_favorite = true;
                         else if (item.action) card.yani_list_id = {watching: 0, planned: 1, completed: 2, dropped: 3, postponed: 5}[item.action];
                         addCardListBadge(null, card);
+                        syncCardOverlayLayout(null, card);
                         Lampa.Noty.show(t('saved'));
                     }).catch(function (error) {
                         console.error('[YummyAnime]', error);

@@ -30,6 +30,7 @@
     var addCardListBadge = cardRenderers.addCardListBadge;
     var cardPlaybackState = cardRenderers.cardPlaybackState;
     var addCardPlaybackProgress = cardRenderers.addCardPlaybackProgress;
+    var syncCardOverlayLayout = cardRenderers.syncCardOverlayLayout;
     var formatRating = cardRenderers.formatRating;
     var createRatingLogo = cardRenderers.createRatingLogo;
     var addCardRatings = cardRenderers.addCardRatings;
@@ -76,6 +77,7 @@
         commentsMenu: function (animeId, page, comments, navigation) { return commentsMenu(animeId, page, comments, navigation); },
         openSettingsLogin: function () { return openSettingsLogin(); },
         addCardListBadge: addCardListBadge,
+        syncCardOverlayLayout: syncCardOverlayLayout,
         getPlayback: function (id) { return getPlayback(id); },
         voiceOptionSubtitle: function (group) { return voiceOptionSubtitle(group); },
         videoQualityLabel: function (video) { return videoQualityLabel(video); },
@@ -2816,6 +2818,7 @@
                 $(this).toggleClass('active', active).attr('aria-pressed', active ? 'true' : 'false');
             });
             addCardListBadge(null, cardData);
+            syncCardOverlayLayout(null, cardData);
         }
 
         function toggleDetailListState(cardData, action, panel) {
