@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.20 — 2026-08-12
+
+- Extracted YummyAnime catalog card bind/open helpers into `src/ui-card-bind.js`.
+- Left Continue Watching history-card overrides in `ui.js` for the next progress/history extraction.
+
 ## 0.41.19 — 2026-08-12
 
 - Extracted shared YummyAnime card decoration helpers into `src/ui-card-renderers.js`.

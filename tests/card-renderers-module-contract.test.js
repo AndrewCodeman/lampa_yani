@@ -8,7 +8,8 @@ const build = fs.readFileSync('build.js', 'utf8');
 
 assert.match(build, /src\/ui-card-renderers\.js/);
 assert.match(ui, /LampaYaniCardRenderers\.create/);
-assert.match(ui, /cardRenderers\.decorate\(element, card\)/);
+assert.match(ui, /cardRenderers\.decorate/);
+assert.match(ui, /LampaYaniCardBind\.create/);
 assert.match(ui, /var addCardMetadata = cardRenderers\.addCardMetadata/);
 assert.match(ui, /var addCardPlaybackProgress = cardRenderers\.addCardPlaybackProgress/);
 assert.doesNotMatch(ui, /function addCardMetadata\(element, card\)/);
