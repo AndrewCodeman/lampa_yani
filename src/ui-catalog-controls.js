@@ -40,7 +40,6 @@
         var topButton;
         var filterButton;
         var controlsReady = false;
-        var toolbarFocused = false;
         var lastCatalogCard = null;
         var shortcutHandler = null;
         var focusScope = LampaYaniNavigation.createScope({
@@ -48,7 +47,9 @@
             root: function () { return comp.render(); },
             collection: function () { return navigationCollection(); },
             scroll: comp.scroll,
-            selector: '.selector',
+            // Cards only: the command deck is mouse/shortcut controlled and must
+            // never enter the TV remote focus path.
+            selector: '.card.selector',
             fallback: firstCard
         });
         var sortDefinitions = [
@@ -170,7 +171,7 @@
         function firstCard() {
             if (comp.items && comp.items.length && comp.items[0].render) return comp.items[0].render(true);
             var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
-            return collection && collection.find ? collection.find('.card.selector, .selector').first()[0] : null;
+            return collection && collection.find ? collection.find('.card.selector').first()[0] : null;
         }
 
         function navigationCollection() {
@@ -194,54 +195,32 @@
             var controller = activeCatalogController();
             var ownsController = controller && (controller.yaniCatalogOwner === comp || controller.link === comp);
             if (!ownsController) return;
-            var selectors = toolbarTrack && toolbarTrack[0] ? Array.prototype.slice.call(toolbarTrack[0].querySelectorAll('.selector')).filter(function (element) {
-                return element.offsetParent !== null;
-            }) : [];
-            selectors.forEach(function (element) { Navigator.add(element); });
+            var collection = navigationCollection();
+            if (!collection || !collection.length) return;
+            // Keep Navigator limited to title cards so D-pad never lands on the
+            // sort/filter command deck.
+            Lampa.Controller.collectionSet(collection, false, true);
+            if (lastCatalogCard && document.documentElement.contains(lastCatalogCard)) Navigator.add(lastCatalogCard);
         }
 
         function focusCards(first) {
             var collection = navigationCollection();
             var target = first ? firstCard() : lastCatalogCard || comp.last || firstCard();
             if (target && !document.documentElement.contains(target)) target = firstCard();
-            toolbarFocused = false;
+            if (target && $(target).closest('.yani-catalog-command-deck').length) target = firstCard();
             if (target) {
                 lastCatalogCard = target;
                 comp.last = target;
                 Navigator.add(target);
                 focusScope.remember(target);
             }
-            // Moving down from the command deck must rebuild the full card
-            // collection. Keeping the deck-only collection made Down appear
-            // to work while Navigator had no poster targets to enter.
             Lampa.Controller.collectionSet(collection, false, true);
-            syncNavigationCollection();
             Lampa.Controller.collectionFocus(target || false, collection, true);
-        }
-
-        function focusToolbar(preferred) {
-            if (!toolbarTrack || !toolbarTrack.length) return;
-            var focusedCard = comp.scroll && comp.scroll.render ? comp.scroll.render().find('.selector.focus').first() : null;
-            if (focusedCard && focusedCard.length) {
-                lastCatalogCard = focusedCard[0];
-                comp.last = focusedCard[0];
-            }
-            var target = preferred && preferred.length ? preferred : toolbarTrack.find('.yani-catalog-sort--active').first();
-            if (!target.length) target = toolbarTrack.find('.selector').first();
-            var collection = navigationCollection();
-            toolbarFocused = true;
-            syncNavigationCollection();
-            Lampa.Controller.collectionFocus(target, collection, true);
-            focusScope.remember(target[0]);
-        }
-
-        function toolbarHasFocus() {
-            return toolbarFocused || Boolean(toolbar && toolbar.find('.selector.focus, .focus.selector').length);
         }
 
         function focusedCatalogCard() {
             var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
-            var focused = collection && collection.find ? collection.find('.card.selector.focus, .selector.focus').first() : null;
+            var focused = collection && collection.find ? collection.find('.card.selector.focus').first() : null;
             return focused && focused.length ? focused : $();
         }
 
@@ -273,7 +252,6 @@
                 }
             });
             if (!target) return false;
-            toolbarFocused = false;
             lastCatalogCard = target;
             comp.last = target;
             Navigator.add(target);
@@ -374,36 +352,33 @@
             heading.append('<span class="yani-catalog-command-deck__mark"></span>');
             heading.append($('<span class="yani-catalog-command-deck__caption"></span>').text(topMode ? t('top_rated') : t('catalog')));
             toolbarTrack = $('<div class="yani-catalog-command-deck__rail"></div>');
-            topButton = $('<div class="yani-catalog-top selector" aria-label="' + t('scroll_to_top') + '"></div>');
+            topButton = $('<div class="yani-catalog-top" aria-label="' + t('scroll_to_top') + '"></div>');
             topButton.append('<span class="yani-catalog-top__icon">↑</span>');
             topButton.append($('<span class="yani-catalog-top__title"></span>').text(t('scroll_to_top')));
             topButton.append(shortcutBadge(0, ''));
-            topButton.on('hover:focus', function () { toolbarFocused = true; });
-            topButton.on('hover:enter click.yaniCatalogTop', scrollToTop);
+            topButton.on('click.yaniCatalogTop', scrollToTop);
             toolbarTrack.append(topButton);
             if (!topMode) {
                 var activeFilters = filterModel.activeCount(baseParams);
-                filterButton = $('<div class="yani-catalog-sort yani-catalog-filter selector"></div>');
+                filterButton = $('<div class="yani-catalog-sort yani-catalog-filter"></div>');
                 filterButton.toggleClass('yani-catalog-sort--active', activeFilters > 0);
                 filterButton.append($('<span class="yani-catalog-sort__icon"></span>').html('<svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>'));
                 if (activeFilters) filterButton.append($('<span class="yani-catalog-filter__count"></span>').text(activeFilters));
                 filterButton.append($('<span class="yani-catalog-sort__title"></span>').text(t('catalog_filters')));
                 filterButton.append(shortcutBadge(null, 'blue'));
-                filterButton.on('hover:focus', function () { toolbarFocused = true; });
-                filterButton.on('hover:enter click.yaniCatalogFilter', function () { openFilterMenu(); });
+                filterButton.on('click.yaniCatalogFilter', function () { openFilterMenu(); });
                 toolbarTrack.append(filterButton);
             }
             controlDefinitions.forEach(function (definition, index) {
-                var button = $('<div class="yani-catalog-sort selector"></div>');
+                var button = $('<div class="yani-catalog-sort"></div>');
                 button.toggleClass('yani-catalog-sort--active', activeSort(definition));
                 button.append($('<span class="yani-catalog-sort__icon"></span>').html(topMode ? topTypeIcon(definition.key) : catalogSortIcon(definition.key)));
                 button.append($('<span class="yani-catalog-sort__title"></span>').text(definition.title));
                 button.append(shortcutBadge(index + 1, shortcutColorFor(definition)));
-                button.on('hover:focus', function () {
-                    toolbarFocused = true;
+                button.on('click.yaniCatalogSort', function () {
                     toolbarTrack[0].scrollLeft = Math.max(0, button[0].offsetLeft - toolbarTrack[0].clientWidth / 3);
+                    changeSort(definition);
                 });
-                button.on('hover:enter click.yaniCatalogSort', function () { changeSort(definition); });
                 toolbarTrack.append(button);
             });
             toolbar.append(heading).append(toolbarTrack);
@@ -413,48 +388,31 @@
             if (comp.scroll && comp.scroll.minus) comp.scroll.minus(toolbar);
             focusScope.bind(root);
             root.off('hover:focus.yaniCatalogCard').on('hover:focus.yaniCatalogCard', '.card.selector', function (event) {
-                toolbarFocused = false;
                 lastCatalogCard = event.currentTarget || this;
                 comp.last = lastCatalogCard;
             });
-            setTimeout(syncNavigationCollection, 0);
+            setTimeout(function () {
+                syncNavigationCollection();
+                focusCards(true);
+            }, 0);
             shortcutHandler = handleRemoteShortcut;
             document.addEventListener('keydown', shortcutHandler, true);
         }
 
         function patchCatalogController(controller) {
             if (!controller || controller.yaniCatalogOwner === comp) return;
-            var originalLeft = controller.left;
-            var originalRight = controller.right;
             var originalUp = controller.up;
             var originalDown = controller.down;
             controller.yaniCatalogOwner = comp;
-            controller.left = function () {
-                if (toolbarHasFocus()) {
-                    if (Navigator.canmove('left')) return Navigator.move('left');
-                    return;
-                }
-                if (originalLeft) originalLeft();
-            };
-            controller.right = function () {
-                if (toolbarHasFocus()) {
-                    if (Navigator.canmove('right')) return Navigator.move('right');
-                    return;
-                }
-                if (originalRight) originalRight();
-            };
             controller.up = function () {
-                if (toolbarHasFocus()) {
-                    return Lampa.Controller.toggle('head');
-                }
                 var focusedCard = focusedCatalogCard();
-                if (focusedCard.length && isFirstCardRow(focusedCard)) return focusToolbar();
+                if (focusedCard.length && isFirstCardRow(focusedCard)) return Lampa.Controller.toggle('head');
+                if (focusCardInDirection('up')) return;
                 if (Navigator.canmove('up')) return Navigator.move('up');
-                if (toolbarTrack) return focusToolbar();
-                if (originalUp) originalUp();
+                if (originalUp) return originalUp();
+                return Lampa.Controller.toggle('head');
             };
             controller.down = function () {
-                if (toolbarHasFocus()) return focusCards(false);
                 if (focusCardInDirection('down')) return;
                 if (Navigator.canmove('down')) return Navigator.move('down');
                 if (comp.scroll && comp.scroll.wheel) {

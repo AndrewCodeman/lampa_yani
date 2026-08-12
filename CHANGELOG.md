@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.17 — 2026-08-12
+
+- Show the full genre description in the catalog header instead of clamping it to two lines.
+- Keep catalog TV-remote focus on title cards only: the sort/filter command deck is no longer a D-pad target and remains reachable via color/number shortcuts and mouse clicks.
+
 ## 0.41.16 — 2026-08-12
 
 - Added a dedicated title-detail panel listing unique voice teams and subtitle releases.
