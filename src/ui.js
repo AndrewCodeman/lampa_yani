@@ -196,7 +196,7 @@
     function Catalog(object) {
         var comp = new Lampa.InteractionCategory(object);
         var topMode = Boolean(object.topMode);
-        var baseParams = copyParams(object.params || {limit: 30, sort: 'top', sort_forward: false});
+        var baseParams = copyParams(object.params || {limit: 30, sort: 'top', sort_forward: true});
         var limit = Number(baseParams.limit || 30);
         var maxPages = Math.ceil(20000 / limit) + 1;
         var seen = {};
@@ -207,7 +207,10 @@
         baseParams.limit = limit;
         baseParams.offset = Number(baseParams.offset || 0);
         baseParams.sort = baseParams.sort || 'top';
-        baseParams.sort_forward = baseParams.sort_forward === true || baseParams.sort_forward === 'true';
+        var hasSortDirection = Object.prototype.hasOwnProperty.call(baseParams, 'sort_forward');
+        baseParams.sort_forward = hasSortDirection ?
+            baseParams.sort_forward === true || baseParams.sort_forward === 'true' :
+            baseParams.sort === 'top';
 
         function installGenreHeader() {
             var context = object.genre_context;
@@ -227,6 +230,16 @@
             view.addClass('yani-genre-catalog-view').prepend(genreHeader);
             if (comp.scroll && comp.scroll.minus) comp.scroll.minus(genreHeader);
         }
+
+        function annotateGenreTop(items, offset) {
+            if (!object.genre_context || baseParams.sort !== 'top' || !baseParams.sort_forward) return items;
+            var title = genreTitle(object.genre_context);
+            (items || []).forEach(function (item, index) {
+                var position = Number(offset || 0) + index + 1;
+                if (item && position <= 100) item.yani_genre_top = {position: position, genre: title};
+            });
+            return items;
+        }
         var controls = LampaYaniCatalogControls.create({
             comp: comp,
             object: object,
@@ -244,7 +257,7 @@
             this.activity.loader(true);
             LampaYaniApi.catalog(baseParams)
                 .then(function (payload) {
-                    var raw = LampaYaniApi.normalize(payload);
+                    var raw = annotateGenreTop(LampaYaniApi.normalize(payload), baseParams.offset);
                     var results = mapUniqueCards(raw, seen);
                     requestedOffsets[baseParams.offset] = true;
                     if (raw.length < limit) object.page = maxPages;
@@ -268,7 +281,7 @@
             requestedOffsets[params.offset] = true;
 
             LampaYaniApi.catalog(params).then(function (payload) {
-                var raw = LampaYaniApi.normalize(payload);
+                var raw = annotateGenreTop(LampaYaniApi.normalize(payload), params.offset);
                 var results = mapUniqueCards(raw, seen);
                 if (raw.length < limit) requestObject.page = maxPages;
                 resolve({results: results, total_pages: maxPages, title: t(topMode ? 'top_rated' : 'anime')});
@@ -1727,16 +1740,33 @@
     function renderCardMediaBadges(element, card, meta) {
         meta = meta || {};
         var mediaType = mediaTypeLabels(card && card.yani_type);
-        if (!mediaType && !meta.quality && !meta.voices) return;
+        var genreTop = genreTopPosition(card);
+        if (!mediaType && !meta.quality && !meta.voices && !genreTop) return;
         var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length) return;
         var block = $('.yani-card-media', view);
         if (!block.length) block = $('<div class="yani-card-media"></div>').appendTo(view);
         block.empty();
+        if (genreTop) {
+            var topLabel = t('genre_top_position')
+                .replace('{genre}', card.yani_genre_top.genre || '')
+                .replace('{position}', genreTop);
+            var topBadge = $('<span class="yani-card-media__badge yani-card-media__genre-top"></span>')
+                .attr({'title': topLabel, 'aria-label': topLabel});
+            topBadge.append('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v3h3v2c0 3.2-1.8 5.5-5 6.3V17h3v3H6v-3h3v-2.7C5.8 13.5 4 11.2 4 8V6h3V3Zm0 5H6c0 1.7.8 3 2.3 3.7A8.8 8.8 0 0 1 7 8Zm10 0c-.1 1.4-.5 2.6-1.3 3.7C17.2 11 18 9.7 18 8h-1Z"/></svg>');
+            topBadge.append($('<b></b>').text('#' + genreTop));
+            block.append(topBadge);
+        }
         if (mediaType) block.append($('<span class="yani-card-media__badge yani-card-media__type"></span>').text(mediaType.short));
         if (meta.quality) block.append($('<span class="yani-card-media__badge yani-card-media__quality"></span>').text(meta.quality));
         if (meta.voices) block.append($('<span class="yani-card-media__badge yani-card-media__voices"></span>').text(meta.voices + ' ' + t('voices_short')));
+    }
+
+    function genreTopPosition(card) {
+        var top = card && card.yani_genre_top;
+        var position = Number(top && top.position);
+        return position >= 1 && position <= 100 ? Math.floor(position) : 0;
     }
 
     function addCardUpdateBadge(element, card) {
@@ -4617,6 +4647,7 @@
             yani_user_rating: Number(item.user && (item.user.rate || item.user.rating || item.user.score) || item.user_rate || 0) || null,
             yani_viewing_order: Array.isArray(item.viewing_order) ? item.viewing_order : [],
             yani_genres: item.genres || item.genre || [],
+            yani_genre_top: item.yani_genre_top && typeof item.yani_genre_top === 'object' ? item.yani_genre_top : null,
             yani_type: item.type || null,
             yani_episodes: item.episodes || null,
             yani_seasons: Array.isArray(item.seasons) ? item.seasons : null,

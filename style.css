@@ -1743,6 +1743,9 @@
 .yani-card-media__quality { background: #f1c40f; color: #171717; }
 .yani-card-media__voices { background: #3b9bd9; }
 .yani-card-media__type { background: rgba(239, 100, 112, 0.94); }
+.yani-card-media__genre-top { display: inline-flex; align-items: center; gap: .24em; border: 1px solid rgba(255,224,132,.65); background: linear-gradient(135deg, rgba(106,69,18,.96), rgba(206,143,35,.96)); box-shadow: 0 .18em .5em rgba(0,0,0,.3); color: #fff5ce; }
+.yani-card-media__genre-top svg { width: .95em; height: .95em; fill: currentColor; }
+.yani-card-media__genre-top b { font: inherit; letter-spacing: .02em; }
 .yani-card-update { position: absolute; top: 0.35em; right: 0.35em; z-index: 2; max-width: calc(100% - 0.7em); padding: 0.22em 0.38em; border-radius: 0.25em; background: #ef6470; color: #fff; font-size: 0.62em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .yani-card-recommendation { position: absolute; top: .35em; left: .35em; z-index: 3; max-width: calc(100% - .7em); padding: .22em .42em; border-radius: .3em; background: rgba(81, 61, 143, .94); color: #fff; font-size: .58em; font-weight: 700; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .yani-card-list { position: absolute; left: 0.35em; bottom: 0.35em; z-index: 3; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: #5f43a8; color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

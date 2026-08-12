@@ -52,7 +52,7 @@
             fallback: firstCard
         });
         var sortDefinitions = [
-            {key: 'top', sort: 'top', forward: false, title: t('catalog_sort_top')},
+            {key: 'top', sort: 'top', forward: true, title: t('catalog_sort_top')},
             {key: 'new', sort: 'year', forward: false, title: t('catalog_sort_new')},
             {key: 'rating', sort: 'rating', forward: false, title: t('catalog_sort_rating')},
             {key: 'votes', sort: 'rating_counters', forward: false, title: t('catalog_sort_votes')},

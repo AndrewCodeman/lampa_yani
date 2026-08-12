@@ -29,11 +29,13 @@
 
     messages.ru.version_name = 'YummyAnime';
     messages.ru.version_label = 'Версия';
+    messages.ru.genre_top_position = 'Топ-100 жанра «{genre}»: место {position}';
     messages.ru.top_all = 'Общий топ';
     messages.ru.top_tv = 'Сериалы';
     messages.ru.top_movies = 'Фильмы';
     messages.ru.top_ona = 'ONA';
     messages.en.version_name = 'YummyAnime';
+    messages.en.genre_top_position = '“{genre}” top 100: position {position}';
     messages.en.version_label = 'Version';
     messages.en.top_all = 'Overall';
     messages.en.top_tv = 'TV series';
@@ -512,6 +514,7 @@
         language_name: 'Мова / Language', language_description: 'Мова інтерфейсу розширення YummyAnime', language_changed: 'Мову YummyAnime змінено. Відкрийте розширення знову.', section_visibility_description: 'Показувати цей розділ на головному екрані YummyAnime', lampa_card_integration: 'Картка Lampa', lampa_card_rating: 'Рейтинг YummyAnime', lampa_card_rating_description: 'Показувати рейтинг YummyAnime на звичайній картці Lampa', lampa_card_button: 'Кнопка YummyAnime', lampa_card_button_description: 'Показувати кнопку з логотипом YummyAnime на звичайній картці Lampa', version_name: 'YummyAnime', version_label: 'Версія', website_description: 'Офіційний сайт YummyAnime', unofficial_extension: 'Неофіційне розширення', account_statistics: 'Статистика', genres_statistics: 'Жанри', ratings_statistics: 'Оцінки', types_statistics: 'Типи', auth_title: 'Авторизація YummyAnime', auth_authorized: 'Ви увійшли до облікового запису YummyAnime', auth_not_authorized: 'Вхід не виконано', auth_login: 'Нікнейм або Email', auth_password: 'Пароль', auth_submit: 'Увійти', auth_account: 'Обліковий запис',
         login_name: 'Увійти до YummyAnime', refresh_name: 'Оновити токен YummyAnime', login_first: 'Спочатку увійдіть до YummyAnime', token_refreshed: 'Токен YummyAnime оновлено', token_refresh_error: 'Не вдалося оновити токен YummyAnime', logout_name: 'Вийти з YummyAnime', logged_out: 'Ви вийшли з YummyAnime', api_check_name: 'Перевірити YummyAnime API', api_ok: 'YummyAnime API працює', api_error: 'YummyAnime API недоступний або публічний токен неправильний', email_prompt: 'Нікнейм або Email', email_required: 'Введіть нікнейм або email YummyAnime', password_prompt: 'Пароль YummyAnime', password_required: 'Введіть пароль YummyAnime', login_ok: 'Вхід до YummyAnime виконано', login_error: 'Помилка входу до YummyAnime', comments_title: 'Коментарі YummyAnime', comments_error: 'Не вдалося завантажити коментарі', kinopoisk: 'Кінопошук'
     });
+    messages.uk.genre_top_position = 'Топ-100 жанру «{genre}»: місце {position}';
     messages.uk.back_to_lampa = 'Повернутися до Lampa';
     messages.uk.top_all = 'Загальний топ';
     messages.uk.top_tv = 'Серіали';

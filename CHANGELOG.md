@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.9 — 2026-08-12
+
+- Added a compact trophy badge with the actual top-100 position to cards in a genre catalog.
+- Corrected the Popular sort direction so genre positions are derived from the API's real best-first order; the badge remains self-contained with an embedded SVG.
+
 ## 0.41.8 — 2026-08-12
 
 - Added localized textual genre descriptions when the YummyAnime API only provides a genre title and identifier.
