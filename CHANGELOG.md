@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.35 — 2026-08-13
+
+- Open the voice and episode pickers without waiting on Jikan episode titles; reuse the title-page videos request from memory so Watch does not refetch before the dubbing list.
+
 ## 0.41.34 — 2026-08-13
 
 - Remove the remote-focus pause on the dashboard: keep D-pad movement instant, and stop scaling tiles, ambient layers, and intro art on every focus change.

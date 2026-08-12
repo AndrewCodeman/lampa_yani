@@ -299,6 +299,8 @@
 
         function renderDetail(cardData) {
             data = cardData;
+            var malId = data.yani_remote_ids && (data.yani_remote_ids.myanimelist_id || data.yani_remote_ids.mal_id);
+            if (malId) LampaYaniApi.episodeInfo(malId).catch(function () {});
             var poster = $('<img class="yani-detail__poster">').attr('src', data.img || data.poster || '');
             LampaYaniMedia.bindPosterFallback(poster, data);
             var info = $('<div class="yani-detail__info"></div>');

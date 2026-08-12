@@ -2483,9 +2483,8 @@
     }
 
     function groupPlaybackPriority(group) {
-        return (group && group.videos || []).reduce(function (priority, video) {
-            return Math.max(priority, videoPlaybackPriority(video, group));
-        }, 0);
+        var videos = group && group.videos || [];
+        return videos.length ? videoPlaybackPriority(videos[0], group) : 0;
     }
 
     function voiceOptionSubtitle(group) {
@@ -2621,25 +2620,52 @@
         return value !== false && value !== 'false';
     }
 
+    var episodeTitlesCache = {};
+
+    function episodeTitlesForCard(card) {
+        var malId = card && card.yani_remote_ids && (card.yani_remote_ids.myanimelist_id || card.yani_remote_ids.mal_id);
+        if (!malId) return Promise.resolve(null);
+        var key = String(malId);
+        var entry = episodeTitlesCache[key];
+        if (entry) return entry.promise;
+        entry = episodeTitlesCache[key] = {titles: null, promise: null};
+        entry.promise = LampaYaniApi.episodeInfo(malId).then(function (payload) {
+            var items = payload && payload.episodes;
+            var titles = {};
+            if (Array.isArray(items)) {
+                items.forEach(function (item) {
+                    var number = Number(item.episodeNumber || item.episode || item.number);
+                    if (number > 0 && item.title) titles[number] = item.title;
+                });
+            }
+            entry.titles = titles;
+            return titles;
+        }).catch(function () {
+            delete episodeTitlesCache[key];
+            return null;
+        });
+        return entry.promise;
+    }
+
+    function applyEpisodeTitles(group, titles) {
+        if (!group || !titles) return;
+        group.episodeTitlesLoaded = true;
+        (group.videos || []).forEach(function (video) {
+            var number = Number(video.number || video.index);
+            if (titles[number]) video.yani_episode_title = titles[number];
+        });
+    }
+
     function enrichEpisodeTitles(card, group) {
         var malId = card && card.yani_remote_ids && (card.yani_remote_ids.myanimelist_id || card.yani_remote_ids.mal_id);
-        if (!malId || !group || group.episodeTitlesLoaded) return Promise.resolve();
-        group.episodeTitlesLoaded = true;
-        return LampaYaniApi.episodeInfo(malId).then(function (payload) {
-            var items = payload && payload.episodes;
-            if (!Array.isArray(items)) return;
-            var titles = {};
-            items.forEach(function (item) {
-                var number = Number(item.episodeNumber || item.episode || item.number);
-                if (number > 0 && item.title) titles[number] = item.title;
-            });
-            group.videos.forEach(function (video) {
-                var number = Number(video.number || video.index);
-                if (titles[number]) video.yani_episode_title = titles[number];
-            });
-        }).catch(function () {
-            // Episode metadata is optional; playback must continue if the helper API is down.
-        });
+        if (!malId) {
+            if (group) group.episodeTitlesLoaded = true;
+            return Promise.resolve();
+        }
+        var entry = episodeTitlesCache[String(malId)];
+        if (group && entry && entry.titles) applyEpisodeTitles(group, entry.titles);
+        else episodeTitlesForCard(card);
+        return Promise.resolve();
     }
 
     // Stream sources that already carry a direct Alloha stream and must not be

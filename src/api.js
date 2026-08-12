@@ -8,9 +8,9 @@
         return new Promise(function (resolve) { setTimeout(resolve, milliseconds); });
     }
 
-    function fetchWithRetry(url, options, canRetry) {
+    function fetchWithRetry(url, options, canRetry, timeoutMs) {
         var retries = canRetry ? Number(config.requestRetries || 0) : 0;
-        var timeout = Number(config.requestTimeout || 15000);
+        var timeout = Number(timeoutMs || config.requestTimeout || 15000);
         var externalSignal = options && options.signal;
         function attempt(number) {
             var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -147,13 +147,16 @@
         return fetchWithRetry(url, {
             method: options.method || 'GET',
             headers: {Accept: 'application/json'}
-        }, true).then(function (response) {
+        }, options.retry !== false, options.timeout).then(function (response) {
             if (!response.ok) throw new Error('External API: ' + response.status);
             return response.json();
         });
     }
 
     var malTitlesCache = {};
+    var episodeInfoCache = {};
+    var videosMemory = {};
+    var VIDEOS_MEMORY_MS = 45000;
 
     function malTitles(malId) {
         if (!malId) return Promise.resolve([]);
@@ -240,20 +243,35 @@
         },
         episodeInfo: function (malId) {
             if (!malId) return Promise.reject(new Error('MAL id is missing'));
-            return externalRequest('https://api.jikan.moe/v4', '/anime/' + encodeURIComponent(malId) + '/episodes').then(function (payload) {
+            var key = String(malId);
+            if (episodeInfoCache[key]) return episodeInfoCache[key];
+            episodeInfoCache[key] = externalRequest('https://api.jikan.moe/v4', '/anime/' + encodeURIComponent(malId) + '/episodes', {
+                timeout: 4000,
+                retry: false
+            }).then(function (payload) {
                 return {
                     episodes: (payload && payload.data || []).map(function (item) {
                         return {episodeNumber: item.mal_id, title: item.title || item.title_romanji || item.title_japanese || ''};
                     })
                 };
+            }).catch(function (error) {
+                delete episodeInfoCache[key];
+                throw error;
             });
+            return episodeInfoCache[key];
         },
         malTitles: malTitles,
         detail: function (id) {
             return request('/anime/' + encodeURIComponent(id), {auth: true});
         },
         videos: function (id) {
-            return request('/anime/' + encodeURIComponent(id) + '/videos', {auth: true, cache: false});
+            var key = String(id || '');
+            var cached = videosMemory[key];
+            if (cached && Date.now() - cached.at < VIDEOS_MEMORY_MS) return Promise.resolve(cached.payload);
+            return request('/anime/' + encodeURIComponent(id) + '/videos', {auth: true, cache: false}).then(function (payload) {
+                videosMemory[key] = {at: Date.now(), payload: payload};
+                return payload;
+            });
         },
         subscribeVideo: function (videoId) {
             return request('/video/' + encodeURIComponent(videoId) + '/subscribe', {

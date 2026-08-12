@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.41.34',
+        version: '0.41.35',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -1151,9 +1151,9 @@ function pluginYummyAnime() {
         return new Promise(function (resolve) { setTimeout(resolve, milliseconds); });
     }
 
-    function fetchWithRetry(url, options, canRetry) {
+    function fetchWithRetry(url, options, canRetry, timeoutMs) {
         var retries = canRetry ? Number(config.requestRetries || 0) : 0;
-        var timeout = Number(config.requestTimeout || 15000);
+        var timeout = Number(timeoutMs || config.requestTimeout || 15000);
         var externalSignal = options && options.signal;
         function attempt(number) {
             var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -1290,13 +1290,16 @@ function pluginYummyAnime() {
         return fetchWithRetry(url, {
             method: options.method || 'GET',
             headers: {Accept: 'application/json'}
-        }, true).then(function (response) {
+        }, options.retry !== false, options.timeout).then(function (response) {
             if (!response.ok) throw new Error('External API: ' + response.status);
             return response.json();
         });
     }
 
     var malTitlesCache = {};
+    var episodeInfoCache = {};
+    var videosMemory = {};
+    var VIDEOS_MEMORY_MS = 45000;
 
     function malTitles(malId) {
         if (!malId) return Promise.resolve([]);
@@ -1383,20 +1386,35 @@ function pluginYummyAnime() {
         },
         episodeInfo: function (malId) {
             if (!malId) return Promise.reject(new Error('MAL id is missing'));
-            return externalRequest('https://api.jikan.moe/v4', '/anime/' + encodeURIComponent(malId) + '/episodes').then(function (payload) {
+            var key = String(malId);
+            if (episodeInfoCache[key]) return episodeInfoCache[key];
+            episodeInfoCache[key] = externalRequest('https://api.jikan.moe/v4', '/anime/' + encodeURIComponent(malId) + '/episodes', {
+                timeout: 4000,
+                retry: false
+            }).then(function (payload) {
                 return {
                     episodes: (payload && payload.data || []).map(function (item) {
                         return {episodeNumber: item.mal_id, title: item.title || item.title_romanji || item.title_japanese || ''};
                     })
                 };
+            }).catch(function (error) {
+                delete episodeInfoCache[key];
+                throw error;
             });
+            return episodeInfoCache[key];
         },
         malTitles: malTitles,
         detail: function (id) {
             return request('/anime/' + encodeURIComponent(id), {auth: true});
         },
         videos: function (id) {
-            return request('/anime/' + encodeURIComponent(id) + '/videos', {auth: true, cache: false});
+            var key = String(id || '');
+            var cached = videosMemory[key];
+            if (cached && Date.now() - cached.at < VIDEOS_MEMORY_MS) return Promise.resolve(cached.payload);
+            return request('/anime/' + encodeURIComponent(id) + '/videos', {auth: true, cache: false}).then(function (payload) {
+                videosMemory[key] = {at: Date.now(), payload: payload};
+                return payload;
+            });
         },
         subscribeVideo: function (videoId) {
             return request('/video/' + encodeURIComponent(videoId) + '/subscribe', {
@@ -5577,6 +5595,7 @@ function pluginYummyAnime() {
                 return;
             }
             if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+            enrichEpisodeTitles(card);
 
             LampaYaniApi.videos(card.yani_id).then(function (payload) {
                 if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
@@ -5648,9 +5667,8 @@ function pluginYummyAnime() {
 
                 if (voices.length === 1) {
                     rememberPlayer(voices[0].group);
-                    return enrichEpisodeTitles(card, voices[0].group).then(function () {
-                        chooseEpisode(card, voices[0].group);
-                    });
+                    enrichEpisodeTitles(card, voices[0].group);
+                    return chooseEpisode(card, voices[0].group);
                 }
                 showPlaybackSelect({
                     title: t('choose_voice'),
@@ -5658,9 +5676,8 @@ function pluginYummyAnime() {
                     onFocus: enrichVoiceOptionQuality,
                     onSelect: function (item) {
                         rememberPlayer(item.group);
-                        enrichEpisodeTitles(card, item.group).then(function () {
-                            chooseEpisode(card, item.group);
-                        });
+                        enrichEpisodeTitles(card, item.group);
+                        chooseEpisode(card, item.group);
                     }
                 });
             }).catch(function (error) {
@@ -9625,6 +9642,8 @@ function pluginYummyAnime() {
 
         function renderDetail(cardData) {
             data = cardData;
+            var malId = data.yani_remote_ids && (data.yani_remote_ids.myanimelist_id || data.yani_remote_ids.mal_id);
+            if (malId) LampaYaniApi.episodeInfo(malId).catch(function () {});
             var poster = $('<img class="yani-detail__poster">').attr('src', data.img || data.poster || '');
             LampaYaniMedia.bindPosterFallback(poster, data);
             var info = $('<div class="yani-detail__info"></div>');
@@ -12569,9 +12588,8 @@ function pluginYummyAnime() {
     }
 
     function groupPlaybackPriority(group) {
-        return (group && group.videos || []).reduce(function (priority, video) {
-            return Math.max(priority, videoPlaybackPriority(video, group));
-        }, 0);
+        var videos = group && group.videos || [];
+        return videos.length ? videoPlaybackPriority(videos[0], group) : 0;
     }
 
     function voiceOptionSubtitle(group) {
@@ -12707,25 +12725,52 @@ function pluginYummyAnime() {
         return value !== false && value !== 'false';
     }
 
+    var episodeTitlesCache = {};
+
+    function episodeTitlesForCard(card) {
+        var malId = card && card.yani_remote_ids && (card.yani_remote_ids.myanimelist_id || card.yani_remote_ids.mal_id);
+        if (!malId) return Promise.resolve(null);
+        var key = String(malId);
+        var entry = episodeTitlesCache[key];
+        if (entry) return entry.promise;
+        entry = episodeTitlesCache[key] = {titles: null, promise: null};
+        entry.promise = LampaYaniApi.episodeInfo(malId).then(function (payload) {
+            var items = payload && payload.episodes;
+            var titles = {};
+            if (Array.isArray(items)) {
+                items.forEach(function (item) {
+                    var number = Number(item.episodeNumber || item.episode || item.number);
+                    if (number > 0 && item.title) titles[number] = item.title;
+                });
+            }
+            entry.titles = titles;
+            return titles;
+        }).catch(function () {
+            delete episodeTitlesCache[key];
+            return null;
+        });
+        return entry.promise;
+    }
+
+    function applyEpisodeTitles(group, titles) {
+        if (!group || !titles) return;
+        group.episodeTitlesLoaded = true;
+        (group.videos || []).forEach(function (video) {
+            var number = Number(video.number || video.index);
+            if (titles[number]) video.yani_episode_title = titles[number];
+        });
+    }
+
     function enrichEpisodeTitles(card, group) {
         var malId = card && card.yani_remote_ids && (card.yani_remote_ids.myanimelist_id || card.yani_remote_ids.mal_id);
-        if (!malId || !group || group.episodeTitlesLoaded) return Promise.resolve();
-        group.episodeTitlesLoaded = true;
-        return LampaYaniApi.episodeInfo(malId).then(function (payload) {
-            var items = payload && payload.episodes;
-            if (!Array.isArray(items)) return;
-            var titles = {};
-            items.forEach(function (item) {
-                var number = Number(item.episodeNumber || item.episode || item.number);
-                if (number > 0 && item.title) titles[number] = item.title;
-            });
-            group.videos.forEach(function (video) {
-                var number = Number(video.number || video.index);
-                if (titles[number]) video.yani_episode_title = titles[number];
-            });
-        }).catch(function () {
-            // Episode metadata is optional; playback must continue if the helper API is down.
-        });
+        if (!malId) {
+            if (group) group.episodeTitlesLoaded = true;
+            return Promise.resolve();
+        }
+        var entry = episodeTitlesCache[String(malId)];
+        if (group && entry && entry.titles) applyEpisodeTitles(group, entry.titles);
+        else episodeTitlesForCard(card);
+        return Promise.resolve();
     }
 
     // Stream sources that already carry a direct Alloha stream and must not be

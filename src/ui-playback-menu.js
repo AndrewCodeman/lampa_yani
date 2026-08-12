@@ -199,6 +199,7 @@
                 return;
             }
             if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
+            enrichEpisodeTitles(card);
 
             LampaYaniApi.videos(card.yani_id).then(function (payload) {
                 if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
@@ -270,9 +271,8 @@
 
                 if (voices.length === 1) {
                     rememberPlayer(voices[0].group);
-                    return enrichEpisodeTitles(card, voices[0].group).then(function () {
-                        chooseEpisode(card, voices[0].group);
-                    });
+                    enrichEpisodeTitles(card, voices[0].group);
+                    return chooseEpisode(card, voices[0].group);
                 }
                 showPlaybackSelect({
                     title: t('choose_voice'),
@@ -280,9 +280,8 @@
                     onFocus: enrichVoiceOptionQuality,
                     onSelect: function (item) {
                         rememberPlayer(item.group);
-                        enrichEpisodeTitles(card, item.group).then(function () {
-                            chooseEpisode(card, item.group);
-                        });
+                        enrichEpisodeTitles(card, item.group);
+                        chooseEpisode(card, item.group);
                     }
                 });
             }).catch(function (error) {

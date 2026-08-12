@@ -17,7 +17,7 @@ const model = fs.readFileSync('src/ui-card-model.js', 'utf8');
 const api = fs.readFileSync('src/api.js', 'utf8');
 assert.match(model, /yani_episodes: item\.episodes \|\| null/);
 assert.match(css, /\.yani-detail__episode-summary\.focus/);
-assert.match(api, /videos: function \(id\)[\s\S]{0,140}\{auth: true, cache: false\}/,
+assert.match(api, /videos: function \(id\)[\s\S]{0,420}\{auth: true, cache: false\}/,
     'authorized video metadata is required for watched-episode counts');
 
 ['ru', 'en', 'uk'].forEach((language) => {
