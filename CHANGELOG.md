@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.11 — 2026-08-12
+
+- Added a compact metadata line below title cards with media type, release status, available episode counts and year when supplied by YummyAnime.
+- Removed the duplicate media-type badge from poster artwork and retained quality, dubbing and genre-top badges.
+
 ## 0.41.10 — 2026-08-12
 
 - Load the full localized genre description from the YummyAnime genre endpoint and keep the bundled description as an offline fallback.

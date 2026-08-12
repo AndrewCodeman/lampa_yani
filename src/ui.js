@@ -1682,6 +1682,7 @@
         card._yani_card = true;
         addCardRatings(element, card);
         addCardMediaBadges(element, card);
+        addCardMetadata(element, card);
         addCardUpdateBadge(element, card);
         addCardRecommendationBadge(element, card);
         addCardListBadge(element, card);
@@ -1756,9 +1757,8 @@
 
     function renderCardMediaBadges(element, card, meta) {
         meta = meta || {};
-        var mediaType = mediaTypeLabels(card && card.yani_type);
         var genreTop = genreTopPosition(card);
-        if (!mediaType && !meta.quality && !meta.voices && !genreTop) return;
+        if (!meta.quality && !meta.voices && !genreTop) return;
         var render = cardRenderElement(element, card);
         var view = $('.card__view', render).first();
         if (!view.length) return;
@@ -1775,7 +1775,6 @@
             topBadge.append($('<b></b>').text('#' + genreTop));
             block.append(topBadge);
         }
-        if (mediaType) block.append($('<span class="yani-card-media__badge yani-card-media__type"></span>').text(mediaType.short));
         if (meta.quality) block.append($('<span class="yani-card-media__badge yani-card-media__quality"></span>').text(meta.quality));
         if (meta.voices) block.append($('<span class="yani-card-media__badge yani-card-media__voices"></span>').text(meta.voices + ' ' + t('voices_short')));
     }
@@ -1784,6 +1783,49 @@
         var top = card && card.yani_genre_top;
         var position = Number(top && top.position);
         return position >= 1 && position <= 100 ? Math.floor(position) : 0;
+    }
+
+    function cardStatusLabel(status) {
+        if (!status) return '';
+        if (typeof status === 'string') return status;
+        if (status.title) return status.title;
+        var aliases = {released: 'status_released', ongoing: 'status_ongoing', announced: 'status_announced'};
+        return status.alias && aliases[status.alias] ? t(aliases[status.alias]) : '';
+    }
+
+    function cardEpisodesLabel(episodes) {
+        if (!episodes) return '';
+        if (typeof episodes === 'number') return episodes > 0 ? episodes + ' ' + t('episodes_short') : '';
+        var total = Number(episodes.count || episodes.total || 0);
+        var aired = Number(episodes.aired || episodes.released || 0);
+        if (aired > 0 && total > 0 && aired !== total) return aired + '/' + total + ' ' + t('episodes_short');
+        var count = total || aired;
+        return count > 0 ? count + ' ' + t('episodes_short') : '';
+    }
+
+    function addCardMetadata(element, card) {
+        var render = cardRenderElement(element, card);
+        if (!render.length || render.find('.yani-card-meta').length) return;
+        var values = [];
+        var type = mediaTypeLabels(card && card.yani_type);
+        if (type && type.short) values.push({kind: 'type', text: type.short});
+        var status = cardStatusLabel(card && card.yani_status);
+        if (status) values.push({kind: 'status', text: status});
+        var episodes = cardEpisodesLabel(card && card.yani_episodes);
+        if (episodes) values.push({kind: 'episodes', text: episodes});
+        var year = String(card && (card.yani_year || card.release_date) || '').slice(0, 4);
+        if (/^\d{4}$/.test(year)) values.push({kind: 'year', text: year});
+        if (!values.length) return;
+
+        var metadata = $('<div class="yani-card-meta" aria-hidden="true"></div>');
+        values.forEach(function (value) {
+            metadata.append($('<span></span>').addClass('yani-card-meta__' + value.kind).text(value.text));
+        });
+        var age = render.find('.card__age').first();
+        var title = render.find('.card__title').first();
+        if (age.length) age.addClass('yani-card-meta__native-age').after(metadata);
+        else if (title.length) title.after(metadata);
+        else render.append(metadata);
     }
 
     function addCardUpdateBadge(element, card) {
@@ -4672,6 +4714,8 @@
             yani_genres: item.genres || item.genre || [],
             yani_genre_top: item.yani_genre_top && typeof item.yani_genre_top === 'object' ? item.yani_genre_top : null,
             yani_type: item.type || null,
+            yani_status: item.anime_status || item.status || null,
+            yani_year: item.year || item.release_year || null,
             yani_episodes: item.episodes || null,
             yani_seasons: Array.isArray(item.seasons) ? item.seasons : null,
             yani_seasons_count: Number(item.seasons_count || item.season_count || 0) || 0,

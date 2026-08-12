@@ -30,12 +30,18 @@
     messages.ru.version_name = 'YummyAnime';
     messages.ru.version_label = 'Версия';
     messages.ru.genre_top_position = 'Топ-100 жанра «{genre}»: место {position}';
+    messages.ru.status_released = 'Вышел';
+    messages.ru.status_ongoing = 'Онгоинг';
+    messages.ru.status_announced = 'Анонс';
     messages.ru.top_all = 'Общий топ';
     messages.ru.top_tv = 'Сериалы';
     messages.ru.top_movies = 'Фильмы';
     messages.ru.top_ona = 'ONA';
     messages.en.version_name = 'YummyAnime';
     messages.en.genre_top_position = '“{genre}” top 100: position {position}';
+    messages.en.status_released = 'Released';
+    messages.en.status_ongoing = 'Ongoing';
+    messages.en.status_announced = 'Announced';
     messages.en.version_label = 'Version';
     messages.en.top_all = 'Overall';
     messages.en.top_tv = 'TV series';
@@ -515,6 +521,9 @@
         login_name: 'Увійти до YummyAnime', refresh_name: 'Оновити токен YummyAnime', login_first: 'Спочатку увійдіть до YummyAnime', token_refreshed: 'Токен YummyAnime оновлено', token_refresh_error: 'Не вдалося оновити токен YummyAnime', logout_name: 'Вийти з YummyAnime', logged_out: 'Ви вийшли з YummyAnime', api_check_name: 'Перевірити YummyAnime API', api_ok: 'YummyAnime API працює', api_error: 'YummyAnime API недоступний або публічний токен неправильний', email_prompt: 'Нікнейм або Email', email_required: 'Введіть нікнейм або email YummyAnime', password_prompt: 'Пароль YummyAnime', password_required: 'Введіть пароль YummyAnime', login_ok: 'Вхід до YummyAnime виконано', login_error: 'Помилка входу до YummyAnime', comments_title: 'Коментарі YummyAnime', comments_error: 'Не вдалося завантажити коментарі', kinopoisk: 'Кінопошук'
     });
     messages.uk.genre_top_position = 'Топ-100 жанру «{genre}»: місце {position}';
+    messages.uk.status_released = 'Вийшов';
+    messages.uk.status_ongoing = 'Онгоїнг';
+    messages.uk.status_announced = 'Анонс';
     messages.uk.back_to_lampa = 'Повернутися до Lampa';
     messages.uk.top_all = 'Загальний топ';
     messages.uk.top_tv = 'Серіали';
