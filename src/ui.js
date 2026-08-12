@@ -265,6 +265,8 @@
         var homeButtons = {};
         var homeFocusStorageKey = 'yani_home_last_focus';
         var destroyed = false;
+        var homeAbortController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        var homeTimers = [];
         var currentEpisodeFlow;
         var preferredHomeKey = 'catalog';
         var renderIntroContext = function () {};
@@ -275,6 +277,23 @@
         var lowMemoryDevice = Number(navigatorInfo.deviceMemory || 0) > 0 && Number(navigatorInfo.deviceMemory) <= 2;
         var lowCpuDevice = Number(navigatorInfo.hardwareConcurrency || 0) > 0 && Number(navigatorInfo.hardwareConcurrency) <= 2;
         html.addClass(reducedMotion || lowMemoryDevice || lowCpuDevice ? 'yani-home--reduced-motion' : 'yani-home--motion');
+
+        function homeRequestControl() {
+            return homeAbortController ? {signal: homeAbortController.signal} : {};
+        }
+
+        function scheduleHomeTask(callback, delay) {
+            var timer = setTimeout(function () {
+                homeTimers = homeTimers.filter(function (item) { return item !== timer; });
+                if (!destroyed) callback();
+            }, Math.max(0, Number(delay || 0)));
+            homeTimers.push(timer);
+            return timer;
+        }
+
+        function homeRequestCancelled(error) {
+            return destroyed || homeAbortController && homeAbortController.signal.aborted || error && error.name === 'AbortError';
+        }
 
         var items = [
             {key: 'catalog', title: t('catalog'), group: 'explore', action: function () {
@@ -343,6 +362,7 @@
             var introMetrics = {};
             var sectionRailNodes = {};
             var panels = {};
+            var panelRoots = {};
             var sectionRail = $('<div class="yani-home__section-rail"></div>');
             var sectionDefinitions = [
                 {key: 'explore', chapter: '01', title: t('dashboard_browse')},
@@ -407,7 +427,7 @@
                     group === 'service' ? t('dashboard_service') : '';
                 var chapter = group === 'explore' ? '01' : group === 'library' ? '03' : group === 'service' ? '05' : '';
                 var root = $('<div class="yani-home__panel yani-home__panel--' + group + '"></div>');
-                var head = $('<div class="yani-home__panel-head"><span class="yani-home__panel-chapter" aria-hidden="true"></span><span class="yani-home__panel-title"></span><span class="yani-home__panel-line" aria-hidden="true"></span></div>');
+                var head = $('<div class="yani-home__panel-head"><span class="yani-home__panel-chapter" aria-hidden="true"></span><span class="yani-home__panel-title"></span><span class="yani-home__panel-line" aria-hidden="true"></span><span class="yani-home__chapter-state"><i></i><b></b></span></div>');
                 var content = $('<div class="yani-home__panel-items"></div>');
                 head.find('.yani-home__panel-chapter').text(chapter);
                 head.find('.yani-home__panel-title').text(title);
@@ -445,7 +465,25 @@
                 }
                 grid.append(root);
                 panels[group] = content;
+                panelRoots[group] = root;
                 return content;
+            }
+
+            function setChapterState(group, state, label) {
+                var root = group === 'episode_flow' ? episodeFlow : group === 'discover' ? discover : panelRoots[group];
+                if (!root || !root.length) return;
+                var labels = {
+                    loading: t('dashboard_state_loading'),
+                    ready: t('dashboard_state_ready'),
+                    partial: t('dashboard_data_partial'),
+                    empty: t('dashboard_state_empty'),
+                    cached: t('dashboard_data_cached'),
+                    offline: t('dashboard_state_offline')
+                };
+                root.removeClass('yani-home__panel--loading yani-home__panel--ready yani-home__panel--partial yani-home__panel--empty yani-home__panel--cached yani-home__panel--offline')
+                    .addClass('yani-home__panel--' + state);
+                root.find('.yani-home__chapter-state').first().removeClass('yani-home__chapter-state--loading yani-home__chapter-state--ready yani-home__chapter-state--partial yani-home__chapter-state--empty yani-home__chapter-state--cached yani-home__chapter-state--offline')
+                    .addClass('yani-home__chapter-state--' + state).find('b').text(label || labels[state] || '');
             }
 
             items.forEach(function (item) {
@@ -477,7 +515,7 @@
                 button.on('hover:enter click.yaniHome', item.action);
                 if (item.group === 'episode_flow') {
                     if (!episodeFlow) {
-                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__panel-chapter" aria-hidden="true">02</span><span class="yani-home__episode-flow-title"></span><span class="yani-home__episode-flow-live" aria-hidden="true"><i></i><b></b></span></div><div class="yani-home__episode-timeline"></div><div class="yani-home__episode-flow-items"></div></div>');
+                        episodeFlow = $('<div class="yani-home__panel yani-home__panel--episode-flow yani-home__episode-flow"><div class="yani-home__panel-head"><span class="yani-home__panel-chapter" aria-hidden="true">02</span><span class="yani-home__episode-flow-title"></span><span class="yani-home__panel-line" aria-hidden="true"></span><span class="yani-home__chapter-state"><i></i><b></b></span><span class="yani-home__episode-flow-live" aria-hidden="true"><i></i><b></b></span></div><div class="yani-home__episode-timeline"></div><div class="yani-home__episode-flow-items"></div></div>');
                         episodeFlow.find('.yani-home__episode-flow-title').text(t('episode_flow'));
                         episodeFlowTimeline = episodeFlow.find('.yani-home__episode-timeline');
                         episodeFlowItems = episodeFlow.find('.yani-home__episode-flow-items');
@@ -486,7 +524,7 @@
                     episodeFlowItems.append(button);
                 } else if (item.group === 'discover') {
                     if (!discover) {
-                        discover = $('<div class="yani-home__panel yani-home__panel--discover yani-home__discover"><div class="yani-home__discover-head"><span class="yani-home__panel-chapter" aria-hidden="true">04</span><span class="yani-home__discover-title"></span><span class="yani-home__discover-mark" aria-hidden="true"><i></i><i></i><i></i></span></div><div class="yani-home__discover-preview"></div><div class="yani-home__discover-items"></div></div>');
+                        discover = $('<div class="yani-home__panel yani-home__panel--discover yani-home__discover"><div class="yani-home__discover-head"><span class="yani-home__panel-chapter" aria-hidden="true">04</span><span class="yani-home__discover-title"></span><span class="yani-home__panel-line" aria-hidden="true"></span><span class="yani-home__chapter-state"><i></i><b></b></span><span class="yani-home__discover-mark" aria-hidden="true"><i></i><i></i><i></i></span></div><div class="yani-home__discover-preview"></div><div class="yani-home__discover-items"></div></div>');
                         discover.find('.yani-home__discover-title').text(t('discover'));
                         discoverPreview = discover.find('.yani-home__discover-preview');
                         discoverItems = discover.find('.yani-home__discover-items');
@@ -499,6 +537,12 @@
                     grid.append(button);
                 }
             });
+
+            setChapterState('explore', 'ready');
+            setChapterState('episode_flow', 'loading');
+            setChapterState('library', 'loading');
+            setChapterState('discover', 'loading');
+            setChapterState('service', 'loading');
 
             homeCollection = function () {
                 return scroll.render().add(sectionRail);
@@ -992,35 +1036,64 @@
             var playbackUserKey = account && (account.user_id || account.login) || '';
             var playbackCache = readHomePlaybackSnapshot(playbackUserKey);
             if (playbackCache.available) applyPlaybackSnapshot(playbackCache.entries, playbackCache.excluded);
-            if (LampaYaniAuth.token() && playbackUserKey && !playbackCache.fresh) {
+            var playbackNeedsRefresh = Boolean(LampaYaniAuth.token() && playbackUserKey && !playbackCache.fresh);
+            var listNeedsRefresh = Boolean(LampaYaniAuth.token() && Number(account && account.user_id || 0) && !homeListCountsFresh(account.user_id) && (homeButtons.user_lists || homeButtons.updates));
+            var libraryRefreshPending = (playbackNeedsRefresh ? 1 : 0) + (listNeedsRefresh ? 1 : 0);
+            var libraryRefreshFailed = false;
+            var homeDelayScale = lowMemoryDevice || lowCpuDevice ? 2.4 : 1;
+
+            function finishLibraryRefresh(failed) {
+                if (destroyed) return;
+                libraryRefreshFailed = libraryRefreshFailed || Boolean(failed);
+                libraryRefreshPending = Math.max(0, libraryRefreshPending - 1);
+                if (libraryRefreshPending) return setChapterState('library', 'loading');
+                var personal = LampaYaniHomeInsights.personalInsight(continuing, account, personalStats);
+                var hasLibraryData = personal.continue_count + personal.list_total > 0;
+                setChapterState('library', libraryRefreshFailed && !hasLibraryData ? 'offline' : hasLibraryData ? 'ready' : 'empty');
+            }
+
+            if (!libraryRefreshPending) {
+                var initialPersonal = LampaYaniHomeInsights.personalInsight(continuing, account, personalStats);
+                setChapterState('library', initialPersonal.continue_count + initialPersonal.list_total > 0 ? 'ready' : 'empty');
+            } else {
+                setChapterState('library', 'loading');
+            }
+
+            if (playbackNeedsRefresh) scheduleHomeTask(function () {
+                var control = homeRequestControl();
                 Promise.all([
-                    LampaYaniApi.watchHistory(30, 0).then(LampaYaniHomeSections.normalizeRemoteHistory).catch(function (error) {
-                        console.warn('[YummyAnime Home] Server playback history is unavailable', error);
+                    LampaYaniApi.watchHistory(30, 0, control).then(LampaYaniHomeSections.normalizeRemoteHistory).catch(function (error) {
+                        if (!homeRequestCancelled(error)) console.warn('[YummyAnime Home] Server playback history is unavailable', error);
                         return null;
                     }),
-                    loadContinueWatchingExclusions().catch(function (error) {
-                        console.warn('[YummyAnime Home] Playback exclusions are unavailable', error);
+                    loadContinueWatchingExclusions(control).catch(function (error) {
+                        if (!homeRequestCancelled(error)) console.warn('[YummyAnime Home] Playback exclusions are unavailable', error);
                         return playbackCache.excluded || {};
                     })
                 ]).then(function (result) {
-                    if (destroyed || result[0] === null) return;
-                    cacheHomePlaybackSnapshot(playbackUserKey, result[0], result[1]);
-                    applyPlaybackSnapshot(result[0], result[1]);
+                    if (destroyed) return;
+                    if (result[0] !== null) {
+                        cacheHomePlaybackSnapshot(playbackUserKey, result[0], result[1]);
+                        applyPlaybackSnapshot(result[0], result[1]);
+                    }
+                    finishLibraryRefresh(result[0] === null);
                 });
-            }
+            }, 140 * homeDelayScale);
 
-            if (LampaYaniAuth.token() && Number(account && account.user_id || 0) && !homeListCountsFresh(account.user_id) && (homeButtons.user_lists || homeButtons.updates)) {
-                LampaYaniApi.userListStats(account.user_id).then(function (stats) {
+            if (listNeedsRefresh) scheduleHomeTask(function () {
+                LampaYaniApi.userListStats(account.user_id, homeRequestControl()).then(function (stats) {
                     if (destroyed) return;
                     var normalized = LampaYaniHomeInsights.listCounts(stats);
                     var hasCounts = Object.keys(normalized).some(function (key) { return Number(normalized[key] || 0) > 0; });
                     cacheHomeListCounts(account.user_id, hasCounts ? normalized : readHomeListCounts(account.user_id));
                     personalStats = stats;
                     renderPersonal(personalStats);
+                    finishLibraryRefresh(false);
                 }).catch(function (error) {
-                    console.warn('[YummyAnime Home] Personal list insights are unavailable', error);
+                    if (!homeRequestCancelled(error)) console.warn('[YummyAnime Home] Personal list insights are unavailable', error);
+                    finishLibraryRefresh(true);
                 });
-            }
+            }, 420 * homeDelayScale);
 
             var notificationUserKey = account && (account.user_id || account.login) || '';
             var notificationCache = readHomeNotificationCount(notificationUserKey);
@@ -1034,16 +1107,16 @@
                 refreshPriority();
             }
             if (notificationCache.available) renderNotifications(notificationCache.count);
-            if (LampaYaniAuth.token() && homeButtons.notifications && !notificationCache.fresh) {
-                LampaYaniApi.notificationCounts().then(function (payload) {
+            if (LampaYaniAuth.token() && homeButtons.notifications && !notificationCache.fresh) scheduleHomeTask(function () {
+                LampaYaniApi.notificationCounts(homeRequestControl()).then(function (payload) {
                     if (destroyed) return;
                     var count = LampaYaniHomeInsights.notificationCount(payload);
                     cacheHomeNotificationCount(notificationUserKey, count);
                     renderNotifications(count);
                 }).catch(function (error) {
-                    console.warn('[YummyAnime Home] Notification count is unavailable', error);
+                    if (!homeRequestCancelled(error)) console.warn('[YummyAnime Home] Notification count is unavailable', error);
                 });
-            }
+            }, 760 * homeDelayScale);
 
             if (homeButtons.schedule || homeButtons.new_translations || homeButtons.new_releases || homeButtons.collections || homeButtons.status) {
                 var dashboardCache = readHomeDashboardSnapshot();
@@ -1057,6 +1130,13 @@
                     var scheduleKnown = Object.prototype.hasOwnProperty.call(schedule, 'today');
                     renderEpisodeTimeline(dashboard.episode_flow);
                     var service = dashboard.service || {};
+                    var episodeData = dashboard.episode_flow || {};
+                    var discoveryData = dashboard.discovery || {};
+                    var episodeHasData = Boolean(episodeData.japan || episodeData.waiting || episodeData.available);
+                    var discoveryHasData = Boolean(discoveryData.new_release || discoveryData.collection);
+                    setChapterState('episode_flow', dataState === 'cached' && episodeHasData ? 'cached' : service.feed && service.schedule ? episodeHasData ? 'ready' : 'empty' : service.api ? 'partial' : episodeHasData ? 'cached' : 'offline');
+                    setChapterState('discover', dataState === 'cached' && discoveryHasData ? 'cached' : service.feed ? discoveryHasData ? 'ready' : 'empty' : discoveryHasData ? 'cached' : 'offline');
+                    setChapterState('service', dataState === 'cached' ? 'cached' : service.degraded ? 'partial' : service.api ? 'ready' : 'offline');
                     var serviceState = dataState === 'cached' ? 'degraded' : service.degraded ? 'degraded' : service.api ? 'up' : 'down';
                     var serviceTitle = dataState === 'cached' ? t('dashboard_data_cached') : service.degraded ? t('degraded') : service.api ? t('api_ok') : t('api_error');
                     setServiceState(homeButtons.status, serviceState);
@@ -1115,8 +1195,8 @@
 
                 if (dashboardCache.available) renderDashboardSnapshot(dashboardCache.dashboard, 'cached', dashboardCache.updated_at);
                 LampaYaniHomeInsights.dashboard({
-                    feed: LampaYaniApi.feed,
-                    schedule: function () { return LampaYaniApi.schedule({}); },
+                    feed: function () { return LampaYaniApi.feed(homeRequestControl()); },
+                    schedule: function () { return LampaYaniApi.schedule(homeRequestControl()); },
                     now: Date.now()
                 }).then(function (dashboard) {
                     if (destroyed) return;
@@ -1127,7 +1207,11 @@
                     renderDashboardSnapshot(merged, state, updatedAt);
                     if (service.feed && service.schedule) cacheHomeDashboardSnapshot(dashboard);
                 }).catch(function (error) {
+                    if (homeRequestCancelled(error)) return;
                     if (dashboardCache.available) setIntroDataState('offline', dashboardCache.updated_at);
+                    setChapterState('episode_flow', dashboardCache.available ? 'cached' : 'offline');
+                    setChapterState('discover', dashboardCache.available ? 'cached' : 'offline');
+                    setChapterState('service', 'offline');
                     console.warn('[YummyAnime Home] Dashboard insights are unavailable', error);
                 });
             }
@@ -1171,6 +1255,9 @@
         this.render = function (js) { return js ? html[0] : html; };
         this.destroy = function () {
             destroyed = true;
+            homeTimers.forEach(function (timer) { clearTimeout(timer); });
+            homeTimers = [];
+            if (homeAbortController) homeAbortController.abort();
             homeButtons = {};
             currentEpisodeFlow = null;
             preferredHomeKey = 'catalog';
@@ -1379,14 +1466,15 @@
         });
     }
 
-    function loadContinueWatchingExclusions() {
+    function loadContinueWatchingExclusions(control) {
+        control = control || {};
         if (!LampaYaniAuth.token()) return Promise.resolve({});
         var account = LampaYaniAuth.get();
 
         function withUserId() {
             var storedId = Number(account && account.user_id || 0);
             if (storedId) return Promise.resolve(storedId);
-            return LampaYaniApi.profile().then(function (payload) {
+            return LampaYaniApi.profile(control).then(function (payload) {
                 var profile = payload && payload.response ? payload.response : payload;
                 var userId = Number(profile && (profile.id || profile.user_id || profile.user && profile.user.id) || 0);
                 if (!userId) throw new Error('YummyAnime profile id is missing');
@@ -1415,7 +1503,7 @@
         return withUserId().then(function (userId) {
             var cached = readCache(userId);
             if (cached.fresh) return cached.ids;
-            return LampaYaniApi.userLists(userId).then(normalizeUserList).then(function (items) {
+            return LampaYaniApi.userLists(userId, control).then(normalizeUserList).then(function (items) {
                 var excluded = {};
                 [2, 3].forEach(function (listId) {
                     filterAccountListItems({id: listId}, items).forEach(function (item) {

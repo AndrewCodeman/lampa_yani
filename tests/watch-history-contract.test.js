@@ -10,7 +10,7 @@ const context = {window: {}};
 vm.runInNewContext(sectionsSource, context);
 const history = context.window.LampaYaniHomeSections;
 
-assert.match(api, /watchHistory: function \(limit, offset\)/);
+assert.match(api, /watchHistory: function \(limit, offset, control\)/);
 assert.match(api, /\/video\/watch-history\?limit=/);
 assert.match(api, /auth: true,[\s\S]{0,40}cache: false/);
 assert.match(ui, /fetchRemote: LampaYaniApi\.watchHistory/);
@@ -23,7 +23,7 @@ assert.match(ui, /mode: 'continue'/);
 assert.match(ui, /duration: Math\.max\(0, Number\(video\.duration \|\| 0\)\)/);
 assert.match(ui, /fetchExcluded: loadContinueWatchingExclusions/);
 assert.match(ui, /function applyPlaybackSnapshot\(remoteEntries, excludedAnimeIds\)/);
-assert.match(ui, /LampaYaniApi\.watchHistory\(30, 0\)\.then\(LampaYaniHomeSections\.normalizeRemoteHistory\)/);
+assert.match(ui, /LampaYaniApi\.watchHistory\(30, 0, control\)\.then\(LampaYaniHomeSections\.normalizeRemoteHistory\)/);
 assert.match(ui, /readHomePlaybackSnapshot\(playbackUserKey\)/);
 assert.match(ui, /cacheHomePlaybackSnapshot\(playbackUserKey, result\[0\], result\[1\]\)/);
 assert.match(ui, /homePlaybackCacheLifetime = 300000/);

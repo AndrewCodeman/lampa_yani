@@ -12,7 +12,7 @@ const insights = context.window.LampaYaniHomeInsights;
 assert.equal(insights.notificationCount({response: {unread_count: 7}}), 7);
 assert.equal(insights.notificationCount({response: {notifications: {count: 3}}}), 3);
 assert.equal(insights.notificationCount({response: {comments: 2, mentions: 1}}), 3);
-assert.match(ui, /LampaYaniApi\.notificationCounts\(\)/);
+assert.match(ui, /LampaYaniApi\.notificationCounts\(homeRequestControl\(\)\)/);
 assert.match(ui, /yani_home_notification_count/);
 assert.match(ui, /setServiceState\(homeButtons\.status, serviceState\)/);
 assert.match(ui, /yani-home__service-hub/);

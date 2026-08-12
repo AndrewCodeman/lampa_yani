@@ -6,7 +6,7 @@ const ui = fs.readFileSync('src/ui.js', 'utf8');
 const translations = fs.readFileSync('src/ui-translations.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 
-assert.match(api, /feed: function \(\)/);
+assert.match(api, /feed: function \(control\)/);
 assert.match(api, /request\('\/feed'/);
 assert.match(ui, /component: 'yani_schedule'/);
 assert.match(ui, /component: 'yani_new_translations'/);

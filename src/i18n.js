@@ -476,6 +476,10 @@
     messages.ru.dashboard_data_partial = 'Часть данных обновлена';
     messages.ru.dashboard_data_cached = 'Сохранённые данные';
     messages.ru.dashboard_data_offline = 'API недоступен · сохранённые данные';
+    messages.ru.dashboard_state_loading = 'Обновление';
+    messages.ru.dashboard_state_ready = 'Готово';
+    messages.ru.dashboard_state_empty = 'Нет данных';
+    messages.ru.dashboard_state_offline = 'Нет соединения';
     messages.en.dashboard_title = 'Your anime in one place';
     messages.en.dashboard_subtitle = 'Broadcasts, new translations, lists and discoveries with fewer steps';
     messages.en.broadcasts_today = 'Broadcasts today';
@@ -486,6 +490,10 @@
     messages.en.dashboard_data_partial = 'Some data updated';
     messages.en.dashboard_data_cached = 'Saved data';
     messages.en.dashboard_data_offline = 'API unavailable · saved data';
+    messages.en.dashboard_state_loading = 'Updating';
+    messages.en.dashboard_state_ready = 'Ready';
+    messages.en.dashboard_state_empty = 'No data';
+    messages.en.dashboard_state_offline = 'Offline';
 
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
@@ -725,6 +733,10 @@
     messages.uk.dashboard_data_partial = 'Частину даних оновлено';
     messages.uk.dashboard_data_cached = 'Збережені дані';
     messages.uk.dashboard_data_offline = 'API недоступний · збережені дані';
+    messages.uk.dashboard_state_loading = 'Оновлення';
+    messages.uk.dashboard_state_ready = 'Готово';
+    messages.uk.dashboard_state_empty = 'Немає даних';
+    messages.uk.dashboard_state_offline = 'Немає з’єднання';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

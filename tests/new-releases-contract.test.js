@@ -8,7 +8,7 @@ const releases = fs.readFileSync('src/ui-releases.js', 'utf8');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 
-assert.match(api, /feed: function \(\)/);
+assert.match(api, /feed: function \(control\)/);
 assert.match(releases, /Array\.isArray\(value\.new\)/);
 assert.match(build, /src\/ui-releases\.js/);
 assert.match(ui, /Lampa\.Component\.add\('yani_new_releases', NewReleases\)/);

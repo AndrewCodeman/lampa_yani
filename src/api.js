@@ -11,11 +11,22 @@
     function fetchWithRetry(url, options, canRetry) {
         var retries = canRetry ? Number(config.requestRetries || 0) : 0;
         var timeout = Number(config.requestTimeout || 15000);
+        var externalSignal = options && options.signal;
         function attempt(number) {
             var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
             var requestOptions = Object.assign({}, options);
             if (controller) requestOptions.signal = controller.signal;
             var timer;
+            var abortRequest;
+            if (controller && externalSignal) {
+                abortRequest = function () { controller.abort(); };
+                if (externalSignal.aborted) abortRequest();
+                else if (externalSignal.addEventListener) externalSignal.addEventListener('abort', abortRequest, {once: true});
+            }
+            function cleanup() {
+                clearTimeout(timer);
+                if (abortRequest && externalSignal && externalSignal.removeEventListener) externalSignal.removeEventListener('abort', abortRequest);
+            }
             var timeoutPromise = new Promise(function (resolve, reject) {
                 timer = setTimeout(function () {
                     if (controller) controller.abort();
@@ -23,16 +34,16 @@
                 }, timeout);
             });
             return Promise.race([fetch(url, requestOptions), timeoutPromise]).then(function (response) {
-                clearTimeout(timer);
+                cleanup();
                 var retryableStatus = response.status === 408 || response.status === 425 || response.status === 429 || response.status >= 500;
-                if (!response.ok && retryableStatus && number < retries) {
+                if (!response.ok && retryableStatus && number < retries && !(externalSignal && externalSignal.aborted)) {
                     return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
                 }
                 return response;
             }).catch(function (error) {
-                clearTimeout(timer);
+                cleanup();
                 var aborted = error && error.name === 'AbortError';
-                if (number < retries && !aborted) return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
+                if (number < retries && !aborted && !(externalSignal && externalSignal.aborted)) return sleep(Math.pow(2, number) * 400).then(function () { return attempt(number + 1); });
                 throw error;
             });
         }
@@ -74,7 +85,7 @@
         headers.Lang = apiLanguage;
         if (options.token) headers.Authorization = 'Bearer ' + options.token;
 
-        var pendingKey = method === 'GET' && options.dedupe !== false
+        var pendingKey = method === 'GET' && options.dedupe !== false && !options.signal
             ? [apiLanguage, path, options.auth ? 'auth' : 'public', options.token ? 'token' : ''].join('|')
             : '';
         if (pendingKey && pendingRequests[pendingKey]) return pendingRequests[pendingKey];
@@ -82,7 +93,8 @@
         var operation = fetchWithRetry(config.apiBase + path, {
             method: method,
             headers: headers,
-            body: options.body
+            body: options.body,
+            signal: options.signal
         }, method === 'GET').then(function (response) {
             if (!response.ok) throw new Error('YummyAnime API: ' + response.status);
             return response.json();
@@ -169,17 +181,21 @@
         genres: function () {
             return request('/anime/genres');
         },
-        schedule: function () {
+        schedule: function (control) {
+            control = control || {};
             return request('/anime/schedule', {
                 cacheTtl: 60 * 60 * 1000,
-                staleFallback: true
+                staleFallback: true,
+                signal: control.signal
             });
         },
-        feed: function () {
+        feed: function (control) {
+            control = control || {};
             return request('/feed', {
                 auth: true,
                 cacheTtl: 5 * 60 * 1000,
-                staleFallback: true
+                staleFallback: true,
+                signal: control.signal
             });
         },
         collectionCatalog: function (limit, offset) {
@@ -290,14 +306,17 @@
             if (Array.isArray(response)) return response;
             return response && (response.comments || response.items || response.data) || [];
         },
-        profile: function () {
-            return request('/profile', {auth: true, cache: false});
+        profile: function (control) {
+            control = control || {};
+            return request('/profile', {auth: true, cache: false, signal: control.signal});
         },
-        userListStats: function (id) {
-            return request('/users/' + encodeURIComponent(id) + '/stats/lists', {auth: true, cache: false});
+        userListStats: function (id, control) {
+            control = control || {};
+            return request('/users/' + encodeURIComponent(id) + '/stats/lists', {auth: true, cache: false, signal: control.signal});
         },
-        userLists: function (id) {
-            return request('/users/' + encodeURIComponent(id) + '/lists', {auth: true, cache: false});
+        userLists: function (id, control) {
+            control = control || {};
+            return request('/users/' + encodeURIComponent(id) + '/lists', {auth: true, cache: false, signal: control.signal});
         },
         subscriptions: function (id) {
             return request('/users/' + encodeURIComponent(id) + '/lists/subs', {auth: true, cache: false});
@@ -320,8 +339,9 @@
         notifications: function (limit, offset) {
             return request('/profile/notifications?limit=' + encodeURIComponent(limit || 30) + '&offset=' + encodeURIComponent(offset || 0), {auth: true, cache: false});
         },
-        notificationCounts: function () {
-            return request('/profile/notifications/counts', {auth: true, cache: false});
+        notificationCounts: function (control) {
+            control = control || {};
+            return request('/profile/notifications/counts', {auth: true, cache: false, signal: control.signal});
         },
         markNotificationRead: function (id) {
             return request('/profile/notifications/' + encodeURIComponent(id) + '/read', {method: 'POST', auth: true, cache: false});
@@ -351,10 +371,12 @@
                 body: JSON.stringify({videos: videos || []})
             });
         },
-        watchHistory: function (limit, offset) {
+        watchHistory: function (limit, offset, control) {
+            control = control || {};
             return request('/video/watch-history?limit=' + encodeURIComponent(limit || 30) + '&offset=' + encodeURIComponent(offset || 0), {
                 auth: true,
-                cache: false
+                cache: false,
+                signal: control.signal
             });
         },
         health: function () {

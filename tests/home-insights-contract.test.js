@@ -9,11 +9,11 @@ const css = fs.readFileSync('style.css', 'utf8');
 
 assert.match(build, /src\/ui-home-insights\.js/);
 assert.match(ui, /LampaYaniHomeInsights\.dashboard\(\{/);
-assert.match(ui, /schedule: function \(\) \{ return LampaYaniApi\.schedule\(\{\}\); \}/);
+assert.match(ui, /schedule: function \(\) \{ return LampaYaniApi\.schedule\(homeRequestControl\(\)\); \}/);
 assert.match(ui, /yani-home__count/);
 assert.match(ui, /yani-home__item-insight/);
 assert.match(ui, /LampaYaniHomeInsights\.personalInsight/);
-assert.match(ui, /LampaYaniApi\.userListStats\(account\.user_id\)/);
+assert.match(ui, /LampaYaniApi\.userListStats\(account\.user_id, homeRequestControl\(\)\)/);
 assert.match(ui, /yani_home_list_counts/);
 assert.match(ui, /!homeListCountsFresh\(account\.user_id\)/);
 assert.match(ui, /if \(destroyed\) return/);

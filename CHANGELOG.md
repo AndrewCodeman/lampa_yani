@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.40.0 — 2026-08-12
+
+- Finalized the dashboard data lifecycle with chapter-level loading, ready, partial, cached, empty and offline states.
+- Staggered personal history, list and notification refreshes to reduce startup pressure on low-memory devices.
+- Cancelled pending dashboard requests and timers when leaving the screen.
+- Kept chapter state indicators compact on narrow layouts and motion-safe on reduced-motion devices.
+- Added regression coverage for dashboard request cancellation, refresh scheduling and responsive state indicators.
+
 ## 0.39.16 — 2026-08-12
 
 - Added chapter-specific focus contours to dashboard actions.
