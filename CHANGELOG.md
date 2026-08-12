@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.40 — 2026-08-13
+
+- Add a single script that updates the plugin version in src/config.js, README, docs, changelog, the install URL, and the built dist bundle.
+
 ## 0.41.39 — 2026-08-13
 
 - Synchronized Russian and English documentation with the current installation URL.
