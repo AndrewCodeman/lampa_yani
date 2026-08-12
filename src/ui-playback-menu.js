@@ -61,6 +61,42 @@
             return String(group && (group.player || group.title) || '').toLowerCase();
         }
 
+        function normalizeVoiceName(value) {
+            return String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        }
+
+        function lastWatchedVoice(voices, card) {
+            var playback = card && (card.yani_resume || getPlayback(card.yani_id));
+            if (!playback || !voices || !voices.length) return null;
+            var videoId = playback.video_id ? String(playback.video_id) : '';
+            var byVideo = videoId && voices.filter(function (voice) {
+                return voice.group && voice.group.videos && voice.group.videos.some(function (video) {
+                    return String(video.video_id || video.id || '') === videoId;
+                });
+            })[0];
+            if (byVideo) return byVideo;
+            var savedVoice = normalizeVoiceName(playback.voice);
+            if (!savedVoice) return null;
+            var named = voices.filter(function (voice) {
+                return normalizeVoiceName(voice.group && voice.group.title) === savedVoice;
+            });
+            if (playback.player) {
+                var withPlayer = named.filter(function (voice) {
+                    return playerMatchesPreference(voice.group, playback.player);
+                });
+                if (withPlayer.length) return withPlayer[0];
+            }
+            return named[0] || null;
+        }
+
+        function markLastWatchedVoice(voices, card) {
+            var last = lastWatchedVoice(voices, card);
+            if (!last) return -1;
+            last.selected = true;
+            if (String(last.title || '').indexOf('▶ ') !== 0) last.title = '▶ ' + last.title;
+            return voices.indexOf(last);
+        }
+
         function beginPlaybackNavigation(element, collection) {
             // Temporary Select windows must not replace the detail controller and
             // focus target that need to be restored after playback.
@@ -275,9 +311,11 @@
                     enrichEpisodeTitles(card, voices[0].group);
                     return chooseEpisode(card, voices[0].group);
                 }
+                var selectedVoice = markLastWatchedVoice(voices, card);
                 showPlaybackSelect({
                     title: t('choose_voice'),
                     items: voices,
+                    selected: selectedVoice >= 0 ? selectedVoice : 0,
                     onFocus: enrichVoiceOptionQuality,
                     onSelect: function (item) {
                         rememberPlayer(item.group);

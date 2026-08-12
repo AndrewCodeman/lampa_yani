@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.38 — 2026-08-13
+
+- Focus the last-watched dubbing in the voice picker when opening Watch, using the previous episode's saved voice when that group is still available.
+
 ## 0.41.37 — 2026-08-13
 
 - Share one cached `/videos` request across catalog cards, title-card episode stats, translation chips, and the Watch menu, with TTL, a bounded cache, and abort when the title card closes.
