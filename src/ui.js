@@ -1686,10 +1686,12 @@
         addCardUpdateBadge(element, card);
         addCardRecommendationBadge(element, card);
         addCardListBadge(element, card);
+        addCardPlaybackProgress(element, card);
         LampaYaniMedia.attachPosterFallback(element, card);
         // Some Lampa versions clone the card object after cardRender. Keep a
         // DOM-level handler as a fallback so search results remain clickable.
         var rendered = cardRenderElement(element, card);
+        rendered.attr('data-yani-card-id', String(card.yani_id || ''));
         // Lampa cards already have a default `hover:enter` handler. Some
         // builds attach it to an inner card element, not the rendered root.
         // Remove it from the full YummyAnime card tree: otherwise one Enter
@@ -1905,6 +1907,39 @@
         var label = labels[card.yani_list_id] || '';
         if (card.yani_is_favorite) label = label ? label + ' · ♥' : '♥';
         badge.text(label);
+    }
+
+    function cardPlaybackState(card) {
+        if (!card) return null;
+        var playback = card.yani_resume || getPlayback(card.yani_id) || {};
+        var duration = Math.max(0, Number(playback.duration || 0));
+        var position = Math.max(0, Number(playback.time || 0));
+        var progress = duration > 0 ? position / duration : Number(card.yani_list_progress || 0);
+        progress = Math.max(0, Math.min(1, progress));
+        var episode = playback.number || card.yani_watched_episodes || '';
+        if (!episode && !(progress > 0)) return null;
+        return {
+            episode: episode,
+            percent: progress > 0 ? Math.round(progress * 100) : 0,
+            progress: progress
+        };
+    }
+
+    function addCardPlaybackProgress(element, card) {
+        var state = cardPlaybackState(card);
+        var render = cardRenderElement(element, card);
+        var view = $('.card__view', render).first();
+        if (!view.length) return;
+        view.find('.yani-card-playback, .yani-card-playback-progress').remove();
+        if (!state) return;
+        var parts = [];
+        if (state.episode) parts.push(t('episode') + ' ' + state.episode);
+        if (state.percent) parts.push(state.percent + '%');
+        view.append($('<span class="yani-card-playback"></span>').text(parts.join(' · ')));
+        if (state.progress > 0) {
+            view.append($('<span class="yani-card-playback-progress"><span></span></span>')
+                .find('span').css('width', state.percent + '%').end());
+        }
     }
 
     function showYummyActions(card, originElement, originCollection) {
@@ -4455,6 +4490,9 @@
             var rendered = $(this);
             if (String(rendered.attr('data-yani-history-id') || '') !== String(card.yani_id)) return;
             renderHistoryProgress(rendered, card.yani_resume || getPlayback(card.yani_id) || {});
+        });
+        $('[data-yani-card-id="' + String(card.yani_id).replace(/"/g, '') + '"]').not('.yani-history-card').each(function () {
+            addCardPlaybackProgress($(this), card);
         });
     }
 

@@ -1767,6 +1767,11 @@
 .yani-card-history { position: absolute; top: 0.35em; right: 0.35em; z-index: 4; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: rgba(239, 100, 112, 0.94); color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .yani-card-history-progress { position: absolute; right: 0; bottom: 0; left: 0; z-index: 5; height: 0.24em; overflow: hidden; background: rgba(255, 255, 255, 0.25); }
 .yani-card-history-progress span { display: block; height: 100%; background: #ef6470; }
+.yani-card-playback { position: absolute; right: .35em; bottom: .54em; z-index: 4; max-width: calc(100% - .7em); overflow: hidden; padding: .22em .42em; border: .06em solid rgba(255,255,255,.18); border-radius: .34em; background: rgba(21,20,29,.86); color: rgba(255,255,255,.96); font-size: .6em; font-weight: 700; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; box-shadow: 0 .18em .5em rgba(0,0,0,.28); }
+.yani-card-list + .yani-card-playback { max-width: 54%; }
+.yani-card-playback-progress { position: absolute; right: 0; bottom: 0; left: 0; z-index: 5; height: .25em; overflow: hidden; background: rgba(255,255,255,.2); }
+.yani-card-playback-progress span { display: block; height: 100%; border-radius: 0 .2em .2em 0; background: linear-gradient(90deg, #ef6470, #a975e7); box-shadow: 0 0 .45em rgba(239,100,112,.5); }
+.card.focus .yani-card-playback { border-color: rgba(255,255,255,.65); background: rgba(34,28,45,.94); }
 .yani-collection-card__previews { position: absolute; right: .38em; bottom: 2.15em; z-index: 4; display: flex; gap: .22em; }
 .yani-collection-card__previews span { width: 2.15em; height: 3.1em; border: .08em solid rgba(255,255,255,.72); border-radius: .28em; background-position: center; background-size: cover; box-shadow: 0 .25em .7em rgba(0,0,0,.45); }
 .yani-collection-card__meta { position: absolute; right: .35em; bottom: .35em; left: .35em; z-index: 5; overflow: hidden; padding: .3em .45em; border-radius: .32em; background: rgba(21,20,29,.82); color: #fff; font-size: .62em; font-weight: 650; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }

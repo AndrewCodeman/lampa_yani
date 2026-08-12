@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.14 — 2026-08-12
+
+- Added compact episode and playback percentage indicators to YummyAnime cards.
+- Added a slim progress bar that updates on visible cards after playback progress changes.
+
 ## 0.41.13 — 2026-08-12
 
 - Added compact freshness labels to updated title cards: Today, Yesterday, or a localized date.
