@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.8 — 2026-08-12
+
+- Added localized textual genre descriptions when the YummyAnime API only provides a genre title and identifier.
+- Expanded the genre catalog header to show a readable two-line description instead of truncating it to one line.
+
 ## 0.41.7 — 2026-08-12
 
 - Embedded remote color and number hints into Schedule day/release controls and the actionable More cards in My Lists, removing the separate shortcut legends.

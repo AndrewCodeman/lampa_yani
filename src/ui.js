@@ -4523,7 +4523,9 @@
             var language = String(locale() || 'ru').slice(0, 2);
             value = value[language] || value.ru || value.en || value.uk || value.text || '';
         }
-        return String(value || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        value = String(value || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!value && window.LampaYaniGenreDescriptions) value = LampaYaniGenreDescriptions.resolve(genre, locale());
+        return value;
     }
 
     function detailGenres(card) {

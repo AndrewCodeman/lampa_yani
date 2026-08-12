@@ -2282,7 +2282,7 @@
 .yani-account-list-sort-option.focus .yani-account-list-sort-option__icon { color: #fff; background: var(--yani-list-accent); }
 .yani-account-list-sort-option.focus .yani-account-list-sort-option__state { background: #a84374; box-shadow: none; }
 
-.yani-genre-catalog-header { position: relative; z-index: 4; display: flex; align-items: center; min-height: 4.8em; margin: .1em 1em .75em; padding: .62em 1em; overflow: hidden; border: .08em solid rgba(255, 255, 255, .13); border-radius: 1.15em; background: linear-gradient(120deg, rgba(36, 26, 44, .94), rgba(31, 43, 59, .9)); box-shadow: 0 .8em 2em rgba(0, 0, 0, .2), inset 0 .06em 0 rgba(255, 255, 255, .08); backdrop-filter: blur(.8em); }
+.yani-genre-catalog-header { position: relative; z-index: 4; display: flex; align-items: center; min-height: 5.8em; margin: .1em 1em .75em; padding: .72em 1em; overflow: hidden; border: .08em solid rgba(255, 255, 255, .13); border-radius: 1.15em; background: linear-gradient(120deg, rgba(36, 26, 44, .94), rgba(31, 43, 59, .9)); box-shadow: 0 .8em 2em rgba(0, 0, 0, .2), inset 0 .06em 0 rgba(255, 255, 255, .08); backdrop-filter: blur(.8em); }
 .yani-genre-catalog-header::after { position: absolute; right: -5em; top: -7em; width: 18em; height: 18em; border: .08em solid rgba(111, 197, 232, .18); border-radius: 50%; box-shadow: 0 0 0 2.7em rgba(181, 102, 225, .06), 0 0 0 5.4em rgba(255, 104, 120, .045); content: ''; }
 .yani-genre-catalog-header__orb { position: relative; display: block; flex: 0 0 3.35em; width: 3.35em; height: 3.35em; margin-right: .9em; border-radius: 1em; background: linear-gradient(145deg, #ff6878, #825ed8); box-shadow: 0 .55em 1.25em rgba(139, 69, 129, .36); }
 .yani-genre-catalog-header__orb i { position: absolute; border: .13em solid rgba(255, 255, 255, .84); border-radius: 50%; }
@@ -2292,7 +2292,7 @@
 .yani-genre-catalog-header__copy { position: relative; z-index: 1; min-width: 0; }
 .yani-genre-catalog-header__eyebrow { display: block; color: #f07d94; font-size: .64em; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .yani-genre-catalog-header__title { display: block; margin-top: .06em; font-size: 1.35em; line-height: 1.08; }
-.yani-genre-catalog-header__description { max-width: 58em; margin: .28em 0 0; overflow: hidden; color: rgba(255, 255, 255, .62); font-size: .76em; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+.yani-genre-catalog-header__description { display: -webkit-box; max-width: 62em; margin: .32em 0 0; overflow: hidden; color: rgba(255, 255, 255, .68); font-size: .78em; line-height: 1.38; white-space: normal; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 
 @media (max-width: 700px) {
     .yani-account-list-sort-panel { margin: .1em .6em .65em; }
