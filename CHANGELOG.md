@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.21 — 2026-08-12
+
+- Extracted local playback history storage and Continue Watching progress UI into `src/ui-playback-history.js`.
+- Kept player progress watchers and flush callbacks in `ui.js` for the next playback-menu extraction.
+
 ## 0.41.20 — 2026-08-12
 
 - Extracted YummyAnime catalog card bind/open helpers into `src/ui-card-bind.js`.

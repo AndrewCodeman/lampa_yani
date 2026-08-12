@@ -4,6 +4,7 @@ const vm = require('vm');
 
 const api = fs.readFileSync('src/api.js', 'utf8');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
+const historySource = fs.readFileSync('src/ui-playback-history.js', 'utf8');
 const sectionsSource = fs.readFileSync('src/ui-home-sections.js', 'utf8');
 const context = {window: {}};
 
@@ -16,11 +17,11 @@ assert.match(api, /auth: true,[\s\S]{0,40}cache: false/);
 assert.match(ui, /fetchRemote: LampaYaniApi\.watchHistory/);
 assert.match(ui, /var playback = card\.yani_resume \|\| getPlayback\(card\.yani_id\)/);
 assert.match(ui, /String\(video\.video_id \|\| video\.id \|\| ''\) === String\(playback\.video_id\)/);
-assert.match(ui, /function bindHistoryCardRender[\s\S]{0,2200}hover:enter\.yaniHistory click\.yaniHistory/);
-assert.match(ui, /function renderHistoryProgress/);
+assert.match(historySource, /hover:enter\.yaniHistory click\.yaniHistory/);
+assert.match(historySource, /function renderHistoryProgress|renderHistoryProgress\(rendered, playback\)/);
 assert.match(ui, /function openContinueWatching\(\)/);
 assert.match(ui, /mode: 'continue'/);
-assert.match(ui, /duration: Math\.max\(0, Number\(video\.duration \|\| 0\)\)/);
+assert.match(historySource, /duration: Math\.max\(0, Number\(video\.duration \|\| 0\)\)/);
 assert.match(ui, /fetchExcluded: loadContinueWatchingExclusions/);
 assert.match(ui, /function applyPlaybackSnapshot\(remoteEntries, excludedAnimeIds\)/);
 assert.match(ui, /LampaYaniApi\.watchHistory\(30, 0, control\)\.then\(LampaYaniHomeSections\.normalizeRemoteHistory\)/);
@@ -31,6 +32,8 @@ assert.match(ui, /if \(cached\.fresh\) return cached\.ids/, 'fresh exclusions sh
 assert.match(ui, /\[2, 3\]\.forEach\(function \(listId\)/, 'completed and dropped lists must be excluded');
 assert.match(ui, /typeof item\.poster === 'string' \? item\.poster/, 'locally stored string poster URLs must remain visible');
 assert.match(ui, /item\.poster\.huge/, 'large remote history posters must be supported');
+assert.match(ui, /LampaYaniPlaybackHistory\.create/);
+assert.match(ui, /historyCardRender: bindHistoryCardRender/);
 
 const remote = history.normalizeRemoteHistory({response: [{
     anime_id: 42,
