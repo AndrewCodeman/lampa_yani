@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.25 — 2026-08-12
+
+- Gate GitHub Pages deploy on JavaScript syntax checks, the full contract-test suite, a fresh `node build.js`, and a `dist/index.js` freshness check against sources.
+- Keep the YummyStatus snapshot refresh best-effort (`continue-on-error`) so a status API outage cannot block plugin publishing.
+
 ## 0.41.24 — 2026-08-12
 
 - Unified catalog and title-detail ratings into one compact logo+score chip panel with consistent logo size and clearer card focus.

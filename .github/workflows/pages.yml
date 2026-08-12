@@ -30,8 +30,44 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -e
+          find . -name '*.js' -not -path '*/node_modules/*' -print0 | xargs -0 -n1 node --check
+
+      - name: Run contract tests
+        shell: bash
+        run: |
+          set -e
+          for test in tests/*.test.js; do
+            echo "-- $test"
+            node "$test"
+          done
+
+      - name: Rebuild bundled plugin
+        run: node build.js
+
+      - name: Check bundled plugin syntax
+        run: node --check dist/index.js
+
+      - name: Verify dist/index.js matches sources
+        shell: bash
+        run: |
+          set -e
+          if ! git diff --exit-code -- dist/index.js; then
+            echo "::error::dist/index.js is out of date. Run node build.js and commit the result."
+            exit 1
+          fi
+
       - name: Update YummyStatus snapshot
+        id: yummy_status
+        continue-on-error: true
         run: node scripts/update-status.js
+
+      - name: Report YummyStatus result
+        if: steps.yummy_status.outcome == 'failure'
+        run: echo "::warning::YummyStatus snapshot update failed; continuing Pages deploy with the existing status files."
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
