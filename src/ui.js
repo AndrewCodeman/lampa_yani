@@ -2263,12 +2263,14 @@
     function localHistoryCards(remotePayload) {
         var remote = LampaYaniHomeSections.normalizeRemoteHistory(remotePayload || []);
         return LampaYaniHomeSections.mergeHistory(playbackHistory(), remote).map(function (entry) {
-            return toCard(Object.assign({}, entry.card || {}, {
+            var card = toCard(Object.assign({}, entry.card || {}, {
                 anime_id: entry.anime_id,
                 title: entry.title || entry.card && entry.card.title,
                 poster: entry.poster || entry.card && entry.card.poster,
                 updated_at: entry.updated_at || 0
             }));
+            card.yani_list_progress = entry.duration > 0 ? Math.max(0, Math.min(1, Number(entry.time || 0) / Number(entry.duration))) : 0;
+            return card;
         });
     }
 
@@ -2313,7 +2315,11 @@
                     title: definition.title,
                     definition: definition,
                     total: selected.length,
-                    results: selected.slice(0, 10).map(toCard)
+                    results: selected.slice(0, 10).map(function (item) {
+                        var card = toCard(item);
+                        card.yani_list_progress = LampaYaniAccountListControls.progress(item);
+                        return card;
+                    })
                 };
             });
             var history = localHistoryCards(result[1]);

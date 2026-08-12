@@ -22,7 +22,8 @@ assert.match(lists, /showSelect: deps\.showSelect/);
 assert.match(listControls, /yani-account-list-sort-trigger selector/);
 assert.match(listControls, /yani_account_list_sort_/);
 assert.match(lists, /object\.page = 1/);
-assert.match(lists, /items\.slice\(start, start \+ pageSize\)\.map\(deps\.toCard\)/);
+assert.match(lists, /items\.slice\(start, start \+ pageSize\)\.map\(function \(item\)/);
+assert.match(lists, /LampaYaniAccountListControls\.progress\(item\)/);
 assert.match(lists, /object\.lazy && deps\.loadItems/);
 assert.match(lists, /deps\.loadItems\(object\.definition\)/);
 assert.match(lists, /this\.activity\.loader\(true\)/);
@@ -35,6 +36,11 @@ assert.doesNotMatch(lists.slice(lists.indexOf('function userLists'), lists.index
 assert.match(lists, /function withMore\(row\)/);
 assert.match(lists, /\(row\.results \|\| \[\]\)\.slice\(0, 10\)/);
 assert.match(lists, /yani_more: true/);
+assert.match(lists, /function listVisual\(key\)/);
+assert.match(lists, /function decorateListCard\(first, second, third\)/);
+assert.match(lists, /yani-user-list-card--/);
+assert.match(lists, /yani-user-list-card__progress/);
+assert.match(lists, /component\.cardRender = decorateListCard/);
 assert.match(lists, /card_events:/);
 assert.match(lists, /card\.yani_history\) deps\.openHistory\(\)/);
 assert.match(lists, /deps\.openList\(card\.yani_definition\)/);
@@ -57,7 +63,8 @@ assert.match(ui, /loadItems: loadUserListShortcutItems/);
 assert.match(ui, /openList: openUserListShortcut/);
 assert.match(ui, /openHistory: openWatchHistory/);
 assert.match(ui, /function loadUserListRows\(\)/);
-assert.match(ui, /results: selected\.slice\(0, 10\)\.map\(toCard\)/);
+assert.match(ui, /results: selected\.slice\(0, 10\)\.map\(function \(item\)/);
+assert.match(ui, /card\.yani_list_progress = LampaYaniAccountListControls\.progress\(item\)/);
 assert.match(ui, /function localHistoryCards\(remotePayload\)/);
 assert.match(ui, /function hydrateHistoryPosters\(cards, listItems\)/);
 assert.match(ui, /LampaYaniApi\.watchHistory\(30, 0\)/);
@@ -77,6 +84,8 @@ assert.match(ui, /function openWatchHistory\(\)[\s\S]{0,300}component: 'yani_his
 const context = {window: {}};
 vm.runInNewContext(lists, context);
 const helpers = context.window.LampaYaniAccountLists;
+assert.strictEqual(helpers.listVisual('watching').from, '#ff6878');
+assert.strictEqual(helpers.listVisual('history').to, '#6653b4');
 const normalized = helpers.normalize({response: {items: [
     {anime: {anime_id: 42, title: 'Nested title'}, user: {list: {list: {id: 1}}}, date: 123},
     {anime_id: 43, title: 'Direct title', user: {list: {is_fav: true, list: {id: 0}}}}

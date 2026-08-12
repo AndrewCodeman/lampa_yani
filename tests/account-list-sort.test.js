@@ -26,6 +26,9 @@ assert.match(source, /if \(current && isFirstCardRow\(current\)\) return focusPa
 assert.match(source, /collectionFocus\(button\[0\], root\(\), true\)/);
 assert.match(source, /if \(panelFocused\) return focusCards\(\)/);
 assert.match(source, /showSelect/);
+assert.match(source, /function listIcon\(key\)/);
+assert.match(source, /yani-account-list-sort-panel--/);
+assert.match(source, /yani-account-list-sort-trigger__sort-icon/);
 assert.doesNotMatch(source, /yani-catalog-toolbar/);
 
 console.log('Account list sorting tests passed');

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.40.1 — 2026-08-12
+
+- Redesigned My Lists with a distinct color and icon for every account list and watch history.
+- Replaced the generic More poster with a list-specific card showing the list size and destination.
+- Added compact list badges and playback progress bars to title posters.
+- Reworked the single TV-friendly sorting control to show the current list, item count and active sort order.
+
 ## 0.40.0 — 2026-08-12
 
 - Finalized the dashboard data lifecycle with chapter-level loading, ready, partial, cached, empty and offline states.

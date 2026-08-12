@@ -84,6 +84,18 @@
         return icons[key] || icons.recent;
     }
 
+    function listIcon(key) {
+        var icons = {
+            watching: '<svg viewBox="0 0 24 24"><path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>',
+            planned: '<svg viewBox="0 0 24 24"><path d="M5 18h13a3 3 0 0 0 .4-6A6.5 6.5 0 0 0 6 10.5 3.8 3.8 0 0 0 5 18Z"/></svg>',
+            completed: '<svg viewBox="0 0 24 24"><path d="M6 21V4m1 1h10l-2.3 3L17 11H7"/></svg>',
+            dropped: '<svg viewBox="0 0 24 24"><path d="m4 4 16 16M10.6 6.3A9.8 9.8 0 0 1 12 6c5.8 0 9 6 9 6a15 15 0 0 1-2.1 3M7.2 7.3C4.5 9.2 3 12 3 12s3.2 6 9 6c1.1 0 2.1-.2 3-.6"/></svg>',
+            favorites: '<svg viewBox="0 0 24 24"><path d="M20.5 8.8c0 5-8.5 10.2-8.5 10.2S3.5 13.8 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"/></svg>',
+            postponed: '<svg viewBox="0 0 24 24"><path d="M7 3h10M7 21h10M8 4c0 4 1.2 5.5 4 8-2.8 2.5-4 4-4 8M16 4c0 4-1.2 5.5-4 8 2.8 2.5 4 4 4 8"/></svg>'
+        };
+        return icons[key] || icons.watching;
+    }
+
     function create(options) {
         options = options || {};
         var comp = options.comp;
@@ -189,14 +201,17 @@
             if (!view || !view.length) return;
             installed = true;
             view.addClass('yani-account-list-view');
-            panel = $('<div class="yani-account-list-sort-panel"></div>');
+            var definitionKey = String(definition.key || 'watching');
+            var activeDefinition = definitions.filter(function (item) { return item.key === active; })[0];
+            panel = $('<div class="yani-account-list-sort-panel yani-account-list-sort-panel--' + definitionKey + '"></div>');
             button = $('<div class="yani-account-list-sort-trigger selector"></div>');
-            button.append($('<span class="yani-account-list-sort-trigger__icon"></span>').html(icon(active)));
+            button.append($('<span class="yani-account-list-sort-trigger__icon"></span>').html(listIcon(definitionKey)));
             var text = $('<span class="yani-account-list-sort-trigger__text"></span>');
-            text.append($('<span class="yani-account-list-sort-trigger__caption"></span>').text(options.t('list_sort')));
-            text.append($('<span class="yani-account-list-sort-trigger__value"></span>').text(definitions.filter(function (item) { return item.key === active; })[0].title));
+            text.append($('<span class="yani-account-list-sort-trigger__caption"></span>').text(definition.title || object.title || ''));
+            text.append($('<span class="yani-account-list-sort-trigger__value"></span>').text(options.t('list_sort') + ' · ' + activeDefinition.title));
             button.append(text);
             button.append($('<span class="yani-account-list-sort-trigger__count"></span>').text(String(total || 0)));
+            button.append($('<span class="yani-account-list-sort-trigger__sort-icon"></span>').html(icon(active)));
             button.append('<span class="yani-account-list-sort-trigger__chevron">›</span>');
             button.on('hover:focus', function () { panelFocused = true; });
             button.on('hover:enter click.yaniAccountListSort', openMenu);
