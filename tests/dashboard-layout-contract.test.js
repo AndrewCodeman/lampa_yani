@@ -40,5 +40,10 @@ assert.match(css, /\.yani-home__explore-art--catalog i:nth-child\(1\)[^}]*176,13
 assert.match(css, /\.yani-home__explore-art--catalog i:nth-child\(4\)[^}]*100,224,178/);
 assert.match(css, /\.yani-home__panel-chapter \{/);
 assert.match(css, /\.yani-home__panel--active \.yani-home__panel-chapter/);
+assert.match(css, /\.yani-home__panel--episode-flow \.yani-home__item\.focus[^}]*98,184,255/);
+assert.match(css, /\.yani-home__panel--library \.yani-home__item\.focus[^}]*85,215,149/);
+assert.match(css, /\.yani-home__panel--discover \.yani-home__item\.focus[^}]*191,114,233/);
+assert.match(css, /\.yani-home__panel--service \.yani-home__item\.focus[^}]*236,176,85/);
+assert.match(css, /\.yani-home__panel--service \.yani-home__item\.focus \.yani-home__arrow/);
 
 console.log('dashboard layout contract checks passed');

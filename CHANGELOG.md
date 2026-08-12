@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.39.16 — 2026-08-12
+
+- Added chapter-specific focus contours to dashboard actions.
+- Matched tile accents and navigation arrows to each section color.
+- Preserved the high-contrast light focus surface required for TV viewing.
+
 ## 0.39.15 — 2026-08-12
 
 - Redesigned the dashboard section rail as a numbered chapter spine.

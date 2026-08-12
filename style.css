@@ -839,6 +839,11 @@
     transition: transform .42s cubic-bezier(.2,.8,.2,1), border-radius .42s ease;
 }
 
+.yani-home__panel--episode-flow .yani-home__item::before { background: rgba(98,184,255,.09); }
+.yani-home__panel--library .yani-home__item::before { background: rgba(85,215,149,.085); }
+.yani-home__panel--discover .yani-home__item::before { background: rgba(191,114,233,.085); }
+.yani-home__panel--service .yani-home__item::before { background: rgba(236,176,85,.075); }
+
 .yani-home__item > * { position: relative; z-index: 1; }
 .yani-home__item > .yani-home__item-art {
     position: absolute;
@@ -915,6 +920,12 @@
     transform: translateY(-.12em) scale(1.015);
     border-radius: .85em 1.55em .9em 1.45em;
 }
+
+.yani-home__panel--explore .yani-home__item.focus { border-color: rgba(239,100,112,.8); box-shadow: 0 0 0 .2em rgba(239,100,112,.2), 0 1em 2.4em rgba(0,0,0,.25); }
+.yani-home__panel--episode-flow .yani-home__item.focus { border-color: rgba(98,184,255,.82); box-shadow: 0 0 0 .2em rgba(98,184,255,.2), 0 1em 2.4em rgba(0,0,0,.25); }
+.yani-home__panel--library .yani-home__item.focus { border-color: rgba(85,215,149,.82); box-shadow: 0 0 0 .2em rgba(85,215,149,.2), 0 1em 2.4em rgba(0,0,0,.25); }
+.yani-home__panel--discover .yani-home__item.focus { border-color: rgba(191,114,233,.82); box-shadow: 0 0 0 .2em rgba(191,114,233,.2), 0 1em 2.4em rgba(0,0,0,.25); }
+.yani-home__panel--service .yani-home__item.focus { border-color: rgba(236,176,85,.82); box-shadow: 0 0 0 .2em rgba(236,176,85,.18), 0 1em 2.4em rgba(0,0,0,.25); }
 
 .yani-home--motion .yani-home__item.focus::before {
     transform: translate(-42%, -34%) rotate(22deg) scale(1.08);
@@ -1043,6 +1054,10 @@
     color: #ef6470;
     transform: translateX(.15em);
 }
+.yani-home__panel--episode-flow .yani-home__item.focus .yani-home__arrow { color: #2679c2; }
+.yani-home__panel--library .yani-home__item.focus .yani-home__arrow { color: #218d78; }
+.yani-home__panel--discover .yani-home__item.focus .yani-home__arrow { color: #8f4fd1; }
+.yani-home__panel--service .yani-home__item.focus .yani-home__arrow { color: #b07124; }
 
 .yani-home__item--catalog .yani-home__icon { background: linear-gradient(135deg, #ef6470, #b84068); }
 .yani-home__item--genres .yani-home__icon { background: linear-gradient(135deg, #9b75e8, #6548b7); }
