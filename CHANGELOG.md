@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.41 — 2026-08-13
+
+- Keep a production install URL separate from the experimental dist URL, tag verified releases, and roll production back by promoting an earlier git tag.
+
 ## 0.41.40 — 2026-08-13
 
 - Add a single script that updates the plugin version in src/config.js, README, docs, changelog, the install URL, and the built dist bundle.

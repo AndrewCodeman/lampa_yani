@@ -45,9 +45,22 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 2. The extension uses the built-in public application key for YummyAnime for Lampa by default.
 3. If necessary, open `Settings → YummyAnime → Public application key` to set another public key. Leave the field empty to restore the default key. Never enter a private application key there.
 
-Install the bundled file from GitHub Pages:
+Install the bundled file from GitHub Pages. There are two URLs:
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.40`
+Production — a verified release. The URL stays the same; a serious bug is rolled back by promoting an earlier git tag.
+
+`https://andrewcodeman.github.io/lampa_yani/stable/index.js`
+
+Test — the latest `main` build, including changes that are not a production release yet.
+
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.41`
+
+Verified versions are tagged `vX.Y.Z`. Release and rollback:
+
+```
+node scripts/release.js
+node scripts/release.js --promote 0.41.38
+```
 
 The `YummyAnime → Status` screen shows YummyStatus history for three hours, one day, one week or one month. GitHub Actions refreshes the monitoring snapshot every five minutes.
 

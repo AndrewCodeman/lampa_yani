@@ -7,6 +7,8 @@ const ru = fs.readFileSync('docs/README.ru.md', 'utf8');
 const en = fs.readFileSync('docs/README.en.md', 'utf8');
 const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
 const dist = fs.readFileSync('dist/index.js', 'utf8');
+const pages = fs.readFileSync('.github/workflows/pages.yml', 'utf8');
+const releaseWorkflow = fs.readFileSync('.github/workflows/release.yml', 'utf8');
 const version = (config.match(/version:\s*'([^']+)'/) || [])[1];
 const escaped = version.replace(/\./g, '\\.');
 
@@ -15,8 +17,16 @@ assert.match(root, new RegExp('Current version: `' + escaped + '`'));
 assert.match(changelog, new RegExp('^## ' + escaped + ' — ', 'm'));
 assert.match(dist, new RegExp("version: '" + escaped + "'"));
 [root, ru, en].forEach((document) => {
+    assert.match(document, /lampa_yani\/stable\/index\.js/);
+    assert.doesNotMatch(document, /stable\/index\.js\?v=/);
     assert.match(document, new RegExp('dist/index\\.js\\?v=' + escaped));
 });
+const stableMeta = JSON.parse(fs.readFileSync('stable.json', 'utf8'));
+const stable = fs.readFileSync('stable/index.js', 'utf8');
+assert.strictEqual(stableMeta.channel, 'production');
+assert.match(stable, new RegExp("version: '" + String(stableMeta.version).replace(/\./g, '\\.') + "'"));
+assert.match(pages, /cp -R stable _pages\/stable/);
+assert.match(releaseWorkflow, /tags:[\s\S]*v\*/);
 assert.match(ru, /русским, английским и украинским языками/);
 assert.match(en, /Russian, English and Ukrainian extension interface/);
 assert.match(ru, /Доступные переводы/);

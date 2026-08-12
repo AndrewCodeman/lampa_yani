@@ -1,0 +1,8 @@
+{
+    "channel": "production",
+    "version": "0.41.41",
+    "tag": "v0.41.41",
+    "url": "https://andrewcodeman.github.io/lampa_yani/stable/index.js",
+    "testUrl": "https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.41",
+    "releasedAt": "2026-08-12T22:53:09.905Z"
+}

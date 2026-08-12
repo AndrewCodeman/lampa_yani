@@ -51,6 +51,9 @@ jobs:
       - name: Check bundled plugin syntax
         run: node --check dist/index.js
 
+      - name: Check production bundle syntax
+        run: node --check stable/index.js
+
       - name: Verify dist/index.js matches sources
         shell: bash
         run: |
@@ -80,6 +83,8 @@ jobs:
           mkdir -p _pages
           cp -R dist assets status _pages/
           cp index.js style.css LICENSE README.md _pages/
+          if [ -d stable ]; then cp -R stable _pages/stable; fi
+          if [ -f stable.json ]; then cp stable.json _pages/; fi
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v3

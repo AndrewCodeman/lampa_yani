@@ -27,6 +27,7 @@ fs.writeFileSync(path.join(root, 'src/config.js'), "window.LampaYaniConfig = { v
 fs.writeFileSync(path.join(root, 'README.md'), [
     'Current version: `0.41.39`',
     '',
+    '`https://andrewcodeman.github.io/lampa_yani/stable/index.js`',
     '`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.39`'
 ].join('\n'));
 fs.writeFileSync(path.join(root, 'docs/README.ru.md'), '`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.39`\n');
@@ -48,6 +49,8 @@ assert.strictEqual(built, true);
 assert.match(fs.readFileSync(path.join(root, 'src/config.js'), 'utf8'), /version: '0\.41\.40'/);
 assert.match(fs.readFileSync(path.join(root, 'README.md'), 'utf8'), /Current version: `0\.41\.40`/);
 assert.match(fs.readFileSync(path.join(root, 'README.md'), 'utf8'), /dist\/index\.js\?v=0\.41\.40/);
+assert.match(fs.readFileSync(path.join(root, 'README.md'), 'utf8'), /stable\/index\.js/);
+assert.doesNotMatch(fs.readFileSync(path.join(root, 'README.md'), 'utf8'), /stable\/index\.js\?v=/);
 assert.match(fs.readFileSync(path.join(root, 'docs/README.ru.md'), 'utf8'), /dist\/index\.js\?v=0\.41\.40/);
 assert.match(fs.readFileSync(path.join(root, 'docs/README.en.md'), 'utf8'), /dist\/index\.js\?v=0\.41\.40/);
 assert.doesNotMatch(fs.readFileSync(path.join(root, 'docs/README.ru.md'), 'utf8'), /v=0\.41\.39/);

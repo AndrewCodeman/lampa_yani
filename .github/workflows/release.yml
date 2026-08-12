@@ -1,0 +1,53 @@
+name: Release YummyAnime plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -e
+          find . -name '*.js' -not -path '*/node_modules/*' -print0 | xargs -0 -n1 node --check
+
+      - name: Run contract tests
+        shell: bash
+        run: |
+          set -e
+          for test in tests/*.test.js; do
+            echo "-- $test"
+            node "$test"
+          done
+
+      - name: Rebuild bundled plugin
+        run: node build.js
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          set -e
+          NOTES="$(node -e "const fs=require('fs'); const release=require('./scripts/release'); process.stdout.write(release.changelogSection(fs.readFileSync('CHANGELOG.md','utf8'), process.env.VERSION));")"
+          gh release create "$GITHUB_REF_NAME" dist/index.js stable/index.js stable.json \
+            --title "YummyAnime ${GITHUB_REF_NAME#v}" \
+            --notes "$NOTES"

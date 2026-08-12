@@ -30,6 +30,9 @@ jobs:
       - name: Check bundled plugin
         run: node --check dist/index.js
 
+      - name: Check production bundle
+        run: node --check stable/index.js
+
       - name: Run tests
         shell: bash
         run: |
