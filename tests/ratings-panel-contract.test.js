@@ -3,6 +3,7 @@ const fs = require('fs');
 const vm = require('vm');
 
 const renderersSource = fs.readFileSync('src/ui-card-renderers.js', 'utf8');
+const model = fs.readFileSync('src/ui-card-model.js', 'utf8');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 const history = fs.readFileSync('src/ui-playback-history.js', 'utf8');
@@ -16,9 +17,9 @@ assert.match(renderersSource, /root\.classList\.toggle\('yani-card-view--has-foo
 assert.match(renderersSource, /positive\.slice\(0, 3\)/);
 assert.match(history, /HISTORY_CACHE_MS = 500/);
 assert.match(history, /invalidatePlaybackHistoryCache\(\)/);
-assert.match(ui, /filter\(function \(item\) \{ return Number\(item\.value\) > 0; \}\)/);
-assert.match(ui, /function createDetailRatings\(ratings, votes\)/);
-assert.doesNotMatch(ui, /yani-ratings__source/);
+assert.match(model, /filter\(function \(item\) \{ return Number\(item\.value\) > 0; \}\)/);
+assert.match(model, /function createDetailRatings\(ratings, votes\)/);
+assert.doesNotMatch(model, /yani-ratings__source/);
 assert.match(ui, /syncCardOverlayLayout: cardRenderers\.syncCardOverlayLayout/);
 assert.match(history, /syncCardOverlayLayout\(rendered\)/);
 

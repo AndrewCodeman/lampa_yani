@@ -2,6 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 
 const cards = fs.readFileSync('src/ui-card-renderers.js', 'utf8');
+const model = fs.readFileSync('src/ui-card-model.js', 'utf8');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
@@ -9,7 +10,7 @@ const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 assert.match(ui, /function annotateGenreTop\(items, offset\)/);
 assert.match(ui, /hasSortDirection \?[^:]+:[\s\r\n]*baseParams\.sort === 'top'/);
 assert.match(ui, /item\.yani_genre_top = \{position: position, genre: title\}/);
-assert.match(ui, /yani_genre_top: item\.yani_genre_top && typeof item\.yani_genre_top === 'object'/);
+assert.match(model, /yani_genre_top: item\.yani_genre_top && typeof item\.yani_genre_top === 'object'/);
 assert.match(cards, /function genreTopPosition\(card\)/);
 assert.match(cards, /position >= 1 && position <= 100/);
 assert.match(cards, /yani-card-media__genre-top/);

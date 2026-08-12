@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.32 — 2026-08-13
+
+- Extract shared title-card mapping (`toCard`, ratings, media meta, watched-episode progress) into `src/ui-card-model.js` so catalog, detail, and Lampa card integration share one model.
+
 ## 0.41.31 — 2026-08-13
 
 - Scale card overlay density by font-relative `em` size so Lampa interface scale, 720p, and 4K do not change when badges collapse.

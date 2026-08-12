@@ -4,6 +4,7 @@ const vm = require('vm');
 
 const api = fs.readFileSync('src/api.js', 'utf8');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
+const model = fs.readFileSync('src/ui-card-model.js', 'utf8');
 const historySource = fs.readFileSync('src/ui-playback-history.js', 'utf8');
 const menuSource = fs.readFileSync('src/ui-playback-menu.js', 'utf8');
 const sectionsSource = fs.readFileSync('src/ui-home-sections.js', 'utf8');
@@ -31,8 +32,8 @@ assert.match(ui, /cacheHomePlaybackSnapshot\(playbackUserKey, result\[0\], resul
 assert.match(ui, /homePlaybackCacheLifetime = 300000/);
 assert.match(ui, /if \(cached\.fresh\) return cached\.ids/, 'fresh exclusions should avoid reloading the complete user library');
 assert.match(ui, /\[2, 3\]\.forEach\(function \(listId\)/, 'completed and dropped lists must be excluded');
-assert.match(ui, /typeof item\.poster === 'string' \? item\.poster/, 'locally stored string poster URLs must remain visible');
-assert.match(ui, /item\.poster\.huge/, 'large remote history posters must be supported');
+assert.match(model, /typeof item\.poster === 'string' \? item\.poster/, 'locally stored string poster URLs must remain visible');
+assert.match(model, /item\.poster\.huge/, 'large remote history posters must be supported');
 assert.match(ui, /LampaYaniPlaybackHistory\.create/);
 assert.match(ui, /historyCardRender: bindHistoryCardRender/);
 
