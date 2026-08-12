@@ -16,6 +16,7 @@
         };
         var openVideos = deps.openVideos || function () {};
         var addCardPlaybackProgress = deps.addCardPlaybackProgress || function () {};
+        var syncCardOverlayLayout = deps.syncCardOverlayLayout || function () {};
         var playerKey = deps.playerKey || function (group) {
             return String(group && (group.player || group.title) || '').toLowerCase();
         };
@@ -95,6 +96,7 @@
             if (duration > 0) {
                 view.append($('<span class="yani-card-history-progress"><span></span></span>').find('span').css('width', percent + '%').end());
             }
+            syncCardOverlayLayout(rendered);
         }
 
         function refreshVisiblePlaybackProgress(card) {

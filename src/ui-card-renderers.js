@@ -213,6 +213,19 @@
             view.append($('<span class="yani-card-recommendation"></span>').text(card.yani_recommendation_label));
         }
 
+        function syncCardOverlayLayout(element, card) {
+            var render = cardRenderElement(element, card);
+            var view = $('.card__view', render).first();
+            if (!view.length) return view;
+            var hasFooter = view.find('.yani-card-list, .yani-card-playback, .yani-card-history').length > 0;
+            var hasProgress = view.find('.yani-card-playback-progress, .yani-card-history-progress').length > 0;
+            var hasRatings = view.find('.yani-card-ratings').length > 0;
+            view.toggleClass('yani-card-view--has-footer', hasFooter);
+            view.toggleClass('yani-card-view--has-progress', hasProgress);
+            view.toggleClass('yani-card-view--has-ratings', hasRatings);
+            return view;
+        }
+
         function addCardListBadge(element, card) {
             if (!card || (card.yani_list_id === null && !card.yani_is_favorite)) return;
             var render = cardRenderElement(element, card);
@@ -224,6 +237,7 @@
             var label = labels[card.yani_list_id] || '';
             if (card.yani_is_favorite) label = label ? label + ' · ♥' : '♥';
             badge.text(label);
+            syncCardOverlayLayout(render, card);
         }
 
         function cardPlaybackState(card) {
@@ -248,7 +262,10 @@
             var view = $('.card__view', render).first();
             if (!view.length) return;
             view.find('.yani-card-playback, .yani-card-playback-progress').remove();
-            if (!state) return;
+            if (!state) {
+                syncCardOverlayLayout(render, card);
+                return;
+            }
             var parts = [];
             if (state.episode) parts.push(t('episode') + ' ' + state.episode);
             if (state.percent) parts.push(state.percent + '%');
@@ -257,6 +274,7 @@
                 view.append($('<span class="yani-card-playback-progress"><span></span></span>')
                     .find('span').css('width', state.percent + '%').end());
             }
+            syncCardOverlayLayout(render, card);
         }
 
         function formatRating(value) {
@@ -270,21 +288,37 @@
                 .attr('aria-label', rating.title || rating.key);
         }
 
+        function visibleCardRatings(ratings) {
+            var positive = (ratings || []).filter(function (rating) {
+                return rating && Number(rating.value) > 0;
+            });
+            positive.sort(function (a, b) {
+                if (a.key === 'yummy') return -1;
+                if (b.key === 'yummy') return 1;
+                return Number(b.value) - Number(a.value);
+            });
+            return positive.slice(0, 3);
+        }
+
         function addCardRatings(element, card) {
-            var ratings = card && card.yani_ratings || [];
+            var ratings = visibleCardRatings(card && card.yani_ratings);
             if (!ratings.length || !card) return;
             var render = cardRenderElement(element, card);
-            if ($('.yani-card-ratings', render).length) return;
+            var view = $('.card__view', render).first();
+            if (!view.length) return;
+            view.find('.yani-card-ratings').remove();
 
             $('.card__vote', render).hide();
-            var block = $('<div class="yani-card-ratings"></div>');
+            var block = $('<div class="yani-card-ratings" role="group" aria-label="ratings"></div>');
             ratings.forEach(function (rating) {
                 var badge = $('<div class="yani-card-rating yani-card-rating--' + rating.key + '"></div>');
+                badge.attr('title', (rating.title || rating.key) + ' ' + formatRating(rating.value));
                 badge.append(createRatingLogo(rating, 'yani-card-rating__logo'));
                 badge.append($('<span class="yani-card-rating__value"></span>').text(formatRating(rating.value)));
                 block.append(badge);
             });
-            $('.card__view', render).append(block);
+            view.append(block);
+            syncCardOverlayLayout(render, card);
         }
 
         function decorate(element, card) {
@@ -295,6 +329,7 @@
             addCardRecommendationBadge(element, card);
             addCardListBadge(element, card);
             addCardPlaybackProgress(element, card);
+            syncCardOverlayLayout(element, card);
         }
 
         return {
@@ -315,8 +350,10 @@
             addCardListBadge: addCardListBadge,
             cardPlaybackState: cardPlaybackState,
             addCardPlaybackProgress: addCardPlaybackProgress,
+            syncCardOverlayLayout: syncCardOverlayLayout,
             formatRating: formatRating,
             createRatingLogo: createRatingLogo,
+            visibleCardRatings: visibleCardRatings,
             addCardRatings: addCardRatings,
             decorate: decorate
         };

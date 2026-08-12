@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.24 — 2026-08-12
+
+- Unified catalog and title-detail ratings into one compact logo+score chip panel with consistent logo size and clearer card focus.
+- Keep at most three positive ratings on cards (YummyAnime first) and lift the panel above list, playback, and progress overlays so it no longer collides with quality badges or footer chrome.
+
 ## 0.41.23 — 2026-08-12
 
 - Extracted native Lampa card resolve, reverse Yummy match, and full-detail rating/button decoration into `src/ui-standard-card.js`.

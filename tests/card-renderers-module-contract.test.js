@@ -31,6 +31,7 @@ const context = {
             find: function () { return this; },
             append: function () { return this; },
             addClass: function () { return this; },
+            toggleClass: function () { return this; },
             text: function () { return this; },
             attr: function () { return this; },
             css: function () { return this; },

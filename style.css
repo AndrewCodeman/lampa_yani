@@ -1738,10 +1738,13 @@
     position: absolute;
     right: 0.35em;
     bottom: 0.35em;
-    left: 0.35em;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.2em;
+    left: auto;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.18em;
+    max-width: calc(100% - 0.7em);
     pointer-events: none;
 }
 
@@ -1750,6 +1753,7 @@
     top: 0.35em;
     left: 0.35em;
     right: 0.35em;
+    z-index: 3;
     display: flex;
     flex-wrap: wrap;
     gap: 0.25em;
@@ -1799,43 +1803,58 @@
 .yani-card--fresh .card__view { box-shadow: inset 0 0 0 .08em rgba(244,112,133,.58); }
 .yani-card--fresh.focus .card__view { box-shadow: inset 0 0 0 .08em rgba(244,112,133,.7), 0 0 0 .12em #fff; }
 .yani-card-recommendation { position: absolute; top: .35em; left: .35em; z-index: 3; max-width: calc(100% - .7em); padding: .22em .42em; border-radius: .3em; background: rgba(81, 61, 143, .94); color: #fff; font-size: .58em; font-weight: 700; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.yani-card-list { position: absolute; left: 0.35em; bottom: 0.35em; z-index: 3; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: #5f43a8; color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.yani-card-list { position: absolute; left: 0.35em; bottom: 0.42em; z-index: 4; max-width: 46%; padding: 0.25em 0.45em; border-radius: 0.3em; background: #5f43a8; color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .yani-card-history { position: absolute; top: 0.35em; right: 0.35em; z-index: 4; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: rgba(239, 100, 112, 0.94); color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .yani-card-history-progress { position: absolute; right: 0; bottom: 0; left: 0; z-index: 5; height: 0.24em; overflow: hidden; background: rgba(255, 255, 255, 0.25); }
 .yani-card-history-progress span { display: block; height: 100%; background: #ef6470; }
-.yani-card-playback { position: absolute; right: .35em; bottom: .54em; z-index: 4; max-width: calc(100% - .7em); overflow: hidden; padding: .22em .42em; border: .06em solid rgba(255,255,255,.18); border-radius: .34em; background: rgba(21,20,29,.86); color: rgba(255,255,255,.96); font-size: .6em; font-weight: 700; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; box-shadow: 0 .18em .5em rgba(0,0,0,.28); }
-.yani-card-list + .yani-card-playback { max-width: 54%; }
+.yani-card-playback { position: absolute; right: .35em; bottom: .42em; z-index: 4; max-width: 48%; overflow: hidden; padding: .22em .42em; border: .06em solid rgba(255,255,255,.18); border-radius: .34em; background: rgba(21,20,29,.86); color: rgba(255,255,255,.96); font-size: .6em; font-weight: 700; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; box-shadow: 0 .18em .5em rgba(0,0,0,.28); }
+.yani-card-list + .yani-card-playback { max-width: 48%; }
 .yani-card-playback-progress { position: absolute; right: 0; bottom: 0; left: 0; z-index: 5; height: .25em; overflow: hidden; background: rgba(255,255,255,.2); }
 .yani-card-playback-progress span { display: block; height: 100%; border-radius: 0 .2em .2em 0; background: linear-gradient(90deg, #ef6470, #a975e7); box-shadow: 0 0 .45em rgba(239,100,112,.5); }
 .card.focus .yani-card-playback { border-color: rgba(255,255,255,.65); background: rgba(34,28,45,.94); }
+
+/* Lift ratings above list/playback/progress so chips never collide. */
+.yani-card-view--has-footer .yani-card-ratings { bottom: 1.72em; }
+.yani-card-view--has-progress .yani-card-ratings { bottom: 1.55em; }
+.yani-card-view--has-footer.yani-card-view--has-progress .yani-card-ratings { bottom: 1.95em; }
+.yani-card-view--has-progress .yani-card-list,
+.yani-card-view--has-progress .yani-card-playback { bottom: .48em; }
+.yani-card-view--has-ratings.yani-card-view--has-footer .yani-card-list { max-width: 42%; }
+.yani-card-view--has-ratings.yani-card-view--has-footer .yani-card-playback { max-width: 48%; }
 .yani-collection-card__previews { position: absolute; right: .38em; bottom: 2.15em; z-index: 4; display: flex; gap: .22em; }
 .yani-collection-card__previews span { width: 2.15em; height: 3.1em; border: .08em solid rgba(255,255,255,.72); border-radius: .28em; background-position: center; background-size: cover; box-shadow: 0 .25em .7em rgba(0,0,0,.45); }
 .yani-collection-card__meta { position: absolute; right: .35em; bottom: .35em; left: .35em; z-index: 5; overflow: hidden; padding: .3em .45em; border-radius: .32em; background: rgba(21,20,29,.82); color: #fff; font-size: .62em; font-weight: 650; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
 .yani-collection-card.focus .yani-collection-card__meta { background: #ef6470; }
 
 .yani-card-rating {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0.2em 0.3em;
-    border-radius: 0.25em;
-    background: rgba(0, 0, 0, 0.78);
+    gap: 0.22em;
+    min-height: 1.55em;
+    padding: 0.1em 0.32em 0.1em 0.1em;
+    border: 0.06em solid rgba(255, 255, 255, 0.18);
+    border-radius: 0.34em;
+    background: rgba(16, 15, 24, 0.9);
+    box-shadow: 0 0.16em 0.45em rgba(0, 0, 0, 0.28);
     color: #fff;
     font-size: 0.62em;
+    line-height: 1;
 }
 
 .yani-rating-logo {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 2.1em;
-    height: 1.45em;
-    padding: 0 0.3em;
+    flex: none;
+    width: 1.55em;
+    min-width: 1.55em;
+    height: 1.55em;
+    padding: 0;
     box-sizing: border-box;
     border-radius: 0.28em;
     background: #fff;
     color: #111;
-    font-size: 0.78em;
+    font-size: 0.72em;
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 1;
@@ -1857,42 +1876,58 @@
 }
 
 .yani-card-rating__logo {
-    margin-right: 0.25em;
+    margin-right: 0;
 }
 
 .yani-card-rating__value {
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.card.focus .yani-card-rating {
+    border-color: rgba(255, 255, 255, 0.62);
+    box-shadow: 0 0.18em 0.5em rgba(0, 0, 0, 0.34), 0 0 0.45em rgba(133, 193, 255, 0.18);
 }
 
 .yani-ratings {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(8em, 1fr));
-    gap: 0.6em;
-    margin: 1em 0 1.4em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45em;
+    margin: 0.85em 0 1.2em;
 }
 
 .yani-ratings__item {
-    padding: 0.65em 0.8em;
-    border-radius: 0.5em;
-    background: rgba(255, 255, 255, 0.1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    min-height: 2.1em;
+    padding: 0.28em 0.55em 0.28em 0.28em;
+    border: 0.06em solid rgba(255, 255, 255, 0.14);
+    border-radius: 0.45em;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
 }
 
-.yani-ratings__header { display: flex; align-items: center; gap: 0.55em; }
-.yani-ratings__logo { min-width: 2.5em; height: 1.7em; font-size: 0.85em; }
+.yani-ratings__logo {
+    width: 1.7em;
+    min-width: 1.7em;
+    height: 1.7em;
+    font-size: 0.78em;
+}
+
 .yani-ratings__value {
-    font-size: 1.35em;
-    font-weight: 600;
-}
-
-.yani-ratings__source {
-    margin-top: 0.15em;
-    opacity: 0.78;
+    font-size: 1.05em;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .yani-ratings__votes {
-    margin-top: 0.2em;
-    font-size: 0.75em;
-    opacity: 0.55;
+    margin-left: 0.1em;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.72em;
+    font-weight: 600;
+    line-height: 1.1;
+    white-space: nowrap;
 }
 
 .yani-account__content {
@@ -2675,7 +2710,8 @@
     .yani-schedule__content { padding: 1em; }
     .yani-schedule__release { min-width: 5em; }
     .yani-schedule__timezone { display: none; }
-    .yani-ratings { grid-template-columns: repeat(2, minmax(7em, 1fr)); }
+    .yani-ratings { gap: 0.35em; }
+    .yani-ratings__votes { display: none; }
     .yani-account__content { padding: 1em; }
     .yani-account__grid,
     .yani-account__lists { grid-template-columns: repeat(2, minmax(8em, 1fr)); }

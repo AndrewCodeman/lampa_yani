@@ -119,6 +119,7 @@
         cardRenderElement: cardRenderElement,
         openVideos: function (card, resume) { return openVideos(card, resume); },
         addCardPlaybackProgress: addCardPlaybackProgress,
+        syncCardOverlayLayout: cardRenderers.syncCardOverlayLayout,
         playerKey: function (group) { return playerKey(group); },
         videoSourceUrl: function (video) { return videoSourceUrl(video); }
     });
@@ -4311,7 +4312,7 @@
             {key: 'anidub', short: 'AD', title: 'AniDUB', value: Number(rating.anidub_rating || 0)},
             {key: 'mal', short: 'MAL', title: 'MyAnimeList', value: Number(rating.myanimelist_rating || 0)},
             {key: 'worldart', short: 'WA', title: 'World-Art', value: Number(rating.worldart_rating || 0)}
-        ];
+        ].filter(function (item) { return Number(item.value) > 0; });
     }
 
     function mediaMeta(item) {
@@ -4337,15 +4338,20 @@
     }
 
     function createDetailRatings(ratings, votes) {
-        var block = $('<div class="yani-ratings"></div>');
-        ratings.forEach(function (rating) {
+        var items = (ratings || []).filter(function (rating) { return rating && Number(rating.value) > 0; });
+        if (!items.length) return $();
+        var block = $('<div class="yani-ratings" role="group"></div>');
+        items.forEach(function (rating) {
             var item = $('<div class="yani-ratings__item"></div>');
-            var header = $('<div class="yani-ratings__header"></div>');
-            header.append(createRatingLogo(rating, 'yani-ratings__logo'));
-            header.append($('<div class="yani-ratings__value"></div>').text(formatRating(rating.value)));
-            item.append(header);
-            item.append($('<div class="yani-ratings__source"></div>').text(rating.title));
-            if (rating.key === 'yummy' && votes) item.append($('<div class="yani-ratings__votes"></div>').text(votes + ' ' + t('ratings_count')));
+            var label = rating.title || rating.key;
+            if (rating.key === 'yummy' && votes) label += ' · ' + votes + ' ' + t('ratings_count');
+            item.attr('title', label);
+            item.attr('aria-label', label);
+            item.append(createRatingLogo(rating, 'yani-ratings__logo'));
+            item.append($('<span class="yani-ratings__value"></span>').text(formatRating(rating.value)));
+            if (rating.key === 'yummy' && votes) {
+                item.append($('<span class="yani-ratings__votes"></span>').text(votes + ' ' + t('ratings_count')));
+            }
             block.append(item);
         });
         return block;
