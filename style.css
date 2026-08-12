@@ -1752,11 +1752,12 @@
     position: absolute;
     top: 0.35em;
     left: 0.35em;
-    right: 0.35em;
+    right: auto;
     z-index: 3;
     display: flex;
     flex-wrap: wrap;
     gap: 0.25em;
+    max-width: calc(100% - 0.7em);
     pointer-events: none;
 }
 
@@ -1795,23 +1796,28 @@
 .yani-card-meta__status--announced { color: #f2bf69; }
 .yani-card-meta__episodes { color: rgba(142,205,247,.94); }
 .card.focus .yani-card-meta { color: rgba(255,255,255,.88); }
-.yani-card-update { position: absolute; top: 0.35em; right: 0.35em; z-index: 2; display: flex; align-items: center; gap: .38em; max-width: calc(100% - 0.7em); padding: 0.25em 0.42em; border: .06em solid rgba(255,255,255,.16); border-radius: .38em; background: rgba(28,27,38,.9); color: #fff; font-size: 0.62em; font-weight: 700; line-height: 1.1; box-shadow: 0 .2em .6em rgba(0,0,0,.28); white-space: nowrap; }
+.yani-card-update { position: absolute; top: 0.35em; right: 0.35em; z-index: 5; display: flex; align-items: center; gap: .38em; max-width: calc(100% - 0.7em); padding: 0.25em 0.42em; border: .06em solid rgba(255,255,255,.16); border-radius: .38em; background: rgba(28,27,38,.9); color: #fff; font-size: 0.62em; font-weight: 700; line-height: 1.1; box-shadow: 0 .2em .6em rgba(0,0,0,.28); white-space: nowrap; }
 .yani-card-update__label { overflow: hidden; text-overflow: ellipsis; }
 .yani-card-update__freshness { flex: none; padding-left: .38em; border-left: .08em solid rgba(255,255,255,.22); color: #ffc7cd; font-size: .86em; font-weight: 600; }
 .yani-card-update--fresh { border-color: rgba(255,151,166,.5); background: linear-gradient(115deg, rgba(217,67,91,.96), rgba(108,62,145,.94)); }
 .yani-card-update--fresh .yani-card-update__freshness { color: #fff; }
 .yani-card--fresh .card__view { box-shadow: inset 0 0 0 .08em rgba(244,112,133,.58); }
 .yani-card--fresh.focus .card__view { box-shadow: inset 0 0 0 .08em rgba(244,112,133,.7), 0 0 0 .12em #fff; }
-.yani-card-recommendation { position: absolute; top: .35em; left: .35em; z-index: 3; max-width: calc(100% - .7em); padding: .22em .42em; border-radius: .3em; background: rgba(81, 61, 143, .94); color: #fff; font-size: .58em; font-weight: 700; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.yani-card-list { position: absolute; left: 0.35em; bottom: 0.42em; z-index: 4; max-width: 46%; padding: 0.25em 0.45em; border-radius: 0.3em; background: #5f43a8; color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.yani-card-history { position: absolute; top: 0.35em; right: 0.35em; z-index: 4; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: rgba(239, 100, 112, 0.94); color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.yani-card-history-progress { position: absolute; right: 0; bottom: 0; left: 0; z-index: 5; height: 0.24em; overflow: hidden; background: rgba(255, 255, 255, 0.25); }
+.yani-card-recommendation { position: absolute; top: .35em; left: .35em; z-index: 2; max-width: calc(100% - .7em); padding: .22em .42em; border-radius: .3em; background: rgba(81, 61, 143, .94); color: #fff; font-size: .58em; font-weight: 700; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.yani-card-list { position: absolute; left: 0.35em; bottom: 0.42em; z-index: 6; max-width: 46%; padding: 0.25em 0.45em; border-radius: 0.3em; background: #5f43a8; color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.yani-card-history { position: absolute; top: 0.35em; right: 0.35em; z-index: 6; max-width: calc(100% - 0.7em); padding: 0.25em 0.45em; border-radius: 0.3em; background: rgba(239, 100, 112, 0.94); color: #fff; font-size: 0.68em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.yani-card-history-progress { position: absolute; right: 0; bottom: 0; left: 0; z-index: 7; height: 0.24em; overflow: hidden; background: rgba(255, 255, 255, 0.25); }
 .yani-card-history-progress span { display: block; height: 100%; background: #ef6470; }
-.yani-card-playback { position: absolute; right: .35em; bottom: .42em; z-index: 4; max-width: 48%; overflow: hidden; padding: .22em .42em; border: .06em solid rgba(255,255,255,.18); border-radius: .34em; background: rgba(21,20,29,.86); color: rgba(255,255,255,.96); font-size: .6em; font-weight: 700; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; box-shadow: 0 .18em .5em rgba(0,0,0,.28); }
+.yani-card-playback { position: absolute; right: .35em; bottom: .42em; z-index: 6; max-width: 48%; overflow: hidden; padding: .22em .42em; border: .06em solid rgba(255,255,255,.18); border-radius: .34em; background: rgba(21,20,29,.86); color: rgba(255,255,255,.96); font-size: .6em; font-weight: 700; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; box-shadow: 0 .18em .5em rgba(0,0,0,.28); }
 .yani-card-list + .yani-card-playback { max-width: 48%; }
-.yani-card-playback-progress { position: absolute; right: 0; bottom: 0; left: 0; z-index: 5; height: .25em; overflow: hidden; background: rgba(255,255,255,.2); }
+.yani-card-playback-progress { position: absolute; right: 0; bottom: 0; left: 0; z-index: 7; height: .25em; overflow: hidden; background: rgba(255,255,255,.2); }
 .yani-card-playback-progress span { display: block; height: 100%; border-radius: 0 .2em .2em 0; background: linear-gradient(90deg, #ef6470, #a975e7); box-shadow: 0 0 .45em rgba(239,100,112,.5); }
 .card.focus .yani-card-playback { border-color: rgba(255,255,255,.65); background: rgba(34,28,45,.94); }
+
+/* Keep top-start media and top-end fresh/history badges in separate lanes. */
+.yani-card-view--has-top-end .yani-card-media { max-width: 52%; }
+.yani-card-view--has-top-start .yani-card-update,
+.yani-card-view--has-top-start .yani-card-history { max-width: 46%; }
 
 /* Lift ratings above list/playback/progress so chips never collide. */
 .yani-card-view--has-footer .yani-card-ratings { bottom: 1.72em; }
@@ -1821,6 +1827,15 @@
 .yani-card-view--has-progress .yani-card-playback { bottom: .48em; }
 .yani-card-view--has-ratings.yani-card-view--has-footer .yani-card-list { max-width: 42%; }
 .yani-card-view--has-ratings.yani-card-view--has-footer .yani-card-playback { max-width: 48%; }
+
+/* Priority hide rules: secondary poster data disappears before list/progress. */
+.yani-card-view--hide-recommendation .yani-card-recommendation,
+.yani-card-view--hide-ratings .yani-card-ratings,
+.yani-card-view--hide-genre-top .yani-card-media__genre-top,
+.yani-card-view--hide-voices .yani-card-media__voices,
+.yani-card-view--hide-availability .yani-card-media__availability,
+.yani-card-view--hide-update-freshness .yani-card-update__freshness,
+.yani-card-view--hide-update .yani-card-update { display: none !important; }
 .yani-collection-card__previews { position: absolute; right: .38em; bottom: 2.15em; z-index: 4; display: flex; gap: .22em; }
 .yani-collection-card__previews span { width: 2.15em; height: 3.1em; border: .08em solid rgba(255,255,255,.72); border-radius: .28em; background-position: center; background-size: cover; box-shadow: 0 .25em .7em rgba(0,0,0,.45); }
 .yani-collection-card__meta { position: absolute; right: .35em; bottom: .35em; left: .35em; z-index: 5; overflow: hidden; padding: .3em .45em; border-radius: .32em; background: rgba(21,20,29,.82); color: #fff; font-size: .62em; font-weight: 650; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.29 — 2026-08-13
+
+- Unify small-poster card overlays by priority: list status and playback progress stay first, then fresh episode, quality/voices, genre top, and ratings.
+- When the poster is crowded, secondary badges hide in that order instead of overlapping; top-start media and top-end fresh/history badges keep separate lanes.
+
 ## 0.41.28 — 2026-08-13
 
 - Classify detail-page translations by dubbing labels from real Yani names: voice prefixes like `Озвучка Kazoku Sub` / `Озвучка SubVost` stay in voice teams, while `Субтитры …`, SoftSub/HardSub/сабы variants still go to subtitles.

@@ -219,13 +219,108 @@
             if (!view.length) return view;
             var root = view[0];
             if (!root || !root.classList) return view;
-            var hasFooter = !!root.querySelector('.yani-card-list, .yani-card-playback, .yani-card-history');
-            var hasProgress = !!root.querySelector('.yani-card-playback-progress, .yani-card-history-progress');
-            var hasRatings = !!root.querySelector('.yani-card-ratings');
+
+            var list = root.querySelector('.yani-card-list');
+            var playback = root.querySelector('.yani-card-playback');
+            var history = root.querySelector('.yani-card-history');
+            var progress = root.querySelector('.yani-card-playback-progress, .yani-card-history-progress');
+            var ratings = root.querySelector('.yani-card-ratings');
+            var update = root.querySelector('.yani-card-update');
+            var availability = root.querySelector('.yani-card-media__availability');
+            var voices = root.querySelector('.yani-card-media__voices');
+            var genreTop = root.querySelector('.yani-card-media__genre-top');
+            var recommendation = root.querySelector('.yani-card-recommendation');
+            var media = root.querySelector('.yani-card-media');
+
+            var hasFooter = Boolean(list || playback || history);
+            var hasProgress = Boolean(progress);
+            var hasRatings = Boolean(ratings);
+            var hasTopEnd = Boolean(update || history);
+            var hasTopStart = Boolean((media && media.children && media.children.length) || recommendation);
+
             root.classList.toggle('yani-card-view--has-footer', hasFooter);
             root.classList.toggle('yani-card-view--has-progress', hasProgress);
             root.classList.toggle('yani-card-view--has-ratings', hasRatings);
+            root.classList.toggle('yani-card-view--has-top-end', hasTopEnd);
+            root.classList.toggle('yani-card-view--has-top-start', hasTopStart);
+
+            var plan = cardOverlayPriorityPlan({
+                width: root.clientWidth || root.offsetWidth || 0,
+                height: root.clientHeight || root.offsetHeight || 0,
+                list: Boolean(list),
+                playback: Boolean(playback),
+                history: Boolean(history),
+                progress: hasProgress,
+                ratings: hasRatings,
+                update: Boolean(update),
+                updateFreshness: Boolean(update && update.querySelector('.yani-card-update__freshness')),
+                availability: Boolean(availability),
+                voices: Boolean(voices),
+                genreTop: Boolean(genreTop),
+                recommendation: Boolean(recommendation)
+            });
+
+            root.classList.toggle('yani-card-view--hide-recommendation', plan.recommendation);
+            root.classList.toggle('yani-card-view--hide-ratings', plan.ratings);
+            root.classList.toggle('yani-card-view--hide-genre-top', plan.genreTop);
+            root.classList.toggle('yani-card-view--hide-voices', plan.voices);
+            root.classList.toggle('yani-card-view--hide-availability', plan.availability);
+            root.classList.toggle('yani-card-view--hide-update-freshness', plan.updateFreshness);
+            root.classList.toggle('yani-card-view--hide-update', plan.update);
+
             return view;
+        }
+
+        // Small-poster priority (keep → hide): list, progress, fresh episode,
+        // quality/voices, genre top, ratings. Secondary badges disappear instead
+        // of stacking on top of higher-priority chrome.
+        function cardOverlayPriorityPlan(state) {
+            state = state || {};
+            var hide = {
+                recommendation: false,
+                ratings: false,
+                genreTop: false,
+                voices: false,
+                availability: false,
+                updateFreshness: false,
+                update: false
+            };
+            var width = Number(state.width || 0);
+            var height = Number(state.height || 0);
+            var pressure = 0;
+
+            if (width > 0) {
+                if (width < 185) pressure += 1;
+                if (width < 155) pressure += 1;
+                if (width < 130) pressure += 1;
+            }
+            if (width > 0 && width < 200) {
+                if (height > 0 && height < 200) pressure += 1;
+                if (state.list && (state.playback || state.history)) pressure += 1;
+                if (state.ratings && (state.list || state.playback || state.progress)) pressure += 1;
+                if ((state.availability || state.genreTop) && (state.update || state.history)) pressure += 1;
+            }
+
+            if (state.recommendation && (state.availability || state.genreTop || state.update || state.history)) {
+                hide.recommendation = true;
+            }
+
+            // Fresh episode outranks quality/top/ratings: only trim its date text
+            // here, and drop the whole badge in extreme widths below.
+            var steps = [];
+            if (state.ratings) steps.push(function () { hide.ratings = true; });
+            if (state.genreTop) steps.push(function () { hide.genreTop = true; });
+            if (state.voices) steps.push(function () { hide.voices = true; });
+            if (state.availability) steps.push(function () { hide.availability = true; });
+            if (state.updateFreshness) steps.push(function () { hide.updateFreshness = true; });
+
+            for (var index = 0; index < Math.min(pressure, steps.length); index++) steps[index]();
+
+            if (state.update && width > 0 && width < 105 && (state.list || state.playback || state.progress || state.history)) {
+                hide.update = true;
+            }
+
+            return hide;
         }
 
         function addCardListBadge(element, card) {
@@ -353,6 +448,7 @@
             cardPlaybackState: cardPlaybackState,
             addCardPlaybackProgress: addCardPlaybackProgress,
             syncCardOverlayLayout: syncCardOverlayLayout,
+            cardOverlayPriorityPlan: cardOverlayPriorityPlan,
             formatRating: formatRating,
             createRatingLogo: createRatingLogo,
             visibleCardRatings: visibleCardRatings,
