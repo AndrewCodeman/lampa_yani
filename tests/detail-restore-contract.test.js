@@ -22,6 +22,7 @@ assert.match(detail, /if \(appendNavigation\) appendNavigation\(row\)/);
 assert.match(detail, /appendDetailNavigation\(empty\)/);
 assert.match(detail, /appendDetailNavigation\(errorRow\)/);
 assert.match(detail, /yaniDetailOwner: detailComponent/);
-assert.match(detail, /comp\.destroy = function \(\) \{ destroyed = true/);
+assert.match(detail, /comp\.destroy = function \(\) \{\s*destroyed = true/);
+assert.match(detail, /if \(videosAbort\) videosAbort\.abort\(\)/);
 
 console.log('detail restore contract tests passed');
