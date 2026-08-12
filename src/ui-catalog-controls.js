@@ -220,6 +220,44 @@
             return focused && focused.length ? focused : $();
         }
 
+        function focusCardInDirection(direction) {
+            var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
+            var current = focusedCatalogCard();
+            if (!collection || !collection.length || !current.length) return false;
+            var currentRect = current[0].getBoundingClientRect();
+            var currentCenterX = currentRect.left + currentRect.width / 2;
+            var currentCenterY = currentRect.top + currentRect.height / 2;
+            var verticalThreshold = Math.max(12, currentRect.height * 0.25);
+            var target = null;
+            var score = Infinity;
+            collection.find('.card.selector').each(function () {
+                if (this === current[0] || this.offsetParent === null) return;
+                var rect = this.getBoundingClientRect();
+                var centerY = rect.top + rect.height / 2;
+                var distanceY = centerY - currentCenterY;
+                var isCorrectDirection = direction === 'down' ? distanceY > verticalThreshold : distanceY < -verticalThreshold;
+                if (!isCorrectDirection) return;
+                // Prefer the closest next row, then retain the current column.
+                // This stays deterministic when Lampa did not create Navigator
+                // links for the vertically rendered catalog grid.
+                var distanceX = Math.abs((rect.left + rect.width / 2) - currentCenterX);
+                var candidateScore = Math.abs(distanceY) * 10000 + distanceX;
+                if (candidateScore < score) {
+                    score = candidateScore;
+                    target = this;
+                }
+            });
+            if (!target) return false;
+            toolbarFocused = false;
+            lastCatalogCard = target;
+            comp.last = target;
+            Navigator.add(target);
+            Lampa.Controller.collectionFocus(target, collection, true);
+            if (comp.scroll && comp.scroll.update) comp.scroll.update($(target), true);
+            focusScope.remember(target);
+            return true;
+        }
+
         function isFirstCardRow(card) {
             if (!card || !card.length) return false;
             var collection = comp.scroll && comp.scroll.render ? comp.scroll.render() : comp.render();
@@ -327,6 +365,7 @@
             };
             controller.down = function () {
                 if (toolbarHasFocus()) return focusCards(false);
+                if (focusCardInDirection('down')) return;
                 if (Navigator.canmove('down')) return Navigator.move('down');
                 if (comp.scroll && comp.scroll.wheel) {
                     comp.scroll.wheel(300);

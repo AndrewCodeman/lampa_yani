@@ -46,6 +46,8 @@ assert.match(filters, /key: 'year'/);
 assert.match(ui, /function isFirstCardRow\(card\)[\s\S]{0,900}Math\.abs\(currentCenter - firstCenter\)/);
 assert.match(ui, /controller\.up = function \(\)[\s\S]{0,500}isFirstCardRow\(focusedCard\)[\s\S]{0,120}focusToolbar\(\)/);
 assert.match(ui, /controller\.down = function \(\)[\s\S]{0,180}toolbarHasFocus\(\)[\s\S]{0,80}focusCards\(false\)/);
+assert.match(ui, /function focusCardInDirection\(direction\)[\s\S]{0,1600}candidateScore = Math\.abs\(distanceY\) \* 10000 \+ distanceX[\s\S]{0,500}collectionFocus\(target, collection, true\)/);
+assert.match(ui, /controller\.down = function \(\)[\s\S]{0,250}focusCardInDirection\('down'\)[\s\S]{0,150}Navigator\.canmove\('down'\)/);
 assert.match(ui, /controller\.down = function \(\)[\s\S]{0,500}comp\.scroll\.wheel\(300\)/);
 assert.match(ui, /hover:focus\.yaniCatalogCard/);
 assert.match(ui, /controller\.left = function \(\)[\s\S]{0,220}toolbarHasFocus\(\)[\s\S]{0,120}Navigator\.canmove\('left'\)/);

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.2 — 2026-08-12
+
+- Fixed vertical catalog navigation for Lampa builds that do not expose Down links through `Navigator`: the remote now selects the closest poster in the next grid row and scrolls it into view.
+
 ## 0.41.1 — 2026-08-12
 
 - Fixed catalog remote navigation after the new command deck: Down now rebuilds the poster collection before moving focus into it.
