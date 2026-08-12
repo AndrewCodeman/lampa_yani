@@ -1,15 +1,15 @@
 const assert = require('assert');
 const fs = require('fs');
 
-const ui = fs.readFileSync('src/ui.js', 'utf8');
+const cards = fs.readFileSync('src/ui-card-renderers.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 
-assert.match(ui, /function cardMediaMotionAllowed\(\)/);
-assert.match(ui, /yani-card-media__availability/);
-assert.match(ui, /yani-card-media__availability-part yani-card-media__quality/);
-assert.match(ui, /yani-card-media__availability-part yani-card-media__voices/);
-assert.match(ui, /prefers-reduced-motion: reduce/);
-assert.match(ui, /deviceMemory/);
+assert.match(cards, /function cardMediaMotionAllowed\(\)/);
+assert.match(cards, /yani-card-media__availability/);
+assert.match(cards, /yani-card-media__availability-part yani-card-media__quality/);
+assert.match(cards, /yani-card-media__availability-part yani-card-media__voices/);
+assert.match(cards, /prefers-reduced-motion: reduce/);
+assert.match(cards, /deviceMemory/);
 assert.match(css, /\.yani-card-media__availability \{/);
 assert.match(css, /@keyframes yani-card-availability-in/);
 assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);

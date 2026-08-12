@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.19 — 2026-08-12
+
+- Extracted shared YummyAnime card decoration helpers into `src/ui-card-renderers.js`.
+- Kept catalog card open/bind lifecycle in `ui.js` and wired decoration through `LampaYaniCardRenderers.create`.
+
 ## 0.41.18 — 2026-08-12
 
 - Show only the dubbing or subtitle team name on title-detail translation chips when a team is present.
