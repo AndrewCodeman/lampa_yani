@@ -9,7 +9,12 @@ const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 const filters = fs.readFileSync('src/ui-catalog-filters.js', 'utf8');
 
 assert.match(ui, /Lampa\.Component\.add\('yani_catalog', Catalog\)/);
-assert.match(uiSource, /function Catalog\(object\)[\s\S]{0,1000}LampaYaniCatalogControls\.create/);
+assert.match(uiSource, /function Catalog\(object\)[\s\S]{0,3000}LampaYaniCatalogControls\.create/);
+assert.match(uiSource, /function installGenreHeader\(\)/);
+assert.match(uiSource, /genre_context: context/);
+assert.match(uiSource, /function genreDescription\(genre\)/);
+assert.match(controls, /genre_context: object\.genre_context/);
+assert.match(css, /\.yani-genre-catalog-header/);
 assert.match(controls, /var sortDefinitions = \[[\s\S]{0,500}sort: 'top'[\s\S]{0,300}sort: 'year'[\s\S]{0,300}sort: 'rating'[\s\S]{0,300}sort: 'rating_counters'[\s\S]{0,300}sort: 'views'[\s\S]{0,300}sort: 'title'[\s\S]{0,300}sort: 'random'/);
 assert.match(ui, /function changeSort\(definition\)[\s\S]{0,1600}params\.sort = definition\.sort[\s\S]{0,500}Lampa\.Activity\.replace/);
 assert.match(ui, /function scrollToTop\(\)[\s\S]{0,250}comp\.scroll\.reset\(\)[\s\S]{0,150}focusCards\(true\)/);

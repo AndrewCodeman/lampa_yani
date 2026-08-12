@@ -113,8 +113,7 @@
             {key: 'title', title: options.t('list_sort_title')}
         ];
         var panel;
-        var button;
-        var menu;
+        var buttons;
         var lastCard = null;
         var panelFocused = false;
         var installed = false;
@@ -138,11 +137,14 @@
         }
 
         function syncNavigation() {
-            if (!installed || !button || !button.length) return;
+            if (!installed || !buttons || !buttons.length) return;
             var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
             var controller = enabled && enabled.controller;
             var owns = enabled && enabled.name === 'content' && controller && (controller.yaniAccountListOwner === comp || controller.link === comp);
-            if (owns && button[0].offsetParent !== null) Navigator.add(button[0]);
+            if (!owns) return;
+            buttons.each(function () {
+                if (this.offsetParent !== null) Navigator.add(this);
+            });
         }
 
         function focusPanel() {
@@ -150,7 +152,8 @@
             if (focused) lastCard = focused;
             panelFocused = true;
             syncNavigation();
-            Lampa.Controller.collectionFocus(button[0], root(), true);
+            var target = buttons.filter('[data-sort="' + active + '"]')[0] || buttons[0];
+            Lampa.Controller.collectionFocus(target, root(), true);
         }
 
         function focusCards() {
@@ -172,74 +175,12 @@
             return rect.top <= firstTop + Math.max(18, rect.height * .35);
         }
 
-        function closeMenu(restore) {
-            if (!menu) return;
-            menu.remove();
-            menu = null;
-            if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle('content');
-            if (restore) setTimeout(focusPanel, 0);
-        }
-
         function choose(item) {
             var key = item && item.key;
             if (valid.indexOf(key) < 0) return;
-            if (key === active) return closeMenu(true);
+            if (key === active) return;
             if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(storageKey, key);
-            closeMenu(false);
             options.onSelect(key);
-        }
-
-        function openMenu() {
-            if (menu) return;
-            if (!Lampa.Controller || !Lampa.Controller.add) {
-                if (!options.showSelect) return;
-                return options.showSelect({
-                    title: options.t('list_sort'),
-                    items: definitions.map(function (definition) {
-                        return {title: definition.title, selected: definition.key === active, key: definition.key};
-                    }),
-                    onSelect: choose
-                }, {controller: 'content', element: button[0], collection: root()});
-            }
-
-            menu = $('<div class="yani-account-sort-dialog"><div class="yani-account-sort-dialog__shade"></div><div class="yani-account-sort-dialog__sheet"></div></div>');
-            var sheet = menu.find('.yani-account-sort-dialog__sheet');
-            var heading = $('<div class="yani-account-sort-dialog__heading"></div>');
-            heading.append($('<span class="yani-account-sort-dialog__heading-icon"></span>').html(icon(active)));
-            heading.append($('<div><strong></strong><small></small></div>')
-                .find('strong').text(options.t('list_sort')).end()
-                .find('small').text(definition.title || object.title || '').end());
-            sheet.append(heading);
-
-            definitions.forEach(function (definition, index) {
-                var row = $('<div class="yani-account-sort-dialog__option selector"></div>');
-                row.attr('data-sort', definition.key).toggleClass('active', definition.key === active);
-                row.append($('<span class="yani-account-sort-dialog__number"></span>').text('0' + (index + 1)));
-                row.append($('<span class="yani-account-sort-dialog__option-icon"></span>').html(icon(definition.key)));
-                row.append($('<span class="yani-account-sort-dialog__option-title"></span>').text(definition.title));
-                row.append('<span class="yani-account-sort-dialog__check">✓</span>');
-                row.on('hover:focus', function () { this.scrollIntoView({block: 'nearest'}); });
-                row.on('hover:enter click.yaniAccountSort', function () { choose(definition); });
-                sheet.append(row);
-            });
-
-            menu.find('.yani-account-sort-dialog__shade').on('click.yaniAccountSort', function () { closeMenu(true); });
-            $('body').append(menu);
-            Lampa.Controller.add('yani_account_sort', {
-                toggle: function () {
-                    var collection = menu && menu.find('.selector');
-                    if (!collection || !collection.length) return;
-                    Lampa.Controller.collectionSet(collection);
-                    var selected = collection.filter('[data-sort="' + active + '"]')[0] || collection[0];
-                    Lampa.Controller.collectionFocus(selected, collection);
-                },
-                up: function () { if (Navigator.canmove('up')) Navigator.move('up'); },
-                down: function () { if (Navigator.canmove('down')) Navigator.move('down'); },
-                left: function () { closeMenu(true); },
-                right: function () {},
-                back: function () { closeMenu(true); }
-            });
-            Lampa.Controller.toggle('yani_account_sort');
         }
 
         function install(total) {
@@ -249,20 +190,29 @@
             installed = true;
             view.addClass('yani-account-list-view');
             var definitionKey = String(definition.key || 'watching');
-            var activeDefinition = definitions.filter(function (item) { return item.key === active; })[0];
             panel = $('<div class="yani-account-list-sort-panel yani-account-list-sort-panel--' + definitionKey + '"></div>');
-            button = $('<div class="yani-account-list-sort-trigger selector"></div>');
-            button.append($('<span class="yani-account-list-sort-trigger__icon"></span>').html(listIcon(definitionKey)));
-            var text = $('<span class="yani-account-list-sort-trigger__text"></span>');
-            text.append($('<span class="yani-account-list-sort-trigger__caption"></span>').text(definition.title || object.title || ''));
-            text.append($('<span class="yani-account-list-sort-trigger__value"></span>').text(options.t('list_sort') + ' · ' + activeDefinition.title));
-            button.append(text);
-            button.append($('<span class="yani-account-list-sort-trigger__count"></span>').text(String(total || 0)));
-            button.append($('<span class="yani-account-list-sort-trigger__sort-icon"></span>').html(icon(active)));
-            button.append('<span class="yani-account-list-sort-trigger__chevron">›</span>');
-            button.on('hover:focus', function () { panelFocused = true; });
-            button.on('hover:enter click.yaniAccountListSort', openMenu);
-            panel.append(button);
+            var heading = $('<div class="yani-account-list-sort-panel__heading"></div>');
+            heading.append($('<span class="yani-account-list-sort-panel__list-icon"></span>').html(listIcon(definitionKey)));
+            heading.append($('<span class="yani-account-list-sort-panel__title"></span>').text(definition.title || object.title || ''));
+            heading.append($('<span class="yani-account-list-sort-panel__count"></span>').text(String(total || 0)));
+            heading.append($('<span class="yani-account-list-sort-panel__hint"></span>').text('‹  ' + options.t('list_sort') + '  ›'));
+            var rail = $('<div class="yani-account-list-sort-rail"></div>');
+            definitions.forEach(function (sortDefinition, index) {
+                var option = $('<div class="yani-account-list-sort-option selector"></div>');
+                option.attr('data-sort', sortDefinition.key).toggleClass('active', sortDefinition.key === active);
+                option.append($('<span class="yani-account-list-sort-option__index"></span>').text('0' + (index + 1)));
+                option.append($('<span class="yani-account-list-sort-option__icon"></span>').html(icon(sortDefinition.key)));
+                option.append($('<span class="yani-account-list-sort-option__title"></span>').text(sortDefinition.title));
+                option.append('<span class="yani-account-list-sort-option__state"></span>');
+                option.on('hover:focus', function () {
+                    panelFocused = true;
+                    this.scrollIntoView({block: 'nearest', inline: 'nearest'});
+                });
+                option.on('hover:enter click.yaniAccountListSort', function () { choose(sortDefinition); });
+                rail.append(option);
+            });
+            panel.append(heading, rail);
+            buttons = rail.find('.selector');
             view.prepend(panel);
             if (comp.scroll && comp.scroll.minus) comp.scroll.minus(panel);
             view.off('hover:focus.yaniAccountListCard').on('hover:focus.yaniAccountListCard', '.card.selector', function () {
@@ -280,11 +230,17 @@
             var originalDown = controller.down;
             controller.yaniAccountListOwner = comp;
             controller.left = function () {
-                if (panelFocused) return;
+                if (panelFocused) {
+                    if (Navigator.canmove('left')) Navigator.move('left');
+                    return;
+                }
                 if (originalLeft) originalLeft();
             };
             controller.right = function () {
-                if (panelFocused) return;
+                if (panelFocused) {
+                    if (Navigator.canmove('right')) Navigator.move('right');
+                    return;
+                }
                 if (originalRight) originalRight();
             };
             controller.up = function () {
@@ -317,7 +273,7 @@
             active: function () { return active; },
             sort: function (items) { return sortItems(items, active); },
             install: install,
-            destroy: function () { closeMenu(false); }
+            destroy: function () { if (panel) panel.remove(); }
         };
     }
 

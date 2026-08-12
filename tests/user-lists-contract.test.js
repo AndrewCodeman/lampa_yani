@@ -20,7 +20,7 @@ assert.match(lists, /items = controls\.sort/);
 assert.match(lists, /controls\.install\(items\.length\)/);
 assert.match(lists, /controls\.destroy\(\)/);
 assert.match(lists, /showSelect: deps\.showSelect/);
-assert.match(listControls, /yani-account-list-sort-trigger selector/);
+assert.match(listControls, /yani-account-list-sort-option selector/);
 assert.match(listControls, /yani_account_list_sort_/);
 assert.match(lists, /object\.page = 1/);
 assert.match(lists, /items\.slice\(start, start \+ pageSize\)\.map\(function \(item\)/);

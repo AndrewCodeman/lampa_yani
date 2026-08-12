@@ -94,6 +94,7 @@
                 url: cleanCatalogRoute() + '/sort/' + definition.key,
                 title: object.title || ('YummyAnime ' + t('catalog')),
                 component: 'yani_catalog',
+                genre_context: object.genre_context,
                 params: params
             });
         }
@@ -103,6 +104,7 @@
                 url: cleanCatalogRoute() + '/filter/' + filterModel.signature(params),
                 title: object.title || ('YummyAnime ' + t('catalog')),
                 component: 'yani_catalog',
+                genre_context: object.genre_context,
                 params: params
             });
         }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.40.3 — 2026-08-12
+
+- Replaced the sorting popup with an inline five-mode TV rail controlled directly by Up, Down, Left, Right and OK.
+- Kept list cards and sorting inside the same Lampa controller to make remote navigation predictable.
+- Added a persistent selected-genre header with the genre name and API description, including a localized fallback.
+- Preserved genre context after sorting and filtering the catalog.
+
 ## 0.40.2 — 2026-08-12
 
 - Replaced the generic list sorting popup with a dedicated TV-friendly selector.

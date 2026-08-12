@@ -23,17 +23,15 @@ assert.deepStrictEqual(items.map((item) => item.anime_id), [1, 2, 3], 'sorting m
 assert.match(source, /function isFirstCardRow\(current\)/);
 assert.match(source, /var current = focusedCard\(\) \|\| lastCard/);
 assert.match(source, /if \(current && isFirstCardRow\(current\)\) return focusPanel\(\)/);
-assert.match(source, /collectionFocus\(button\[0\], root\(\), true\)/);
+assert.match(source, /buttons\.filter\('\[data-sort="' \+ active \+ '"\]'\)\[0\]/);
 assert.match(source, /if \(panelFocused\) return focusCards\(\)/);
-assert.match(source, /showSelect/);
-assert.match(source, /yani-account-sort-dialog/);
-assert.match(source, /Controller\.add\('yani_account_sort'/);
-assert.match(source, /left: function \(\) \{ closeMenu\(true\); \}/);
-assert.match(source, /back: function \(\) \{ closeMenu\(true\); \}/);
-assert.match(source, /destroy: function \(\) \{ closeMenu\(false\); \}/);
+assert.match(source, /yani-account-list-sort-rail/);
+assert.match(source, /yani-account-list-sort-option selector/);
+assert.match(source, /if \(panelFocused\) \{[\s\S]{0,120}Navigator\.canmove\('left'\)/);
+assert.match(source, /if \(panelFocused\) \{[\s\S]{0,120}Navigator\.canmove\('right'\)/);
 assert.match(source, /function listIcon\(key\)/);
 assert.match(source, /yani-account-list-sort-panel--/);
-assert.match(source, /yani-account-list-sort-trigger__sort-icon/);
+assert.match(source, /yani-account-list-sort-option__icon/);
 assert.doesNotMatch(source, /yani-catalog-toolbar/);
 
 console.log('Account list sorting tests passed');
