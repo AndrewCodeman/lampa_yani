@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.1 — 2026-08-12
+
+- Fixed catalog remote navigation after the new command deck: Down now rebuilds the poster collection before moving focus into it.
+- Kept the last focused poster in sync and added a scroll fallback when the next catalog row is not yet available.
+
 ## 0.41.0 — 2026-08-12
 
 - Added one bounded focus-state manager for catalog, search results, account lists, My Lists, schedule and title details.

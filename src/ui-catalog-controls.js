@@ -186,8 +186,11 @@
                 Navigator.add(target);
                 focusScope.remember(target);
             }
-            if (first) Lampa.Controller.collectionSet(collection, false, true);
-            else syncNavigationCollection();
+            // Moving down from the command deck must rebuild the full card
+            // collection. Keeping the deck-only collection made Down appear
+            // to work while Navigator had no poster targets to enter.
+            Lampa.Controller.collectionSet(collection, false, true);
+            syncNavigationCollection();
             Lampa.Controller.collectionFocus(target || false, collection, true);
         }
 
@@ -283,6 +286,11 @@
             else root.prepend(toolbar);
             if (comp.scroll && comp.scroll.minus) comp.scroll.minus(toolbar);
             focusScope.bind(root);
+            root.off('hover:focus.yaniCatalogCard').on('hover:focus.yaniCatalogCard', '.card.selector', function (event) {
+                toolbarFocused = false;
+                lastCatalogCard = event.currentTarget || this;
+                comp.last = lastCatalogCard;
+            });
             setTimeout(syncNavigationCollection, 0);
         }
 
@@ -320,6 +328,11 @@
             controller.down = function () {
                 if (toolbarHasFocus()) return focusCards(false);
                 if (Navigator.canmove('down')) return Navigator.move('down');
+                if (comp.scroll && comp.scroll.wheel) {
+                    comp.scroll.wheel(300);
+                    setTimeout(function () { syncNavigationCollection(); }, 0);
+                    return;
+                }
                 if (originalDown) originalDown();
             };
         }
