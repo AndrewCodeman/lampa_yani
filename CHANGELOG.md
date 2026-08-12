@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.18 — 2026-08-12
+
+- Show only the dubbing or subtitle team name on title-detail translation chips when a team is present.
+- Keep the generic “Озвучка” / “Субтитры” label only for entries without a team name.
+
 ## 0.41.17 — 2026-08-12
 
 - Show the full genre description in the catalog header instead of clamping it to two lines.

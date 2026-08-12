@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.41.17',
+        version: '0.41.18',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -9826,14 +9826,32 @@ function pluginYummyAnime() {
             return block;
         }
 
+        function detailTranslationKind(name) {
+            return /субтитр|субтитри|\bsub(?:title|titles|bed)?\b/i.test(name) ? 'subtitles' : 'voices';
+        }
+
+        function detailTranslationLabel(name, kind) {
+            var cleaned = String(name || '').replace(/\s+/g, ' ').trim();
+            if (!cleaned) return '';
+            // Section headings already say "Озвучка" / "Субтитры", so keep that
+            // word on a chip only when the API did not provide a team name.
+            var prefix = kind === 'subtitles'
+                ? /^(?:субтитры|субтитри|sub(?:title|titles|bed)?)\s*[:\-–—]?\s+/i
+                : /^(?:озвучка|озвучення|dub(?:bing)?|voice(?:\s*over)?)\s*[:\-–—]?\s+/i;
+            var withoutPrefix = cleaned.replace(prefix, '').trim();
+            return withoutPrefix || cleaned;
+        }
+
         function detailTranslationGroups(videos) {
             var voices = {};
             var subtitles = {};
             (videos || []).forEach(function (video) {
                 var videoInfo = LampaYaniUiUtils.videoData(video);
-                var name = String(videoInfo.dubbing || '').replace(/\s+/g, ' ').trim();
-                if (!name) return;
-                var target = /субтитр|субтитри|\bsub(?:title|titles|bed)?\b/i.test(name) ? subtitles : voices;
+                var raw = String(videoInfo.dubbing || '').replace(/\s+/g, ' ').trim();
+                if (!raw) return;
+                var kind = detailTranslationKind(raw);
+                var name = detailTranslationLabel(raw, kind);
+                var target = kind === 'subtitles' ? subtitles : voices;
                 var key = name.toLowerCase();
                 if (!target[key]) target[key] = name;
             });
