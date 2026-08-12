@@ -89,28 +89,49 @@
         var comp = new Lampa.InteractionCategory(object);
         comp.create = function () {
             var self = this;
-            this.activity.loader(true);
-            if (!deps.authorized()) {
-                self.build({results: [], total_pages: 1, title: deps.t('updates')});
-                deps.notice(deps.t('login_required'));
-                return;
+            var states = LampaYaniSectionState.forActivity(self.activity, deps);
+            function load() {
+                if (!deps.authorized()) {
+                    states.empty({
+                        title: deps.t('login_required'),
+                        hint: deps.t('login_hint')
+                    });
+                    self.activity.toggle();
+                    states.focus();
+                    return;
+                }
+                states.loading('cards');
+                deps.resolveUserId().then(function (userId) {
+                    return Promise.all([
+                        deps.loadLists(userId),
+                        deps.subscriptions(userId).catch(function () { return []; }),
+                        deps.schedule().catch(function () { return []; }),
+                        deps.feed().catch(function () { return {}; })
+                    ]);
+                }).then(function (result) {
+                    var resultCards = cards(result[0], result[1], result[2], result[3], deps);
+                    if (!resultCards.length) {
+                        states.empty({
+                            title: deps.t('updates_empty'),
+                            onRetry: load
+                        });
+                        self.activity.toggle();
+                        states.focus();
+                        return;
+                    }
+                    self.build({results: resultCards, total_pages: 1, title: deps.t('updates')});
+                    states.ready();
+                }).catch(function (error) {
+                    console.error('[YummyAnime Updates]', error);
+                    states.offline({
+                        title: deps.t('updates_error'),
+                        onRetry: load
+                    });
+                    self.activity.toggle();
+                    states.focus();
+                });
             }
-            deps.resolveUserId().then(function (userId) {
-                return Promise.all([
-                    deps.loadLists(userId),
-                    deps.subscriptions(userId).catch(function () { return []; }),
-                    deps.schedule().catch(function () { return []; }),
-                    deps.feed().catch(function () { return {}; })
-                ]);
-            }).then(function (result) {
-                var resultCards = cards(result[0], result[1], result[2], result[3], deps);
-                self.build({results: resultCards, total_pages: 1, title: deps.t('updates')});
-                if (!resultCards.length) deps.notice(deps.t('updates_empty'));
-            }).catch(function (error) {
-                console.error('[YummyAnime Updates]', error);
-                self.activity.loader(false);
-                deps.notice(deps.t('updates_error'));
-            });
+            load();
         };
         comp.cardRender = deps.cardRender;
         return comp;

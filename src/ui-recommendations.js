@@ -62,12 +62,30 @@
         return cards.slice(0, 40);
     }
 
-    function fallback(comp, deps) {
+    function fallback(comp, deps, states) {
         return deps.catalog({limit: 30, sort: 'top', sort_forward: true, from_year: 1900}).then(function (payload) {
             var cards = deps.normalize(payload).map(deps.toCard).filter(function (card) { return Boolean(card.yani_id); });
             cards.forEach(function (card) { card.yani_recommendation_label = deps.t('popular_fallback'); });
+            if (!cards.length) {
+                states.empty({
+                    title: deps.t('recommendations_empty'),
+                    onRetry: function () { comp.create(); }
+                });
+                comp.activity.toggle();
+                states.focus();
+                return;
+            }
             comp.build({results: cards, total_pages: 1, title: deps.t('for_you')});
-            if (!cards.length) deps.notice(deps.t('recommendations_empty'));
+            if (LampaYaniSectionState.fromCache(payload)) states.cached({onRetry: function () { comp.create(); }});
+            else states.ready();
+        }).catch(function (error) {
+            console.error('[YummyAnime Recommendations] Fallback catalog failed', error);
+            states.offline({
+                title: deps.t('recommendations_error'),
+                onRetry: function () { comp.create(); }
+            });
+            comp.activity.toggle();
+            states.focus();
         });
     }
 
@@ -75,31 +93,40 @@
         var comp = new Lampa.InteractionCategory(object);
         comp.create = function () {
             var self = this;
-            this.activity.loader(true);
-            var remote = deps.authorized()
-                ? deps.watchHistory(30, 0).catch(function (error) {
-                    console.warn('[YummyAnime Recommendations] Remote history is unavailable', error);
-                    return [];
-                })
-                : Promise.resolve([]);
-            remote.then(function (remotePayload) {
-                var sources = recentSources(deps.history(), remotePayload, 4);
-                if (!sources.length) return fallback(self, deps);
-                return Promise.all(sources.map(function (source) {
-                    return deps.recommendations(source.id).then(deps.normalize).catch(function (error) {
-                        console.warn('[YummyAnime Recommendations] Source failed', source.id, error);
+            var states = LampaYaniSectionState.forActivity(self.activity, deps);
+            function load() {
+                states.loading('cards');
+                var remote = deps.authorized()
+                    ? deps.watchHistory(30, 0).catch(function (error) {
+                        console.warn('[YummyAnime Recommendations] Remote history is unavailable', error);
                         return [];
+                    })
+                    : Promise.resolve([]);
+                remote.then(function (remotePayload) {
+                    var sources = recentSources(deps.history(), remotePayload, 4);
+                    if (!sources.length) return fallback(self, deps, states);
+                    return Promise.all(sources.map(function (source) {
+                        return deps.recommendations(source.id).then(deps.normalize).catch(function (error) {
+                            console.warn('[YummyAnime Recommendations] Source failed', source.id, error);
+                            return [];
+                        });
+                    })).then(function (rows) {
+                        var cards = cardsFromRows(rows, sources, deps.toCard, deps.t);
+                        if (!cards.length) return fallback(self, deps, states);
+                        self.build({results: cards, total_pages: 1, title: deps.t('for_you')});
+                        states.ready();
                     });
-                })).then(function (rows) {
-                    var cards = cardsFromRows(rows, sources, deps.toCard, deps.t);
-                    if (!cards.length) return fallback(self, deps);
-                    self.build({results: cards, total_pages: 1, title: deps.t('for_you')});
+                }).catch(function (error) {
+                    console.error('[YummyAnime Recommendations]', error);
+                    states.offline({
+                        title: deps.t('recommendations_error'),
+                        onRetry: load
+                    });
+                    self.activity.toggle();
+                    states.focus();
                 });
-            }).catch(function (error) {
-                console.error('[YummyAnime Recommendations]', error);
-                self.activity.loader(false);
-                deps.notice(deps.t('recommendations_error'));
-            });
+            }
+            load();
         };
         comp.cardRender = deps.cardRender;
         return comp;

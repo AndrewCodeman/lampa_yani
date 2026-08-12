@@ -7,7 +7,17 @@
         function focus(element, key) { if (key) element.attr('data-yani-focus-key', key); element.on('hover:focus', function (event) { var target = event.currentTarget || event.target; last = target; lastKey = key || $(target).attr('data-yani-focus-key') || ''; scroll.update($(target), true); }); return element; }
         function metric(title, value) { return $('<div class="yani-status__metric"></div>').append($('<span></span>').text(title), $('<strong></strong>').text(value)); }
         function domainName(domain) { var names = {'old.yummyani.me': 'domain_old', 'old.yummy-ani.me': 'domain_old_mirror', 'ru.yummyani.me': 'domain_new', 'ru.yummy-ani.me': 'domain_new_mirror', 'api.yani.tv': 'domain_api', 'waf.valtrix.org': 'domain_waf'}; return names[domain.domain] ? deps.t(names[domain.domain]) : (domain.label || domain.domain); }
-        function renderError() { content.empty(); var error = focus($('<div class="yani-status__error selector"></div>')); error.append($('<strong></strong>').text(deps.t('status_load_error')), $('<span></span>').text(deps.t('status_error_hint'))); content.append(error); refreshFocus(); }
+        function renderError() {
+            content.empty();
+            var state = LampaYaniSectionState.create({t: deps.t});
+            state.show('offline', {
+                title: deps.t('status_load_error'),
+                hint: deps.t('status_error_hint'),
+                onRetry: function () { load(false); }
+            });
+            content.append(state.root);
+            refreshFocus();
+        }
         function render(data) {
             content.empty(); var periods = data.periods || null, selected = periods ? (periods[period] || periods[data.default_period] || periods['3hour']) : data; if (!selected) return renderError();
             var labels = {'3hour': deps.t('period_3hour'), day: deps.t('period_day'), week: deps.t('period_week'), month: deps.t('period_month')}, switches = $('<div class="yani-status__periods"></div>');
@@ -21,7 +31,31 @@
             content.append(focus($('<div class="yani-status__refresh selector"></div>').text(deps.t('refresh_status')).on('hover:enter', function () { Lampa.Noty.show(deps.t('refreshing_status')); load(false); }))); refreshFocus();
         }
         function refreshFocus() { if (!ready) return; var target = last && document.documentElement.contains(last) ? $(last) : lastKey ? content.find('[data-yani-focus-key="' + lastKey + '"]').first() : $(); if (!target.length) target = content.find('.selector').first(); last = target.length ? target[0] : null; Lampa.Controller.collectionSet(scroll.render()); Lampa.Controller.collectionFocus(last || false, scroll.render()); if (target.length) scroll.update(target, true); }
-        function load(first) { if (first) component.activity.loader(true); LampaYaniApi.status().then(function (data) { render(data); if (first) { component.activity.loader(false); component.activity.toggle(); ready = true; } }).catch(function (error) { console.error('[YummyAnime Status]', error); renderError(); if (first) { component.activity.loader(false); component.activity.toggle(); ready = true; } }); }
+        function load(first) {
+            if (first) {
+                component.activity.loader(false);
+                content.empty();
+                var loading = LampaYaniSectionState.create({t: deps.t});
+                loading.show('loading', {skeleton: 'rows'});
+                content.append(loading.root);
+            }
+            LampaYaniApi.status().then(function (data) {
+                render(data);
+                if (first) {
+                    component.activity.toggle();
+                    ready = true;
+                    refreshFocus();
+                }
+            }).catch(function (error) {
+                console.error('[YummyAnime Status]', error);
+                renderError();
+                if (first) {
+                    component.activity.toggle();
+                    ready = true;
+                    refreshFocus();
+                }
+            });
+        }
         component = {create: function () { scroll.append(content); html.append(scroll.render(true)); load(true); }, start: function () { Lampa.Controller.add('content', {toggle: function () { Lampa.Controller.collectionSet(scroll.render()); Lampa.Controller.collectionFocus(last || false, scroll.render()); }, left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); }, right: function () { Navigator.move('right'); }, up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); }, down: function () { LampaYaniNavigation.moveDown(scroll); }, back: deps.goBack}); Lampa.Controller.toggle('content'); }, render: function (js) { return js ? html[0] : html; }, destroy: function () { scroll.destroy(); html.remove(); }};
         return component;
     }

@@ -210,11 +210,23 @@
         }
 
         function emptyState() {
-            var empty = focusable($('<div class="yani-notifications__empty selector"></div>'));
-            empty.append($('<span class="yani-notifications__empty-icon"></span>').html(icon('system')));
-            empty.append($('<strong></strong>').text(deps.t('notifications_empty')));
-            empty.append($('<span></span>').text(deps.t('notifications_empty_hint')));
-            return empty;
+            var empty = LampaYaniSectionState.create({t: deps.t});
+            empty.show('empty', {
+                title: deps.t('notifications_empty'),
+                hint: deps.t('notifications_empty_hint'),
+                focusable: true
+            });
+            empty.root.removeAttr('hidden');
+            return focusable(empty.root.addClass('yani-notifications__empty'));
+        }
+
+        function offlineState(onRetry) {
+            var offline = LampaYaniSectionState.create({t: deps.t});
+            offline.show('offline', {
+                title: deps.t('notifications_error'),
+                onRetry: onRetry
+            });
+            return focusable(offline.root);
         }
 
         function appendItems(items, append) {
@@ -293,25 +305,46 @@
             content.append(hero, actions, list);
         }
 
+        function load(self) {
+            offset = 0;
+            list.empty();
+            var loading = LampaYaniSectionState.create({t: deps.t});
+            loading.show('loading', {skeleton: 'list'});
+            list.append(loading.root);
+            deps.fetch(pageSize, offset).then(function (payload) {
+                var items = deps.normalize(payload);
+                appendItems(items, false);
+                if (LampaYaniSectionState.fromCache(payload) && items.length) {
+                    var cached = LampaYaniSectionState.create({t: deps.t});
+                    cached.show('cached', {compact: true, onRetry: function () { load(self); }});
+                    list.prepend(cached.root);
+                }
+                if (!scroll.render().parent().length) {
+                    scroll.append(content);
+                    html.append(scroll.render(true));
+                }
+                self.activity.loader(false);
+                self.activity.toggle();
+                refreshFocus();
+            }).catch(function (error) {
+                console.error('[YummyAnime Notifications]', error);
+                list.empty().append(offlineState(function () { load(self); }));
+                if (!scroll.render().parent().length) {
+                    scroll.append(content);
+                    html.append(scroll.render(true));
+                }
+                self.activity.loader(false);
+                self.activity.toggle();
+                refreshFocus();
+            });
+        }
+
         return {
             create: function () {
                 var self = this;
-                this.activity.loader(true);
+                this.activity.loader(false);
                 buildHeader();
-                deps.fetch(pageSize, offset).then(function (payload) {
-                    appendItems(deps.normalize(payload), false);
-                    scroll.append(content);
-                    html.append(scroll.render(true));
-                    self.activity.loader(false);
-                    self.activity.toggle();
-                }).catch(function (error) {
-                    console.error('[YummyAnime Notifications]', error);
-                    list.append(focusable($('<div class="yani-notifications__empty selector"></div>')).append($('<strong></strong>').text(deps.t('notifications_error'))));
-                    scroll.append(content);
-                    html.append(scroll.render(true));
-                    self.activity.loader(false);
-                    self.activity.toggle();
-                });
+                load(self);
             },
             start: function () {
                 Lampa.Controller.add('content', {

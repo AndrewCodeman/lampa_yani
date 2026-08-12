@@ -50,6 +50,20 @@
         return attempt(0);
     }
 
+    function markFromCache(payload) {
+        if (!payload || typeof payload !== 'object') return payload;
+        try {
+            Object.defineProperty(payload, '__yaniFromCache', {value: true, configurable: true});
+        } catch (error) {
+            payload.__yaniFromCache = true;
+        }
+        return payload;
+    }
+
+    function fromCache(payload) {
+        return Boolean(payload && payload.__yaniFromCache);
+    }
+
     function rememberCacheKey(key) {
         if (!window.Lampa || !Lampa.Storage) return;
         var indexKey = 'lampa_yummyanime_cache_index';
@@ -108,7 +122,9 @@
             if (method === 'GET' && options.cache !== false && window.Lampa && Lampa.Storage) {
                 try {
                     var cached = JSON.parse(Lampa.Storage.get(cacheKey, 'null'));
-                    if (cached && (options.staleFallback || Date.now() - cached.time < cacheTtl)) return cached.data;
+                    if (cached && (options.staleFallback || Date.now() - cached.time < cacheTtl)) {
+                        return markFromCache(cached.data);
+                    }
                 } catch (ignore) {}
             }
             throw error;
@@ -159,6 +175,7 @@
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Api = window.LampaYaniApi = {
         request: request,
+        fromCache: fromCache,
         search: function (query, params) {
             params = params || {};
             params.q = query || undefined;

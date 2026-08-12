@@ -146,8 +146,15 @@
                     buildInitial(self, raw);
                 }).catch(function (fallbackError) {
                     console.error('[YummyAnime Collections]', fallbackError || error);
-                    self.activity.loader(false);
-                    deps.error(deps.t('collections_load_error'));
+                    var states = LampaYaniSectionState.forActivity(self.activity, {
+                        t: deps.t
+                    });
+                    states.offline({
+                        title: deps.t('collections_load_error'),
+                        onRetry: function () { self.create(); }
+                    });
+                    self.activity.toggle();
+                    states.focus();
                 });
             });
         };

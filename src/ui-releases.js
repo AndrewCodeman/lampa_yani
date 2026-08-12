@@ -33,16 +33,34 @@
         var comp = new Lampa.InteractionCategory(object);
         comp.create = function () {
             var self = this;
-            this.activity.loader(true);
-            deps.feed().then(function (payload) {
-                var cards = normalize(payload, deps.toCard);
-                self.build({results: cards, total_pages: 1, title: deps.t('new_releases')});
-                if (!cards.length) deps.notice(deps.t('new_releases_empty'));
-            }).catch(function (error) {
-                console.error('[YummyAnime New Releases]', error);
-                self.activity.loader(false);
-                deps.notice(deps.t('new_releases_error'));
-            });
+            var states = LampaYaniSectionState.forActivity(self.activity, deps);
+            function load() {
+                states.loading('cards');
+                deps.feed().then(function (payload) {
+                    var cards = normalize(payload, deps.toCard);
+                    if (!cards.length) {
+                        states.empty({
+                            title: deps.t('new_releases_empty'),
+                            onRetry: load
+                        });
+                        self.activity.toggle();
+                        states.focus();
+                        return;
+                    }
+                    self.build({results: cards, total_pages: 1, title: deps.t('new_releases')});
+                    if (LampaYaniSectionState.fromCache(payload)) states.cached({onRetry: load});
+                    else states.ready();
+                }).catch(function (error) {
+                    console.error('[YummyAnime New Releases]', error);
+                    states.offline({
+                        title: deps.t('new_releases_error'),
+                        onRetry: load
+                    });
+                    self.activity.toggle();
+                    states.focus();
+                });
+            }
+            load();
         };
         comp.cardRender = deps.cardRender;
         return comp;

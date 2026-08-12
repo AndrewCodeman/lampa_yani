@@ -506,6 +506,14 @@
     messages.ru.dashboard_state_ready = 'Готово';
     messages.ru.dashboard_state_empty = 'Нет данных';
     messages.ru.dashboard_state_offline = 'Нет соединения';
+    messages.ru.section_state_loading = 'Загрузка';
+    messages.ru.section_state_offline = 'API недоступен';
+    messages.ru.section_state_offline_hint = 'Проверьте соединение и повторите запрос';
+    messages.ru.section_state_cached = 'Данные из кеша';
+    messages.ru.section_state_cached_hint = 'Показаны сохранённые данные, пока API недоступен';
+    messages.ru.section_state_empty = 'Список пуст';
+    messages.ru.section_state_empty_hint = 'Здесь пока нет элементов для отображения';
+    messages.ru.section_retry = 'Повторить';
     messages.en.dashboard_title = 'Your anime in one place';
     messages.en.dashboard_subtitle = 'Broadcasts, new translations, lists and discoveries with fewer steps';
     messages.en.broadcasts_today = 'Broadcasts today';
@@ -520,6 +528,14 @@
     messages.en.dashboard_state_ready = 'Ready';
     messages.en.dashboard_state_empty = 'No data';
     messages.en.dashboard_state_offline = 'Offline';
+    messages.en.section_state_loading = 'Loading';
+    messages.en.section_state_offline = 'API unavailable';
+    messages.en.section_state_offline_hint = 'Check the connection and try again';
+    messages.en.section_state_cached = 'Showing cached data';
+    messages.en.section_state_cached_hint = 'Saved data is shown while the API is unavailable';
+    messages.en.section_state_empty = 'This list is empty';
+    messages.en.section_state_empty_hint = 'There is nothing to show here yet';
+    messages.en.section_retry = 'Retry';
 
     messages.uk = Object.assign({}, messages.ru, {
         catalog: 'Каталог', genres: 'Жанри', search: 'Пошук', schedule: 'Розклад', continue_watching: 'Продовжити перегляд', status: 'Статус', top_rated: 'Найкращі', account: 'Обліковий запис', anime: 'Аніме', home_sections: 'Розділи головного екрана',
@@ -776,6 +792,14 @@
     messages.uk.dashboard_state_ready = 'Готово';
     messages.uk.dashboard_state_empty = 'Немає даних';
     messages.uk.dashboard_state_offline = 'Немає з’єднання';
+    messages.uk.section_state_loading = 'Завантаження';
+    messages.uk.section_state_offline = 'API недоступний';
+    messages.uk.section_state_offline_hint = 'Перевірте з’єднання і повторіть запит';
+    messages.uk.section_state_cached = 'Дані з кешу';
+    messages.uk.section_state_cached_hint = 'Показано збережені дані, поки API недоступний';
+    messages.uk.section_state_empty = 'Список порожній';
+    messages.uk.section_state_empty_hint = 'Тут поки немає елементів для показу';
+    messages.uk.section_retry = 'Повторити';
 
     function language() {
         var value = window.Lampa && Lampa.Storage ? Lampa.Storage.get(key, 'ru') : 'ru';

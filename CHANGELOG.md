@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.30 — 2026-08-13
+
+- Add shared section states for skeleton loading, API offline, cached data, truly empty lists, and retry across schedule, notifications, status, releases, translations, updates, recommendations, and collections.
+- Mark stale API fallback payloads so screens can show a cached-data banner instead of looking like a live empty failure.
+
 ## 0.41.29 — 2026-08-13
 
 - Unify small-poster card overlays by priority: list status and playback progress stay first, then fresh episode, quality/voices, genre top, and ratings.
