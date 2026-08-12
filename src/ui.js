@@ -2710,6 +2710,7 @@
         scroll.minus();
         var button;
         var destroyed = false;
+        var detailVideosPromise;
         var detailFocus = LampaYaniNavigation.createScope({
             id: 'detail:' + String(routeId || getYummyId(data) || object.url || 'unknown'),
             root: function () { return html; },
@@ -2730,6 +2731,16 @@
         }
 
         detailFocus.bind(html);
+
+        function loadDetailVideos() {
+            if (!detailVideosPromise) {
+                detailVideosPromise = LampaYaniApi.videos(data.yani_id).then(function (payload) {
+                    var videos = payload && payload.response ? payload.response : payload;
+                    return Array.isArray(videos) ? videos : [];
+                });
+            }
+            return detailVideosPromise;
+        }
 
         this.create = function () {
             var self = this;
@@ -2828,6 +2839,7 @@
             if (data.release_date) info.append($('<div class="yani-detail__meta"></div>').text(data.release_date));
             var episodeSummary = createDetailEpisodeSummary(data);
             if (episodeSummary) info.append(episodeSummary);
+            info.append(createDetailTranslations());
             info.append(createDetailRatings(data.yani_ratings || [], data.vote_count));
             info.append(createDetailRatingAction(data));
             if (data.yani_schedule) info.append($('<div class="yani-detail__schedule"></div>').text(data.yani_schedule));
@@ -2903,12 +2915,11 @@
                 if (loading || loaded) return;
                 loading = true;
                 block.addClass('loading');
-                LampaYaniApi.videos(cardData.yani_id).then(function (payload) {
-                    var videos = payload && payload.response ? payload.response : payload;
+                loadDetailVideos().then(function (videos) {
                     loaded = true;
                     loading = false;
                     block.removeClass('loading');
-                    render(LampaYaniUiUtils.detailEpisodeStats(cardData, Array.isArray(videos) ? videos : [], local));
+                    render(LampaYaniUiUtils.detailEpisodeStats(cardData, videos, local));
                 }).catch(function (error) {
                     loading = false;
                     loaded = true;
@@ -2924,6 +2935,71 @@
             // Very long shows wait until this compact row receives focus to
             // avoid loading thousands of video variants on weak devices.
             if (stats.total > 0 && stats.total <= 100) setTimeout(enrich, 350);
+            return block;
+        }
+
+        function detailTranslationGroups(videos) {
+            var voices = {};
+            var subtitles = {};
+            (videos || []).forEach(function (video) {
+                var videoInfo = LampaYaniUiUtils.videoData(video);
+                var name = String(videoInfo.dubbing || '').replace(/\s+/g, ' ').trim();
+                if (!name) return;
+                var target = /субтитр|субтитри|\bsub(?:title|titles|bed)?\b/i.test(name) ? subtitles : voices;
+                var key = name.toLowerCase();
+                if (!target[key]) target[key] = name;
+            });
+            var sort = function (values) {
+                return Object.keys(values).map(function (key) { return values[key]; }).sort(function (a, b) {
+                    return a.localeCompare(b, locale());
+                });
+            };
+            return {voices: sort(voices), subtitles: sort(subtitles)};
+        }
+
+        function createDetailTranslations() {
+            var block = $('<div class="yani-detail__translations selector loading"></div>')
+                .attr('aria-label', t('available_translations'));
+            block.addClass(cardMediaMotionAllowed() ? 'yani-detail__translations--motion' : 'yani-detail__translations--static');
+            block.append($('<div class="yani-detail__translations-title"></div>').text(t('available_translations')));
+            block.append('<div class="yani-detail__translations-skeleton"><i></i><i></i><i></i></div>');
+            bindDetailButtonFocus(block);
+
+            function renderRow(kind, title, values) {
+                if (!values.length) return null;
+                var row = $('<div class="yani-detail__translation-row yani-detail__translation-row--' + kind + '"></div>');
+                var heading = $('<div class="yani-detail__translation-heading"></div>');
+                heading.append(kind === 'voices'
+                    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9H5l-3 3 3 3h4l5 4V5L9 9Zm8.5.2a4 4 0 0 1 0 5.6M20 6.5a7.5 7.5 0 0 1 0 11"/></svg>'
+                    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3V5Zm3 8h4M14 13h4M6 16h7"/></svg>');
+                heading.append($('<span></span>').text(title));
+                heading.append($('<b></b>').text(values.length));
+                row.append(heading);
+                var list = $('<div class="yani-detail__translation-list"></div>');
+                values.forEach(function (value, index) {
+                    list.append($('<span></span>').css('animation-delay', Math.min(index, 8) * 24 + 'ms').text(value));
+                });
+                row.append(list);
+                return row;
+            }
+
+            loadDetailVideos().then(function (videos) {
+                if (destroyed) return;
+                var groups = detailTranslationGroups(videos);
+                block.removeClass('loading').empty();
+                block.append($('<div class="yani-detail__translations-title"></div>').text(t('available_translations')));
+                var voices = renderRow('voices', t('voice_teams'), groups.voices);
+                var subtitles = renderRow('subtitles', t('subtitle_teams'), groups.subtitles);
+                if (voices) block.append(voices);
+                if (subtitles) block.append(subtitles);
+                if (!voices && !subtitles) block.append($('<div class="yani-detail__translations-empty"></div>').text(t('translations_unknown')));
+                bindDetailScrollTargets(block);
+                appendDetailNavigation(block);
+            }).catch(function () {
+                block.removeClass('loading').addClass('unavailable');
+                block.find('.yani-detail__translations-skeleton').remove();
+                block.append($('<div class="yani-detail__translations-empty"></div>').text(t('translations_unknown')));
+            });
             return block;
         }
 

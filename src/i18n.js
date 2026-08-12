@@ -35,6 +35,10 @@
     messages.ru.status_announced = 'Анонс';
     messages.ru.fresh_today = 'Сегодня';
     messages.ru.fresh_yesterday = 'Вчера';
+    messages.ru.available_translations = 'Доступные переводы';
+    messages.ru.voice_teams = 'Озвучка';
+    messages.ru.subtitle_teams = 'Субтитры';
+    messages.ru.translations_unknown = 'Информация о переводах пока недоступна';
     messages.ru.top_all = 'Общий топ';
     messages.ru.top_tv = 'Сериалы';
     messages.ru.top_movies = 'Фильмы';
@@ -46,6 +50,10 @@
     messages.en.status_announced = 'Announced';
     messages.en.fresh_today = 'Today';
     messages.en.fresh_yesterday = 'Yesterday';
+    messages.en.available_translations = 'Available translations';
+    messages.en.voice_teams = 'Voice teams';
+    messages.en.subtitle_teams = 'Subtitles';
+    messages.en.translations_unknown = 'Translation information is not available yet';
     messages.en.version_label = 'Version';
     messages.en.top_all = 'Overall';
     messages.en.top_tv = 'TV series';
@@ -530,6 +538,10 @@
     messages.uk.status_announced = 'Анонс';
     messages.uk.fresh_today = 'Сьогодні';
     messages.uk.fresh_yesterday = 'Учора';
+    messages.uk.available_translations = 'Доступні переклади';
+    messages.uk.voice_teams = 'Озвучення';
+    messages.uk.subtitle_teams = 'Субтитри';
+    messages.uk.translations_unknown = 'Інформація про переклади поки недоступна';
     messages.uk.back_to_lampa = 'Повернутися до Lampa';
     messages.uk.top_all = 'Загальний топ';
     messages.uk.top_tv = 'Серіали';

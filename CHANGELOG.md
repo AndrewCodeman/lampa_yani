@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.41.16 — 2026-08-12
+
+- Added a dedicated title-detail panel listing unique voice teams and subtitle releases.
+- Removed player names and duplicate translation entries from this informational panel.
+- Shared the video request with episode statistics and added lightweight reduced-motion-aware presentation.
+
 ## 0.41.15 — 2026-08-12
 
 - Redesigned video quality and dubbing availability as one compact glass-style card indicator.

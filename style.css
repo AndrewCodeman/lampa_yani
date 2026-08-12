@@ -1297,6 +1297,30 @@
 .yani-detail__episode-stat { display: inline-flex; align-items: center; gap: .28em; padding: .28em .48em; border-radius: .38em; background: rgba(255,255,255,.1); color: rgba(255,255,255,.9); font-size: .76em; font-weight: 600; line-height: 1.15; white-space: nowrap; }
 .yani-detail__episode-stat-icon { display: inline-flex; width: 1em; height: 1em; color: #ef8992; }
 .yani-detail__episode-stat-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }
+.yani-detail__translations { width: 100%; margin: 0 0 .9em; padding: .7em .78em; border: .08em solid rgba(255,255,255,.14); border-radius: .72em; box-sizing: border-box; background: linear-gradient(125deg, rgba(18,22,33,.62), rgba(61,43,73,.48)); box-shadow: inset 0 .06em 0 rgba(255,255,255,.08); }
+.yani-detail__translations.focus { border-color: rgba(239,100,112,.86); box-shadow: 0 0 0 .1em rgba(239,100,112,.4), inset 0 .06em 0 rgba(255,255,255,.12); }
+.yani-detail__translations-title { margin-bottom: .55em; color: rgba(255,255,255,.9); font-size: .86em; font-weight: 750; letter-spacing: .025em; }
+.yani-detail__translation-row { display: grid; grid-template-columns: 8.5em minmax(0,1fr); align-items: start; gap: .55em; padding: .34em 0; }
+.yani-detail__translation-heading { display: flex; align-items: center; gap: .38em; min-height: 1.75em; color: rgba(255,255,255,.7); font-size: .72em; font-weight: 650; }
+.yani-detail__translation-heading svg { width: 1.2em; height: 1.2em; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.yani-detail__translation-heading b { min-width: 1.45em; padding: .18em .36em; border-radius: 999px; background: rgba(255,255,255,.1); color: #fff; font-size: .86em; text-align: center; }
+.yani-detail__translation-row--voices .yani-detail__translation-heading { color: #91d9ff; }
+.yani-detail__translation-row--subtitles .yani-detail__translation-heading { color: #d3afff; }
+.yani-detail__translation-list { display: flex; flex-wrap: wrap; gap: .3em; min-width: 0; }
+.yani-detail__translation-list span { overflow: hidden; max-width: 14em; padding: .3em .52em; border: .06em solid rgba(255,255,255,.13); border-radius: .42em; background: rgba(255,255,255,.08); color: rgba(255,255,255,.9); font-size: .7em; font-weight: 600; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.yani-detail__translations--motion .yani-detail__translation-list span { animation: yani-translation-chip-in .28s cubic-bezier(.2,.8,.2,1) both; }
+.yani-detail__translation-row--voices .yani-detail__translation-list span { border-color: rgba(93,190,240,.2); background: rgba(63,153,207,.12); }
+.yani-detail__translation-row--subtitles .yani-detail__translation-list span { border-color: rgba(191,143,242,.22); background: rgba(137,84,191,.13); }
+.yani-detail__translations-empty { color: rgba(255,255,255,.55); font-size: .72em; }
+.yani-detail__translations-skeleton { display: flex; gap: .35em; }
+.yani-detail__translations-skeleton i { width: 6em; height: 1.35em; border-radius: .38em; background: rgba(255,255,255,.09); }
+.yani-detail__translations--motion .yani-detail__translations-skeleton i { animation: yani-translation-skeleton 1.2s ease-in-out infinite alternate; }
+.yani-detail__translations-skeleton i:nth-child(2) { width: 8em; animation-delay: .14s; }
+.yani-detail__translations-skeleton i:nth-child(3) { width: 5em; animation-delay: .28s; }
+@keyframes yani-translation-chip-in { from { opacity: 0; transform: translateY(.28em); } to { opacity: 1; transform: none; } }
+@keyframes yani-translation-skeleton { from { opacity: .35; } to { opacity: .8; } }
+@media (max-width: 720px) { .yani-detail__translation-row { grid-template-columns: 1fr; gap: .25em; } }
+@media (prefers-reduced-motion: reduce) { .yani-detail__translation-list span, .yani-detail__translations-skeleton i { animation: none; } }
 .yani-detail__overview { line-height: 1.45; margin-bottom: 1.5em; }
 .yani-detail__actions { display: flex; flex-wrap: wrap; gap: 0.7em; max-width: 100%; }
 .yani-detail__button { display: block; max-width: 100%; box-sizing: border-box; padding: 0.8em 1.2em; border: 0.12em solid transparent; border-radius: 0.5em; background: rgba(255,255,255,.15); overflow-wrap: anywhere; }
