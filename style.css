@@ -1565,6 +1565,20 @@
 
 .yani-schedule { color: #f4f7fb !important; opacity: 1 !important; filter: none !important; }
 
+.yani-schedule__remote-legend,
+.yani-user-lists__remote-legend { display: flex; align-items: center; flex-wrap: wrap; gap: .42em; margin-bottom: .72em; color: rgba(255,255,255,.74); font-size: .72em; }
+.yani-schedule__remote-key,
+.yani-user-lists__remote-key { display: inline-flex; align-items: center; gap: .36em; padding: .3em .48em .3em .34em; border: .08em solid rgba(255,255,255,.13); border-radius: .45em .66em .48em .58em; background: rgba(18,27,39,.58); }
+.yani-schedule__remote-key i,
+.yani-user-lists__remote-key i { width: .8em; height: .8em; border-radius: .24em .4em .26em .36em; box-shadow: 0 0 .7em currentColor; }
+.yani-schedule__remote-key b,
+.yani-user-lists__remote-key b { max-width: 8em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 750; }
+.yani-schedule__remote-key--red, .yani-user-lists__remote-key--red { color: #ff7381; }.yani-schedule__remote-key--red i, .yani-user-lists__remote-key--red i { background: #ef6470; }
+.yani-schedule__remote-key--green, .yani-user-lists__remote-key--green { color: #65d99d; }.yani-schedule__remote-key--green i, .yani-user-lists__remote-key--green i { background: #55d795; }
+.yani-schedule__remote-key--yellow, .yani-user-lists__remote-key--yellow { color: #f2c75e; }.yani-schedule__remote-key--yellow i, .yani-user-lists__remote-key--yellow i { background: #efc35b; }
+.yani-schedule__remote-key--blue, .yani-user-lists__remote-key--blue { color: #6fc7ff; }.yani-schedule__remote-key--blue i, .yani-user-lists__remote-key--blue i { background: #62b8ff; }
+.yani-user-lists__remote-legend { margin: 1em 1em .1em; }.yani-user-lists__remote-numbers { margin-left: .25em; padding: .27em .44em; border-radius: .4em; background: rgba(255,255,255,.09); color: rgba(255,255,255,.84); font-weight: 800; }
+
 .yani-schedule__days {
     display: flex;
     gap: 0.65em;

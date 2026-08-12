@@ -209,6 +209,47 @@
     function userLists(object, deps) {
         var component = new Lampa.InteractionMain(object);
         var destroyed = false;
+        var remoteShortcutHandler = null;
+        var shortcutRows = {};
+
+        function remoteColor(event) {
+            var key = String(event && (event.key || event.code || '') || '').toLowerCase();
+            var code = Number(event && (event.keyCode || event.which));
+            if (key === 'colorf0red' || key === 'red' || code === 403) return 'red';
+            if (key === 'colorf1green' || key === 'green' || code === 404) return 'green';
+            if (key === 'colorf2yellow' || key === 'yellow' || code === 405) return 'yellow';
+            if (key === 'colorf3blue' || key === 'blue' || code === 406) return 'blue';
+            return '';
+        }
+
+        function openShortcutRow(row) {
+            if (!row) return;
+            if (row.history) deps.openHistory();
+            else if (row.definition) deps.openList(row.definition);
+        }
+
+        function handleRemoteShortcut(event) {
+            var root = component.render ? component.render() : $();
+            if (!root.length || !root.is(':visible') || event.defaultPrevented || $(event.target).closest('input, textarea, select, [contenteditable=true]').length) return;
+            var color = remoteColor(event);
+            var number = Number(event && (event.keyCode || event.which));
+            var byColor = {red: 'watching', green: 'planned', yellow: 'favorites', blue: 'history'};
+            var ordered = ['watching', 'planned', 'completed', 'dropped', 'favorites', 'postponed'];
+            var row = color ? shortcutRows[byColor[color]] : number >= 49 && number <= 54 ? shortcutRows[ordered[number - 49]] : number === 48 ? shortcutRows.history : null;
+            if (!row) return;
+            event.preventDefault(); event.stopPropagation(); openShortcutRow(row);
+        }
+
+        function remoteLegend() {
+            var root = $('<div class="yani-user-lists__remote-legend" aria-label="Remote shortcuts"></div>');
+            [{color: 'red', row: shortcutRows.watching}, {color: 'green', row: shortcutRows.planned}, {color: 'yellow', row: shortcutRows.favorites}, {color: 'blue', row: shortcutRows.history}].forEach(function (shortcut) {
+                if (!shortcut.row) return;
+                var key = $('<span class="yani-user-lists__remote-key yani-user-lists__remote-key--' + shortcut.color + '"></span>');
+                key.append('<i aria-hidden="true"></i>'); key.append($('<b></b>').text(shortcut.row.title)); root.append(key);
+            });
+            root.append('<span class="yani-user-lists__remote-numbers">1–6 · 0</span>');
+            return root;
+        }
 
         function morePoster(row) {
             var key = row.history ? 'history' : row.definition && row.definition.key || 'history';
@@ -271,8 +312,18 @@
             this.activity.loader(true);
             deps.loadRows().then(function (rows) {
                 if (destroyed) return;
+                (rows || []).forEach(function (row) {
+                    if (row.history) shortcutRows.history = row;
+                    else if (row.definition && row.definition.key) shortcutRows[row.definition.key] = row;
+                });
                 self.build((rows || []).map(withMore));
-                if (self.render) self.render().addClass('yani-user-lists-view');
+                if (self.render) {
+                    var root = self.render().addClass('yani-user-lists-view');
+                    root.find('.yani-user-lists__remote-legend').remove();
+                    root.prepend(remoteLegend());
+                    remoteShortcutHandler = handleRemoteShortcut;
+                    document.addEventListener('keydown', remoteShortcutHandler, true);
+                }
             }).catch(function (error) {
                 if (destroyed) return;
                 console.error('[YummyAnime User Lists]', error);
@@ -290,6 +341,8 @@
         var originalDestroy = component.destroy;
         component.destroy = function () {
             destroyed = true;
+            if (remoteShortcutHandler) document.removeEventListener('keydown', remoteShortcutHandler, true);
+            remoteShortcutHandler = null;
             if (originalDestroy) originalDestroy.apply(this, arguments);
         };
         return component;

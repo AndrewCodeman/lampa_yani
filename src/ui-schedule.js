@@ -7,7 +7,7 @@
         scroll.minus();
         var html = $('<div class="yani-schedule"></div>');
         var content = $('<div class="yani-schedule__content"></div>');
-        var last, dayGroups = [], selectedDay = 0;
+        var last, dayGroups = [], selectedDay = 0, remoteShortcutHandler = null;
         var focusScope = LampaYaniNavigation.createScope({
             id: 'schedule:' + String(object && object.url || 'yani/schedule'),
             root: function () { return html; },
@@ -101,7 +101,7 @@
                 dayGroups.push({day: day, relativeOffset: Math.round((day.getTime() - today.getTime()) / 86400000), releases: releases});
             }
             var days = $('<div class="yani-schedule__days"></div>'); dayGroups.forEach(function (group, index) { var chip = $('<div class="yani-schedule__day-chip selector"></div>'); chip.append($('<div class="yani-schedule__day-name"></div>').text(dayLabel(group.day, group.relativeOffset))); chip.append($('<div class="yani-schedule__day-count"></div>').text(group.releases.length)); chip.on('hover:focus', function (event) { content.find('.yani-schedule__day-chip.focus').removeClass('focus'); chip.addClass('focus'); last = event.currentTarget || chip[0]; revealDayChip(chip); }); chip.on('hover:blur', function () { chip.removeClass('focus'); }); chip.on('hover:enter click.yaniScheduleDay', function () { select(index, true); }); days.append(chip); });
-            content.append(days).append($('<div class="yani-schedule__selected-title"></div>')).append($('<div class="yani-schedule__releases"></div>')); select(dayGroups.findIndex(function (group) { return group.relativeOffset === 0; }), true);
+            content.append(remoteLegend()).append(days).append($('<div class="yani-schedule__selected-title"></div>')).append($('<div class="yani-schedule__releases"></div>')); select(dayGroups.findIndex(function (group) { return group.relativeOffset === 0; }), true);
         }
         function focusFirstRelease() {
             var first = content.find('.yani-schedule__releases .yani-schedule__item.selector').first();
@@ -111,7 +111,35 @@
             scroll.update(first, true);
             return true;
         }
-        var comp = {create: function () { var self = this; this.activity.loader(true); LampaYaniApi.schedule({}).then(function (payload) { render(LampaYaniApi.normalize(payload)); scroll.append(content); html.append(scroll.render(true)); focusScope.bind(html); self.activity.loader(false); self.activity.toggle(); }).catch(function (error) { console.error('[YummyAnime]', error); self.activity.loader(false); Lampa.Noty.show(t('schedule_load_error')); }); }, start: function () { Lampa.Controller.add('content', {toggle: function () { var restored = focusScope.restore(last, false); if (restored) last = restored; }, left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); }, right: function () { Navigator.move('right'); }, up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); }, down: function () { var current = $(last); if (current.hasClass('yani-schedule__day-chip') && focusFirstRelease()) return; if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); }, back: deps.goBack}); Lampa.Controller.toggle('content'); }, render: function (js) { return js ? html[0] : html; }, destroy: function () { focusScope.destroy(); scroll.destroy(); html.remove(); } };
+        function remoteColor(event) {
+            var key = String(event && (event.key || event.code || '') || '').toLowerCase();
+            var code = Number(event && (event.keyCode || event.which));
+            if (key === 'colorf0red' || key === 'red' || code === 403) return 'red';
+            if (key === 'colorf1green' || key === 'green' || code === 404) return 'green';
+            if (key === 'colorf2yellow' || key === 'yellow' || code === 405) return 'yellow';
+            if (key === 'colorf3blue' || key === 'blue' || code === 406) return 'blue';
+            return '';
+        }
+        function handleRemoteShortcut(event) {
+            if (!html.is(':visible') || event.defaultPrevented || $(event.target).closest('input, textarea, select, [contenteditable=true]').length) return;
+            var color = remoteColor(event);
+            var todayIndex = dayGroups.findIndex(function (group) { return group.relativeOffset === 0; });
+            if (!color) return;
+            event.preventDefault(); event.stopPropagation();
+            if (color === 'red') select(todayIndex >= 0 ? todayIndex : selectedDay, true);
+            else if (color === 'green') select(selectedDay - 1, true);
+            else if (color === 'yellow') select(selectedDay + 1, true);
+            else if (color === 'blue') focusFirstRelease();
+        }
+        function remoteLegend() {
+            var legend = $('<div class="yani-schedule__remote-legend" aria-label="Remote shortcuts"></div>');
+            [{color: 'red', title: t('today')}, {color: 'green', title: '‹'}, {color: 'yellow', title: '›'}, {color: 'blue', title: t('release')}].forEach(function (shortcut) {
+                var key = $('<span class="yani-schedule__remote-key yani-schedule__remote-key--' + shortcut.color + '"></span>');
+                key.append('<i aria-hidden="true"></i>'); key.append($('<b></b>').text(shortcut.title)); legend.append(key);
+            });
+            return legend;
+        }
+        var comp = {create: function () { var self = this; this.activity.loader(true); LampaYaniApi.schedule({}).then(function (payload) { render(LampaYaniApi.normalize(payload)); scroll.append(content); html.append(scroll.render(true)); focusScope.bind(html); remoteShortcutHandler = handleRemoteShortcut; document.addEventListener('keydown', remoteShortcutHandler, true); self.activity.loader(false); self.activity.toggle(); }).catch(function (error) { console.error('[YummyAnime]', error); self.activity.loader(false); Lampa.Noty.show(t('schedule_load_error')); }); }, start: function () { Lampa.Controller.add('content', {toggle: function () { var restored = focusScope.restore(last, false); if (restored) last = restored; }, left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); }, right: function () { Navigator.move('right'); }, up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); }, down: function () { var current = $(last); if (current.hasClass('yani-schedule__day-chip') && focusFirstRelease()) return; if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); }, back: deps.goBack}); Lampa.Controller.toggle('content'); }, render: function (js) { return js ? html[0] : html; }, destroy: function () { if (remoteShortcutHandler) document.removeEventListener('keydown', remoteShortcutHandler, true); remoteShortcutHandler = null; focusScope.destroy(); scroll.destroy(); html.remove(); } };
         return comp;
     }
     window.LampaYani = window.LampaYani || {};

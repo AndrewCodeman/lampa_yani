@@ -5,6 +5,7 @@ const auth = fs.readFileSync('src/ui-auth.js', 'utf8');
 const status = fs.readFileSync('src/ui-status.js', 'utf8');
 const notifications = fs.readFileSync('src/ui-notifications.js', 'utf8');
 const player = fs.readFileSync('src/ui-player.js', 'utf8');
+const schedule = fs.readFileSync('src/ui-schedule.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 
@@ -22,6 +23,10 @@ assert.match(notifications, /collectionSet\(scroll\.render\(\), false, true\)/);
 
 assert.match(player, /yani-player__back selector/);
 assert.match(player, /collectionFocus\(back, html, true\)/);
+assert.match(schedule, /function remoteLegend\(\)[\s\S]{0,900}yani-schedule__remote-key/);
+assert.match(schedule, /color: 'red'/);
+assert.match(schedule, /function handleRemoteShortcut\(event\)[\s\S]{0,900}focusFirstRelease\(\)/);
+assert.match(schedule, /document\.addEventListener\('keydown', remoteShortcutHandler, true\)/);
 assert.match(css, /\.yani-player__back\.focus/);
 ['ru', 'en', 'uk'].forEach((language) => {
     assert.match(i18n, new RegExp(`messages\\.${language}\\.back_to_lampa\\s*=`));

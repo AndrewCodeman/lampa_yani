@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.5 — 2026-08-12
+
+- Added compact remote-control legends and color-key shortcuts to Schedule and My Lists: day navigation and release focus in Schedule; direct account-list and watch-history access in My Lists.
+
 ## 0.41.4 — 2026-08-12
 
 - Added a compact TV remote legend to catalog controls and color/number shortcuts for catalog modes, sorting, filters and returning to the first row.
