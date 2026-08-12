@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.33 — 2026-08-13
+
+- Extract the YummyAnime title Detail page into `src/ui-detail.js` (`LampaYaniDetail.create`) so the main UI shell delegates detail rendering through injected dependencies.
+
 ## 0.41.32 — 2026-08-13
 
 - Extract shared title-card mapping (`toCard`, ratings, media meta, watched-episode progress) into `src/ui-card-model.js` so catalog, detail, and Lampa card integration share one model.

@@ -15,7 +15,7 @@ assert.ok(watchStart >= 0 && watchEnd > watchStart, 'the playback watcher must e
 assert.ok(watchPolicy.includes('duration < 60 || position <= 0) return'), 'a stalled or unmeasured video must not advance');
 assert.ok(watchPolicy.includes('!video.paused'), 'a paused video must not advance');
 assert.ok(watchPolicy.includes('!state.advanced'), 'an episode must advance at most once');
-assert.ok(watchPolicy.includes('stopPlaybackWatcher();\n            advanceToNextEpisode'), 'the watcher must stop before handing over to the next episode');
+assert.ok(/stopPlaybackWatcher\(\);\s+advanceToNextEpisode/.test(watchPolicy.replace(/\r\n/g, '\n')), 'the watcher must stop before handing over to the next episode');
 
 const prefetchStart = source.indexOf('function prefetchNextEpisode');
 const prefetchEnd = source.indexOf('function advanceToNextEpisode', prefetchStart);

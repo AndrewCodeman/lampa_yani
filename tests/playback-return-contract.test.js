@@ -2,11 +2,11 @@ const assert = require('assert');
 const fs = require('fs');
 
 const ui = fs.readFileSync('src/ui.js', 'utf8');
+const detail = fs.readFileSync('src/ui-detail.js', 'utf8');
 const menu = fs.readFileSync('src/ui-playback-menu.js', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 const sources = ui + '\n' + menu;
-
-assert.match(ui, /beginPlaybackNavigation\(button, scroll\.render\(\)\);[\s\S]{0,100}openTitlePlaybackOptions\(data\)/);
+assert.match(detail, /beginPlaybackNavigation\(button, scroll\.render\(\)\);[\s\S]{0,100}openTitlePlaybackOptions\(data\)/);
 assert.match(menu, /function showPlaybackSelect\(params\)[\s\S]{0,500}params\.onBack = function \(\)[\s\S]{0,200}restorePlaybackInteraction\(\)/);
 assert.match(menu, /function chooseEpisode[\s\S]{0,1200}showPlaybackSelect\(\{/);
 assert.match(menu, /function openVideos[\s\S]{0,5200}showPlaybackSelect\(\{/);

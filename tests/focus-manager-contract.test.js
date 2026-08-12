@@ -3,6 +3,7 @@ const fs = require('fs');
 
 const navigation = fs.readFileSync('src/ui-navigation.js', 'utf8');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
+const detail = fs.readFileSync('src/ui-detail.js', 'utf8');
 const catalog = fs.readFileSync('src/ui-catalog-controls.js', 'utf8');
 const accountControls = fs.readFileSync('src/ui-account-list-controls.js', 'utf8');
 const accountLists = fs.readFileSync('src/ui-account-lists.js', 'utf8');
@@ -21,8 +22,8 @@ assert.match(navigation, /while \(scopeOrder\.length > MAX_SCOPES\)/);
 
 assert.match(ui, /LampaYaniNavigation\.captureSnapshot\(\)/);
 assert.match(ui, /LampaYaniNavigation\.restoreSnapshot\(snapshot\)/);
-assert.match(ui, /var detailFocus = LampaYaniNavigation\.createScope/);
-assert.match(ui, /detailFocus\.restore\(button, true\)/);
+assert.match(detail, /var detailFocus = LampaYaniNavigation\.createScope/);
+assert.match(detail, /detailFocus\.restore\(button, true\)/);
 assert.match(catalog, /var focusScope = LampaYaniNavigation\.createScope/);
 assert.match(catalog, /focusScope\.bind\(root\)/);
 assert.match(accountControls, /var focusScope = LampaYaniNavigation\.createScope/);
