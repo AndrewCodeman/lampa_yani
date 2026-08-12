@@ -61,6 +61,7 @@
             var chip = content.find('.yani-schedule__day-chip').removeClass('selected').eq(selectedDay).addClass('selected'); content.find('.yani-schedule__selected-title').text(dayLabel(group.day, group.relativeOffset));
             var releases = content.find('.yani-schedule__releases').empty(); if (!group.releases.length) releases.append($('<div class="yani-schedule__empty"></div>').text(t('no_releases'))); else group.releases.forEach(function (entry) { releases.append(createItem(entry)); });
             revealDayChip(chip);
+            updateShortcutBadges();
             if (focus) last = chip[0];
         }
         function scheduleItems(items) {
@@ -100,8 +101,8 @@
                 });
                 dayGroups.push({day: day, relativeOffset: Math.round((day.getTime() - today.getTime()) / 86400000), releases: releases});
             }
-            var days = $('<div class="yani-schedule__days"></div>'); dayGroups.forEach(function (group, index) { var chip = $('<div class="yani-schedule__day-chip selector"></div>'); chip.append($('<div class="yani-schedule__day-name"></div>').text(dayLabel(group.day, group.relativeOffset))); chip.append($('<div class="yani-schedule__day-count"></div>').text(group.releases.length)); chip.on('hover:focus', function (event) { content.find('.yani-schedule__day-chip.focus').removeClass('focus'); chip.addClass('focus'); last = event.currentTarget || chip[0]; revealDayChip(chip); }); chip.on('hover:blur', function () { chip.removeClass('focus'); }); chip.on('hover:enter click.yaniScheduleDay', function () { select(index, true); }); days.append(chip); });
-            content.append(remoteLegend()).append(days).append($('<div class="yani-schedule__selected-title"></div>')).append($('<div class="yani-schedule__releases"></div>')); select(dayGroups.findIndex(function (group) { return group.relativeOffset === 0; }), true);
+            var days = $('<div class="yani-schedule__days"></div>'); dayGroups.forEach(function (group, index) { var chip = $('<div class="yani-schedule__day-chip selector"></div>'); chip.append($('<div class="yani-schedule__day-name"></div>').text(dayLabel(group.day, group.relativeOffset))); chip.append($('<div class="yani-schedule__day-count"></div>').text(group.releases.length)); if (group.relativeOffset === 0) chip.append(shortcutBadge('red')); chip.on('hover:focus', function (event) { content.find('.yani-schedule__day-chip.focus').removeClass('focus'); chip.addClass('focus'); last = event.currentTarget || chip[0]; revealDayChip(chip); }); chip.on('hover:blur', function () { chip.removeClass('focus'); }); chip.on('hover:enter click.yaniScheduleDay', function () { select(index, true); }); days.append(chip); });
+            content.append(days).append($('<div class="yani-schedule__selected-title"></div>')).append($('<div class="yani-schedule__releases"></div>')); select(dayGroups.findIndex(function (group) { return group.relativeOffset === 0; }), true);
         }
         function focusFirstRelease() {
             var first = content.find('.yani-schedule__releases .yani-schedule__item.selector').first();
@@ -131,13 +132,17 @@
             else if (color === 'yellow') select(selectedDay + 1, true);
             else if (color === 'blue') focusFirstRelease();
         }
-        function remoteLegend() {
-            var legend = $('<div class="yani-schedule__remote-legend" aria-label="Remote shortcuts"></div>');
-            [{color: 'red', title: t('today')}, {color: 'green', title: '‹'}, {color: 'yellow', title: '›'}, {color: 'blue', title: t('release')}].forEach(function (shortcut) {
-                var key = $('<span class="yani-schedule__remote-key yani-schedule__remote-key--' + shortcut.color + '"></span>');
-                key.append('<i aria-hidden="true"></i>'); key.append($('<b></b>').text(shortcut.title)); legend.append(key);
-            });
-            return legend;
+        function shortcutBadge(color) {
+            return $('<span class="yani-schedule__shortcut-badge" aria-hidden="true"><i class="yani-schedule__shortcut-color yani-schedule__shortcut-color--' + color + '"></i></span>');
+        }
+        function updateShortcutBadges() {
+            var chips = content.find('.yani-schedule__day-chip');
+            chips.find('.yani-schedule__shortcut-badge--relative').remove();
+            if (selectedDay > 0) chips.eq(selectedDay - 1).append(shortcutBadge('green').addClass('yani-schedule__shortcut-badge--relative'));
+            if (selectedDay + 1 < dayGroups.length) chips.eq(selectedDay + 1).append(shortcutBadge('yellow').addClass('yani-schedule__shortcut-badge--relative'));
+            var releases = content.find('.yani-schedule__releases .yani-schedule__item');
+            releases.find('.yani-schedule__shortcut-badge').remove();
+            releases.first().append(shortcutBadge('blue'));
         }
         var comp = {create: function () { var self = this; this.activity.loader(true); LampaYaniApi.schedule({}).then(function (payload) { render(LampaYaniApi.normalize(payload)); scroll.append(content); html.append(scroll.render(true)); focusScope.bind(html); remoteShortcutHandler = handleRemoteShortcut; document.addEventListener('keydown', remoteShortcutHandler, true); self.activity.loader(false); self.activity.toggle(); }).catch(function (error) { console.error('[YummyAnime]', error); self.activity.loader(false); Lampa.Noty.show(t('schedule_load_error')); }); }, start: function () { Lampa.Controller.add('content', {toggle: function () { var restored = focusScope.restore(last, false); if (restored) last = restored; }, left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); }, right: function () { Navigator.move('right'); }, up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); }, down: function () { var current = $(last); if (current.hasClass('yani-schedule__day-chip') && focusFirstRelease()) return; if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); }, back: deps.goBack}); Lampa.Controller.toggle('content'); }, render: function (js) { return js ? html[0] : html; }, destroy: function () { if (remoteShortcutHandler) document.removeEventListener('keydown', remoteShortcutHandler, true); remoteShortcutHandler = null; focusScope.destroy(); scroll.destroy(); html.remove(); } };
         return comp;

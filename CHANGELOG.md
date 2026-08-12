@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.7 — 2026-08-12
+
+- Embedded remote color and number hints into Schedule day/release controls and the actionable More cards in My Lists, removing the separate shortcut legends.
+
 ## 0.41.6 — 2026-08-12
 
 - Replaced the separate catalog remote legend with compact color and number badges embedded directly into the corresponding filter and sorting buttons.

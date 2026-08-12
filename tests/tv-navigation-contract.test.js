@@ -23,8 +23,9 @@ assert.match(notifications, /collectionSet\(scroll\.render\(\), false, true\)/);
 
 assert.match(player, /yani-player__back selector/);
 assert.match(player, /collectionFocus\(back, html, true\)/);
-assert.match(schedule, /function remoteLegend\(\)[\s\S]{0,900}yani-schedule__remote-key/);
-assert.match(schedule, /color: 'red'/);
+assert.match(schedule, /function shortcutBadge\(color\)[\s\S]{0,500}yani-schedule__shortcut-badge/);
+assert.match(schedule, /function updateShortcutBadges\(\)[\s\S]{0,900}shortcutBadge\('green'\)[\s\S]{0,500}shortcutBadge\('yellow'\)[\s\S]{0,500}shortcutBadge\('blue'\)/);
+assert.match(schedule, /group\.relativeOffset === 0\) chip\.append\(shortcutBadge\('red'\)\)/);
 assert.match(schedule, /function handleRemoteShortcut\(event\)[\s\S]{0,900}focusFirstRelease\(\)/);
 assert.match(schedule, /document\.addEventListener\('keydown', remoteShortcutHandler, true\)/);
 assert.match(css, /\.yani-player__back\.focus/);

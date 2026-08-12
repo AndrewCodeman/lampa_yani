@@ -113,6 +113,13 @@
         var badge = view.find('.yani-user-list-card__badge');
         if (!badge.length) badge = $('<span class="yani-user-list-card__badge"></span>').prependTo(view);
         badge.html(listIcon(card.yani_list_key));
+        if (card.yani_more && typeof card.yani_shortcut_number === 'number') {
+            var shortcut = view.find('.yani-user-list-card__shortcut');
+            if (!shortcut.length) shortcut = $('<span class="yani-user-list-card__shortcut"></span>').appendTo(view);
+            shortcut.empty();
+            if (card.yani_shortcut_color) shortcut.append('<i class="yani-user-list-card__shortcut-color yani-user-list-card__shortcut-color--' + card.yani_shortcut_color + '"></i>');
+            shortcut.append($('<b></b>').text(card.yani_shortcut_number));
+        }
         if (card.yani_list_progress > 0 && card.yani_list_progress < 1 && !card.yani_more) {
             var progress = view.find('.yani-user-list-card__progress');
             if (!progress.length) progress = $('<span class="yani-user-list-card__progress"><i></i></span>').appendTo(view);
@@ -240,15 +247,11 @@
             event.preventDefault(); event.stopPropagation(); openShortcutRow(row);
         }
 
-        function remoteLegend() {
-            var root = $('<div class="yani-user-lists__remote-legend" aria-label="Remote shortcuts"></div>');
-            [{color: 'red', row: shortcutRows.watching}, {color: 'green', row: shortcutRows.planned}, {color: 'yellow', row: shortcutRows.favorites}, {color: 'blue', row: shortcutRows.history}].forEach(function (shortcut) {
-                if (!shortcut.row) return;
-                var key = $('<span class="yani-user-lists__remote-key yani-user-lists__remote-key--' + shortcut.color + '"></span>');
-                key.append('<i aria-hidden="true"></i>'); key.append($('<b></b>').text(shortcut.row.title)); root.append(key);
-            });
-            root.append('<span class="yani-user-lists__remote-numbers">1–6 · 0</span>');
-            return root;
+        function shortcutMeta(row) {
+            var key = row.history ? 'history' : row.definition && row.definition.key || '';
+            var numbers = {watching: 1, planned: 2, completed: 3, dropped: 4, favorites: 5, postponed: 6, history: 0};
+            var colors = {watching: 'red', planned: 'green', favorites: 'yellow', history: 'blue'};
+            return {number: numbers[key], color: colors[key] || ''};
         }
 
         function morePoster(row) {
@@ -272,6 +275,7 @@
                 return markCard(card, definition, row.total, card.yani_list_progress);
             });
             var poster = morePoster(row);
+            var shortcut = shortcutMeta(row);
             results.push({
                 title: deps.t('more'),
                 poster: poster,
@@ -281,7 +285,9 @@
                 yani_list_title: row.title,
                 yani_list_total: Number(row.total || 0),
                 yani_definition: row.definition,
-                yani_history: Boolean(row.history)
+                yani_history: Boolean(row.history),
+                yani_shortcut_number: shortcut.number,
+                yani_shortcut_color: shortcut.color
             });
             return {
                 title: row.title + (typeof row.total === 'number' ? ' · ' + row.total : ''),
@@ -319,8 +325,6 @@
                 self.build((rows || []).map(withMore));
                 if (self.render) {
                     var root = self.render().addClass('yani-user-lists-view');
-                    root.find('.yani-user-lists__remote-legend').remove();
-                    root.prepend(remoteLegend());
                     remoteShortcutHandler = handleRemoteShortcut;
                     document.addEventListener('keydown', remoteShortcutHandler, true);
                 }
