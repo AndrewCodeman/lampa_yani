@@ -281,6 +281,12 @@
             });
         };
         component.cardRender = decorateListCard;
+        LampaYaniNavigation.attachComponent(component, {
+            id: 'user-lists:' + String(object && object.url || 'yani/user-lists'),
+            root: function () { return component.render ? component.render() : $(); },
+            collection: function () { return component.render ? component.render() : $(); },
+            selector: '.selector'
+        });
         var originalDestroy = component.destroy;
         component.destroy = function () {
             destroyed = true;

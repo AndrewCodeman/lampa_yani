@@ -120,6 +120,14 @@
         var panelFocused = false;
         var expanded = false;
         var installed = false;
+        var focusScope = LampaYaniNavigation.createScope({
+            id: 'account-list:' + String(object.url || definition.key || 'default').replace(/\/sort\/[^/]+$/, ''),
+            root: root,
+            collection: root,
+            scroll: comp.scroll,
+            selector: '.selector',
+            fallback: firstCard
+        });
 
         function root() { return comp.render && comp.render(); }
 
@@ -155,6 +163,7 @@
             if (focused) lastCard = focused;
             panelFocused = true;
             syncNavigation();
+            focusScope.remember(trigger && trigger[0]);
             Lampa.Controller.collectionFocus(trigger && trigger[0] || false, root(), true);
         }
 
@@ -162,6 +171,7 @@
             var target = buttons.filter('[data-sort="' + active + '"]')[0] || buttons[0];
             panelFocused = true;
             syncNavigation();
+            focusScope.remember(target);
             Lampa.Controller.collectionFocus(target || false, root(), true);
         }
 
@@ -180,7 +190,10 @@
             var target = lastCard && document.documentElement.contains(lastCard) ? lastCard : firstCard();
             if (expanded) setExpanded(false);
             panelFocused = false;
-            if (target) Navigator.add(target);
+            if (target) {
+                Navigator.add(target);
+                focusScope.remember(target);
+            }
             Lampa.Controller.collectionFocus(target || false, root(), true);
         }
 
@@ -245,6 +258,7 @@
                 panelFocused = false;
                 lastCard = this;
             });
+            focusScope.bind(view);
             setTimeout(syncNavigation, 0);
         }
 
@@ -300,6 +314,7 @@
             var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
             if (enabled && enabled.name === 'content') patchController(enabled.controller);
             syncNavigation();
+            setTimeout(function () { focusScope.restore(lastCard || firstCard(), false); }, 0);
             return result;
         };
 
@@ -307,7 +322,7 @@
             active: function () { return active; },
             sort: function (items) { return sortItems(items, active); },
             install: install,
-            destroy: function () { if (panel) panel.remove(); }
+            destroy: function () { focusScope.destroy(); if (panel) panel.remove(); }
         };
     }
 

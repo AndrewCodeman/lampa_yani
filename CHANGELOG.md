@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.41.0 — 2026-08-12
+
+- Added one bounded focus-state manager for catalog, search results, account lists, My Lists, schedule and title details.
+- Restored logical focus keys and scroll positions after a screen rerender instead of relying only on stale DOM nodes.
+- Routed temporary Select and Input returns through the same restoration mechanism.
+- Kept at most 32 screen states to avoid unbounded memory growth during long TV sessions.
+
 ## 0.40.5 — 2026-08-12
 
 - Replaced the permanently expanded account-list sorting row with a compact TV-friendly sorting capsule.

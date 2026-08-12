@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.40.5',
+        version: '0.41.0',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -2989,6 +2989,212 @@ function pluginYummyAnime() {
 (function (window) {
     'use strict';
 
+    var scopeStates = {};
+    var scopeOrder = [];
+    var MAX_SCOPES = 32;
+
+    function live(element) {
+        return Boolean(element && document.documentElement.contains(element));
+    }
+
+    function asElement(value) {
+        if (!value) return null;
+        if (value.jquery) return value[0] || null;
+        return value.nodeType ? value : null;
+    }
+
+    function touchScope(id) {
+        var index = scopeOrder.indexOf(id);
+        if (index >= 0) scopeOrder.splice(index, 1);
+        scopeOrder.push(id);
+        while (scopeOrder.length > MAX_SCOPES) delete scopeStates[scopeOrder.shift()];
+    }
+
+    function elementKey(element, root) {
+        element = asElement(element);
+        if (!element) return '';
+        var attributes = ['data-yani-focus-key', 'data-yani-home-key', 'data-sort', 'data-yani-id', 'data-id'];
+        for (var i = 0; i < attributes.length; i++) {
+            var value = element.getAttribute && element.getAttribute(attributes[i]);
+            if (value) return attributes[i] + ':' + value;
+        }
+        var collection = root && root.find ? root.find('.selector') : $();
+        var index = collection.index(element);
+        return index >= 0 ? 'index:' + index : '';
+    }
+
+    function elementByKey(key, root) {
+        if (!key || !root || !root.find) return null;
+        if (key.indexOf('index:') === 0) return root.find('.selector').eq(Number(key.slice(6)))[0] || null;
+        var separator = key.indexOf(':');
+        if (separator < 1) return null;
+        var attribute = key.slice(0, separator);
+        var value = key.slice(separator + 1);
+        var found = null;
+        root.find('.selector').each(function () {
+            if (!found && String(this.getAttribute && this.getAttribute(attribute) || '') === value) found = this;
+        });
+        return found;
+    }
+
+    function scrollPosition(collection) {
+        var element = collection && collection.jquery ? collection[0] : collection;
+        return element && typeof element.scrollTop === 'number' ? element.scrollTop : 0;
+    }
+
+    function createScope(options) {
+        options = options || {};
+        var id = String(options.id || 'default');
+        var state = scopeStates[id] || (scopeStates[id] = {key: '', last: null, scrollTop: 0});
+        var namespace = '.yaniFocus' + id.replace(/[^a-z0-9]/gi, '');
+        var destroyed = false;
+        touchScope(id);
+
+        function root() {
+            var value = typeof options.root === 'function' ? options.root() : options.root;
+            return value && value.jquery ? value : value ? $(value) : $();
+        }
+
+        function collection() {
+            var value = typeof options.collection === 'function' ? options.collection() : options.collection;
+            return value && value.jquery ? value : value ? $(value) : root();
+        }
+
+        function remember(value) {
+            if (destroyed) return null;
+            var currentRoot = root();
+            var element = asElement(value);
+            if (element) {
+                var selector = $(element).closest('.selector');
+                if (selector.length) element = selector[0];
+            }
+            if (!element) return null;
+            state.last = element;
+            state.key = elementKey(element, currentRoot);
+            state.scrollTop = scrollPosition(collection());
+            touchScope(id);
+            return element;
+        }
+
+        function target(preferred) {
+            var currentRoot = root();
+            var element = asElement(preferred);
+            if (live(element)) return element;
+            if (live(state.last)) return state.last;
+            element = elementByKey(state.key, currentRoot);
+            if (element) return element;
+            if (typeof options.fallback === 'function') element = asElement(options.fallback());
+            return element || currentRoot.find(options.selector || '.selector').first()[0] || null;
+        }
+
+        function restore(preferred, updateScroll) {
+            if (destroyed) return null;
+            var currentCollection = collection();
+            var element = target(preferred);
+            if (currentCollection.length && state.scrollTop && currentCollection[0] && typeof currentCollection[0].scrollTop === 'number') {
+                currentCollection[0].scrollTop = state.scrollTop;
+            }
+            if (Lampa.Controller && Lampa.Controller.collectionSet) Lampa.Controller.collectionSet(currentCollection);
+            if (element && Lampa.Controller && Lampa.Controller.collectionFocus) {
+                if (window.Navigator && Navigator.add) Navigator.add(element);
+                Lampa.Controller.collectionFocus(element, currentCollection, true);
+                remember(element);
+                if (updateScroll !== false && options.scroll && options.scroll.update) options.scroll.update($(element), true);
+            }
+            return element;
+        }
+
+        function bind(container) {
+            var host = container && container.jquery ? container : root();
+            if (!host || !host.length) return;
+            host.off('hover:focus' + namespace).on('hover:focus' + namespace, options.selector || '.selector', function (event) {
+                var element = remember(event.currentTarget || this);
+                if (element && options.scroll && options.scroll.update) options.scroll.update($(element), true);
+            });
+        }
+
+        function snapshot() {
+            return {scope: id, key: state.key, element: state.last, collection: collection(), scrollTop: state.scrollTop, controller: 'content'};
+        }
+
+        function destroy(forget) {
+            destroyed = true;
+            var currentRoot = root();
+            if (currentRoot && currentRoot.length) currentRoot.off(namespace);
+            state.last = null;
+            if (forget) {
+                delete scopeStates[id];
+                var index = scopeOrder.indexOf(id);
+                if (index >= 0) scopeOrder.splice(index, 1);
+            }
+        }
+
+        return {id: id, bind: bind, remember: remember, restore: restore, target: target, snapshot: snapshot, destroy: destroy};
+    }
+
+    function restoreSnapshot(snapshot) {
+        if (!snapshot) return null;
+        var state = snapshot.scope && scopeStates[snapshot.scope];
+        var element = live(snapshot.element) ? snapshot.element : null;
+        var collection = snapshot.collection;
+        if (state && !element) element = state.last;
+        if (!live(element) && state && snapshot.scope) {
+            var roots = $('.yani-home, .yani-detail, .yani-account, .yani-schedule, .yani-catalog-view, .yani-user-lists-view');
+            element = elementByKey(state.key || snapshot.key, roots);
+        }
+        if (!collection || !collection.length || !live(collection[0])) collection = element ? $(element).closest('.scroll, .yani-detail, .yani-home, .yani-account, .yani-schedule, .yani-catalog-view, .yani-user-lists-view') : null;
+        var controller = snapshot.controller && snapshot.controller !== 'select' && snapshot.controller !== 'input' ? snapshot.controller : 'content';
+        if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle(controller);
+        if (collection && collection.length && Lampa.Controller && Lampa.Controller.collectionSet) Lampa.Controller.collectionSet(collection);
+        if (element && Lampa.Controller && Lampa.Controller.collectionFocus) Lampa.Controller.collectionFocus(element, collection && collection.length ? collection : undefined, true);
+        return element;
+    }
+
+    function captureSnapshot() {
+        var element = document.querySelector('.yani-home .selector.focus, .yani-detail .selector.focus, .yani-account .selector.focus, .yani-schedule .selector.focus, .yani-catalog-view .selector.focus, .yani-user-lists-view .selector.focus') ||
+            document.querySelector('.selector.focus') ||
+            document.querySelector('.yani-home .selector, .yani-detail .selector, .yani-account .selector, .yani-schedule .selector, .yani-catalog-view .selector, .yani-user-lists-view .selector') ||
+            document.querySelector('.selector');
+        var collection = element ? $(element).closest('.scroll, .yani-detail, .yani-home, .yani-account, .yani-schedule, .yani-catalog-view, .yani-user-lists-view') : null;
+        return {controller: 'content', element: element || null, collection: collection && collection.length ? collection : null, key: elementKey(element, collection)};
+    }
+
+    function attachComponent(component, options) {
+        options = options || {};
+        var scope = createScope(options);
+
+        function patch(controller) {
+            if (!controller || controller.yaniFocusScope === scope.id) return;
+            var originalToggle = controller.toggle;
+            controller.yaniFocusScope = scope.id;
+            controller.toggle = function () {
+                if (originalToggle) originalToggle.apply(this, arguments);
+                setTimeout(function () { scope.restore(null, true); }, 0);
+            };
+        }
+
+        if (component.on) {
+            component.on('controller', patch);
+            component.on('toggle', function () { scope.bind(); });
+            component.on('scroll', function () { scope.bind(); });
+        }
+        var originalStart = component.start;
+        component.start = function () {
+            var result = originalStart && originalStart.apply(this, arguments);
+            scope.bind();
+            var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
+            if (enabled && enabled.name === 'content') patch(enabled.controller);
+            setTimeout(function () { scope.restore(null, true); }, 0);
+            return result;
+        };
+        var originalDestroy = component.destroy;
+        component.destroy = function () {
+            scope.destroy();
+            if (originalDestroy) return originalDestroy.apply(this, arguments);
+        };
+        return scope;
+    }
+
     function moveDown(scroll) {
         if (Navigator.canmove('down')) Navigator.move('down');
         else if (scroll && scroll.wheel) scroll.wheel(250);
@@ -3012,7 +3218,16 @@ function pluginYummyAnime() {
     }
 
     window.LampaYani = window.LampaYani || {};
-    window.LampaYani.Navigation = window.LampaYaniNavigation = {moveDown: moveDown, moveUp: moveUp, bindFocus: bindFocus};
+    window.LampaYani.Navigation = window.LampaYaniNavigation = {
+        moveDown: moveDown,
+        moveUp: moveUp,
+        bindFocus: bindFocus,
+        createScope: createScope,
+        attachComponent: attachComponent,
+        captureSnapshot: captureSnapshot,
+        restoreSnapshot: restoreSnapshot,
+        elementKey: elementKey
+    };
 }(window));
 
 (function (window) {
@@ -3352,6 +3567,14 @@ function pluginYummyAnime() {
         var controlsReady = false;
         var toolbarFocused = false;
         var lastCatalogCard = null;
+        var focusScope = LampaYaniNavigation.createScope({
+            id: 'catalog:' + cleanCatalogRoute(),
+            root: function () { return comp.render(); },
+            collection: function () { return navigationCollection(); },
+            scroll: comp.scroll,
+            selector: '.selector',
+            fallback: firstCard
+        });
         var sortDefinitions = [
             {key: 'top', sort: 'top', forward: false, title: t('catalog_sort_top')},
             {key: 'new', sort: 'year', forward: false, title: t('catalog_sort_new')},
@@ -3486,6 +3709,7 @@ function pluginYummyAnime() {
                 lastCatalogCard = target;
                 comp.last = target;
                 Navigator.add(target);
+                focusScope.remember(target);
             }
             if (first) Lampa.Controller.collectionSet(collection, false, true);
             else syncNavigationCollection();
@@ -3505,6 +3729,7 @@ function pluginYummyAnime() {
             toolbarFocused = true;
             syncNavigationCollection();
             Lampa.Controller.collectionFocus(target, collection, true);
+            focusScope.remember(target[0]);
         }
 
         function toolbarHasFocus() {
@@ -3582,6 +3807,7 @@ function pluginYummyAnime() {
             if (genreHeader.length) toolbar.insertAfter(genreHeader);
             else root.prepend(toolbar);
             if (comp.scroll && comp.scroll.minus) comp.scroll.minus(toolbar);
+            focusScope.bind(root);
             setTimeout(syncNavigationCollection, 0);
         }
 
@@ -3635,10 +3861,11 @@ function pluginYummyAnime() {
             var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
             if (enabled && enabled.name === 'content') patchCatalogController(enabled.controller);
             syncNavigationCollection();
+            setTimeout(function () { focusScope.restore(comp.last || firstCard(), false); }, 0);
             return result;
         };
 
-        return {install: install, sync: syncNavigationCollection};
+        return {install: install, sync: syncNavigationCollection, destroy: function () { focusScope.destroy(); }};
     }
 
     window.LampaYani = window.LampaYani || {};
@@ -3840,6 +4067,14 @@ function pluginYummyAnime() {
         var html = $('<div class="yani-schedule"></div>');
         var content = $('<div class="yani-schedule__content"></div>');
         var last, dayGroups = [], selectedDay = 0;
+        var focusScope = LampaYaniNavigation.createScope({
+            id: 'schedule:' + String(object && object.url || 'yani/schedule'),
+            root: function () { return html; },
+            collection: function () { return scroll.render(); },
+            scroll: scroll,
+            selector: '.selector',
+            fallback: function () { return content.find('.yani-schedule__day-chip.selected, .selector').first()[0] || null; }
+        });
         function startOfWeek(date) {
             var start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
             start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
@@ -3935,7 +4170,7 @@ function pluginYummyAnime() {
             scroll.update(first, true);
             return true;
         }
-        var comp = {create: function () { var self = this; this.activity.loader(true); LampaYaniApi.schedule({}).then(function (payload) { render(LampaYaniApi.normalize(payload)); scroll.append(content); html.append(scroll.render(true)); self.activity.loader(false); self.activity.toggle(); }).catch(function (error) { console.error('[YummyAnime]', error); self.activity.loader(false); Lampa.Noty.show(t('schedule_load_error')); }); }, start: function () { Lampa.Controller.add('content', {toggle: function () { Lampa.Controller.collectionSet(scroll.render()); Lampa.Controller.collectionFocus(last || false, scroll.render()); }, left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); }, right: function () { Navigator.move('right'); }, up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); }, down: function () { var current = $(last); if (current.hasClass('yani-schedule__day-chip') && focusFirstRelease()) return; if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); }, back: deps.goBack}); Lampa.Controller.toggle('content'); }, render: function (js) { return js ? html[0] : html; }, destroy: function () { scroll.destroy(); html.remove(); } };
+        var comp = {create: function () { var self = this; this.activity.loader(true); LampaYaniApi.schedule({}).then(function (payload) { render(LampaYaniApi.normalize(payload)); scroll.append(content); html.append(scroll.render(true)); focusScope.bind(html); self.activity.loader(false); self.activity.toggle(); }).catch(function (error) { console.error('[YummyAnime]', error); self.activity.loader(false); Lampa.Noty.show(t('schedule_load_error')); }); }, start: function () { Lampa.Controller.add('content', {toggle: function () { var restored = focusScope.restore(last, false); if (restored) last = restored; }, left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); }, right: function () { Navigator.move('right'); }, up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); }, down: function () { var current = $(last); if (current.hasClass('yani-schedule__day-chip') && focusFirstRelease()) return; if (Navigator.canmove('down')) Navigator.move('down'); else scroll.wheel(300); }, back: deps.goBack}); Lampa.Controller.toggle('content'); }, render: function (js) { return js ? html[0] : html; }, destroy: function () { focusScope.destroy(); scroll.destroy(); html.remove(); } };
         return comp;
     }
     window.LampaYani = window.LampaYani || {};
@@ -4485,6 +4720,14 @@ function pluginYummyAnime() {
         var panelFocused = false;
         var expanded = false;
         var installed = false;
+        var focusScope = LampaYaniNavigation.createScope({
+            id: 'account-list:' + String(object.url || definition.key || 'default').replace(/\/sort\/[^/]+$/, ''),
+            root: root,
+            collection: root,
+            scroll: comp.scroll,
+            selector: '.selector',
+            fallback: firstCard
+        });
 
         function root() { return comp.render && comp.render(); }
 
@@ -4520,6 +4763,7 @@ function pluginYummyAnime() {
             if (focused) lastCard = focused;
             panelFocused = true;
             syncNavigation();
+            focusScope.remember(trigger && trigger[0]);
             Lampa.Controller.collectionFocus(trigger && trigger[0] || false, root(), true);
         }
 
@@ -4527,6 +4771,7 @@ function pluginYummyAnime() {
             var target = buttons.filter('[data-sort="' + active + '"]')[0] || buttons[0];
             panelFocused = true;
             syncNavigation();
+            focusScope.remember(target);
             Lampa.Controller.collectionFocus(target || false, root(), true);
         }
 
@@ -4545,7 +4790,10 @@ function pluginYummyAnime() {
             var target = lastCard && document.documentElement.contains(lastCard) ? lastCard : firstCard();
             if (expanded) setExpanded(false);
             panelFocused = false;
-            if (target) Navigator.add(target);
+            if (target) {
+                Navigator.add(target);
+                focusScope.remember(target);
+            }
             Lampa.Controller.collectionFocus(target || false, root(), true);
         }
 
@@ -4610,6 +4858,7 @@ function pluginYummyAnime() {
                 panelFocused = false;
                 lastCard = this;
             });
+            focusScope.bind(view);
             setTimeout(syncNavigation, 0);
         }
 
@@ -4665,6 +4914,7 @@ function pluginYummyAnime() {
             var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
             if (enabled && enabled.name === 'content') patchController(enabled.controller);
             syncNavigation();
+            setTimeout(function () { focusScope.restore(lastCard || firstCard(), false); }, 0);
             return result;
         };
 
@@ -4672,7 +4922,7 @@ function pluginYummyAnime() {
             active: function () { return active; },
             sort: function (items) { return sortItems(items, active); },
             install: install,
-            destroy: function () { if (panel) panel.remove(); }
+            destroy: function () { focusScope.destroy(); if (panel) panel.remove(); }
         };
     }
 
@@ -4968,6 +5218,12 @@ function pluginYummyAnime() {
             });
         };
         component.cardRender = decorateListCard;
+        LampaYaniNavigation.attachComponent(component, {
+            id: 'user-lists:' + String(object && object.url || 'yani/user-lists'),
+            root: function () { return component.render ? component.render() : $(); },
+            collection: function () { return component.render ? component.render() : $(); },
+            selector: '.selector'
+        });
         var originalDestroy = component.destroy;
         component.destroy = function () {
             destroyed = true;
@@ -6322,6 +6578,11 @@ function pluginYummyAnime() {
     }
 
     function transientNavigationSnapshot() {
+        if (window.LampaYaniNavigation && LampaYaniNavigation.captureSnapshot) {
+            var shared = LampaYaniNavigation.captureSnapshot();
+            shared.controller = currentControllerName() || 'content';
+            return shared;
+        }
         var element = document.querySelector('.yani-home .selector.focus, .yani-detail .selector.focus, .yani-account .selector.focus, .yani-schedule .selector.focus') ||
             document.querySelector('.selector.focus') ||
             document.querySelector('.yani-home .selector, .yani-detail .selector, .yani-account .selector, .yani-schedule .selector') ||
@@ -6338,6 +6599,10 @@ function pluginYummyAnime() {
         snapshot = snapshot || transientNavigationSnapshot();
         setTimeout(function () {
             try {
+                if (window.LampaYaniNavigation && LampaYaniNavigation.restoreSnapshot) {
+                    LampaYaniNavigation.restoreSnapshot(snapshot);
+                    return;
+                }
                 var controller = snapshot.controller && snapshot.controller !== 'select' && snapshot.controller !== 'input'
                     ? snapshot.controller
                     : 'content';
@@ -6563,6 +6828,11 @@ function pluginYummyAnime() {
         // Lampa builds use both spellings across releases.
         comp.nextPageRequest = comp.nextPageReuest;
         comp.cardRender = bindYummyCardRender;
+        var originalCatalogDestroy = comp.destroy;
+        comp.destroy = function () {
+            controls.destroy();
+            if (originalCatalogDestroy) originalCatalogDestroy.apply(this, arguments);
+        };
         return comp;
     }
 
@@ -8786,6 +9056,14 @@ function pluginYummyAnime() {
         scroll.minus();
         var button;
         var destroyed = false;
+        var detailFocus = LampaYaniNavigation.createScope({
+            id: 'detail:' + String(routeId || getYummyId(data) || object.url || 'unknown'),
+            root: function () { return html; },
+            collection: function () { return scroll.render(); },
+            scroll: scroll,
+            selector: '.selector',
+            fallback: function () { return button && (button[0] || button) || html.find('.selector').first()[0] || null; }
+        });
 
         function appendDetailNavigation(container) {
             if (destroyed || !container || !Lampa.Controller || !Lampa.Controller.enabled || !Lampa.Controller.collectionAppend) return;
@@ -8797,10 +9075,7 @@ function pluginYummyAnime() {
             if (targets.length) Lampa.Controller.collectionAppend(targets);
         }
 
-        html.on('hover:focus', function (event) {
-            var target = $(event.target).closest('.selector');
-            if (target.hasClass('selector')) scroll.update(target, true);
-        });
+        detailFocus.bind(html);
 
         this.create = function () {
             var self = this;
@@ -9242,7 +9517,7 @@ function pluginYummyAnime() {
             var controller = {
                 link: detailComponent,
                 yaniDetailOwner: detailComponent,
-                toggle: function () { Lampa.Controller.collectionSet(scroll.render()); Lampa.Controller.collectionFocus(button, scroll.render()); },
+                toggle: function () { detailFocus.restore(button, true); },
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
@@ -9252,16 +9527,18 @@ function pluginYummyAnime() {
             Lampa.Controller.add('content', controller);
             Lampa.Controller.toggle('content');
             setTimeout(function () {
-                var first = html.find('.yani-detail__button.selector, .yani-detail__order-item.selector, .yani-detail__comment.selector').first();
+                var remembered = detailFocus.target();
+                var first = remembered ? $(remembered) : html.find('.yani-detail__button.selector, .yani-detail__order-item.selector, .yani-detail__comment.selector').first();
                 if (first.length) {
                     scroll.update(first, true);
+                    detailFocus.remember(first[0]);
                     Lampa.Controller.collectionFocus(first, scroll.render());
                 }
             }, 0);
         };
 
         this.render = function (js) { return js ? scroll.render(true) : scroll.render(); };
-        this.destroy = function () { destroyed = true; scroll.destroy(); html.remove(); };
+        this.destroy = function () { destroyed = true; detailFocus.destroy(); scroll.destroy(); html.remove(); };
     }
 
     function toggleEpisodeSubscription(card, button) {

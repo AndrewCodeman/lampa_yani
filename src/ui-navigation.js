@@ -1,6 +1,212 @@
 (function (window) {
     'use strict';
 
+    var scopeStates = {};
+    var scopeOrder = [];
+    var MAX_SCOPES = 32;
+
+    function live(element) {
+        return Boolean(element && document.documentElement.contains(element));
+    }
+
+    function asElement(value) {
+        if (!value) return null;
+        if (value.jquery) return value[0] || null;
+        return value.nodeType ? value : null;
+    }
+
+    function touchScope(id) {
+        var index = scopeOrder.indexOf(id);
+        if (index >= 0) scopeOrder.splice(index, 1);
+        scopeOrder.push(id);
+        while (scopeOrder.length > MAX_SCOPES) delete scopeStates[scopeOrder.shift()];
+    }
+
+    function elementKey(element, root) {
+        element = asElement(element);
+        if (!element) return '';
+        var attributes = ['data-yani-focus-key', 'data-yani-home-key', 'data-sort', 'data-yani-id', 'data-id'];
+        for (var i = 0; i < attributes.length; i++) {
+            var value = element.getAttribute && element.getAttribute(attributes[i]);
+            if (value) return attributes[i] + ':' + value;
+        }
+        var collection = root && root.find ? root.find('.selector') : $();
+        var index = collection.index(element);
+        return index >= 0 ? 'index:' + index : '';
+    }
+
+    function elementByKey(key, root) {
+        if (!key || !root || !root.find) return null;
+        if (key.indexOf('index:') === 0) return root.find('.selector').eq(Number(key.slice(6)))[0] || null;
+        var separator = key.indexOf(':');
+        if (separator < 1) return null;
+        var attribute = key.slice(0, separator);
+        var value = key.slice(separator + 1);
+        var found = null;
+        root.find('.selector').each(function () {
+            if (!found && String(this.getAttribute && this.getAttribute(attribute) || '') === value) found = this;
+        });
+        return found;
+    }
+
+    function scrollPosition(collection) {
+        var element = collection && collection.jquery ? collection[0] : collection;
+        return element && typeof element.scrollTop === 'number' ? element.scrollTop : 0;
+    }
+
+    function createScope(options) {
+        options = options || {};
+        var id = String(options.id || 'default');
+        var state = scopeStates[id] || (scopeStates[id] = {key: '', last: null, scrollTop: 0});
+        var namespace = '.yaniFocus' + id.replace(/[^a-z0-9]/gi, '');
+        var destroyed = false;
+        touchScope(id);
+
+        function root() {
+            var value = typeof options.root === 'function' ? options.root() : options.root;
+            return value && value.jquery ? value : value ? $(value) : $();
+        }
+
+        function collection() {
+            var value = typeof options.collection === 'function' ? options.collection() : options.collection;
+            return value && value.jquery ? value : value ? $(value) : root();
+        }
+
+        function remember(value) {
+            if (destroyed) return null;
+            var currentRoot = root();
+            var element = asElement(value);
+            if (element) {
+                var selector = $(element).closest('.selector');
+                if (selector.length) element = selector[0];
+            }
+            if (!element) return null;
+            state.last = element;
+            state.key = elementKey(element, currentRoot);
+            state.scrollTop = scrollPosition(collection());
+            touchScope(id);
+            return element;
+        }
+
+        function target(preferred) {
+            var currentRoot = root();
+            var element = asElement(preferred);
+            if (live(element)) return element;
+            if (live(state.last)) return state.last;
+            element = elementByKey(state.key, currentRoot);
+            if (element) return element;
+            if (typeof options.fallback === 'function') element = asElement(options.fallback());
+            return element || currentRoot.find(options.selector || '.selector').first()[0] || null;
+        }
+
+        function restore(preferred, updateScroll) {
+            if (destroyed) return null;
+            var currentCollection = collection();
+            var element = target(preferred);
+            if (currentCollection.length && state.scrollTop && currentCollection[0] && typeof currentCollection[0].scrollTop === 'number') {
+                currentCollection[0].scrollTop = state.scrollTop;
+            }
+            if (Lampa.Controller && Lampa.Controller.collectionSet) Lampa.Controller.collectionSet(currentCollection);
+            if (element && Lampa.Controller && Lampa.Controller.collectionFocus) {
+                if (window.Navigator && Navigator.add) Navigator.add(element);
+                Lampa.Controller.collectionFocus(element, currentCollection, true);
+                remember(element);
+                if (updateScroll !== false && options.scroll && options.scroll.update) options.scroll.update($(element), true);
+            }
+            return element;
+        }
+
+        function bind(container) {
+            var host = container && container.jquery ? container : root();
+            if (!host || !host.length) return;
+            host.off('hover:focus' + namespace).on('hover:focus' + namespace, options.selector || '.selector', function (event) {
+                var element = remember(event.currentTarget || this);
+                if (element && options.scroll && options.scroll.update) options.scroll.update($(element), true);
+            });
+        }
+
+        function snapshot() {
+            return {scope: id, key: state.key, element: state.last, collection: collection(), scrollTop: state.scrollTop, controller: 'content'};
+        }
+
+        function destroy(forget) {
+            destroyed = true;
+            var currentRoot = root();
+            if (currentRoot && currentRoot.length) currentRoot.off(namespace);
+            state.last = null;
+            if (forget) {
+                delete scopeStates[id];
+                var index = scopeOrder.indexOf(id);
+                if (index >= 0) scopeOrder.splice(index, 1);
+            }
+        }
+
+        return {id: id, bind: bind, remember: remember, restore: restore, target: target, snapshot: snapshot, destroy: destroy};
+    }
+
+    function restoreSnapshot(snapshot) {
+        if (!snapshot) return null;
+        var state = snapshot.scope && scopeStates[snapshot.scope];
+        var element = live(snapshot.element) ? snapshot.element : null;
+        var collection = snapshot.collection;
+        if (state && !element) element = state.last;
+        if (!live(element) && state && snapshot.scope) {
+            var roots = $('.yani-home, .yani-detail, .yani-account, .yani-schedule, .yani-catalog-view, .yani-user-lists-view');
+            element = elementByKey(state.key || snapshot.key, roots);
+        }
+        if (!collection || !collection.length || !live(collection[0])) collection = element ? $(element).closest('.scroll, .yani-detail, .yani-home, .yani-account, .yani-schedule, .yani-catalog-view, .yani-user-lists-view') : null;
+        var controller = snapshot.controller && snapshot.controller !== 'select' && snapshot.controller !== 'input' ? snapshot.controller : 'content';
+        if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle(controller);
+        if (collection && collection.length && Lampa.Controller && Lampa.Controller.collectionSet) Lampa.Controller.collectionSet(collection);
+        if (element && Lampa.Controller && Lampa.Controller.collectionFocus) Lampa.Controller.collectionFocus(element, collection && collection.length ? collection : undefined, true);
+        return element;
+    }
+
+    function captureSnapshot() {
+        var element = document.querySelector('.yani-home .selector.focus, .yani-detail .selector.focus, .yani-account .selector.focus, .yani-schedule .selector.focus, .yani-catalog-view .selector.focus, .yani-user-lists-view .selector.focus') ||
+            document.querySelector('.selector.focus') ||
+            document.querySelector('.yani-home .selector, .yani-detail .selector, .yani-account .selector, .yani-schedule .selector, .yani-catalog-view .selector, .yani-user-lists-view .selector') ||
+            document.querySelector('.selector');
+        var collection = element ? $(element).closest('.scroll, .yani-detail, .yani-home, .yani-account, .yani-schedule, .yani-catalog-view, .yani-user-lists-view') : null;
+        return {controller: 'content', element: element || null, collection: collection && collection.length ? collection : null, key: elementKey(element, collection)};
+    }
+
+    function attachComponent(component, options) {
+        options = options || {};
+        var scope = createScope(options);
+
+        function patch(controller) {
+            if (!controller || controller.yaniFocusScope === scope.id) return;
+            var originalToggle = controller.toggle;
+            controller.yaniFocusScope = scope.id;
+            controller.toggle = function () {
+                if (originalToggle) originalToggle.apply(this, arguments);
+                setTimeout(function () { scope.restore(null, true); }, 0);
+            };
+        }
+
+        if (component.on) {
+            component.on('controller', patch);
+            component.on('toggle', function () { scope.bind(); });
+            component.on('scroll', function () { scope.bind(); });
+        }
+        var originalStart = component.start;
+        component.start = function () {
+            var result = originalStart && originalStart.apply(this, arguments);
+            scope.bind();
+            var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
+            if (enabled && enabled.name === 'content') patch(enabled.controller);
+            setTimeout(function () { scope.restore(null, true); }, 0);
+            return result;
+        };
+        var originalDestroy = component.destroy;
+        component.destroy = function () {
+            scope.destroy();
+            if (originalDestroy) return originalDestroy.apply(this, arguments);
+        };
+        return scope;
+    }
+
     function moveDown(scroll) {
         if (Navigator.canmove('down')) Navigator.move('down');
         else if (scroll && scroll.wheel) scroll.wheel(250);
@@ -24,5 +230,14 @@
     }
 
     window.LampaYani = window.LampaYani || {};
-    window.LampaYani.Navigation = window.LampaYaniNavigation = {moveDown: moveDown, moveUp: moveUp, bindFocus: bindFocus};
+    window.LampaYani.Navigation = window.LampaYaniNavigation = {
+        moveDown: moveDown,
+        moveUp: moveUp,
+        bindFocus: bindFocus,
+        createScope: createScope,
+        attachComponent: attachComponent,
+        captureSnapshot: captureSnapshot,
+        restoreSnapshot: restoreSnapshot,
+        elementKey: elementKey
+    };
 }(window));

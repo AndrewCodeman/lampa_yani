@@ -42,6 +42,14 @@
         var controlsReady = false;
         var toolbarFocused = false;
         var lastCatalogCard = null;
+        var focusScope = LampaYaniNavigation.createScope({
+            id: 'catalog:' + cleanCatalogRoute(),
+            root: function () { return comp.render(); },
+            collection: function () { return navigationCollection(); },
+            scroll: comp.scroll,
+            selector: '.selector',
+            fallback: firstCard
+        });
         var sortDefinitions = [
             {key: 'top', sort: 'top', forward: false, title: t('catalog_sort_top')},
             {key: 'new', sort: 'year', forward: false, title: t('catalog_sort_new')},
@@ -176,6 +184,7 @@
                 lastCatalogCard = target;
                 comp.last = target;
                 Navigator.add(target);
+                focusScope.remember(target);
             }
             if (first) Lampa.Controller.collectionSet(collection, false, true);
             else syncNavigationCollection();
@@ -195,6 +204,7 @@
             toolbarFocused = true;
             syncNavigationCollection();
             Lampa.Controller.collectionFocus(target, collection, true);
+            focusScope.remember(target[0]);
         }
 
         function toolbarHasFocus() {
@@ -272,6 +282,7 @@
             if (genreHeader.length) toolbar.insertAfter(genreHeader);
             else root.prepend(toolbar);
             if (comp.scroll && comp.scroll.minus) comp.scroll.minus(toolbar);
+            focusScope.bind(root);
             setTimeout(syncNavigationCollection, 0);
         }
 
@@ -325,10 +336,11 @@
             var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
             if (enabled && enabled.name === 'content') patchCatalogController(enabled.controller);
             syncNavigationCollection();
+            setTimeout(function () { focusScope.restore(comp.last || firstCard(), false); }, 0);
             return result;
         };
 
-        return {install: install, sync: syncNavigationCollection};
+        return {install: install, sync: syncNavigationCollection, destroy: function () { focusScope.destroy(); }};
     }
 
     window.LampaYani = window.LampaYani || {};

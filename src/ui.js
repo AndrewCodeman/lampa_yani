@@ -33,6 +33,11 @@
     }
 
     function transientNavigationSnapshot() {
+        if (window.LampaYaniNavigation && LampaYaniNavigation.captureSnapshot) {
+            var shared = LampaYaniNavigation.captureSnapshot();
+            shared.controller = currentControllerName() || 'content';
+            return shared;
+        }
         var element = document.querySelector('.yani-home .selector.focus, .yani-detail .selector.focus, .yani-account .selector.focus, .yani-schedule .selector.focus') ||
             document.querySelector('.selector.focus') ||
             document.querySelector('.yani-home .selector, .yani-detail .selector, .yani-account .selector, .yani-schedule .selector') ||
@@ -49,6 +54,10 @@
         snapshot = snapshot || transientNavigationSnapshot();
         setTimeout(function () {
             try {
+                if (window.LampaYaniNavigation && LampaYaniNavigation.restoreSnapshot) {
+                    LampaYaniNavigation.restoreSnapshot(snapshot);
+                    return;
+                }
                 var controller = snapshot.controller && snapshot.controller !== 'select' && snapshot.controller !== 'input'
                     ? snapshot.controller
                     : 'content';
@@ -274,6 +283,11 @@
         // Lampa builds use both spellings across releases.
         comp.nextPageRequest = comp.nextPageReuest;
         comp.cardRender = bindYummyCardRender;
+        var originalCatalogDestroy = comp.destroy;
+        comp.destroy = function () {
+            controls.destroy();
+            if (originalCatalogDestroy) originalCatalogDestroy.apply(this, arguments);
+        };
         return comp;
     }
 
@@ -2497,6 +2511,14 @@
         scroll.minus();
         var button;
         var destroyed = false;
+        var detailFocus = LampaYaniNavigation.createScope({
+            id: 'detail:' + String(routeId || getYummyId(data) || object.url || 'unknown'),
+            root: function () { return html; },
+            collection: function () { return scroll.render(); },
+            scroll: scroll,
+            selector: '.selector',
+            fallback: function () { return button && (button[0] || button) || html.find('.selector').first()[0] || null; }
+        });
 
         function appendDetailNavigation(container) {
             if (destroyed || !container || !Lampa.Controller || !Lampa.Controller.enabled || !Lampa.Controller.collectionAppend) return;
@@ -2508,10 +2530,7 @@
             if (targets.length) Lampa.Controller.collectionAppend(targets);
         }
 
-        html.on('hover:focus', function (event) {
-            var target = $(event.target).closest('.selector');
-            if (target.hasClass('selector')) scroll.update(target, true);
-        });
+        detailFocus.bind(html);
 
         this.create = function () {
             var self = this;
@@ -2953,7 +2972,7 @@
             var controller = {
                 link: detailComponent,
                 yaniDetailOwner: detailComponent,
-                toggle: function () { Lampa.Controller.collectionSet(scroll.render()); Lampa.Controller.collectionFocus(button, scroll.render()); },
+                toggle: function () { detailFocus.restore(button, true); },
                 left: function () { if (Navigator.canmove('left')) Navigator.move('left'); else Lampa.Controller.toggle('menu'); },
                 right: function () { Navigator.move('right'); },
                 up: function () { if (Navigator.canmove('up')) Navigator.move('up'); else Lampa.Controller.toggle('head'); },
@@ -2963,16 +2982,18 @@
             Lampa.Controller.add('content', controller);
             Lampa.Controller.toggle('content');
             setTimeout(function () {
-                var first = html.find('.yani-detail__button.selector, .yani-detail__order-item.selector, .yani-detail__comment.selector').first();
+                var remembered = detailFocus.target();
+                var first = remembered ? $(remembered) : html.find('.yani-detail__button.selector, .yani-detail__order-item.selector, .yani-detail__comment.selector').first();
                 if (first.length) {
                     scroll.update(first, true);
+                    detailFocus.remember(first[0]);
                     Lampa.Controller.collectionFocus(first, scroll.render());
                 }
             }, 0);
         };
 
         this.render = function (js) { return js ? scroll.render(true) : scroll.render(); };
-        this.destroy = function () { destroyed = true; scroll.destroy(); html.remove(); };
+        this.destroy = function () { destroyed = true; detailFocus.destroy(); scroll.destroy(); html.remove(); };
     }
 
     function toggleEpisodeSubscription(card, button) {
