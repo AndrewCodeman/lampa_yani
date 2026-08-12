@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.28 — 2026-08-13
+
+- Classify detail-page translations by dubbing labels from real Yani names: voice prefixes like `Озвучка Kazoku Sub` / `Озвучка SubVost` stay in voice teams, while `Субтитры …`, SoftSub/HardSub/сабы variants still go to subtitles.
+
 ## 0.41.27 — 2026-08-12
 
 - Add anonymized YummyAnime API response fixtures for catalog/detail, videos, schedule, lists, comments, notifications, and history/progress under `tests/fixtures/yani-api/`.

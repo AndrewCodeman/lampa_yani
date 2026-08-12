@@ -1,17 +1,19 @@
 const assert = require('assert');
 const fs = require('fs');
+const vm = require('vm');
 
 const ui = fs.readFileSync('src/ui.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
+const utilsSource = fs.readFileSync('src/ui-utils.js', 'utf8');
 
 assert.match(ui, /var detailVideosPromise/);
 assert.match(ui, /function loadDetailVideos\(\)/);
 assert.match(ui, /function detailTranslationGroups\(videos\)/);
-assert.match(ui, /function detailTranslationLabel\(name, kind\)/);
-assert.match(ui, /function detailTranslationKind\(name\)/);
-assert.match(ui, /withoutPrefix \|\| cleaned/);
-assert.match(ui, /String\(videoInfo\.dubbing \|\| ''\)/);
+assert.match(ui, /LampaYaniUiUtils\.translationKind\(raw\)/);
+assert.match(ui, /LampaYaniUiUtils\.translationLabel\(raw, kind\)/);
+assert.doesNotMatch(ui, /function detailTranslationKind\(/);
+assert.doesNotMatch(ui, /function detailTranslationLabel\(/);
 assert.doesNotMatch(ui.slice(ui.indexOf('function detailTranslationGroups'), ui.indexOf('function createDetailTranslations')), /videoInfo\.player/);
 assert.match(ui, /function createDetailTranslations\(\)/);
 assert.match(ui, /createDetailTranslations\(\)/);
@@ -20,5 +22,37 @@ assert.match(css, /\.yani-detail__translation-row--subtitles/);
 assert.match(css, /@keyframes yani-translation-chip-in/);
 assert.match(i18n, /messages\.ru\.available_translations = 'Доступные переводы'/);
 assert.match(i18n, /messages\.uk\.subtitle_teams = 'Субтитри'/);
+
+const context = {window: {}};
+vm.runInNewContext(utilsSource, context);
+const utils = context.window.LampaYaniUiUtils;
+
+const cases = [
+    ['Субтитры', 'subtitles', 'Субтитры'],
+    ['Субтитры Crunchyroll', 'subtitles', 'Crunchyroll'],
+    ['Субтитры MedusaSub', 'subtitles', 'MedusaSub'],
+    ['Субтитры SubVost', 'subtitles', 'SubVost'],
+    ['Субтитры TakoSubs', 'subtitles', 'TakoSubs'],
+    ['Субтитры FSG YakuSub Studio', 'subtitles', 'FSG YakuSub Studio'],
+    ['Subtitles SoftSub', 'subtitles', 'SoftSub'],
+    ['Subs AniMovie', 'subtitles', 'AniMovie'],
+    ['SoftSub', 'subtitles', 'SoftSub'],
+    ['Hard Sub', 'subtitles', 'Hard Sub'],
+    ['сабы', 'subtitles', 'сабы'],
+    ['Озвучка AniLibria', 'voices', 'AniLibria'],
+    ['Озвучка Amazing Dubbing', 'voices', 'Amazing Dubbing'],
+    ['Озвучка Kazoku Sub', 'voices', 'Kazoku Sub'],
+    ['Озвучка SubVost', 'voices', 'SubVost'],
+    ['Дубляж ReAnimedia', 'voices', 'ReAnimedia'],
+    ['Арт-Дубляж', 'voices', 'Арт-Дубляж'],
+    ['Озвучка', 'voices', 'Озвучка']
+];
+
+cases.forEach(function (entry) {
+    var kind = utils.translationKind(entry[0]);
+    var label = utils.translationLabel(entry[0], kind);
+    assert.strictEqual(kind, entry[1], entry[0] + ' kind');
+    assert.strictEqual(label, entry[2], entry[0] + ' label');
+});
 
 console.log('detail translations contract checks passed');

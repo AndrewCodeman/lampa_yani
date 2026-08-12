@@ -196,6 +196,34 @@
         return {key: key, full: full, short: short};
     }
 
+    // YummyAnime has no separate subtitle flag: kind is inferred from data.dubbing.
+    // Voice prefixes must win, otherwise teams like "Kazoku Sub" / "SubVost" land in
+    // the subtitles row even when the API labels them as озвучка.
+    function translationKind(name) {
+        var cleaned = String(name || '').replace(/\s+/g, ' ').trim();
+        if (!cleaned) return 'voices';
+        // JS \b is ASCII-only, so Cyrillic prefixes need an explicit separator.
+        if (/^(?:озвучка|озвучення|дубляж|dub(?:bing)?|voice(?:\s*over)?)(?:$|[\s:：\-–—])/i.test(cleaned)) return 'voices';
+        if (/^(?:субтитры|субтитри|sub(?:title|titles)?s?|сабы?)(?:$|[\s:：\-–—])/i.test(cleaned)) return 'subtitles';
+        if (/(?:soft\s*subs?|hard\s*subs?|fansubs?|softsub|hardsub|софт\s*саб(?:ы)?|хард\s*саб(?:ы)?|closed\s*captions?|(?:^|[\s\[(/_-])(?:subs?|сабы?)(?:$|[\s\])/_-]))/i.test(cleaned)) {
+            return 'subtitles';
+        }
+        if (/субтитр|субтитри/i.test(cleaned)) return 'subtitles';
+        return 'voices';
+    }
+
+    function translationLabel(name, kind) {
+        var cleaned = String(name || '').replace(/\s+/g, ' ').trim();
+        if (!cleaned) return '';
+        // Section headings already say "Озвучка" / "Субтитры", so keep that
+        // word on a chip only when the API did not provide a team name.
+        var prefix = kind === 'subtitles'
+            ? /^(?:субтитры|субтитри|sub(?:title|titles)?s?|сабы?)\s*[:\-–—]?\s+/i
+            : /^(?:озвучка|озвучення|дубляж|dub(?:bing)?|voice(?:\s*over)?)\s*[:\-–—]?\s+/i;
+        var withoutPrefix = cleaned.replace(prefix, '').trim();
+        return withoutPrefix || cleaned;
+    }
+
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.UiUtils = window.LampaYaniUiUtils = {
         videoData: videoData,
@@ -208,6 +236,8 @@
         internalPlayerItem: internalPlayerItem,
         detailRouteId: detailRouteId,
         detailEpisodeStats: detailEpisodeStats,
-        mediaTypeInfo: mediaTypeInfo
+        mediaTypeInfo: mediaTypeInfo,
+        translationKind: translationKind,
+        translationLabel: translationLabel
     };
 }(window));
