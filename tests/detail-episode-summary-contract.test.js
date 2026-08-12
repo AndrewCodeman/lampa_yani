@@ -6,7 +6,10 @@ const detail = fs.readFileSync('src/ui-detail.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 
-assert.match(detail, /function createDetailEpisodeSummary\(cardData\)/);
+assert.match(detail, /values\.watchedLabel \|\| values\.watched/);
+assert.match(detail, /kind: 'watched'/);
+assert.match(detail, /yani-detail__episode-stat--' \+ item\.kind/);
+assert.match(css, /\.yani-detail__episode-stat--watched/);
 assert.match(detail, /LampaYaniUiUtils\.detailEpisodeStats\(cardData, \[\], local\)/);
 assert.match(detail, /yani-detail__episode-summary selector/);
 assert.match(detail, /block\.one\('hover:focus\.yaniEpisodeSummary', enrich\)/);

@@ -120,6 +120,56 @@
         return values.length % 2 ? values[middle] : (values[middle - 1] + values[middle]) / 2;
     }
 
+    function formatWatchedEpisodeNumbers(values) {
+        var numbers = [];
+        (Array.isArray(values) ? values : []).forEach(function (value) {
+            var number = Number(value);
+            if (!(number > 0) || numbers.indexOf(number) >= 0) return;
+            numbers.push(number);
+        });
+        numbers.sort(function (a, b) { return a - b; });
+        if (!numbers.length) return '';
+        var parts = [];
+        var start = numbers[0];
+        var prev = numbers[0];
+        for (var index = 1; index <= numbers.length; index++) {
+            var current = numbers[index];
+            if (current === prev + 1) {
+                prev = current;
+                continue;
+            }
+            parts.push(start === prev ? String(start) : start + '–' + prev);
+            start = prev = current;
+        }
+        return parts.join(', ');
+    }
+
+    function compactWatchedEpisodeLabel(values, limit) {
+        var numbers = [];
+        (Array.isArray(values) ? values : []).forEach(function (value) {
+            var number = Number(value);
+            if (!(number > 0) || numbers.indexOf(number) >= 0) return;
+            numbers.push(number);
+        });
+        numbers.sort(function (a, b) { return a - b; });
+        var full = formatWatchedEpisodeNumbers(numbers);
+        if (!full) return '';
+        limit = limit > 0 ? limit : 32;
+        if (full.length <= limit) return full;
+        var suffix = '… · ' + numbers.length;
+        var parts = full.split(', ');
+        var kept = [];
+        var used = 0;
+        for (var index = 0; index < parts.length; index++) {
+            var extra = (kept.length ? 2 : 0) + parts[index].length;
+            if (kept.length && used + extra + suffix.length > limit) break;
+            kept.push(parts[index]);
+            used += extra;
+        }
+        if (!kept.length) return String(numbers[0]) + suffix;
+        return kept.join(', ') + suffix;
+    }
+
     function detailEpisodeStats(item, videos, localPlayback) {
         item = item || {};
         videos = Array.isArray(videos) ? videos : [];
@@ -129,6 +179,9 @@
             total: positiveNumber(episodes.count || episodes.total || item.episodes_count),
             aired: positiveNumber(episodes.aired || episodes.released || item.episodes_aired),
             watched: 0,
+            watchedNumbers: [],
+            watchedLabel: '',
+            watchedTitle: '',
             minutes: 0
         };
         var grouped = {};
@@ -156,12 +209,23 @@
 
         var episodeKeys = Object.keys(grouped);
         var durations = [];
+        var watchedNumbers = [];
         episodeKeys.forEach(function (key) {
             var episode = grouped[key];
-            if (episode.watched) stats.watched += 1;
+            if (episode.watched) {
+                stats.watched += 1;
+                if (key !== 'local' && key.indexOf('video:') !== 0) {
+                    var watchedNumber = Number(key);
+                    if (watchedNumber > 0) watchedNumbers.push(watchedNumber);
+                }
+            }
             var representative = median(episode.durations);
             if (representative > 0) durations.push(representative);
         });
+        watchedNumbers.sort(function (a, b) { return a - b; });
+        stats.watchedNumbers = watchedNumbers;
+        stats.watchedTitle = formatWatchedEpisodeNumbers(watchedNumbers);
+        stats.watchedLabel = compactWatchedEpisodeLabel(watchedNumbers) || (stats.watched ? String(stats.watched) : '');
         if (!stats.aired && episodeKeys.length) stats.aired = episodeKeys.length;
         if (!stats.total && stats.aired) stats.total = stats.aired;
         if (durations.length) {
@@ -235,6 +299,8 @@
         yummyTvDetailsUrl: yummyTvDetailsUrl,
         internalPlayerItem: internalPlayerItem,
         detailRouteId: detailRouteId,
+        formatWatchedEpisodeNumbers: formatWatchedEpisodeNumbers,
+        compactWatchedEpisodeLabel: compactWatchedEpisodeLabel,
         detailEpisodeStats: detailEpisodeStats,
         mediaTypeInfo: mediaTypeInfo,
         translationKind: translationKind,

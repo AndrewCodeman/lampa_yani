@@ -48,9 +48,41 @@ assert.strictEqual(episodeStats.seasons, 2);
 assert.strictEqual(episodeStats.total, 12);
 assert.strictEqual(episodeStats.aired, 8);
 assert.strictEqual(episodeStats.watched, 2, 'dubbings must not duplicate watched episodes');
+assert.deepStrictEqual(JSON.parse(JSON.stringify(episodeStats.watchedNumbers)), [1, 2]);
+assert.strictEqual(episodeStats.watchedLabel, '1–2');
 assert.strictEqual(episodeStats.minutes, 24, 'duration must average representative unique-episode durations');
 assert.strictEqual(utils.detailEpisodeStats({season: 3, episodes: {count: 1}}, [], null).seasons, 0,
     'season catalog code must not be presented as a season count');
+
+const sparseWatched = utils.detailEpisodeStats({}, [
+    {number: '10', duration: 1440, watched: {end_time: 1400}},
+    {number: '13', duration: 1380, watched: {end_time: 1300}}
+], null);
+assert.strictEqual(sparseWatched.watched, 2);
+assert.deepStrictEqual(JSON.parse(JSON.stringify(sparseWatched.watchedNumbers)), [10, 13]);
+assert.strictEqual(sparseWatched.watchedLabel, '10, 13', 'sparse watched episodes must show numbers, not a sequential count');
+
+const hundredWatched = [];
+for (let episode = 1; episode <= 100; episode++) {
+    hundredWatched.push({number: String(episode), duration: 1440, watched: {end_time: 1400}});
+}
+const hundredStats = utils.detailEpisodeStats({}, hundredWatched, null);
+assert.strictEqual(hundredStats.watched, 100);
+assert.strictEqual(hundredStats.watchedLabel, '1–100', 'a long consecutive run must stay a single range');
+assert.strictEqual(hundredStats.watchedTitle, '1–100');
+
+const scatteredWatched = [];
+for (let episode = 1; episode <= 199; episode += 2) {
+    scatteredWatched.push({number: String(episode), duration: 1440, watched: {end_time: 1400}});
+}
+const scatteredStats = utils.detailEpisodeStats({}, scatteredWatched, null);
+assert.strictEqual(scatteredStats.watched, 100);
+assert.ok(scatteredStats.watchedLabel.length <= 32, 'sparse hundred-episode lists must stay compact');
+assert.ok(scatteredStats.watchedLabel.indexOf('…') >= 0);
+assert.ok(scatteredStats.watchedLabel.indexOf('100') >= 0, 'truncated labels must keep the watched count');
+assert.ok(scatteredStats.watchedTitle.length > scatteredStats.watchedLabel.length);
+assert.strictEqual(utils.formatWatchedEpisodeNumbers([10, 13, 14, 15]), '10, 13–15');
+assert.strictEqual(utils.compactWatchedEpisodeLabel([1, 3, 5, 7, 9, 11, 13, 15, 17, 19], 16).indexOf('…') >= 0, true);
 assert.deepStrictEqual(JSON.parse(JSON.stringify(utils.mediaTypeInfo({name: 'Сериал', shortname: 'TV', value: 1}))),
     {key: 'series', full: 'Сериал', short: 'TV'});
 assert.deepStrictEqual(JSON.parse(JSON.stringify(utils.mediaTypeInfo('short film'))),

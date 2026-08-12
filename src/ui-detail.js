@@ -381,13 +381,24 @@
                 if (values.seasons) items.push({icon: 'seasons', text: values.seasons + ' ' + t('seasons_short')});
                 if (values.total) items.push({icon: 'episodes', text: values.total + ' ' + t('episodes_short')});
                 if (values.aired) items.push({icon: 'aired', text: t('episodes_aired') + ' ' + values.aired});
-                if (values.watched) items.push({icon: 'watched', text: t('episodes_watched') + ' ' + values.watched});
+                if (values.watched) {
+                    var watchedText = t('episodes_watched') + ' ' + (values.watchedLabel || values.watched);
+                    items.push({
+                        icon: 'watched',
+                        kind: 'watched',
+                        text: watchedText,
+                        title: values.watchedTitle ? t('episodes_watched') + ' ' + values.watchedTitle : watchedText
+                    });
+                }
                 if (values.minutes) items.push({icon: 'duration', text: '≈ ' + values.minutes + ' ' + t('minutes_short')});
                 block.empty();
                 items.forEach(function (item) {
-                    block.append($('<span class="yani-detail__episode-stat"></span>')
+                    var stat = $('<span class="yani-detail__episode-stat"></span>');
+                    if (item.kind) stat.addClass('yani-detail__episode-stat--' + item.kind);
+                    if (item.title) stat.attr('title', item.title);
+                    block.append(stat
                         .append($('<span class="yani-detail__episode-stat-icon"></span>').html(detailEpisodeIcon(item.icon)))
-                        .append($('<span></span>').text(item.text)));
+                        .append($('<span class="yani-detail__episode-stat-text"></span>').text(item.text)));
                 });
             }
 

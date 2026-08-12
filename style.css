@@ -1291,6 +1291,8 @@
 .yani-detail__episode-summary.focus { border-color: #ef6470; background: rgba(239,100,112,.16); box-shadow: 0 0 0 .1em rgba(239,100,112,.55); }
 .yani-detail__episode-summary.loading { opacity: .72; }
 .yani-detail__episode-stat { display: inline-flex; align-items: center; gap: .28em; padding: .28em .48em; border-radius: .38em; background: rgba(255,255,255,.1); color: rgba(255,255,255,.9); font-size: .76em; font-weight: 600; line-height: 1.15; white-space: nowrap; }
+.yani-detail__episode-stat--watched { max-width: min(22em, 100%); }
+.yani-detail__episode-stat-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .yani-detail__episode-stat-icon { display: inline-flex; width: 1em; height: 1em; color: #ef8992; }
 .yani-detail__episode-stat-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }
 .yani-detail__translations { width: 100%; margin: 0 0 .9em; padding: .7em .78em; border: .08em solid rgba(255,255,255,.14); border-radius: .72em; box-sizing: border-box; background: linear-gradient(125deg, rgba(18,22,33,.62), rgba(61,43,73,.48)); box-shadow: inset 0 .06em 0 rgba(255,255,255,.08); }

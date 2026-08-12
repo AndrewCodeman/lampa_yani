@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.36 — 2026-08-13
+
+- Show watched episode numbers on the title card (`10, 13` or `1–100`) instead of a count that looks like the first N episodes; collapse long lists into ranges and truncate sparse ones.
+
 ## 0.41.35 — 2026-08-13
 
 - Open the voice and episode pickers without waiting on Jikan episode titles; reuse the title-page videos request from memory so Watch does not refetch before the dubbing list.
