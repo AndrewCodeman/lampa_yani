@@ -1793,11 +1793,22 @@
         return status.alias && aliases[status.alias] ? t(aliases[status.alias]) : '';
     }
 
-    function cardEpisodesLabel(episodes) {
+    function cardStatusKey(status) {
+        var value = typeof status === 'string' ? status : status && (status.alias || status.title) || '';
+        value = String(value).toLowerCase();
+        if (/ongoing|онго|онґо|выходит|виходить/.test(value)) return 'ongoing';
+        if (/announce|анонс/.test(value)) return 'announced';
+        if (/released|вышел|вийшов|заверш/.test(value)) return 'released';
+        return 'unknown';
+    }
+
+    function cardEpisodesLabel(episodes, watched) {
         if (!episodes) return '';
-        if (typeof episodes === 'number') return episodes > 0 ? episodes + ' ' + t('episodes_short') : '';
-        var total = Number(episodes.count || episodes.total || 0);
-        var aired = Number(episodes.aired || episodes.released || 0);
+        var total = typeof episodes === 'number' ? Number(episodes) : Number(episodes.count || episodes.total || 0);
+        var aired = typeof episodes === 'object' ? Number(episodes.aired || episodes.released || 0) : 0;
+        watched = Math.max(0, Math.floor(Number(watched || 0)));
+        var available = aired || total;
+        if (watched > 0 && available > 0) return Math.min(watched, available) + '/' + available + ' ' + t('episodes_short');
         if (aired > 0 && total > 0 && aired !== total) return aired + '/' + total + ' ' + t('episodes_short');
         var count = total || aired;
         return count > 0 ? count + ' ' + t('episodes_short') : '';
@@ -1810,8 +1821,8 @@
         var type = mediaTypeLabels(card && card.yani_type);
         if (type && type.short) values.push({kind: 'type', text: type.short});
         var status = cardStatusLabel(card && card.yani_status);
-        if (status) values.push({kind: 'status', text: status});
-        var episodes = cardEpisodesLabel(card && card.yani_episodes);
+        if (status) values.push({kind: 'status status--' + cardStatusKey(card.yani_status), text: status});
+        var episodes = cardEpisodesLabel(card && card.yani_episodes, card && card.yani_watched_episodes);
         if (episodes) values.push({kind: 'episodes', text: episodes});
         var year = String(card && (card.yani_year || card.release_date) || '').slice(0, 4);
         if (/^\d{4}$/.test(year)) values.push({kind: 'year', text: year});
@@ -1819,7 +1830,9 @@
 
         var metadata = $('<div class="yani-card-meta" aria-hidden="true"></div>');
         values.forEach(function (value) {
-            metadata.append($('<span></span>').addClass('yani-card-meta__' + value.kind).text(value.text));
+            metadata.append($('<span></span>').addClass(value.kind.split(' ').map(function (name) {
+                return 'yani-card-meta__' + name;
+            }).join(' ')).text(value.text));
         });
         var age = render.find('.card__age').first();
         var title = render.find('.card__title').first();
@@ -4691,6 +4704,7 @@
         var rating = typeof item.rating === 'object' ? item.rating.average : item.rating;
         var votes = typeof item.rating === 'object' ? item.rating.counters : item.rating_counters;
         var ratings = extractRatings(item.rating);
+        var animeId = item.anime_id || item.animeId || item.id || item._id;
         return {
             title: title,
             original_title: item.original_title || item.japanese || title,
@@ -4704,7 +4718,7 @@
             yani_ratings: ratings,
             yani_media: mediaMeta(item),
             overview: item.description || item.synopsis || '',
-            yani_id: item.anime_id || item.animeId || item.id || item._id,
+            yani_id: animeId,
             yani_url: item.anime_url || item.url,
             yani_comments_count: Number(item.comments_count || 0),
             yani_list_id: item.user && item.user.list && item.user.list.list ? Number(item.user.list.list.id) : null,
@@ -4717,11 +4731,37 @@
             yani_status: item.anime_status || item.status || null,
             yani_year: item.year || item.release_year || null,
             yani_episodes: item.episodes || null,
+            yani_watched_episodes: watchedEpisodeCount(item, animeId),
             yani_seasons: Array.isArray(item.seasons) ? item.seasons : null,
             yani_seasons_count: Number(item.seasons_count || item.season_count || 0) || 0,
             yani_episode_duration: Number(item.episode_duration || item.average_episode_duration || item.duration || 0) || 0,
             yani_remote_ids: item.remote_ids || {}
         };
+    }
+
+    function watchedEpisodeCount(item, animeId) {
+        item = item || {};
+        var user = item.user || {};
+        var state = user.list || item.list || {};
+        var nested = state.list && typeof state.list === 'object' ? state.list : {};
+        var candidates = [
+            state.watched_episodes, state.episodes_watched, state.watched, state.progress,
+            nested.watched_episodes, nested.episodes_watched, nested.watched, nested.progress,
+            item.watched_episodes, item.episodes_watched
+        ];
+        var episodes = item.episodes && typeof item.episodes === 'object' ? item.episodes : {};
+        var total = Number(episodes.aired || episodes.count || episodes.total || item.episodes_count || 0);
+        for (var index = 0; index < candidates.length; index++) {
+            var explicit = Number(candidates[index]);
+            if (explicit > 0 && explicit < 1 && total > 0) return Math.floor(explicit * total);
+            if (explicit >= 1) return Math.floor(explicit);
+        }
+        var playback = animeId ? getPlayback(animeId) : null;
+        var episode = playback && Number(playback.number);
+        if (!(episode > 0)) return 0;
+        var duration = Number(playback.duration || 0);
+        var position = Number(playback.time || 0);
+        return Math.max(0, Math.floor(episode) - (duration > 0 && position / duration < 0.75 ? 1 : 0));
     }
 
     function createViewingOrder(data) {

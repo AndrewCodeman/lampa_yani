@@ -6,7 +6,7 @@ const css = fs.readFileSync('style.css', 'utf8');
 
 assert.match(ui, /addCardMetadata\(element, card\)/);
 assert.match(ui, /function cardStatusLabel\(status\)/);
-assert.match(ui, /function cardEpisodesLabel\(episodes\)/);
+assert.match(ui, /function cardEpisodesLabel\(episodes, watched\)/);
 assert.match(ui, /function addCardMetadata\(element, card\)/);
 assert.match(ui, /yani_status: item\.anime_status \|\| item\.status \|\| null/);
 assert.match(ui, /yani_year: item\.year \|\| item\.release_year \|\| null/);

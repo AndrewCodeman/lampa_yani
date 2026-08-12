@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.12 — 2026-08-12
+
+- Added distinct compact colors for ongoing, released and announced title states.
+- Included watched/available episode progress in the card metadata line using account-list data or reliable local playback history without extra API requests.
+
 ## 0.41.11 — 2026-08-12
 
 - Added a compact metadata line below title cards with media type, release status, available episode counts and year when supplied by YummyAnime.

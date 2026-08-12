@@ -1749,7 +1749,10 @@
 .yani-card-meta { display: flex; align-items: center; flex-wrap: wrap; gap: .22em .48em; min-height: 1.15em; margin-top: .18em; overflow: hidden; color: rgba(255,255,255,.66); font-size: .72em; line-height: 1.15; white-space: nowrap; }
 .yani-card-meta span { position: relative; overflow: hidden; max-width: 10em; text-overflow: ellipsis; }
 .yani-card-meta span + span::before { position: absolute; left: -.34em; content: '·'; color: rgba(255,255,255,.36); }
-.yani-card-meta__status { color: rgba(130,225,175,.92); }
+.yani-card-meta__status { color: rgba(205,214,225,.9); }
+.yani-card-meta__status--ongoing { color: #72dfad; }
+.yani-card-meta__status--released { color: #85bff5; }
+.yani-card-meta__status--announced { color: #f2bf69; }
 .yani-card-meta__episodes { color: rgba(142,205,247,.94); }
 .card.focus .yani-card-meta { color: rgba(255,255,255,.88); }
 .yani-card-update { position: absolute; top: 0.35em; right: 0.35em; z-index: 2; max-width: calc(100% - 0.7em); padding: 0.22em 0.38em; border-radius: 0.25em; background: #ef6470; color: #fff; font-size: 0.62em; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
