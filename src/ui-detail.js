@@ -7,9 +7,11 @@
         if (!card || !card.yani_id) return;
         var key = 'yani_subscribed_video_' + card.yani_id;
         var subscribed = Lampa.Storage && Lampa.Storage.get(key, '');
-        var videoRequest = subscribed ? Promise.resolve(String(subscribed)) : LampaYaniApi.videos(card.yani_id).then(function (payload) {
-            var response = payload && payload.response ? payload.response : payload;
-            var videos = Array.isArray(response) ? response : response && (response.videos || response.items) || [];
+        var videoRequest = subscribed ? Promise.resolve(String(subscribed)) : Promise.resolve(
+            deps.loadVideos ? deps.loadVideos(card.yani_id) : LampaYaniApi.videos(card.yani_id)
+        ).then(function (payload) {
+            var videos = Array.isArray(payload) ? payload : payload && payload.response ? payload.response : payload;
+            videos = Array.isArray(videos) ? videos : videos && (videos.videos || videos.items) || [];
             videos = videos.filter(function (video) { return video && (video.video_id || video.id); });
             if (!videos.length) throw new Error('No subscribable videos');
             videos.sort(function (a, b) { return Number(b.number || b.index || 0) - Number(a.number || a.index || 0); });
@@ -188,7 +190,7 @@
         scroll.minus();
         var button;
         var destroyed = false;
-        var detailVideosPromise;
+        var videosAbort = typeof AbortController !== 'undefined' ? new AbortController() : null;
         var detailFocus = LampaYaniNavigation.createScope({
             id: 'detail:' + String(routeId || getYummyId(data) || object.url || 'unknown'),
             root: function () { return html; },
@@ -211,13 +213,13 @@
         detailFocus.bind(html);
 
         function loadDetailVideos() {
-            if (!detailVideosPromise) {
-                detailVideosPromise = LampaYaniApi.videos(data.yani_id).then(function (payload) {
+            var load = deps.loadVideos || function (id, options) {
+                return LampaYaniApi.videos(id, options).then(function (payload) {
                     var videos = payload && payload.response ? payload.response : payload;
-                    return Array.isArray(videos) ? videos : [];
+                    return Object.prototype.toString.call(videos) === '[object Array]' ? videos : [];
                 });
-            }
-            return detailVideosPromise;
+            };
+            return load(data.yani_id, {signal: videosAbort && videosAbort.signal});
         }
 
         comp.create = function () {
@@ -348,7 +350,12 @@
             if (Lampa.Storage && Lampa.Storage.get('yani_subscribed_video_' + data.yani_id, '')) {
                 subscribeButton.text(t('unsubscribe_episodes'));
             }
-            subscribeButton.on('hover:enter', function () { toggleEpisodeSubscription(data, subscribeButton, deps); });
+            subscribeButton.on('hover:enter', function () {
+                toggleEpisodeSubscription(data, subscribeButton, {
+                    t: t,
+                    loadVideos: function () { return loadDetailVideos(); }
+                });
+            });
             bindDetailButtonFocus(subscribeButton);
             var comments = $('<div class="yani-detail__comments"></div>');
             var listPanel = createDetailListPanel(data);
@@ -762,7 +769,13 @@
         };
 
         comp.render = function (js) { return js ? scroll.render(true) : scroll.render(); };
-        comp.destroy = function () { destroyed = true; detailFocus.destroy(); scroll.destroy(); html.remove(); };
+        comp.destroy = function () {
+            destroyed = true;
+            if (videosAbort) videosAbort.abort();
+            detailFocus.destroy();
+            scroll.destroy();
+            html.remove();
+        };
 
         return comp;
     }

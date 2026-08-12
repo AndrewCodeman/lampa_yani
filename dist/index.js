@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.41.36',
+        version: '0.41.37',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -44,6 +44,8 @@ function pluginYummyAnime() {
         },
         cacheTtl: 300000,
         cacheEntries: 100,
+        videosCacheTtl: 120000,
+        videosCacheEntries: 20,
         requestTimeout: 15000,
         requestRetries: 2
     };
@@ -1298,8 +1300,6 @@ function pluginYummyAnime() {
 
     var malTitlesCache = {};
     var episodeInfoCache = {};
-    var videosMemory = {};
-    var VIDEOS_MEMORY_MS = 45000;
 
     function malTitles(malId) {
         if (!malId) return Promise.resolve([]);
@@ -1407,13 +1407,12 @@ function pluginYummyAnime() {
         detail: function (id) {
             return request('/anime/' + encodeURIComponent(id), {auth: true});
         },
-        videos: function (id) {
-            var key = String(id || '');
-            var cached = videosMemory[key];
-            if (cached && Date.now() - cached.at < VIDEOS_MEMORY_MS) return Promise.resolve(cached.payload);
-            return request('/anime/' + encodeURIComponent(id) + '/videos', {auth: true, cache: false}).then(function (payload) {
-                videosMemory[key] = {at: Date.now(), payload: payload};
-                return payload;
+        videos: function (id, options) {
+            options = options || {};
+            return request('/anime/' + encodeURIComponent(id) + '/videos', {
+                auth: true,
+                cache: false,
+                signal: options.signal
             });
         },
         subscribeVideo: function (videoId) {
@@ -4461,6 +4460,188 @@ function pluginYummyAnime() {
 (function (window) {
     'use strict';
 
+    // One in-flight /videos request per title, shared by catalog cards,
+    // detail episode stats, translation chips, and the Watch menu.
+    // Completed payloads stay in a small TTL cache; closing a title card
+    // drops that card's waiters and aborts the network request when nobody
+    // else still needs it.
+
+    function abortError() {
+        var error = new Error('Aborted');
+        error.name = 'AbortError';
+        return error;
+    }
+
+    function isAbort(error) {
+        return Boolean(error && (error.name === 'AbortError' || /aborted/i.test(String(error.message || ''))));
+    }
+
+    function videosFromPayload(payload) {
+        var videos = payload && payload.response ? payload.response : payload;
+        if (Object.prototype.toString.call(videos) === '[object Array]') return videos;
+        return videos && (videos.videos || videos.items) || [];
+    }
+
+    function create(deps) {
+        deps = deps || {};
+        var config = window.LampaYaniConfig || {};
+        var fetchVideos = deps.fetch || function (id, options) {
+            return window.LampaYaniApi.videos(id, options);
+        };
+        var ttl = Number(deps.ttl || config.videosCacheTtl || 120000);
+        var maxEntries = Number(deps.maxEntries || config.videosCacheEntries || 20);
+        var now = deps.now || function () { return Date.now(); };
+        var entries = {};
+        var order = [];
+
+        function remember(key) {
+            var index = order.indexOf(key);
+            if (index >= 0) order.splice(index, 1);
+            order.push(key);
+            evict();
+        }
+
+        function forget(key, entry) {
+            if (entry && entries[key] !== entry) return;
+            delete entries[key];
+            var index = order.indexOf(key);
+            if (index >= 0) order.splice(index, 1);
+        }
+
+        function evict() {
+            var skipped = 0;
+            while (order.length > maxEntries && skipped < order.length) {
+                var oldest = order[0];
+                var entry = entries[oldest];
+                if (entry && entry.inflight) {
+                    order.push(order.shift());
+                    skipped += 1;
+                    continue;
+                }
+                order.shift();
+                delete entries[oldest];
+            }
+        }
+
+        function clearWaiter(waiter) {
+            if (!waiter || waiter.cleared) return;
+            waiter.cleared = true;
+            if (waiter.abortListener && waiter.signal && waiter.signal.removeEventListener) {
+                waiter.signal.removeEventListener('abort', waiter.abortListener);
+            }
+        }
+
+        function settleWaiters(entry, error, payload) {
+            var waiters = entry.waiters || [];
+            entry.waiters = [];
+            waiters.forEach(function (waiter) {
+                if (waiter.cleared) return;
+                clearWaiter(waiter);
+                if (error) waiter.reject(error);
+                else waiter.resolve(payload);
+            });
+        }
+
+        function cancelWaiter(key, entry, waiter) {
+            if (!waiter || waiter.cleared) return;
+            clearWaiter(waiter);
+            entry.waiters = (entry.waiters || []).filter(function (item) { return item !== waiter; });
+            waiter.reject(abortError());
+            if (entry.inflight && !entry.waiters.length && entry.controller && entry.controller.abort) {
+                entry.controller.abort();
+            }
+        }
+
+        function attachWaiter(key, entry, signal) {
+            return new Promise(function (resolve, reject) {
+                if (signal && signal.aborted) {
+                    reject(abortError());
+                    if (entry.inflight && !(entry.waiters && entry.waiters.length) && entry.controller && entry.controller.abort) {
+                        entry.controller.abort();
+                    }
+                    return;
+                }
+                var waiter = {resolve: resolve, reject: reject, signal: signal, cleared: false};
+                waiter.abortListener = function () { cancelWaiter(key, entry, waiter); };
+                if (signal && signal.addEventListener) signal.addEventListener('abort', waiter.abortListener);
+                entry.waiters.push(waiter);
+            });
+        }
+
+        function start(key, id) {
+            var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            var entry = {
+                inflight: true,
+                controller: controller,
+                waiters: [],
+                at: 0,
+                payload: null
+            };
+            entries[key] = entry;
+            remember(key);
+            Promise.resolve(fetchVideos(id, {signal: controller && controller.signal})).then(function (payload) {
+                if (controller && controller.signal && controller.signal.aborted) throw abortError();
+                entry.inflight = false;
+                entry.controller = null;
+                entry.payload = payload;
+                entry.at = now();
+                remember(key);
+                settleWaiters(entry, null, payload);
+            }).catch(function (error) {
+                entry.inflight = false;
+                entry.controller = null;
+                forget(key, entry);
+                settleWaiters(entry, isAbort(error) ? abortError() : error);
+            });
+            return entry;
+        }
+
+        function payload(id, options) {
+            options = options || {};
+            var key = String(id || '');
+            if (!key) return Promise.reject(new Error('YummyAnime video id is missing'));
+            var entry = entries[key];
+            if (entry && !entry.inflight && entry.payload && now() - entry.at < ttl) {
+                if (options.signal && options.signal.aborted) return Promise.reject(abortError());
+                remember(key);
+                return Promise.resolve(entry.payload);
+            }
+            if (entry && entry.inflight) return attachWaiter(key, entry, options.signal);
+            entry = start(key, id);
+            return attachWaiter(key, entry, options.signal);
+        }
+
+        function list(id, options) {
+            return payload(id, options).then(videosFromPayload);
+        }
+
+        function invalidate(id) {
+            var key = String(id || '');
+            if (!key) {
+                Object.keys(entries).forEach(function (item) {
+                    if (entries[item] && !entries[item].inflight) forget(item, entries[item]);
+                });
+                return;
+            }
+            var entry = entries[key];
+            if (entry && !entry.inflight) forget(key, entry);
+        }
+
+        return {
+            payload: payload,
+            list: list,
+            invalidate: invalidate,
+            videosFromPayload: videosFromPayload
+        };
+    }
+
+    window.LampaYani = window.LampaYani || {};
+    window.LampaYani.VideoData = window.LampaYaniVideoData = {create: create, videosFromPayload: videosFromPayload};
+}(window));
+
+(function (window) {
+    'use strict';
+
     // Shared YummyAnime → Lampa card mapping used by catalog, detail, and
     // standard-card integration. Keeps rating/media/progress derivation in one place.
 
@@ -5498,6 +5679,7 @@ function pluginYummyAnime() {
         var yummyTvEnabled = deps.yummyTvEnabled || function () { return false; };
         var yummyTvAnimeId = deps.yummyTvAnimeId || function () { return ''; };
         var openYummyTv = deps.openYummyTv || function () { return false; };
+        var loadVideos = deps.loadVideos || function (id, options) { return LampaYaniApi.videos(id, options); };
 
         var playbackReturnState = {
             active: false,
@@ -5663,7 +5845,7 @@ function pluginYummyAnime() {
             if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
             enrichEpisodeTitles(card);
 
-            LampaYaniApi.videos(card.yani_id).then(function (payload) {
+            loadVideos(card.yani_id).then(function (payload) {
                 if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
                 var videos = payload && payload.response ? payload.response : payload;
                 videos = (Array.isArray(videos) ? videos : []).filter(function (video) {
@@ -9416,9 +9598,11 @@ function pluginYummyAnime() {
         if (!card || !card.yani_id) return;
         var key = 'yani_subscribed_video_' + card.yani_id;
         var subscribed = Lampa.Storage && Lampa.Storage.get(key, '');
-        var videoRequest = subscribed ? Promise.resolve(String(subscribed)) : LampaYaniApi.videos(card.yani_id).then(function (payload) {
-            var response = payload && payload.response ? payload.response : payload;
-            var videos = Array.isArray(response) ? response : response && (response.videos || response.items) || [];
+        var videoRequest = subscribed ? Promise.resolve(String(subscribed)) : Promise.resolve(
+            deps.loadVideos ? deps.loadVideos(card.yani_id) : LampaYaniApi.videos(card.yani_id)
+        ).then(function (payload) {
+            var videos = Array.isArray(payload) ? payload : payload && payload.response ? payload.response : payload;
+            videos = Array.isArray(videos) ? videos : videos && (videos.videos || videos.items) || [];
             videos = videos.filter(function (video) { return video && (video.video_id || video.id); });
             if (!videos.length) throw new Error('No subscribable videos');
             videos.sort(function (a, b) { return Number(b.number || b.index || 0) - Number(a.number || a.index || 0); });
@@ -9597,7 +9781,7 @@ function pluginYummyAnime() {
         scroll.minus();
         var button;
         var destroyed = false;
-        var detailVideosPromise;
+        var videosAbort = typeof AbortController !== 'undefined' ? new AbortController() : null;
         var detailFocus = LampaYaniNavigation.createScope({
             id: 'detail:' + String(routeId || getYummyId(data) || object.url || 'unknown'),
             root: function () { return html; },
@@ -9620,13 +9804,13 @@ function pluginYummyAnime() {
         detailFocus.bind(html);
 
         function loadDetailVideos() {
-            if (!detailVideosPromise) {
-                detailVideosPromise = LampaYaniApi.videos(data.yani_id).then(function (payload) {
+            var load = deps.loadVideos || function (id, options) {
+                return LampaYaniApi.videos(id, options).then(function (payload) {
                     var videos = payload && payload.response ? payload.response : payload;
-                    return Array.isArray(videos) ? videos : [];
+                    return Object.prototype.toString.call(videos) === '[object Array]' ? videos : [];
                 });
-            }
-            return detailVideosPromise;
+            };
+            return load(data.yani_id, {signal: videosAbort && videosAbort.signal});
         }
 
         comp.create = function () {
@@ -9757,7 +9941,12 @@ function pluginYummyAnime() {
             if (Lampa.Storage && Lampa.Storage.get('yani_subscribed_video_' + data.yani_id, '')) {
                 subscribeButton.text(t('unsubscribe_episodes'));
             }
-            subscribeButton.on('hover:enter', function () { toggleEpisodeSubscription(data, subscribeButton, deps); });
+            subscribeButton.on('hover:enter', function () {
+                toggleEpisodeSubscription(data, subscribeButton, {
+                    t: t,
+                    loadVideos: function () { return loadDetailVideos(); }
+                });
+            });
             bindDetailButtonFocus(subscribeButton);
             var comments = $('<div class="yani-detail__comments"></div>');
             var listPanel = createDetailListPanel(data);
@@ -10171,7 +10360,13 @@ function pluginYummyAnime() {
         };
 
         comp.render = function (js) { return js ? scroll.render(true) : scroll.render(); };
-        comp.destroy = function () { destroyed = true; detailFocus.destroy(); scroll.destroy(); html.remove(); };
+        comp.destroy = function () {
+            destroyed = true;
+            if (videosAbort) videosAbort.abort();
+            detailFocus.destroy();
+            scroll.destroy();
+            html.remove();
+        };
 
         return comp;
     }
@@ -10191,6 +10386,10 @@ function pluginYummyAnime() {
         return window.LampaYaniI18n ? LampaYaniI18n.locale() : 'ru-RU';
     }
 
+    var videoData = LampaYaniVideoData.create({
+        fetch: function (id, options) { return LampaYaniApi.videos(id, options); }
+    });
+
     var cardModel = LampaYaniCardModel.create({
         t: t,
         getPlayback: function (id) { return getPlayback(id); },
@@ -10208,7 +10407,7 @@ function pluginYummyAnime() {
         locale: locale,
         getPlayback: function (id) { return getPlayback(id); },
         mediaMeta: function (item) { return mediaMeta(item); },
-        loadVideos: function (id) { return LampaYaniApi.videos(id); }
+        loadVideos: function (id, options) { return videoData.payload(id, options); }
     });
     var cardRenderElement = cardRenderers.cardRenderElement;
     var addCardMediaBadges = cardRenderers.addCardMediaBadges;
@@ -10290,7 +10489,8 @@ function pluginYummyAnime() {
         playInternalPlayer: function (current, playlist) { return playInternalPlayer(current, playlist); },
         yummyTvEnabled: function () { return yummyTvEnabled(); },
         yummyTvAnimeId: function (card) { return yummyTvAnimeId(card); },
-        openYummyTv: function (card) { return openYummyTv(card); }
+        openYummyTv: function (card) { return openYummyTv(card); },
+        loadVideos: function (id, options) { return videoData.payload(id, options); }
     });
     var playbackReturnState = playbackMenu.playbackReturnState;
     var videoSourceUrl = playbackMenu.videoSourceUrl;
@@ -12642,7 +12842,8 @@ function pluginYummyAnime() {
             transientNavigationSnapshot: transientNavigationSnapshot,
             movePageDown: movePageDown,
             goBack: goBack,
-            cleanCommentText: cleanCommentText
+            cleanCommentText: cleanCommentText,
+            loadVideos: function (id, options) { return videoData.list(id, options); }
         });
     }
 

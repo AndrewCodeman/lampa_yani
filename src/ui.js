@@ -9,6 +9,10 @@
         return window.LampaYaniI18n ? LampaYaniI18n.locale() : 'ru-RU';
     }
 
+    var videoData = LampaYaniVideoData.create({
+        fetch: function (id, options) { return LampaYaniApi.videos(id, options); }
+    });
+
     var cardModel = LampaYaniCardModel.create({
         t: t,
         getPlayback: function (id) { return getPlayback(id); },
@@ -26,7 +30,7 @@
         locale: locale,
         getPlayback: function (id) { return getPlayback(id); },
         mediaMeta: function (item) { return mediaMeta(item); },
-        loadVideos: function (id) { return LampaYaniApi.videos(id); }
+        loadVideos: function (id, options) { return videoData.payload(id, options); }
     });
     var cardRenderElement = cardRenderers.cardRenderElement;
     var addCardMediaBadges = cardRenderers.addCardMediaBadges;
@@ -108,7 +112,8 @@
         playInternalPlayer: function (current, playlist) { return playInternalPlayer(current, playlist); },
         yummyTvEnabled: function () { return yummyTvEnabled(); },
         yummyTvAnimeId: function (card) { return yummyTvAnimeId(card); },
-        openYummyTv: function (card) { return openYummyTv(card); }
+        openYummyTv: function (card) { return openYummyTv(card); },
+        loadVideos: function (id, options) { return videoData.payload(id, options); }
     });
     var playbackReturnState = playbackMenu.playbackReturnState;
     var videoSourceUrl = playbackMenu.videoSourceUrl;
@@ -2460,7 +2465,8 @@
             transientNavigationSnapshot: transientNavigationSnapshot,
             movePageDown: movePageDown,
             goBack: goBack,
-            cleanCommentText: cleanCommentText
+            cleanCommentText: cleanCommentText,
+            loadVideos: function (id, options) { return videoData.list(id, options); }
         });
     }
 

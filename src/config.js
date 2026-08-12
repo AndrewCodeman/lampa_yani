@@ -20,7 +20,7 @@
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.41.36',
+        version: '0.41.37',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -36,6 +36,8 @@
         },
         cacheTtl: 300000,
         cacheEntries: 100,
+        videosCacheTtl: 120000,
+        videosCacheEntries: 20,
         requestTimeout: 15000,
         requestRetries: 2
     };

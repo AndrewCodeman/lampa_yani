@@ -36,6 +36,7 @@
         var yummyTvEnabled = deps.yummyTvEnabled || function () { return false; };
         var yummyTvAnimeId = deps.yummyTvAnimeId || function () { return ''; };
         var openYummyTv = deps.openYummyTv || function () { return false; };
+        var loadVideos = deps.loadVideos || function (id, options) { return LampaYaniApi.videos(id, options); };
 
         var playbackReturnState = {
             active: false,
@@ -201,7 +202,7 @@
             if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
             enrichEpisodeTitles(card);
 
-            LampaYaniApi.videos(card.yani_id).then(function (payload) {
+            loadVideos(card.yani_id).then(function (payload) {
                 if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
                 var videos = payload && payload.response ? payload.response : payload;
                 videos = (Array.isArray(videos) ? videos : []).filter(function (video) {

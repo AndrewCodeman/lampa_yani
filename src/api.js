@@ -155,8 +155,6 @@
 
     var malTitlesCache = {};
     var episodeInfoCache = {};
-    var videosMemory = {};
-    var VIDEOS_MEMORY_MS = 45000;
 
     function malTitles(malId) {
         if (!malId) return Promise.resolve([]);
@@ -264,13 +262,12 @@
         detail: function (id) {
             return request('/anime/' + encodeURIComponent(id), {auth: true});
         },
-        videos: function (id) {
-            var key = String(id || '');
-            var cached = videosMemory[key];
-            if (cached && Date.now() - cached.at < VIDEOS_MEMORY_MS) return Promise.resolve(cached.payload);
-            return request('/anime/' + encodeURIComponent(id) + '/videos', {auth: true, cache: false}).then(function (payload) {
-                videosMemory[key] = {at: Date.now(), payload: payload};
-                return payload;
+        videos: function (id, options) {
+            options = options || {};
+            return request('/anime/' + encodeURIComponent(id) + '/videos', {
+                auth: true,
+                cache: false,
+                signal: options.signal
             });
         },
         subscribeVideo: function (videoId) {

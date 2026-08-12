@@ -8,8 +8,10 @@ const css = fs.readFileSync('style.css', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
 const utilsSource = fs.readFileSync('src/ui-utils.js', 'utf8');
 
-assert.match(detail, /var detailVideosPromise/);
+assert.match(detail, /var videosAbort/);
 assert.match(detail, /function loadDetailVideos\(\)/);
+assert.match(detail, /deps\.loadVideos/);
+assert.match(detail, /videosAbort\.abort\(\)/);
 assert.match(detail, /function detailTranslationGroups\(videos\)/);
 assert.match(detail, /LampaYaniUiUtils\.translationKind\(raw\)/);
 assert.match(detail, /LampaYaniUiUtils\.translationLabel\(raw, kind\)/);

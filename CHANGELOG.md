@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.37 — 2026-08-13
+
+- Share one cached `/videos` request across catalog cards, title-card episode stats, translation chips, and the Watch menu, with TTL, a bounded cache, and abort when the title card closes.
+
 ## 0.41.36 — 2026-08-13
 
 - Show watched episode numbers on the title card (`10, 13` or `1–100`) instead of a count that looks like the first N episodes; collapse long lists into ranges and truncate sparse ones.
