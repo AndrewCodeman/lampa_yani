@@ -79,75 +79,41 @@
     display: none;
 }
 
-.yani-catalog-remote-legend {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: .34em;
-    flex: 0 0 auto;
-    padding: .22em .3em .22em .48em;
-    border-left: .08em solid rgba(255,255,255,.12);
-    color: rgba(255,255,255,.72);
-    font-size: .62em;
-    white-space: nowrap;
-}
-
-.yani-catalog-remote-key {
+.yani-catalog-shortcut-badge {
     display: inline-flex;
     align-items: center;
-    gap: .26em;
-    min-width: 0;
-    padding: .27em .4em .27em .28em;
-    border: .07em solid rgba(255,255,255,.11);
-    border-radius: .48em .66em .48em .6em;
-    background: rgba(8,10,18,.24);
-    box-shadow: inset 0 .06em 0 rgba(255,255,255,.06);
-}
-
-.yani-catalog-remote-key i {
-    width: .76em;
-    height: .76em;
-    display: block;
-    flex: 0 0 auto;
-    border-radius: .23em .4em .26em .36em;
-    box-shadow: 0 0 .55em currentColor;
-}
-
-.yani-catalog-remote-key b,
-.yani-catalog-remote-numbers b {
-    overflow: hidden;
-    max-width: 4.8em;
-    font-weight: 700;
-    text-overflow: ellipsis;
-}
-
-.yani-catalog-remote-key--red { color: #ff7381; }
-.yani-catalog-remote-key--green { color: #65d99d; }
-.yani-catalog-remote-key--yellow { color: #f2c75e; }
-.yani-catalog-remote-key--blue { color: #6fc7ff; }
-.yani-catalog-remote-key--red i { background: #ef6470; }
-.yani-catalog-remote-key--green i { background: #55d795; }
-.yani-catalog-remote-key--yellow i { background: #efc35b; }
-.yani-catalog-remote-key--blue i { background: #62b8ff; }
-
-.yani-catalog-remote-numbers {
-    display: inline-flex;
-    align-items: center;
+    justify-content: center;
     gap: .28em;
-    padding-left: .36em;
-    color: rgba(255,255,255,.66);
+    flex: 0 0 auto;
+    min-width: 1.45em;
+    height: 1.45em;
+    margin-left: auto;
+    padding: 0 .38em;
+    border: .07em solid rgba(255,255,255,.13);
+    border-radius: .55em;
+    color: rgba(255,255,255,.9);
+    background: rgba(9,11,17,.42);
+    box-shadow: inset 0 .06em 0 rgba(255,255,255,.07), 0 .18em .5em rgba(0,0,0,.16);
 }
 
-.yani-catalog-remote-numbers i,
-.yani-catalog-remote-numbers em {
-    padding: .2em .34em;
-    border: .07em solid rgba(255,255,255,.15);
-    border-radius: .36em;
-    color: #fff;
-    background: rgba(255,255,255,.08);
-    font-style: normal;
+.yani-catalog-shortcut-badge__color {
+    display: block;
+    width: .56em;
+    height: .56em;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    box-shadow: 0 0 .5em currentColor;
+}
+
+.yani-catalog-shortcut-badge__color--red { color: #ff7180; background: #ef6470; }
+.yani-catalog-shortcut-badge__color--green { color: #62dda0; background: #55d795; }
+.yani-catalog-shortcut-badge__color--yellow { color: #f4ce66; background: #efc35b; }
+.yani-catalog-shortcut-badge__color--blue { color: #73caff; background: #62b8ff; }
+
+.yani-catalog-shortcut-badge__number {
+    font-size: .68em;
     font-weight: 800;
+    line-height: 1;
 }
 
 .yani-catalog-sort {
@@ -216,6 +182,13 @@
     transform: translateY(-.08em);
 }
 
+.yani-catalog-sort.focus .yani-catalog-shortcut-badge,
+.yani-catalog-top.focus .yani-catalog-shortcut-badge {
+    color: #fff;
+    border-color: rgba(255,255,255,.32);
+    background: rgba(24,24,31,.82);
+}
+
 .yani-catalog-sort__title {
     display: block;
     position: static;
@@ -278,7 +251,6 @@
         min-width: 7em;
         height: 2.55em;
     }
-    .yani-catalog-remote-legend { margin-top: .45em; border-left: 0; border-top: .08em solid rgba(255,255,255,.12); padding-left: .15em; }
 }
 
 .icon-yani {

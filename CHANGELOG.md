@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.6 — 2026-08-12
+
+- Replaced the separate catalog remote legend with compact color and number badges embedded directly into the corresponding filter and sorting buttons.
+
 ## 0.41.5 — 2026-08-12
 
 - Added compact remote-control legends and color-key shortcuts to Schedule and My Lists: day navigation and release focus in Schedule; direct account-list and watch-history access in My Lists.

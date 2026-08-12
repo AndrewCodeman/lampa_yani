@@ -41,8 +41,13 @@ assert.match(ui, /function remoteShortcuts\(\)[\s\S]{0,1000}color: 'red'[\s\S]{0
 assert.match(ui, /function handleRemoteShortcut\(event\)[\s\S]{0,900}changeSort\(shortcut\.definition\)/);
 assert.match(ui, /document\.addEventListener\('keydown', shortcutHandler, true\)/);
 assert.match(ui, /document\.removeEventListener\('keydown', shortcutHandler, true\)/);
-assert.match(css, /\.yani-catalog-remote-legend[\s\S]{0,500}border-left/);
-assert.match(css, /\.yani-catalog-remote-key--red/);
+assert.match(ui, /function shortcutBadge\(number, color\)/);
+assert.match(ui, /filterButton\.append\(shortcutBadge\(null, 'blue'\)\)/);
+assert.match(ui, /button\.append\(shortcutBadge\(index \+ 1, shortcutColorFor\(definition\)\)\)/);
+assert.match(ui, /topButton\.append\(shortcutBadge\(0, ''\)\)/);
+assert.doesNotMatch(ui, /createRemoteLegend/);
+assert.match(css, /\.yani-catalog-shortcut-badge[\s\S]{0,500}border-radius/);
+assert.match(css, /\.yani-catalog-shortcut-badge__color--red/);
 assert.match(ui, /function openFilterMenu\(navigation\)/);
 assert.match(ui, /filterModel\.activeCount\(baseParams\)/);
 assert.match(ui, /yani-catalog-filter selector/);

@@ -351,20 +351,16 @@
             else if (shortcut.definition) changeSort(shortcut.definition);
         }
 
-        function createRemoteLegend() {
-            var legend = $('<div class="yani-catalog-remote-legend" aria-label="Remote shortcuts"></div>');
-            remoteShortcuts().forEach(function (shortcut) {
-                var key = $('<span class="yani-catalog-remote-key yani-catalog-remote-key--' + shortcut.color + '"></span>');
-                key.append('<i aria-hidden="true"></i>');
-                key.append($('<b></b>').text(shortcut.title || shortcut.definition.title));
-                legend.append(key);
-            });
-            var numeric = $('<span class="yani-catalog-remote-numbers"></span>');
-            numeric.append('<i>1–' + controlDefinitions.length + '</i>');
-            numeric.append($('<b></b>').text(t('catalog_shortcuts_numbers')));
-            numeric.append('<em>0 ↑</em>');
-            legend.append(numeric);
-            return legend;
+        function shortcutColorFor(definition) {
+            var shortcut = remoteShortcuts().filter(function (item) { return item.definition === definition; })[0];
+            return shortcut ? shortcut.color : '';
+        }
+
+        function shortcutBadge(number, color) {
+            var badge = $('<span class="yani-catalog-shortcut-badge" aria-hidden="true"></span>');
+            if (color) badge.append('<i class="yani-catalog-shortcut-badge__color yani-catalog-shortcut-badge__color--' + color + '"></i>');
+            if (typeof number === 'number') badge.append($('<b class="yani-catalog-shortcut-badge__number"></b>').text(number));
+            return badge;
         }
 
         function install() {
@@ -381,6 +377,7 @@
             topButton = $('<div class="yani-catalog-top selector" aria-label="' + t('scroll_to_top') + '"></div>');
             topButton.append('<span class="yani-catalog-top__icon">↑</span>');
             topButton.append($('<span class="yani-catalog-top__title"></span>').text(t('scroll_to_top')));
+            topButton.append(shortcutBadge(0, ''));
             topButton.on('hover:focus', function () { toolbarFocused = true; });
             topButton.on('hover:enter click.yaniCatalogTop', scrollToTop);
             toolbarTrack.append(topButton);
@@ -391,15 +388,17 @@
                 filterButton.append($('<span class="yani-catalog-sort__icon"></span>').html('<svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>'));
                 if (activeFilters) filterButton.append($('<span class="yani-catalog-filter__count"></span>').text(activeFilters));
                 filterButton.append($('<span class="yani-catalog-sort__title"></span>').text(t('catalog_filters')));
+                filterButton.append(shortcutBadge(null, 'blue'));
                 filterButton.on('hover:focus', function () { toolbarFocused = true; });
                 filterButton.on('hover:enter click.yaniCatalogFilter', function () { openFilterMenu(); });
                 toolbarTrack.append(filterButton);
             }
-            controlDefinitions.forEach(function (definition) {
+            controlDefinitions.forEach(function (definition, index) {
                 var button = $('<div class="yani-catalog-sort selector"></div>');
                 button.toggleClass('yani-catalog-sort--active', activeSort(definition));
                 button.append($('<span class="yani-catalog-sort__icon"></span>').html(topMode ? topTypeIcon(definition.key) : catalogSortIcon(definition.key)));
                 button.append($('<span class="yani-catalog-sort__title"></span>').text(definition.title));
+                button.append(shortcutBadge(index + 1, shortcutColorFor(definition)));
                 button.on('hover:focus', function () {
                     toolbarFocused = true;
                     toolbarTrack[0].scrollLeft = Math.max(0, button[0].offsetLeft - toolbarTrack[0].clientWidth / 3);
@@ -408,7 +407,6 @@
                 toolbarTrack.append(button);
             });
             toolbar.append(heading).append(toolbarTrack);
-            toolbar.append(createRemoteLegend());
             var genreHeader = root.find('.yani-genre-catalog-header').first();
             if (genreHeader.length) toolbar.insertAfter(genreHeader);
             else root.prepend(toolbar);
