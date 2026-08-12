@@ -3,6 +3,7 @@ const fs = require('fs');
 
 const media = fs.readFileSync('src/ui-media.js', 'utf8');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
+const card = fs.readFileSync('src/ui-standard-card.js', 'utf8');
 const api = fs.readFileSync('src/api.js', 'utf8');
 const build = fs.readFileSync('build.js', 'utf8');
 const css = fs.readFileSync('style.css', 'utf8');
@@ -12,8 +13,8 @@ assert.match(media, /var maxActive = 2;/, 'fallback poster requests must be conc
 assert.match(media, /return values\.slice\(0, 2\);/, 'fallback poster aliases must be bounded');
 assert.match(media, /loading', 'lazy'/, 'poster images should be lazy-loaded');
 assert.match(api, /var pendingRequests = \{\};/, 'identical in-flight API requests must be deduplicated');
-assert.match(ui, /queries\.slice\(0, 2\)/, 'native Lampa matching must use a bounded title set');
-assert.doesNotMatch(ui, /return !source && !Array\.isArray\(ids\);/, 'missing metadata must not classify every title as anime');
+assert.match(card, /queries\.slice\(0, 2\)/, 'native Lampa matching must use a bounded title set');
+assert.doesNotMatch(card, /return !source && !Array\.isArray\(ids\);/, 'missing metadata must not classify every title as anime');
 assert.doesNotMatch(build, /src\/ui-detail-sections\.js/, 'unused duplicate detail sections must stay out of the bundle');
 assert.doesNotMatch(fs.readFileSync('index.js', 'utf8'), /src\/ui-detail-sections\.js/, 'legacy loader must not fetch unused duplicate detail sections');
 assert.doesNotMatch(ui, /function Legacy[A-Z]/, 'dead legacy screen implementations must stay out of the main UI bundle');

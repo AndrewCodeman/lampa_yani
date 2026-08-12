@@ -2,6 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 
 const source = fs.readFileSync('src/ui.js', 'utf8');
+const menu = fs.readFileSync('src/ui-playback-menu.js', 'utf8');
 
 const watchStart = source.indexOf('function watchPlayback');
 const watchEnd = source.indexOf('function nextEpisodeVideo', watchStart);
@@ -26,7 +27,7 @@ assert.ok(prefetchPolicy.includes('LampaYaniStreamResolver.canResolve(url)'), 'o
 // The dialog asking where to play belongs to a deliberate launch. An automatic
 // episode change must continue in the player that is already running.
 assert.ok(
-    source.includes("var target = options && options.autoAdvance ? 'internal' : playbackTargetPreference();"),
+    menu.includes("var target = options && options.autoAdvance ? 'internal' : playbackTargetPreference();"),
     'auto-advance must bypass the playback target dialog'
 );
 assert.ok(

@@ -3,7 +3,7 @@ const fs = require('fs');
 
 const source = fs.readFileSync('src/ui.js', 'utf8');
 const start = source.indexOf('function playInternalDirectVideo');
-const end = source.indexOf('function showDirectPlaybackOptions', start);
+const end = source.indexOf('function playbackTargetPreference', start);
 const internalPlayback = source.slice(start, end);
 
 assert.ok(start >= 0 && end > start, 'internal playback implementation must exist');
