@@ -181,6 +181,14 @@
         genres: function () {
             return request('/anime/genres');
         },
+        genre: function (id, control) {
+            control = control || {};
+            return request('/anime/genres/' + encodeURIComponent(id), {
+                cacheTtl: 24 * 60 * 60 * 1000,
+                staleFallback: true,
+                signal: control.signal
+            });
+        },
         schedule: function (control) {
             control = control || {};
             return request('/anime/schedule', {

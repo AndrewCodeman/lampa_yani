@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.41.9',
+        version: '0.41.10',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -1272,6 +1272,14 @@ function pluginYummyAnime() {
         },
         genres: function () {
             return request('/anime/genres');
+        },
+        genre: function (id, control) {
+            control = control || {};
+            return request('/anime/genres/' + encodeURIComponent(id), {
+                cacheTtl: 24 * 60 * 60 * 1000,
+                staleFallback: true,
+                signal: control.signal
+            });
         },
         schedule: function (control) {
             control = control || {};
@@ -7097,6 +7105,7 @@ function pluginYummyAnime() {
         var seen = {};
         var requestedOffsets = {};
         var genreHeader;
+        var genreDescriptionRequested = false;
 
         object.page = 1;
         baseParams.limit = limit;
@@ -7124,6 +7133,22 @@ function pluginYummyAnime() {
             genreHeader.append(copy);
             view.addClass('yani-genre-catalog-view').prepend(genreHeader);
             if (comp.scroll && comp.scroll.minus) comp.scroll.minus(genreHeader);
+            loadGenreDescription(context);
+        }
+
+        function loadGenreDescription(context) {
+            if (genreDescriptionRequested) return;
+            var genreId = context && (context.id !== undefined ? context.id : context.value);
+            if (!/^\d+$/.test(String(genreId || ''))) return;
+            genreDescriptionRequested = true;
+            LampaYaniApi.genre(genreId).then(function (payload) {
+                var detailed = payload && payload.response ? payload.response : payload;
+                var description = genreDescription(detailed);
+                if (!description || !genreHeader || !genreHeader.length || !genreHeader.closest('body').length) return;
+                genreHeader.find('.yani-genre-catalog-header__description').text(description);
+            }).catch(function () {
+                // The localized bundled description remains visible offline.
+            });
         }
 
         function annotateGenreTop(items, offset) {
@@ -11448,7 +11473,13 @@ function pluginYummyAnime() {
             var language = String(locale() || 'ru').slice(0, 2);
             value = value[language] || value.ru || value.en || value.uk || value.text || '';
         }
-        value = String(value || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        value = String(value || '').replace(/<[^>]+>/g, ' ');
+        if (value && typeof document !== 'undefined') {
+            var decoder = document.createElement('textarea');
+            decoder.innerHTML = value;
+            value = decoder.value;
+        }
+        value = value.replace(/\s+/g, ' ').trim();
         if (!value && window.LampaYaniGenreDescriptions) value = LampaYaniGenreDescriptions.resolve(genre, locale());
         return value;
     }

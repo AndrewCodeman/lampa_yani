@@ -202,6 +202,7 @@
         var seen = {};
         var requestedOffsets = {};
         var genreHeader;
+        var genreDescriptionRequested = false;
 
         object.page = 1;
         baseParams.limit = limit;
@@ -229,6 +230,22 @@
             genreHeader.append(copy);
             view.addClass('yani-genre-catalog-view').prepend(genreHeader);
             if (comp.scroll && comp.scroll.minus) comp.scroll.minus(genreHeader);
+            loadGenreDescription(context);
+        }
+
+        function loadGenreDescription(context) {
+            if (genreDescriptionRequested) return;
+            var genreId = context && (context.id !== undefined ? context.id : context.value);
+            if (!/^\d+$/.test(String(genreId || ''))) return;
+            genreDescriptionRequested = true;
+            LampaYaniApi.genre(genreId).then(function (payload) {
+                var detailed = payload && payload.response ? payload.response : payload;
+                var description = genreDescription(detailed);
+                if (!description || !genreHeader || !genreHeader.length || !genreHeader.closest('body').length) return;
+                genreHeader.find('.yani-genre-catalog-header__description').text(description);
+            }).catch(function () {
+                // The localized bundled description remains visible offline.
+            });
         }
 
         function annotateGenreTop(items, offset) {
@@ -4553,7 +4570,13 @@
             var language = String(locale() || 'ru').slice(0, 2);
             value = value[language] || value.ru || value.en || value.uk || value.text || '';
         }
-        value = String(value || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        value = String(value || '').replace(/<[^>]+>/g, ' ');
+        if (value && typeof document !== 'undefined') {
+            var decoder = document.createElement('textarea');
+            decoder.innerHTML = value;
+            value = decoder.value;
+        }
+        value = value.replace(/\s+/g, ' ').trim();
         if (!value && window.LampaYaniGenreDescriptions) value = LampaYaniGenreDescriptions.resolve(genre, locale());
         return value;
     }

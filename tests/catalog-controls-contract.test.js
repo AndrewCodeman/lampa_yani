@@ -11,7 +11,7 @@ const genreDescriptions = fs.readFileSync('src/genre-descriptions.js', 'utf8');
 const build = fs.readFileSync('build.js', 'utf8');
 
 assert.match(ui, /Lampa\.Component\.add\('yani_catalog', Catalog\)/);
-assert.match(uiSource, /function Catalog\(object\)[\s\S]{0,3000}LampaYaniCatalogControls\.create/);
+assert.match(uiSource, /function Catalog\(object\)[\s\S]{0,5000}LampaYaniCatalogControls\.create/);
 assert.match(uiSource, /function installGenreHeader\(\)/);
 assert.match(uiSource, /genre_context: context/);
 assert.match(uiSource, /function genreDescription\(genre\)/);

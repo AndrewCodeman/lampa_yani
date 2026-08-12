@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.10 — 2026-08-12
+
+- Load the full localized genre description from the YummyAnime genre endpoint and keep the bundled description as an offline fallback.
+- Cache genre details for 24 hours and decode API HTML entities before displaying plain text in the TV catalog header.
+
 ## 0.41.9 — 2026-08-12
 
 - Added a compact trophy badge with the actual top-100 position to cards in a genre catalog.
