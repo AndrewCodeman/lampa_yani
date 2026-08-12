@@ -2,7 +2,7 @@
 
 Extension for Lampa powered by the YummyAnime (Yani) API.
 
-Current version: `0.41.42`
+Current version: `0.41.43`
 
 See the [changelog](CHANGELOG.md) for release history.
 
@@ -21,4 +21,4 @@ The plugin follows Lampa's standard global plugin initialization pattern.
 
 Тестовая / Test (последняя сборка `main`):
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.42`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.43`

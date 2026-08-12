@@ -9,8 +9,12 @@ const build = fs.readFileSync('build.js', 'utf8');
 assert.match(build, /src\/ui-menu\.js/);
 assert.match(ui, /LampaYaniMenu\.create/);
 assert.match(ui, /sidebar\.start\(Lampa\.Listener\)/);
+assert.match(ui, /Sidebar registration failed/);
+assert.match(ui, /Lampa\.Component\.add\('yani_home', Home\)[\s\S]*sidebar\.start/);
 assert.match(source, /listener\.follow\('menu'/);
 assert.match(source, /data-action="' \+ action \+ '"/);
+assert.match(source, /list\.append\(item\)/);
+assert.match(source, /Sidebar item failed/);
 assert.doesNotMatch(ui, /if \(!Lampa\.Menu \|\| !Lampa\.Menu\.addButton\) return/);
 assert.doesNotMatch(ui, /Lampa\.Menu\.addButton\(yummyIcon/);
 
@@ -62,9 +66,10 @@ function fakeList(labels) {
         };
     }
     return {nodes: nodes, length: 1, children: children, append: function (item) {
-        const index = nodes.indexOf(item);
+        var node = item && item[0] ? item[0] : item;
+        const index = nodes.indexOf(node);
         if (index >= 0) nodes.splice(index, 1);
-        nodes.push(item);
+        nodes.push(node);
     }};
 }
 
@@ -84,10 +89,11 @@ function fake$(list) {
             on: function () { return jq; },
             parent: function () { return list; },
             find: function () {
+                var label = items[0] ? items[0].label : '';
                 return {
-                    first: function () {
-                        return {text: function () { return items[0] ? items[0].label : ''; }};
-                    }
+                    eq: function () { return {text: function () { return label; }}; },
+                    first: function () { return {text: function () { return label; }}; },
+                    text: function () { return label; }
                 };
             },
             each: function (fn) { items.forEach(function (item, index) { fn.call(item, index); }); return jq; },
@@ -138,11 +144,9 @@ const storage = {
     get: function (key) { return key === 'menu_hide' ? storage.hide : storage.sort; },
     set: function (key, value) { if (key === 'menu_sort') storage.sort = value; }
 };
-const appended = [];
 const sidebar = Menu.create({
     $: fake$(list),
     Storage: storage,
-    Menu: {addElement: function (item) { appended.push(item); list.nodes.push(item[0] || item); }},
     restoreDelay: 0,
     maxAttempts: 0,
     setTimeout: function () { return 0; },
@@ -151,14 +155,38 @@ const sidebar = Menu.create({
 });
 
 assert.strictEqual(sidebar.add(), true);
-assert.strictEqual(appended.length, 1);
 assert.deepStrictEqual(list.nodes.map(function (node) { return node.label; }), ['Главная', 'Расписание', 'YummyAnime', 'Shots', 'IPTV']);
 assert.strictEqual(list.nodes[2].hidden, false);
 assert.strictEqual(sidebar.add(), true, 'a second add must not create another sidebar item');
-assert.strictEqual(appended.length, 1);
+assert.strictEqual(list.nodes.filter(function (node) { return node.label === 'YummyAnime'; }).length, 1);
 
 storage.hide = ['YummyAnime'];
 sidebar.restore();
 assert.strictEqual(list.nodes[2].hidden, true);
+
+const empty = fakeList([]);
+empty.length = 0;
+const waiting = Menu.create({
+    $: fake$(empty),
+    Storage: storage,
+    restoreDelay: 0,
+    maxAttempts: 0,
+    setTimeout: function () { return 0; },
+    clearTimeout: function () {},
+    listRoot: function () { return empty; }
+});
+assert.strictEqual(waiting.add(), false, 'must wait until the Lampa menu list exists');
+assert.strictEqual(empty.nodes.length, 0);
+
+const broken = Menu.create({
+    $: function () { throw new Error('html is undefined'); },
+    Storage: storage,
+    restoreDelay: 0,
+    maxAttempts: 0,
+    setTimeout: function () { return 0; },
+    clearTimeout: function () {},
+    listRoot: function () { return list; }
+});
+assert.strictEqual(broken.add(), false, 'menu DOM errors must not throw out of add()');
 
 console.log('sidebar menu contract tests passed');

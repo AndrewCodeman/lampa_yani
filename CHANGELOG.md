@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.43 — 2026-08-13
+
+- Stop a sidebar menu error from aborting plugin registration, so settings and YummyAnime screens still load.
+
 ## 0.41.42 — 2026-08-13
 
 - Keep the YummyAnime sidebar item visible and in its saved place on devices where Lampa's menu editor drops plugin buttons.

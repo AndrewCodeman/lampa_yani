@@ -258,15 +258,7 @@
             }
 
             var settingsReady = false;
-            var sidebar = window.LampaYaniMenu.create({
-                onEnter: function () {
-                    Lampa.Activity.push({
-                        url: 'yani',
-                        title: window.LampaYaniMenu.TITLE,
-                        component: 'yani_home'
-                    });
-                }
-            });
+            var sidebar = null;
 
             function addInterface() {
                 if (settingsReady) return;
@@ -282,14 +274,6 @@
                 if (account.token && LampaYaniAuth.refreshIfNeeded) {
                     LampaYaniAuth.refreshIfNeeded();
                 }
-            }
-
-            sidebar.start(Lampa.Listener);
-            if (window.appready) addInterface();
-            else if (Lampa.Listener && Lampa.Listener.follow) {
-                Lampa.Listener.follow('app', function (event) {
-                    if (event.type === 'ready') addInterface();
-                });
             }
 
             Lampa.Component.add('yani_home', Home);
@@ -321,6 +305,30 @@
 
             installUndefinedTmdbGuard();
             installFullRating();
+
+            if (window.appready) addInterface();
+            else if (Lampa.Listener && Lampa.Listener.follow) {
+                Lampa.Listener.follow('app', function (event) {
+                    if (event.type === 'ready') addInterface();
+                });
+            }
+
+            try {
+                if (window.LampaYaniMenu && typeof LampaYaniMenu.create === 'function') {
+                    sidebar = LampaYaniMenu.create({
+                        onEnter: function () {
+                            Lampa.Activity.push({
+                                url: 'yani',
+                                title: window.LampaYaniMenu.TITLE,
+                                component: 'yani_home'
+                            });
+                        }
+                    });
+                    sidebar.start(Lampa.Listener);
+                }
+            } catch (menuError) {
+                console.error('[YummyAnime] Sidebar registration failed', menuError);
+            }
 
             console.log('[YummyAnime] Extension registered');
         }

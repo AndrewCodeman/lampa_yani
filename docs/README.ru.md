@@ -53,7 +53,7 @@
 
 Тестовая — последняя сборка ветки `main`, в том числе ещё не выпущенные изменения.
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.42`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.43`
 
 Проверенные версии помечаются тегом `vX.Y.Z`. Выпуск и откат:
 

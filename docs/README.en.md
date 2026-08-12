@@ -53,7 +53,7 @@ Production — a verified release. The URL stays the same; a serious bug is roll
 
 Test — the latest `main` build, including changes that are not a production release yet.
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.42`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.43`
 
 Verified versions are tagged `vX.Y.Z`. Release and rollback:
 
