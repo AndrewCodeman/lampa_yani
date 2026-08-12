@@ -23,12 +23,16 @@ assert.deepStrictEqual(items.map((item) => item.anime_id), [1, 2, 3], 'sorting m
 assert.match(source, /function isFirstCardRow\(current\)/);
 assert.match(source, /var current = focusedCard\(\) \|\| lastCard/);
 assert.match(source, /if \(current && isFirstCardRow\(current\)\) return focusPanel\(\)/);
-assert.match(source, /buttons\.filter\('\[data-sort="' \+ active \+ '"\]'\)\[0\]/);
+assert.match(source, /function focusActiveOption\(\)[\s\S]{0,250}buttons\.filter\('\[data-sort="' \+ active \+ '"\]'\)\[0\]/);
+assert.match(source, /function setExpanded\(value, focus\)/);
 assert.match(source, /if \(panelFocused\) return focusCards\(\)/);
 assert.match(source, /yani-account-list-sort-rail/);
 assert.match(source, /yani-account-list-sort-option selector/);
+assert.match(source, /yani-account-list-sort-trigger selector/);
+assert.match(source, /aria-expanded/);
 assert.match(source, /if \(panelFocused\) \{[\s\S]{0,120}Navigator\.canmove\('left'\)/);
 assert.match(source, /if \(panelFocused\) \{[\s\S]{0,120}Navigator\.canmove\('right'\)/);
+assert.match(source, /controller\.back = function \(\)[\s\S]{0,120}expanded[\s\S]{0,80}setExpanded\(false, 'trigger'\)/);
 assert.match(source, /function listIcon\(key\)/);
 assert.match(source, /yani-account-list-sort-panel--/);
 assert.match(source, /yani-account-list-sort-option__icon/);

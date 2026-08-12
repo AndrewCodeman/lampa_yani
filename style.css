@@ -2171,12 +2171,7 @@
 .yani-user-list-card--more .yani-user-list-card__badge { display: none; }
 .yani-user-list-card.focus .card__view { box-shadow: 0 0 0 .17em #fff, 0 0 0 .34em var(--yani-list-accent), 0 .8em 1.7em rgba(0, 0, 0, .3); }
 
-.yani-account-list-sort-panel {
-    display: flex;
-    align-items: center;
-    margin: .2em 1em .85em;
-    --yani-list-accent: #ff6878;
-}
+.yani-account-list-sort-panel { margin: .15em 1em .9em; --yani-list-accent: #ff6878; }
 .yani-account-list-sort-panel--watching { --yani-list-accent: #ff6878; }
 .yani-account-list-sort-panel--planned { --yani-list-accent: #59bfea; }
 .yani-account-list-sort-panel--completed { --yani-list-accent: #62d39a; }
@@ -2184,25 +2179,35 @@
 .yani-account-list-sort-panel--favorites { --yani-list-accent: #f174ae; }
 .yani-account-list-sort-panel--postponed { --yani-list-accent: #efbd68; }
 
-/* Sorting stays inside the list navigation tree, so a TV remote never changes controller. */
-.yani-account-list-sort-panel {
-    display: block;
-    margin: .15em 1em .9em;
-    padding: .72em;
+.yani-account-list-sort-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 3.25em;
+    padding: .48em .72em;
     overflow: hidden;
     border: .08em solid rgba(255, 255, 255, .12);
-    border-radius: 1.15em;
-    background: radial-gradient(circle at 92% 0, rgba(255, 104, 120, .2), transparent 34%), linear-gradient(135deg, rgba(34, 35, 48, .94), rgba(24, 22, 32, .88));
+    border-radius: 1em;
+    background: radial-gradient(circle at 94% 0, rgba(255, 104, 120, .18), transparent 35%), linear-gradient(125deg, rgba(34, 35, 48, .94), rgba(24, 22, 32, .9));
     box-shadow: 0 .8em 2.2em rgba(0, 0, 0, .22), inset 0 .06em 0 rgba(255, 255, 255, .08);
     backdrop-filter: blur(.8em);
+    transition: background .16s ease, border-color .16s ease, transform .16s ease;
 }
-.yani-account-list-sort-panel__heading { display: flex; align-items: center; min-height: 2.1em; padding: 0 .25em .55em; }
 .yani-account-list-sort-panel__list-icon { display: flex; align-items: center; justify-content: center; width: 1.9em; height: 1.9em; margin-right: .55em; border-radius: .58em; color: #fff; background: var(--yani-list-accent); box-shadow: 0 .25em .7em rgba(0, 0, 0, .2); }
 .yani-account-list-sort-panel__list-icon svg { width: 1.05em; height: 1.05em; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.yani-account-list-sort-panel__title { font-size: .92em; font-weight: 700; }
-.yani-account-list-sort-panel__count { margin-left: .55em; padding: .18em .48em; border-radius: 99em; color: #fff; background: var(--yani-list-accent); font-size: .72em; font-weight: 700; }
-.yani-account-list-sort-panel__hint { margin-left: auto; color: rgba(255, 255, 255, .45); font-size: .72em; font-weight: 600; }
-.yani-account-list-sort-rail { display: grid; grid-template-columns: repeat(5, minmax(7.2em, 1fr)); gap: .42em; overflow-x: auto; padding: .12em; scrollbar-width: none; }
+.yani-account-list-sort-trigger__copy { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.yani-account-list-sort-panel__title { overflow: hidden; font-size: .92em; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.yani-account-list-sort-trigger__meta { margin-top: .12em; color: rgba(255, 255, 255, .5); font-size: .68em; }
+.yani-account-list-sort-trigger__label { margin-left: 1em; color: rgba(255, 255, 255, .65); font-size: .75em; font-weight: 650; }
+.yani-account-list-sort-trigger__chevron { display: flex; align-items: center; justify-content: center; width: 1.8em; height: 1.8em; margin-left: .55em; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, .1); transition: transform .18s ease; }
+.yani-account-list-sort-trigger.focus { color: #17151c; border-color: #fff; background: #fff; box-shadow: 0 0 0 .15em rgba(255, 255, 255, .2), 0 .65em 1.5em rgba(0, 0, 0, .24); transform: translateY(-.08em); }
+.yani-account-list-sort-trigger.focus .yani-account-list-sort-trigger__meta,
+.yani-account-list-sort-trigger.focus .yani-account-list-sort-trigger__label { color: rgba(23, 21, 28, .58); }
+.yani-account-list-sort-trigger.focus .yani-account-list-sort-trigger__chevron { color: #fff; background: var(--yani-list-accent); }
+.yani-account-list-sort-panel.is-expanded .yani-account-list-sort-trigger__chevron { transform: rotate(180deg); }
+
+.yani-account-list-sort-rail { display: grid; grid-template-columns: repeat(5, minmax(7.2em, 1fr)); gap: .42em; max-height: 0; margin-top: 0; padding: 0 .12em; overflow: hidden; opacity: 0; scrollbar-width: none; transform: translateY(-.4em); transition: max-height .2s ease, margin .2s ease, padding .2s ease, opacity .16s ease, transform .2s ease; }
+.yani-account-list-sort-panel.is-expanded .yani-account-list-sort-rail { max-height: 5.2em; margin-top: .42em; padding: .12em; overflow-x: auto; opacity: 1; transform: none; }
 .yani-account-list-sort-rail::-webkit-scrollbar { display: none; }
 .yani-account-list-sort-option { position: relative; display: grid; grid-template-columns: 2.25em 1fr; grid-template-rows: 1fr auto; min-height: 3.65em; padding: .48em .56em; overflow: hidden; border: .08em solid rgba(255, 255, 255, .09); border-radius: .82em; background: rgba(255, 255, 255, .055); transition: transform .15s ease, background .15s ease, box-shadow .15s ease; }
 .yani-account-list-sort-option__index { position: absolute; right: .55em; top: .42em; color: rgba(255, 255, 255, .24); font-size: .6em; font-weight: 800; letter-spacing: .08em; }
@@ -2234,8 +2239,8 @@
 .yani-genre-catalog-header__description { max-width: 58em; margin: .28em 0 0; overflow: hidden; color: rgba(255, 255, 255, .62); font-size: .76em; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 700px) {
-    .yani-account-list-sort-panel { margin: .1em .6em .65em; padding: .55em; }
-    .yani-account-list-sort-panel__hint { display: none; }
+    .yani-account-list-sort-panel { margin: .1em .6em .65em; }
+    .yani-account-list-sort-trigger__label { display: none; }
     .yani-account-list-sort-rail { grid-template-columns: repeat(5, minmax(8.4em, 1fr)); }
     .yani-genre-catalog-header { margin: .1em .6em .65em; }
     .yani-genre-catalog-header__description { white-space: normal; }

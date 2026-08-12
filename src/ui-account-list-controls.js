@@ -113,9 +113,12 @@
             {key: 'title', title: options.t('list_sort_title')}
         ];
         var panel;
+        var trigger;
+        var rail;
         var buttons;
         var lastCard = null;
         var panelFocused = false;
+        var expanded = false;
         var installed = false;
 
         function root() { return comp.render && comp.render(); }
@@ -137,12 +140,12 @@
         }
 
         function syncNavigation() {
-            if (!installed || !buttons || !buttons.length) return;
+            if (!installed || !panel || !panel.length) return;
             var enabled = Lampa.Controller && Lampa.Controller.enabled ? Lampa.Controller.enabled() : null;
             var controller = enabled && enabled.controller;
             var owns = enabled && enabled.name === 'content' && controller && (controller.yaniAccountListOwner === comp || controller.link === comp);
             if (!owns) return;
-            buttons.each(function () {
+            panel.find('.selector').each(function () {
                 if (this.offsetParent !== null) Navigator.add(this);
             });
         }
@@ -152,12 +155,30 @@
             if (focused) lastCard = focused;
             panelFocused = true;
             syncNavigation();
+            Lampa.Controller.collectionFocus(trigger && trigger[0] || false, root(), true);
+        }
+
+        function focusActiveOption() {
             var target = buttons.filter('[data-sort="' + active + '"]')[0] || buttons[0];
-            Lampa.Controller.collectionFocus(target, root(), true);
+            panelFocused = true;
+            syncNavigation();
+            Lampa.Controller.collectionFocus(target || false, root(), true);
+        }
+
+        function setExpanded(value, focus) {
+            expanded = Boolean(value);
+            panel.toggleClass('is-expanded', expanded);
+            trigger.attr('aria-expanded', expanded ? 'true' : 'false');
+            setTimeout(function () {
+                syncNavigation();
+                if (focus === 'option') focusActiveOption();
+                else if (focus === 'trigger') Lampa.Controller.collectionFocus(trigger[0], root(), true);
+            }, 0);
         }
 
         function focusCards() {
             var target = lastCard && document.documentElement.contains(lastCard) ? lastCard : firstCard();
+            if (expanded) setExpanded(false);
             panelFocused = false;
             if (target) Navigator.add(target);
             Lampa.Controller.collectionFocus(target || false, root(), true);
@@ -178,7 +199,7 @@
         function choose(item) {
             var key = item && item.key;
             if (valid.indexOf(key) < 0) return;
-            if (key === active) return;
+            if (key === active) return setExpanded(false, 'trigger');
             if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(storageKey, key);
             options.onSelect(key);
         }
@@ -191,12 +212,17 @@
             view.addClass('yani-account-list-view');
             var definitionKey = String(definition.key || 'watching');
             panel = $('<div class="yani-account-list-sort-panel yani-account-list-sort-panel--' + definitionKey + '"></div>');
-            var heading = $('<div class="yani-account-list-sort-panel__heading"></div>');
-            heading.append($('<span class="yani-account-list-sort-panel__list-icon"></span>').html(listIcon(definitionKey)));
-            heading.append($('<span class="yani-account-list-sort-panel__title"></span>').text(definition.title || object.title || ''));
-            heading.append($('<span class="yani-account-list-sort-panel__count"></span>').text(String(total || 0)));
-            heading.append($('<span class="yani-account-list-sort-panel__hint"></span>').text('‹  ' + options.t('list_sort') + '  ›'));
-            var rail = $('<div class="yani-account-list-sort-rail"></div>');
+            trigger = $('<div class="yani-account-list-sort-trigger selector" aria-expanded="false"></div>');
+            trigger.append($('<span class="yani-account-list-sort-panel__list-icon"></span>').html(listIcon(definitionKey)));
+            var copy = $('<span class="yani-account-list-sort-trigger__copy"></span>');
+            copy.append($('<span class="yani-account-list-sort-panel__title"></span>').text(definition.title || object.title || ''));
+            copy.append($('<span class="yani-account-list-sort-trigger__meta"></span>').text(String(total || 0) + ' · ' + definitions.filter(function (item) { return item.key === active; })[0].title));
+            trigger.append(copy);
+            trigger.append($('<span class="yani-account-list-sort-trigger__label"></span>').text(options.t('list_sort')));
+            trigger.append('<span class="yani-account-list-sort-trigger__chevron">⌄</span>');
+            trigger.on('hover:focus', function () { panelFocused = true; });
+            trigger.on('hover:enter click.yaniAccountListSortToggle', function () { setExpanded(!expanded, expanded ? 'trigger' : 'option'); });
+            rail = $('<div class="yani-account-list-sort-rail"></div>');
             definitions.forEach(function (sortDefinition, index) {
                 var option = $('<div class="yani-account-list-sort-option selector"></div>');
                 option.attr('data-sort', sortDefinition.key).toggleClass('active', sortDefinition.key === active);
@@ -211,7 +237,7 @@
                 option.on('hover:enter click.yaniAccountListSort', function () { choose(sortDefinition); });
                 rail.append(option);
             });
-            panel.append(heading, rail);
+            panel.append(trigger, rail);
             buttons = rail.find('.selector');
             view.prepend(panel);
             if (comp.scroll && comp.scroll.minus) comp.scroll.minus(panel);
@@ -228,23 +254,27 @@
             var originalRight = controller.right;
             var originalUp = controller.up;
             var originalDown = controller.down;
+            var originalBack = controller.back;
             controller.yaniAccountListOwner = comp;
             controller.left = function () {
                 if (panelFocused) {
-                    if (Navigator.canmove('left')) Navigator.move('left');
+                    if (expanded && Navigator.canmove('left')) Navigator.move('left');
                     return;
                 }
                 if (originalLeft) originalLeft();
             };
             controller.right = function () {
                 if (panelFocused) {
-                    if (Navigator.canmove('right')) Navigator.move('right');
+                    if (expanded && Navigator.canmove('right')) Navigator.move('right');
                     return;
                 }
                 if (originalRight) originalRight();
             };
             controller.up = function () {
-                if (panelFocused) return Lampa.Controller.toggle('head');
+                if (panelFocused) {
+                    if (expanded) return setExpanded(false, 'trigger');
+                    return Lampa.Controller.toggle('head');
+                }
                 var current = focusedCard() || lastCard;
                 if (current && isFirstCardRow(current)) return focusPanel();
                 if (originalUp) originalUp();
@@ -252,6 +282,10 @@
             controller.down = function () {
                 if (panelFocused) return focusCards();
                 if (originalDown) originalDown();
+            };
+            controller.back = function () {
+                if (expanded) return setExpanded(false, 'trigger');
+                if (originalBack) originalBack();
             };
         }
 

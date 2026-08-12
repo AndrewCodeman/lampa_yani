@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.40.5 — 2026-08-12
+
+- Replaced the permanently expanded account-list sorting row with a compact TV-friendly sorting capsule.
+- Added inline expand, collapse and Back handling while preserving the last focused title.
+- Kept list identity, item count and the active sorting mode visible without taking space from the poster grid.
+
 ## 0.40.4 — 2026-08-12
 
 - Replaced the floating catalog toolbar with an integrated horizontal command deck designed for TV remotes.
