@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.42 — 2026-08-13
+
+- Keep the YummyAnime sidebar item visible and in its saved place on devices where Lampa's menu editor drops plugin buttons.
+
 ## 0.41.41 — 2026-08-13
 
 - Keep a production install URL separate from the experimental dist URL, tag verified releases, and roll production back by promoting an earlier git tag.
