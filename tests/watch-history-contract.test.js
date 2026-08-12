@@ -5,6 +5,7 @@ const vm = require('vm');
 const api = fs.readFileSync('src/api.js', 'utf8');
 const ui = fs.readFileSync('src/ui.js', 'utf8');
 const historySource = fs.readFileSync('src/ui-playback-history.js', 'utf8');
+const menuSource = fs.readFileSync('src/ui-playback-menu.js', 'utf8');
 const sectionsSource = fs.readFileSync('src/ui-home-sections.js', 'utf8');
 const context = {window: {}};
 
@@ -15,8 +16,8 @@ assert.match(api, /watchHistory: function \(limit, offset, control\)/);
 assert.match(api, /\/video\/watch-history\?limit=/);
 assert.match(api, /auth: true,[\s\S]{0,40}cache: false/);
 assert.match(ui, /fetchRemote: LampaYaniApi\.watchHistory/);
-assert.match(ui, /var playback = card\.yani_resume \|\| getPlayback\(card\.yani_id\)/);
-assert.match(ui, /String\(video\.video_id \|\| video\.id \|\| ''\) === String\(playback\.video_id\)/);
+assert.match(menuSource, /var playback = card\.yani_resume \|\| getPlayback\(card\.yani_id\)/);
+assert.match(menuSource, /String\(video\.video_id \|\| video\.id \|\| ''\) === String\(playback\.video_id\)/);
 assert.match(historySource, /hover:enter\.yaniHistory click\.yaniHistory/);
 assert.match(historySource, /function renderHistoryProgress|renderHistoryProgress\(rendered, playback\)/);
 assert.match(ui, /function openContinueWatching\(\)/);

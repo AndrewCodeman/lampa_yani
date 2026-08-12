@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.22 — 2026-08-12
+
+- Extracted playback select menus, return-focus helpers, and video URL/player-key utils into `src/ui-playback-menu.js`.
+- Left stream launch, Alloha policy, and player watchers in `ui.js` for the next standard-card extraction.
+
 ## 0.41.21 — 2026-08-12
 
 - Extracted local playback history storage and Continue Watching progress UI into `src/ui-playback-history.js`.

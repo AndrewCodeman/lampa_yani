@@ -2,17 +2,19 @@ const assert = require('assert');
 const fs = require('fs');
 
 const ui = fs.readFileSync('src/ui.js', 'utf8');
+const menu = fs.readFileSync('src/ui-playback-menu.js', 'utf8');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');
+const sources = ui + '\n' + menu;
 
 assert.match(ui, /beginPlaybackNavigation\(button, scroll\.render\(\)\);[\s\S]{0,100}openTitlePlaybackOptions\(data\)/);
-assert.match(ui, /function showPlaybackSelect\(params\)[\s\S]{0,500}params\.onBack = function \(\)[\s\S]{0,200}restorePlaybackInteraction\(\)/);
-assert.match(ui, /function chooseEpisode[\s\S]{0,1200}showPlaybackSelect\(\{/);
-assert.match(ui, /function openVideos[\s\S]{0,5200}showPlaybackSelect\(\{/);
-assert.match(ui, /function showDirectPlaybackOptions[\s\S]{0,1000}showPlaybackSelect\(\{/);
-assert.match(ui, /function openTitlePlaybackOptions[\s\S]{0,900}showPlaybackSelect\(\{/);
-const actionsStart = ui.indexOf('function showYummyActions(card, originElement, originCollection)');
-const actionsEnd = ui.indexOf('\n    function listActionTitle', actionsStart);
-const actionsSource = ui.slice(actionsStart, actionsEnd);
+assert.match(menu, /function showPlaybackSelect\(params\)[\s\S]{0,500}params\.onBack = function \(\)[\s\S]{0,200}restorePlaybackInteraction\(\)/);
+assert.match(menu, /function chooseEpisode[\s\S]{0,1200}showPlaybackSelect\(\{/);
+assert.match(menu, /function openVideos[\s\S]{0,5200}showPlaybackSelect\(\{/);
+assert.match(menu, /function showDirectPlaybackOptions[\s\S]{0,1000}showPlaybackSelect\(\{/);
+assert.match(menu, /function openTitlePlaybackOptions[\s\S]{0,900}showPlaybackSelect\(\{/);
+const actionsStart = menu.indexOf('function showYummyActions(card, originElement, originCollection)');
+const actionsEnd = menu.indexOf('\n        function openVideos', actionsStart);
+const actionsSource = menu.slice(actionsStart, actionsEnd);
 assert.ok(actionsStart >= 0 && actionsEnd > actionsStart, 'showYummyActions must exist');
 assert.match(actionsSource, /beginPlaybackNavigation\(originElement, originCollection\);[\s\S]{0,100}openVideos\(card\)/);
 
@@ -25,6 +27,7 @@ assert.match(ui, /externalRestoreState\.departed/);
 assert.match(ui, /setTimeout\(restoreExternalFocus, 1500\)/);
 assert.match(ui, /if \(!externalRestoreState\.departed && elapsed < 1200\)[\s\S]{0,150}setTimeout\(restoreExternalFocus, 1200 - elapsed\)/);
 assert.match(ui, /Lampa\.Player\.callback\(function \(\) \{[\s\S]{0,120}flushPlaybackProgress\(true\);[\s\S]{0,80}restorePlaybackInteraction\(\)/);
+assert.match(sources, /var beginPlaybackNavigation = playbackMenu\.beginPlaybackNavigation|function beginPlaybackNavigation/);
 
 const settingsStart = ui.indexOf("param: {name: 'yani_home_sections_title'");
 const licenseIndex = ui.indexOf("param: {name: 'yani_license_notice', type: 'title'}");

@@ -3,7 +3,8 @@ const fs = require('fs');
 
 const ui = fs.readFileSync('src/ui.js', 'utf8');
 const trailers = fs.readFileSync('src/ui-trailers.js', 'utf8');
-const sources = ui + '\n' + trailers;
+const menu = fs.readFileSync('src/ui-playback-menu.js', 'utf8');
+const sources = ui + '\n' + trailers + '\n' + menu;
 
 assert.match(ui, /function transientNavigationSnapshot\(\)[\s\S]{0,500}LampaYaniNavigation\.captureSnapshot\(\)[\s\S]{0,200}currentControllerName\(\) \|\| 'content'/);
 assert.match(ui, /function restoreTransientInteraction\(snapshot\)[\s\S]{0,500}LampaYaniNavigation\.restoreSnapshot\(snapshot\)/);

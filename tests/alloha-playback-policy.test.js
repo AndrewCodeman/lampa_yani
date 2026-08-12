@@ -2,6 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 
 const source = fs.readFileSync('src/ui.js', 'utf8');
+const menu = fs.readFileSync('src/ui-playback-menu.js', 'utf8');
 const launchStart = source.indexOf('function launchVideo');
 const launchEnd = source.indexOf('function launchResolvedVideo', launchStart);
 const launchPolicy = source.slice(launchStart, launchEnd);
@@ -38,12 +39,12 @@ const voicePolicy = source.slice(voiceStart, voiceEnd);
 assert.ok(voicePolicy.includes('function videoPlaybackPriority'), 'playback choices must have a capability priority');
 assert.ok(voicePolicy.includes('LampaYaniStreamResolver.canResolve(url)'), 'Kodik and other resolvable sources must receive playable priority');
 assert.ok(voicePolicy.includes('allohaDirectResolverEnabled() ? 3 : 0'), 'unresolved Alloha must sort below playable sources');
-assert.ok(voicePolicy.includes('if (!allohaIframeEnabled())'), 'capability-first sorting must apply when the Alloha embed is disabled');
-assert.ok(voicePolicy.includes('groupPlaybackPriority(a.group)'), 'voice choices must be sorted by playable source capability');
+assert.ok(menu.includes('if (!allohaIframeEnabled())'), 'capability-first sorting must apply when the Alloha embed is disabled');
+assert.ok(menu.includes('groupPlaybackPriority(a.group)'), 'voice choices must be sorted by playable source capability');
 
-const episodeStart = source.indexOf('function chooseEpisode');
-const episodeEnd = source.indexOf('function enrichEpisodeTitles', episodeStart);
-const episodePolicy = source.slice(episodeStart, episodeEnd);
+const episodeStart = menu.indexOf('function chooseEpisode');
+const episodeEnd = menu.indexOf('function showDirectPlaybackOptions', episodeStart);
+const episodePolicy = menu.slice(episodeStart, episodeEnd);
 assert.ok(episodePolicy.includes('videoPlaybackPriority(a, group)'), 'episode choices must prioritize playable sources');
 assert.ok(episodePolicy.indexOf('playableB - playableA') < episodePolicy.indexOf('numberA - numberB'), 'episode capability must sort before episode number');
 

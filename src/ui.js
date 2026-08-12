@@ -51,6 +51,50 @@
     var bindYummyCardRender = cardBind.bindYummyCardRender;
     var bindRecommendedCardRender = cardBind.bindRecommendedCardRender;
 
+    var playbackMenu = LampaYaniPlaybackMenu.create({
+        t: t,
+        showYummySelect: function (params, snapshot) { return showYummySelect(params, snapshot); },
+        currentControllerName: function () { return currentControllerName(); },
+        listActionTitle: function (card, key) { return listActionTitle(card, key); },
+        openYummyDetail: function (card, notifyFallback) { return openYummyDetail(card, notifyFallback); },
+        commentsMenu: function (animeId, page, comments, navigation) { return commentsMenu(animeId, page, comments, navigation); },
+        openSettingsLogin: function () { return openSettingsLogin(); },
+        addCardListBadge: addCardListBadge,
+        getPlayback: function (id) { return getPlayback(id); },
+        voiceOptionSubtitle: function (group) { return voiceOptionSubtitle(group); },
+        videoQualityLabel: function (video) { return videoQualityLabel(video); },
+        getPreferredPlayer: function () { return getPreferredPlayer(); },
+        allohaIframeEnabled: function () { return allohaIframeEnabled(); },
+        groupPlaybackPriority: function (group) { return groupPlaybackPriority(group); },
+        videoPlaybackPriority: function (video, group) { return videoPlaybackPriority(video, group); },
+        playerMatchesPreference: function (group, preference) { return playerMatchesPreference(group, preference); },
+        rememberPlayer: function (group) { return rememberPlayer(group); },
+        launchVideo: function (card, group, videos, selected, options) { return launchVideo(card, group, videos, selected, options); },
+        enrichEpisodeTitles: function (card, group) { return enrichEpisodeTitles(card, group); },
+        enrichVoiceOptionQuality: function (item, target) { return enrichVoiceOptionQuality(item, target); },
+        episodeOptionTitle: function (card, video) { return episodeOptionTitle(card, video); },
+        playbackTargetPreference: function () { return playbackTargetPreference(); },
+        openExternalPlayer: function (current, playlist, card) { return openExternalPlayer(current, playlist, card); },
+        playInternalPlayer: function (current, playlist) { return playInternalPlayer(current, playlist); },
+        yummyTvEnabled: function () { return yummyTvEnabled(); },
+        yummyTvAnimeId: function (card) { return yummyTvAnimeId(card); },
+        openYummyTv: function (card) { return openYummyTv(card); }
+    });
+    var playbackReturnState = playbackMenu.playbackReturnState;
+    var videoSourceUrl = playbackMenu.videoSourceUrl;
+    var playerKey = playbackMenu.playerKey;
+    var beginPlaybackNavigation = playbackMenu.beginPlaybackNavigation;
+    var playbackReturnSnapshot = playbackMenu.playbackReturnSnapshot;
+    var clearPlaybackReturn = playbackMenu.clearPlaybackReturn;
+    var restorePlaybackInteraction = playbackMenu.restorePlaybackInteraction;
+    var showPlaybackSelect = playbackMenu.showPlaybackSelect;
+    var showYummyActions = playbackMenu.showYummyActions;
+    var openVideos = playbackMenu.openVideos;
+    var chooseEpisode = playbackMenu.chooseEpisode;
+    var showDirectPlaybackOptions = playbackMenu.showDirectPlaybackOptions;
+    var openTitlePlaybackOptions = playbackMenu.openTitlePlaybackOptions;
+
+
     var playbackHistoryApi = LampaYaniPlaybackHistory.create({
         t: t,
         bindYummyCardRender: function (first, second, third, options) {
@@ -78,12 +122,6 @@
         installed: false,
         openedAt: 0,
         departed: false,
-        controller: 'content',
-        element: null,
-        collection: null
-    };
-    var playbackReturnState = {
-        active: false,
         controller: 'content',
         element: null,
         collection: null
@@ -1653,60 +1691,6 @@
         });
     }
 
-    function showYummyActions(card, originElement, originCollection) {
-        if (!card || !card.yani_id) return;
-        var originNode = originElement && originElement.jquery ? originElement[0] : originElement;
-        var navigation = {
-            controller: 'content',
-            element: originNode || null,
-            collection: originCollection && originCollection.length ? originCollection : null
-        };
-        var items = [
-            {title: t('watch'), action: 'watch'},
-            {title: t('yummy_details'), action: 'details'},
-            {title: t('comments'), action: 'comments'}
-        ];
-        if (LampaYaniAuth.token()) {
-            items = items.concat([
-                {title: t('favorite'), action: 'favorite'},
-                {title: listActionTitle(card, 'watching'), action: 'watching'},
-                {title: listActionTitle(card, 'planned'), action: 'planned'},
-                {title: listActionTitle(card, 'completed'), action: 'completed'},
-                {title: listActionTitle(card, 'dropped'), action: 'dropped'},
-                {title: listActionTitle(card, 'postponed'), action: 'postponed'}
-            ], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (value) {
-                return {title: value + '/10', value: value};
-            }));
-        } else {
-            items.push({title: t('login_name'), action: 'login'});
-        }
-
-        showYummySelect({
-            title: t('actions'),
-            items: items,
-            onSelect: function (item) {
-                if (item.action === 'watch') {
-                    beginPlaybackNavigation(originElement, originCollection);
-                    return openVideos(card);
-                }
-                if (item.action === 'details') return openYummyDetail(card, false);
-                if (item.action === 'comments') return commentsMenu(card.yani_id, 0, [], navigation);
-                if (item.action === 'login') return openSettingsLogin();
-                if (!LampaYaniAuth.token()) return Lampa.Noty.show(t('login_required'));
-                var action = item.action === 'favorite' ? LampaYaniApi.addFavorite(card.yani_id) : item.action ? LampaYaniApi.addToList(card.yani_id, item.action) : LampaYaniApi.rate(card.yani_id, item.value);
-                action.then(function () {
-                    if (item.action === 'favorite') card.yani_is_favorite = true;
-                    else if (item.action) card.yani_list_id = {watching: 0, planned: 1, completed: 2, dropped: 3, postponed: 5}[item.action];
-                    addCardListBadge(null, card);
-                    Lampa.Noty.show(t('saved'));
-                }).catch(function (error) {
-                    console.error('[YummyAnime]', error);
-                    Lampa.Noty.show(t('save_error'));
-                });
-            }
-        }, navigation);
-    }
-
     function listActionTitle(card, key) {
         var ids = {watching: 0, planned: 1, completed: 2, dropped: 3, postponed: 5};
         var title = t(key);
@@ -3027,108 +3011,6 @@
         }, 0);
     }
 
-    function openVideos(card, resume) {
-        beginPlaybackNavigation();
-        if (!card || !card.yani_id) {
-            Lampa.Noty.show(t('no_videos'));
-            restorePlaybackInteraction();
-            return;
-        }
-        if (Lampa.Loading && Lampa.Loading.start) Lampa.Loading.start();
-
-        LampaYaniApi.videos(card.yani_id).then(function (payload) {
-            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
-            var videos = payload && payload.response ? payload.response : payload;
-            videos = (Array.isArray(videos) ? videos : []).filter(function (video) {
-                return video && videoSourceUrl(video);
-            });
-            videos.forEach(function (video) {
-                // Keep one normalized field for all player implementations.
-                video.iframe_url = videoSourceUrl(video);
-            });
-            if (!videos.length) {
-                Lampa.Noty.show(t('no_videos'));
-                restorePlaybackInteraction();
-                return;
-            }
-
-            var groups = {};
-            videos.forEach(function (video) {
-                var data = LampaYaniUiUtils.videoData(video);
-                var title = data.dubbing || data.player || t('player');
-                var quality = videoQualityLabel(video);
-                var key = title + '|' + String(data.player_id || data.player || '') + '|' + quality;
-                if (!groups[key]) groups[key] = {title: title, player: data.player || '', quality: quality, source: LampaYaniUiUtils.videoHost(videoSourceUrl(video)), videos: []};
-                groups[key].videos.push(video);
-            });
-
-            var voices = Object.keys(groups).map(function (key) {
-                var group = groups[key];
-                return {
-                    title: group.title + (group.player && group.player !== group.title ? ' · ' + group.player : ''),
-                    subtitle: voiceOptionSubtitle(group),
-                    group: group
-                };
-            });
-            var preferredPlayer = getPreferredPlayer();
-            voices.sort(function (a, b) {
-                if (!allohaIframeEnabled()) {
-                    var playableA = groupPlaybackPriority(a.group);
-                    var playableB = groupPlaybackPriority(b.group);
-                    if (playableA !== playableB) return playableB - playableA;
-                }
-                var preferredA = playerMatchesPreference(a.group, preferredPlayer) ? 1 : 0;
-                var preferredB = playerMatchesPreference(b.group, preferredPlayer) ? 1 : 0;
-                return preferredB - preferredA || a.title.localeCompare(b.title);
-            });
-            if (voices.length && playerMatchesPreference(voices[0].group, preferredPlayer)) voices[0].title = '★ ' + voices[0].title;
-
-            if (resume) {
-                var playback = card.yani_resume || getPlayback(card.yani_id);
-                var resumeVoice = playback && voices.filter(function (voice) {
-                    if (playback.video_id && voice.group.videos.some(function (video) {
-                        return String(video.video_id || video.id || '') === String(playback.video_id);
-                    })) return true;
-                    return playerMatchesPreference(voice.group, playback.player);
-                })[0];
-                var resumeVideo = resumeVoice && resumeVoice.group.videos.filter(function (video) {
-                    if (playback.video_id && String(video.video_id || video.id || '') === String(playback.video_id)) return true;
-                    return String(video.number || video.index || '') === String(playback.number || '');
-                })[0];
-                if (resumeVideo) {
-                    resumeVideo.watched = resumeVideo.watched || {};
-                    resumeVideo.watched.end_time = Math.max(Number(resumeVideo.watched.end_time || 0), Number(playback.time || 0));
-                    if (!resumeVideo.duration && playback.duration) resumeVideo.duration = Number(playback.duration);
-                    rememberPlayer(resumeVoice.group);
-                    return launchVideo(card, resumeVoice.group, resumeVoice.group.videos, resumeVideo);
-                }
-            }
-
-            if (voices.length === 1) {
-                rememberPlayer(voices[0].group);
-                return enrichEpisodeTitles(card, voices[0].group).then(function () {
-                    chooseEpisode(card, voices[0].group);
-                });
-            }
-            showPlaybackSelect({
-                title: t('choose_voice'),
-                items: voices,
-                onFocus: enrichVoiceOptionQuality,
-                onSelect: function (item) {
-                    rememberPlayer(item.group);
-                    enrichEpisodeTitles(card, item.group).then(function () {
-                        chooseEpisode(card, item.group);
-                    });
-                }
-            });
-        }).catch(function (error) {
-            if (Lampa.Loading && Lampa.Loading.stop) Lampa.Loading.stop();
-            console.error('[YummyAnime Videos]', error);
-            Lampa.Noty.show(t('videos_load_error'));
-            restorePlaybackInteraction();
-        });
-    }
-
     function voiceOptionSubtitle(group) {
         return t('video_quality') + ': ' + (group.quality || t('quality_auto')) +
             (group.source ? ' · ' + group.source : '') + ' · ' + group.videos.length + ' ' + t('episodes_short');
@@ -3721,29 +3603,6 @@
         return value !== false && value !== 'false';
     }
 
-    function chooseEpisode(card, group) {
-        var videos = group.videos.slice().sort(function (a, b) {
-            if (!allohaIframeEnabled()) {
-                var playableA = videoPlaybackPriority(a, group);
-                var playableB = videoPlaybackPriority(b, group);
-                if (playableA !== playableB) return playableB - playableA;
-            }
-            var numberA = parseFloat(a.number);
-            var numberB = parseFloat(b.number);
-            if (isFinite(numberA) && isFinite(numberB)) return numberA - numberB;
-            return Number(a.index || 0) - Number(b.index || 0);
-        });
-        var episodes = videos.map(function (video) {
-            return {title: episodeOptionTitle(card, video), video: video};
-        });
-        if (episodes.length === 1) return launchVideo(card, group, videos, videos[0]);
-        showPlaybackSelect({
-            title: t('choose_episode') + ' · ' + group.title,
-            items: episodes,
-            onSelect: function (item) { launchVideo(card, group, videos, item.video); }
-        });
-    }
-
     function enrichEpisodeTitles(card, group) {
         var malId = card && card.yani_remote_ids && (card.yani_remote_ids.myanimelist_id || card.yani_remote_ids.mal_id);
         if (!malId || !group || group.episodeTitlesLoaded) return Promise.resolve();
@@ -4001,40 +3860,6 @@
         }
     }
 
-    function showDirectPlaybackOptions(card, current, playlist, options) {
-        // An automatic episode change must never interrupt viewing with a
-        // dialog: playback simply continues where it already was.
-        var target = options && options.autoAdvance ? 'internal' : playbackTargetPreference();
-        if (target === 'external') return openExternalPlayer(current, playlist, card);
-        if (target === 'internal') {
-            if (playInternalPlayer(current, playlist)) return true;
-            Lampa.Noty.show(t('internal_player_unavailable'));
-            restorePlaybackInteraction();
-            return true;
-        }
-        if (!Lampa.Select || !Lampa.Select.show) return false;
-        showPlaybackSelect({
-            title: t('choose_playback'),
-            items: [
-                {title: t('watch_external_player'), subtitle: t('watch_external_player_description'), action: 'external'},
-                {title: t('watch_internal_lampa'), subtitle: t('watch_internal_lampa_description'), action: 'internal'}
-            ],
-            onSelect: function (item) {
-                if (item && item.action === 'internal') {
-                    if (playInternalPlayer(current, playlist)) return;
-                    Lampa.Noty.show(t('internal_player_unavailable'));
-                    restorePlaybackInteraction();
-                    return;
-                }
-                if (openExternalPlayer(current, playlist, card)) return;
-                if (playInternalPlayer(current, playlist)) return;
-                Lampa.Noty.show(current.url);
-                restorePlaybackInteraction();
-            }
-        });
-        return true;
-    }
-
     function playbackTargetPreference() {
         var value = Lampa.Storage && Lampa.Storage.get ? Lampa.Storage.get('yani_playback_target', 'ask') : 'ask';
         return value === 'internal' || value === 'external' ? value : 'ask';
@@ -4254,13 +4079,6 @@
         return (playlist || []).filter(function (item) { return isExternalPlayableUrl(item.url, item.source); });
     }
 
-    function videoSourceUrl(video) {
-        if (!video) return '';
-        var data = LampaYaniUiUtils.videoData(video);
-        return LampaYaniUiUtils.normalizeVideoUrl(video.yani_stream_url || data.yani_stream_url || video.iframe_url || video.url || video.player_url || video.link ||
-            data.iframe_url || data.url || data.player_url || data.link);
-    }
-
     function videoStreamHeaders(video) {
         if (!video) return null;
         var data = LampaYaniUiUtils.videoData(video);
@@ -4301,10 +4119,6 @@
             if (/4k/i.test(text)) best = Math.max(best, 2160);
         });
         return best >= 2160 ? '4K' : best ? best + 'p' : '';
-    }
-
-    function playerKey(group) {
-        return String(group && (group.player || group.title) || '').toLowerCase();
     }
 
     function getPreferredPlayer() {
@@ -4764,82 +4578,6 @@
         return false;
     }
 
-    function beginPlaybackNavigation(element, collection) {
-        // Temporary Select windows must not replace the detail controller and
-        // focus target that need to be restored after playback.
-        if (playbackReturnState.active) return;
-        var controller = currentControllerName() || 'content';
-        if (controller === 'select') controller = 'content';
-        var target = element && element.jquery ? element[0] : element;
-        if (!target) target = document.querySelector('.selector.focus') || document.querySelector('.selector');
-        var root = collection && collection.jquery ? collection : collection ? $(collection) : null;
-        if ((!root || !root.length) && target) root = $(target).closest('.scroll, .yani-detail, .yani-home');
-        playbackReturnState.active = true;
-        playbackReturnState.controller = controller;
-        playbackReturnState.element = target || null;
-        playbackReturnState.collection = root && root.length ? root : null;
-    }
-
-    function playbackReturnSnapshot() {
-        return {
-            controller: playbackReturnState.controller || 'content',
-            element: playbackReturnState.element,
-            collection: playbackReturnState.collection
-        };
-    }
-
-    function clearPlaybackReturn() {
-        playbackReturnState.active = false;
-        playbackReturnState.controller = 'content';
-        playbackReturnState.element = null;
-        playbackReturnState.collection = null;
-    }
-
-    function restorePlaybackInteraction(snapshot) {
-        snapshot = snapshot && snapshot.controller ? snapshot : playbackReturnSnapshot();
-        setTimeout(function () {
-            try {
-                var controller = snapshot.controller && snapshot.controller !== 'select' ? snapshot.controller : 'content';
-                if (Lampa.Controller && Lampa.Controller.toggle) Lampa.Controller.toggle(controller);
-                var element = snapshot.element;
-                if (!element || !document.documentElement.contains(element)) {
-                    element = document.querySelector('.yani-detail .selector.focus') ||
-                        document.querySelector('.yani-detail .selector') ||
-                        document.querySelector('.selector.focus') || document.querySelector('.selector');
-                }
-                var collection = snapshot.collection;
-                if (!collection || !collection.length || !document.documentElement.contains(collection[0])) {
-                    collection = element ? $(element).closest('.scroll, .yani-detail, .yani-home') : $('body');
-                }
-                if (collection && collection.length && Lampa.Controller && Lampa.Controller.collectionSet) {
-                    Lampa.Controller.collectionSet(collection);
-                }
-                if (element && Lampa.Controller && Lampa.Controller.collectionFocus) {
-                    Lampa.Controller.collectionFocus(element, collection);
-                }
-            } catch (error) {
-                console.warn('[YummyAnime] Could not restore playback navigation', error);
-            } finally {
-                clearPlaybackReturn();
-            }
-        }, 0);
-    }
-
-    function showPlaybackSelect(params) {
-        if (!Lampa.Select || !Lampa.Select.show) {
-            restorePlaybackInteraction();
-            return false;
-        }
-        params = Object.assign({}, params || {});
-        var originalBack = params.onBack;
-        params.onBack = function () {
-            if (originalBack) originalBack();
-            restorePlaybackInteraction();
-        };
-        showYummySelect(params);
-        return true;
-    }
-
     function prepareExternalRestore() {
         installExternalRestoreHooks();
         if (!playbackReturnState.active) beginPlaybackNavigation();
@@ -4945,29 +4683,6 @@
             }
         });
         return true;
-    }
-
-    function openTitlePlaybackOptions(card) {
-        var yummyTvUrl = yummyTvEnabled() ? LampaYaniUiUtils.yummyTvDetailsUrl(yummyTvAnimeId(card)) : '';
-        if (!yummyTvUrl || !Lampa.Select || !Lampa.Select.show) {
-            openVideos(card, false);
-            return;
-        }
-
-        showPlaybackSelect({
-            title: t('choose_playback'),
-            items: [
-                {title: t('watch_in_player'), subtitle: t('watch_in_player_description'), action: 'player'},
-                {title: t('watch_in_yummytv'), subtitle: t('watch_in_yummytv_description'), action: 'yummytv'}
-            ],
-            onSelect: function (item) {
-                if (item && item.action === 'yummytv') {
-                    if (!openYummyTv(card)) restorePlaybackInteraction();
-                    return;
-                }
-                openVideos(card, false);
-            }
-        });
     }
 
     function tryExternalOpen(name, callback) {
