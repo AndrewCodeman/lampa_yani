@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.34 — 2026-08-13
+
+- Remove the remote-focus pause on the dashboard: keep D-pad movement instant, and stop scaling tiles, ambient layers, and intro art on every focus change.
+
 ## 0.41.33 — 2026-08-13
 
 - Extract the YummyAnime title Detail page into `src/ui-detail.js` (`LampaYaniDetail.create`) so the main UI shell delegates detail rendering through injected dependencies.

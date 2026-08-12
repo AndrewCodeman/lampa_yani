@@ -306,8 +306,7 @@
     z-index: 0;
     inset: -5%;
     opacity: 0;
-    transform: scale(1.025);
-    transition: opacity .48s ease, transform .65s ease;
+    transition: opacity .18s ease;
 }
 
 .yani-home__ambient--explore {
@@ -346,7 +345,6 @@
 .yani-home[data-yani-section="discover"] .yani-home__ambient--discover,
 .yani-home[data-yani-section="service"] .yani-home__ambient--service {
     opacity: 1;
-    transform: scale(1);
 }
 
 .yani-home__waves svg {
@@ -365,7 +363,7 @@
     stroke-linecap: round;
     stroke-dasharray: 1900;
     stroke-dashoffset: 0;
-    transition: stroke .48s ease;
+    transition: none;
 }
 
 .yani-home__wave--far { stroke: rgba(255,255,255,.09); stroke-width: 34; }
@@ -474,8 +472,8 @@
 .yani-home__intro[data-yani-section="service"] .yani-home__intro-brand em { color: rgba(255,255,255,.68); }
 .yani-home__intro-title { overflow: hidden; margin-top: .16em; font-size: 1.75em; font-weight: 720; line-height: 1.08; text-overflow: ellipsis; white-space: nowrap; transition: color .2s ease; }
 .yani-home__intro-subtitle { overflow: hidden; margin-top: .42em; color: rgba(255,255,255,.6); font-size: .88em; text-overflow: ellipsis; white-space: nowrap; transition: color .2s ease; }
-.yani-home__intro-context-art { position: absolute; z-index: 0; top: -35%; right: -2%; bottom: -35%; width: 52%; background-position: center 24%; background-repeat: no-repeat; background-size: cover; opacity: 0; filter: saturate(.78); -webkit-mask-image: linear-gradient(90deg, transparent, rgba(0,0,0,.72) 35%, #000); mask-image: linear-gradient(90deg, transparent, rgba(0,0,0,.72) 35%, #000); transform: scale(1.04); transition: opacity .28s ease, transform .42s cubic-bezier(.2,.8,.2,1); pointer-events: none; }
-.yani-home__intro-context-art--visible { opacity: .22; transform: scale(1); }
+.yani-home__intro-context-art { position: absolute; z-index: 0; top: -35%; right: -2%; bottom: -35%; width: 52%; background-position: center 24%; background-repeat: no-repeat; background-size: cover; opacity: 0; -webkit-mask-image: linear-gradient(90deg, transparent, rgba(0,0,0,.72) 35%, #000); mask-image: linear-gradient(90deg, transparent, rgba(0,0,0,.72) 35%, #000); pointer-events: none; }
+.yani-home__intro-context-art--visible { opacity: .22; }
 .yani-home__intro[data-yani-context="schedule"] .yani-home__intro-mark,
 .yani-home__intro[data-yani-context="new_translations"] .yani-home__intro-mark { background: linear-gradient(145deg, #72c7ff, #7259c8); }
 .yani-home__intro[data-yani-context="continue_watching"] .yani-home__intro-mark,
@@ -505,7 +503,7 @@
 .yani-home__intro-metric--ready .yani-home__intro-metric-copy b { color: #fff; }
 .yani-home__intro-metric--active { border-color: rgba(255,255,255,.2); background: linear-gradient(132deg, rgba(255,255,255,.15), rgba(255,255,255,.065)); }
 .yani-home__intro-metric--unknown { border-style: dashed; opacity: .62; }
-.yani-home__intro-metric.focus { z-index: 3; border-color: rgba(255,255,255,.96); background: linear-gradient(132deg, #fff, rgba(255,255,255,.86)); box-shadow: 0 0 0 .16em rgba(255,255,255,.22), 0 .6em 1.4em rgba(0,0,0,.26); opacity: 1; transform: translateY(-.12em) scale(1.025); }
+.yani-home__intro-metric.focus { z-index: 3; border-color: rgba(255,255,255,.96); background: linear-gradient(132deg, #fff, rgba(255,255,255,.86)); box-shadow: 0 0 0 .16em rgba(255,255,255,.22), 0 .6em 1.4em rgba(0,0,0,.26); opacity: 1; }
 .yani-home__intro-metric.focus .yani-home__intro-metric-copy small,
 .yani-home__intro-metric.focus .yani-home__intro-metric-copy b,
 .yani-home__intro-metric.focus .yani-home__intro-metric-copy em { color: rgba(22,21,27,.84); }
@@ -531,7 +529,7 @@
     border-radius: 1.45em .82em 1.35em .92em;
     background: linear-gradient(132deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
     box-shadow: inset 0 .08em 0 rgba(255,255,255,.07), 0 .75em 2em rgba(0,0,0,.09);
-    transition: border-color .22s ease, background .22s ease, transform .22s ease;
+    transition: border-color .12s ease;
 }
 
 .yani-home__panel--active { border-color: rgba(255,255,255,.25); background: linear-gradient(132deg, rgba(255,255,255,.13), rgba(239,100,112,.055)); }
@@ -643,7 +641,7 @@
 .yani-home__panel--service::before { content: ''; position: absolute; left: 8.2em; right: 2.6em; top: 58%; height: .08em; background: linear-gradient(90deg, rgba(239,100,112,.42), rgba(124,113,218,.3) 48%, rgba(85,215,149,.32)); pointer-events: none; }
 .yani-home__service-constellation { position: relative; display: grid; grid-template-columns: 8.4em minmax(0, 1fr); gap: 1em; align-items: stretch; }
 .yani-home__panel--service .yani-home__panel-items { position: relative; z-index: 1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.yani-home__panel--service .yani-home__item { min-height: 5.4em; padding: .85em 1em; border-radius: 1.1em .68em 1.05em .72em; background: linear-gradient(138deg, rgba(255,255,255,.13), rgba(255,255,255,.045)); backdrop-filter: blur(.35em); }
+.yani-home__panel--service .yani-home__item { min-height: 5.4em; padding: .85em 1em; border-radius: 1.1em .68em 1.05em .72em; background: linear-gradient(138deg, rgba(255,255,255,.13), rgba(255,255,255,.045)); }
 .yani-home__service-hub { position: relative; z-index: 2; display: flex; align-items: center; min-width: 0; min-height: 5.4em; padding: .75em; box-sizing: border-box; border: .08em solid rgba(255,255,255,.14); border-radius: 50% 43% 49% 40% / 46% 52% 42% 54%; background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.16), rgba(18,16,25,.88) 67%); box-shadow: inset 0 .08em 0 rgba(255,255,255,.1), 0 .65em 1.4em rgba(0,0,0,.18); transition: border-color .25s ease, box-shadow .25s ease; }
 .yani-home__service-hub-logo { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; flex: 0 0 2.15em; width: 2.15em; height: 2.15em; margin-right: .58em; border-radius: .65em .42em .62em .46em; background: linear-gradient(145deg, #ef6470, #a92f53); box-shadow: 0 .35em .8em rgba(169,47,83,.3); color: #fff; }
 .yani-home__service-hub-logo svg { width: 1.35em; height: 1.35em; fill: currentColor; }
@@ -679,7 +677,7 @@
     align-items: center;
     gap: 1em;
     overflow: hidden;
-    transition: transform .2s ease, background .2s ease, border-color .2s ease, border-radius .28s ease;
+    transition: border-color .12s ease;
 }
 
 .yani-home__episode-flow {
@@ -900,7 +898,7 @@
     border-radius: 42% 58% 67% 33% / 55% 38% 62% 45%;
     background: rgba(239,100,112,.09);
     transform: rotate(-18deg) scale(.8);
-    transition: transform .42s cubic-bezier(.2,.8,.2,1), border-radius .42s ease;
+    transition: none;
 }
 
 .yani-home__panel--episode-flow .yani-home__item::before { background: rgba(98,184,255,.09); }
@@ -922,7 +920,7 @@
     transition: opacity .22s ease, transform .35s cubic-bezier(.2,.8,.2,1);
 }
 .yani-home__item--artwork::before { opacity: .38; }
-.yani-home__item--artwork.focus .yani-home__item-art { opacity: .12; transform: scale(1.035); }
+.yani-home__item--artwork.focus .yani-home__item-art { opacity: .12; }
 .yani-home__item--priority:not(.focus) { border-color: rgba(239,100,112,.46); box-shadow: 0 0 0 .08em rgba(239,100,112,.1), 0 .8em 2em rgba(0,0,0,.16); }
 .yani-home__item > .yani-home__priority {
     position: absolute;
@@ -981,7 +979,6 @@
     color: #16151b;
     border-color: rgba(255,255,255,.95);
     box-shadow: 0 0 0 .18em rgba(255,255,255,.22), 0 1em 2.4em rgba(0,0,0,.25);
-    transform: translateY(-.12em) scale(1.015);
     border-radius: .85em 1.55em .9em 1.45em;
 }
 
@@ -992,8 +989,7 @@
 .yani-home__panel--service .yani-home__item.focus { border-color: rgba(236,176,85,.82); box-shadow: 0 0 0 .2em rgba(236,176,85,.18), 0 1em 2.4em rgba(0,0,0,.25); }
 
 .yani-home--motion .yani-home__item.focus::before {
-    transform: translate(-42%, -34%) rotate(22deg) scale(1.08);
-    border-radius: 66% 34% 41% 59% / 45% 62% 38% 55%;
+    opacity: .55;
 }
 
 .yani-home__icon {
@@ -1116,7 +1112,6 @@
 
 .yani-home__item.focus .yani-home__arrow {
     color: #ef6470;
-    transform: translateX(.15em);
 }
 .yani-home__panel--episode-flow .yani-home__item.focus .yani-home__arrow { color: #2679c2; }
 .yani-home__panel--library .yani-home__item.focus .yani-home__arrow { color: #218d78; }
@@ -1142,7 +1137,6 @@
 .yani-home__item.focus .yani-home__icon {
     color: #fff;
     box-shadow: 0 .35em .8em rgba(0,0,0,.2);
-    transform: rotate(-3deg) scale(1.1);
 }
 
 .yani-home--reduced-motion .yani-home__item,

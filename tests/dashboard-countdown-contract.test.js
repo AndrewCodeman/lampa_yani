@@ -22,7 +22,7 @@ assert.equal(insights.releaseCountdown(now + 1, now).minutes, 1);
 assert.match(ui, /var updateEpisodeCountdown = function \(\) \{\};/);
 assert.match(ui, /updateEpisodeCountdown = function \(release\)/);
 assert.match(ui, /releaseCountdown\(release && release\.timestamp, Date\.now\(\)\)/);
-assert.match(ui, /if \(currentEpisodeFlow\) updateEpisodeCountdown\(currentEpisodeFlow\.japan\)/);
+assert.match(ui, /currentEpisodeFlow\) updateEpisodeCountdown\(currentEpisodeFlow\.japan\)/);
 assert.match(ui, /t\('next_broadcast'\)/);
 assert.match(ui, /t\('broadcast_started'\)/);
 assert.match(css, /\.yani-home__episode-flow-live--upcoming/);

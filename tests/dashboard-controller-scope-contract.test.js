@@ -13,10 +13,13 @@ const createScope = ui.slice(createStart, controllerStart);
 const controllerScope = ui.slice(controllerStart, ui.indexOf('this.render = function', controllerStart));
 
 assert.match(homeScope, /var renderIntroContext = function \(\) \{\};/);
+assert.match(homeScope, /var activateHomeFocus = function \(\) \{\};/);
 assert.match(homeScope, /var updateEpisodeCountdown = function \(\) \{\};/);
 assert.match(homeScope, /var homeCollection = function \(\) \{ return scroll\.render\(\); \};/);
 assert.match(homeScope, /var currentEpisodeFlow;/);
 assert.match(createScope, /renderIntroContext = function \(button\)/);
+assert.match(createScope, /activateHomeFocus = function \(target, options\)/);
+assert.match(createScope, /requestAnimationFrame\(function \(\)/);
 assert.match(createScope, /updateEpisodeCountdown = function \(release\)/);
 assert.match(createScope, /homeCollection = function \(\) \{/);
 assert.doesNotMatch(createScope, /function renderIntroContext\(/);

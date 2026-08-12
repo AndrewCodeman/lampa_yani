@@ -468,8 +468,14 @@
         var currentEpisodeFlow;
         var preferredHomeKey = 'catalog';
         var renderIntroContext = function () {};
+        var activateHomeFocus = function () {};
         var updateEpisodeCountdown = function () {};
         var homeCollection = function () { return scroll.render(); };
+        var lastHomeSection = 'explore';
+        var lastIntroContext = '';
+        var lastIntroPoster = '';
+        var lastStoredFocusKey = '';
+        var homeFocusFrame = 0;
         var navigatorInfo = window.navigator || {};
         var reducedMotion = Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
         var lowMemoryDevice = Number(navigatorInfo.deviceMemory || 0) > 0 && Number(navigatorInfo.deviceMemory) <= 2;
@@ -701,14 +707,7 @@
                 if (item.group === 'explore') button.append(homeExploreDecoration(item.key));
                 homeButtons[item.key] = button;
                 button.on('hover:focus', function (event) {
-                    var target = event.currentTarget || event.target;
-                    last = target;
-                    if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, String($(target).attr('data-yani-home-key') || ''));
-                    html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
-                    $(target).closest('.yani-home__panel').addClass('yani-home__panel--active');
-                    renderIntroContext($(target));
-                    if (currentEpisodeFlow) updateEpisodeCountdown(currentEpisodeFlow.japan);
-                    scroll.update($(target), true);
+                    activateHomeFocus(event.currentTarget || event.target, {countdown: true});
                 });
                 button.on('hover:enter click.yaniHome', item.action);
                 if (item.group === 'episode_flow') {
@@ -753,13 +752,11 @@
                 node.addClass('selector').attr({role: 'button', tabindex: '-1', 'aria-label': definition.title});
                 node.data('yani-home-target-key', target.key);
                 node.on('hover:focus', function (event) {
-                    var focused = event.currentTarget || event.target;
-                    last = focused;
-                    if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, target.key);
-                    html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
-                    homeButtons[target.key].closest('.yani-home__panel').addClass('yani-home__panel--active');
-                    renderIntroContext(homeButtons[target.key]);
-                    scroll.update($(focused), true);
+                    activateHomeFocus(event.currentTarget || event.target, {
+                        storageKey: target.key,
+                        context: homeButtons[target.key],
+                        panel: homeButtons[target.key].closest('.yani-home__panel')
+                    });
                 });
                 node.on('hover:enter click.yaniHomeRail', function () {
                     target.action();
@@ -777,14 +774,12 @@
                 metric.addClass('selector').attr({role: 'button', tabindex: '-1'});
                 metric.data('yani-home-target-key', targetKey);
                 metric.on('hover:focus', function (event) {
-                    var focused = event.currentTarget || event.target;
-                    last = focused;
-                    if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, targetKey);
-                    html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
-                    target.closest('.yani-home__panel').addClass('yani-home__panel--active');
-                    renderIntroContext(target);
-                    if (currentEpisodeFlow) updateEpisodeCountdown(currentEpisodeFlow.japan);
-                    scroll.update($(focused), true);
+                    activateHomeFocus(event.currentTarget || event.target, {
+                        storageKey: targetKey,
+                        context: target,
+                        panel: target.closest('.yani-home__panel'),
+                        countdown: true
+                    });
                 });
                 metric.on('hover:enter click.yaniHomeMetric', definition.action);
             }
@@ -821,14 +816,59 @@
                 var insight = String(button.data('yani-home-insight-title') || '');
                 var meta = String(button.data('yani-home-insight-meta') || '');
                 var poster = String(button.data('yani-home-poster') || '').replace(/["\\]/g, '');
-                intro.attr('data-yani-context', key);
-                intro.find('.yani-home__intro-title').text(title);
-                intro.find('.yani-home__intro-subtitle').text([insight, meta].filter(Boolean).join(' · ') || t('dashboard_subtitle'));
-                var art = intro.find('.yani-home__intro-context-art');
-                art.removeClass('yani-home__intro-context-art--visible').css('background-image', '');
-                if (!reducedMotion && !lowMemoryDevice && !lowCpuDevice && /^https?:\/\//i.test(poster)) {
-                    art.css('background-image', 'url("' + poster + '")').addClass('yani-home__intro-context-art--visible');
+                var subtitle = [insight, meta].filter(Boolean).join(' · ') || t('dashboard_subtitle');
+                var contextToken = key + '\n' + title + '\n' + subtitle;
+                if (contextToken !== lastIntroContext) {
+                    lastIntroContext = contextToken;
+                    intro.attr('data-yani-context', key);
+                    intro.find('.yani-home__intro-title').text(title);
+                    intro.find('.yani-home__intro-subtitle').text(subtitle);
                 }
+                var art = intro.find('.yani-home__intro-context-art');
+                var showArt = !reducedMotion && !lowMemoryDevice && !lowCpuDevice && /^https?:\/\//i.test(poster);
+                if (!showArt) {
+                    if (lastIntroPoster) {
+                        lastIntroPoster = '';
+                        art.removeClass('yani-home__intro-context-art--visible').css('background-image', '');
+                    }
+                    return;
+                }
+                if (poster === lastIntroPoster) return;
+                lastIntroPoster = poster;
+                art.css('background-image', 'url("' + poster + '")').addClass('yani-home__intro-context-art--visible');
+            };
+
+            activateHomeFocus = function (target, options) {
+                options = options || {};
+                var element = $(target);
+                if (!element.length) return;
+                last = element[0];
+                if (homeFocusFrame) cancelAnimationFrame(homeFocusFrame);
+                homeFocusFrame = requestAnimationFrame(function () {
+                    homeFocusFrame = 0;
+                    if (destroyed || last !== element[0]) return;
+                    var storageKey = options.storageKey || String(element.attr('data-yani-home-key') || '');
+                    if (storageKey && storageKey !== lastStoredFocusKey && Lampa.Storage && Lampa.Storage.set) {
+                        lastStoredFocusKey = storageKey;
+                        Lampa.Storage.set(homeFocusStorageKey, storageKey);
+                    }
+                    var panel = options.panel || element.closest('.yani-home__panel');
+                    if (panel && panel.length && !panel.hasClass('yani-home__panel--active')) {
+                        html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
+                        panel.addClass('yani-home__panel--active');
+                    }
+                    renderIntroContext(options.context || element);
+                    if (options.countdown && currentEpisodeFlow) updateEpisodeCountdown(currentEpisodeFlow.japan);
+                    if (options.scroll === false) return;
+                    var node = element[0];
+                    var view = scroll.render()[0];
+                    if (node && view && node.getBoundingClientRect && view.getBoundingClientRect) {
+                        var rect = node.getBoundingClientRect();
+                        var box = view.getBoundingClientRect();
+                        if (rect.top >= box.top + 8 && rect.bottom <= box.bottom - 8) return;
+                    }
+                    scroll.update(element, true);
+                });
             };
 
             function setSectionRail(group) {
@@ -840,6 +880,8 @@
                     activeTitle = definition.title;
                     return true;
                 });
+                if (activeGroup === lastHomeSection && html.attr('data-yani-section') === activeGroup) return;
+                lastHomeSection = activeGroup;
                 html.attr('data-yani-section', activeGroup);
                 intro.attr('data-yani-section', activeGroup);
                 intro.find('.yani-home__intro-brand em').text(activeTitle);
@@ -977,13 +1019,10 @@
                     node.data('yani-home-insight-meta', options.meta || '');
                     node.data('yani-home-poster', poster);
                     node.on('hover:focus', function (event) {
-                        var focused = event.currentTarget || event.target;
-                        last = focused;
-                        if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, options.targetKey);
-                        html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
-                        discover.addClass('yani-home__panel--active');
-                        renderIntroContext($(focused));
-                        scroll.update($(focused), true);
+                        activateHomeFocus(event.currentTarget || event.target, {
+                            storageKey: options.targetKey,
+                            panel: discover
+                        });
                     });
                     node.on('hover:enter click.yaniHomeDiscoveryPreview', options.action);
                     discoverPreview.append(node);
@@ -1053,13 +1092,11 @@
                     node.addClass('selector').attr({role: 'button', tabindex: '-1', 'aria-label': [definition.label, data.title || t('flow_no_data'), meta.join(' · ')].filter(Boolean).join(': ')});
                     node.data('yani-home-context-key', targetKey);
                     node.on('hover:focus', function (event) {
-                        var focused = event.currentTarget || event.target;
-                        last = focused;
-                        if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, targetKey);
-                        html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
-                        target.closest('.yani-home__panel').addClass('yani-home__panel--active');
-                        renderIntroContext(target);
-                        scroll.update($(focused), true);
+                        activateHomeFocus(event.currentTarget || event.target, {
+                            storageKey: targetKey,
+                            context: target,
+                            panel: target.closest('.yani-home__panel')
+                        });
                     });
                     node.on('hover:enter click.yaniHomeFlow', target.action);
                 }
@@ -1154,13 +1191,7 @@
                     mini.append($('<span class="yani-home__library-mini-progress"><i></i></span>'));
                     mini.find('.yani-home__library-mini-progress i').css('width', String(entry.progress || 0) + '%');
                     mini.on('hover:focus', function (event) {
-                        var target = event.currentTarget || event.target;
-                        last = target;
-                        if (Lampa.Storage && Lampa.Storage.set) Lampa.Storage.set(homeFocusStorageKey, 'continue_watching');
-                        html.find('.yani-home__panel--active').removeClass('yani-home__panel--active');
-                        $(target).closest('.yani-home__panel').addClass('yani-home__panel--active');
-                        renderIntroContext($(target));
-                        scroll.update($(target), true);
+                        activateHomeFocus(event.currentTarget || event.target, {storageKey: 'continue_watching'});
                     });
                     mini.on('hover:enter click.yaniHomeResume', function () {
                         var source = Object.assign({}, entry.card || {}, {
@@ -1453,6 +1484,8 @@
         this.render = function (js) { return js ? html[0] : html; };
         this.destroy = function () {
             destroyed = true;
+            if (homeFocusFrame) cancelAnimationFrame(homeFocusFrame);
+            homeFocusFrame = 0;
             homeTimers.forEach(function (timer) { clearTimeout(timer); });
             homeTimers = [];
             if (homeAbortController) homeAbortController.abort();
