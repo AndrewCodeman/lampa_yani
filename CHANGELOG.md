@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.44 — 2026-08-13
+
+- Keep a permanent test install URL at dist/index.js, without a version query that pins Lampa to an old build.
+
 ## 0.41.43 — 2026-08-13
 
 - Stop a sidebar menu error from aborting plugin registration, so settings and YummyAnime screens still load.

@@ -51,9 +51,9 @@ Production — a verified release. The URL stays the same; a serious bug is roll
 
 `https://andrewcodeman.github.io/lampa_yani/stable/index.js`
 
-Test — the latest `main` build, including changes that are not a production release yet.
+Test — the latest `main` build, including changes that are not a production release yet. The URL stays the same.
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.43`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js`
 
 Verified versions are tagged `vX.Y.Z`. Release and rollback:
 

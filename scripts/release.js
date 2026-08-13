@@ -39,7 +39,7 @@ function stableManifest(version, options) {
         version: normalizeVersion(version),
         tag: tagName(version),
         url: STABLE_URL,
-        testUrl: TEST_URL + '?v=' + normalizeVersion(version),
+        testUrl: TEST_URL,
         releasedAt: options.releasedAt || new Date().toISOString()
     };
 }
@@ -137,7 +137,7 @@ function promote(options) {
         rollback: rollback,
         manifest: manifest,
         stableUrl: STABLE_URL,
-        testUrl: TEST_URL + '?v=' + version
+        testUrl: TEST_URL
     };
 }
 
@@ -163,7 +163,7 @@ function usage() {
         '  node scripts/release.js --promote <version>',
         '',
         'Production URL:  ' + STABLE_URL,
-        'Test URL:        ' + TEST_URL + '?v=<version>',
+        'Test URL:        ' + TEST_URL,
         '',
         'Promote the current dist bundle to production and tag it, or roll production',
         'back to an earlier git tag without changing the test channel.'

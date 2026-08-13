@@ -51,9 +51,9 @@
 
 `https://andrewcodeman.github.io/lampa_yani/stable/index.js`
 
-Тестовая — последняя сборка ветки `main`, в том числе ещё не выпущенные изменения.
+Тестовая — последняя сборка ветки `main`, в том числе ещё не выпущенные изменения. Ссылка не меняется.
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js?v=0.41.43`
+`https://andrewcodeman.github.io/lampa_yani/dist/index.js`
 
 Проверенные версии помечаются тегом `vX.Y.Z`. Выпуск и откат:
 

@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const {execFileSync} = require('child_process');
 
-const INSTALL_PATH = 'dist/index.js?v=';
 const FILES = {
     config: 'src/config.js',
     readme: 'README.md',
@@ -61,23 +60,13 @@ function updateConfig(source, version) {
     return replaceAll(source, /version:\s*'\d+\.\d+\.\d+'/, "version: '" + version + "'", FILES.config);
 }
 
-function updateInstallUrl(source, from, to, label) {
-    return replaceAll(
-        source,
-        new RegExp(escapeRegExp(INSTALL_PATH + from), 'g'),
-        INSTALL_PATH + to,
-        label
-    );
-}
-
 function updateReadme(source, from, to) {
-    const withVersion = replaceAll(
+    return replaceAll(
         source,
         new RegExp('Current version: `' + escapeRegExp(from) + '`'),
         'Current version: `' + to + '`',
         FILES.readme + ' current version'
     );
-    return updateInstallUrl(withVersion, from, to, FILES.readme + ' install URL');
 }
 
 function formatNotes(notes) {
@@ -127,8 +116,6 @@ function applyVersion(options) {
     const files = {};
     files[FILES.config] = updateConfig(read(FILES.config), version);
     files[FILES.readme] = updateReadme(read(FILES.readme), current, version);
-    files[FILES.docsRu] = updateInstallUrl(read(FILES.docsRu), current, version, FILES.docsRu);
-    files[FILES.docsEn] = updateInstallUrl(read(FILES.docsEn), current, version, FILES.docsEn);
     files[FILES.changelog] = updateChangelog(read(FILES.changelog), version, date, options.notes);
     if (!options.dryRun) {
         Object.keys(files).forEach(function (file) { write(file, files[file]); });
@@ -165,7 +152,7 @@ function usage() {
     return [
         'Usage: node scripts/bump-version.js [patch|minor|major|<version>] [--date YYYY-MM-DD] [--dry-run] [-m note] [note...]',
         '',
-        'Updates src/config.js, README, docs, CHANGELOG, the install URL, and dist/index.js together.'
+        'Updates src/config.js, README version, CHANGELOG, and dist/index.js together.'
     ].join('\n');
 }
 
@@ -185,13 +172,11 @@ if (require.main === module) {
 
 module.exports = {
     FILES: FILES,
-    INSTALL_PATH: INSTALL_PATH,
     parseVersion: parseVersion,
     nextVersion: nextVersion,
     readConfigVersion: readConfigVersion,
     updateConfig: updateConfig,
     updateReadme: updateReadme,
-    updateInstallUrl: updateInstallUrl,
     updateChangelog: updateChangelog,
     applyVersion: applyVersion,
     parseArgs: parseArgs,

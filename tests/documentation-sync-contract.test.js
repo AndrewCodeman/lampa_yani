@@ -18,8 +18,9 @@ assert.match(changelog, new RegExp('^## ' + escaped + ' — ', 'm'));
 assert.match(dist, new RegExp("version: '" + escaped + "'"));
 [root, ru, en].forEach((document) => {
     assert.match(document, /lampa_yani\/stable\/index\.js/);
+    assert.match(document, /lampa_yani\/dist\/index\.js/);
     assert.doesNotMatch(document, /stable\/index\.js\?v=/);
-    assert.match(document, new RegExp('dist/index\\.js\\?v=' + escaped));
+    assert.doesNotMatch(document, /dist\/index\.js\?v=/);
 });
 const stableMeta = JSON.parse(fs.readFileSync('stable.json', 'utf8'));
 const stable = fs.readFileSync('stable/index.js', 'utf8');

@@ -10,6 +10,7 @@ const workflow = fs.readFileSync('.github/workflows/release.yml', 'utf8');
 
 assert.strictEqual(release.STABLE_URL, 'https://andrewcodeman.github.io/lampa_yani/stable/index.js');
 assert.strictEqual(release.TEST_URL, 'https://andrewcodeman.github.io/lampa_yani/dist/index.js');
+assert.doesNotMatch(source, /TEST_URL \+ '\?v='/);
 assert.strictEqual(release.tagName('0.41.38'), 'v0.41.38');
 assert.strictEqual(release.normalizeVersion('v0.41.38'), '0.41.38');
 assert.match(release.changelogSection('# Changelog\n\n## 0.41.40 — 2026-08-13\n\n- First.\n\n## 0.41.39 — 2026-08-13\n\n- Old.\n', '0.41.40'), /First/);
@@ -53,6 +54,7 @@ const meta = JSON.parse(fs.readFileSync(path.join(root, 'stable.json'), 'utf8'))
 assert.strictEqual(meta.channel, 'production');
 assert.strictEqual(meta.version, '0.41.40');
 assert.strictEqual(meta.url, release.STABLE_URL);
+assert.strictEqual(meta.testUrl, release.TEST_URL);
 
 const rolled = release.promote({
     root: root,
