@@ -80,9 +80,64 @@
                 return Number(history[b].updated_at || 0) - Number(history[a].updated_at || 0);
             });
             ids.slice(100).forEach(function (id) { delete history[id]; });
+            persistHistory(history);
+            return saved;
+        }
+
+        function persistHistory(history) {
+            if (!window.Lampa || !window.Lampa.Storage) return;
+            var ids = Object.keys(history).sort(function (a, b) {
+                return Number(history[b].updated_at || 0) - Number(history[a].updated_at || 0);
+            });
+            ids.slice(100).forEach(function (id) { delete history[id]; });
             window.Lampa.Storage.set('yani_playback_history', JSON.stringify(history));
             invalidatePlaybackHistoryCache();
-            return saved;
+        }
+
+        function importRemoteEntries(remoteEntries) {
+            var Home = window.LampaYaniHomeSections;
+            if (!Home || !Home.importRemoteIntoLocal) return {imported: 0, history: playbackHistory()};
+            var result = Home.importRemoteIntoLocal(playbackHistory(), remoteEntries);
+            if (result.imported) persistHistory(result.history);
+            return result;
+        }
+
+        function importVideosProgress(card, videos) {
+            if (!card || !card.yani_id) return {imported: 0};
+            var entries = [];
+            (videos || []).forEach(function (video) {
+                var watched = video && video.watched;
+                if (!watched || typeof watched !== 'object') return;
+                var time = Number(watched.end_time || watched.time || 0);
+                if (!(time > 0) && !watched.completed && !watched.finished) return;
+                var videoData = window.LampaYaniUiUtils && window.LampaYaniUiUtils.videoData
+                    ? window.LampaYaniUiUtils.videoData(video)
+                    : {};
+                entries.push({
+                    anime_id: card.yani_id,
+                    video_id: video.video_id || video.id || '',
+                    number: String(video.number || video.index || ''),
+                    title: card.title || '',
+                    poster: card.poster || card.img || '',
+                    player: String(videoData.player || ''),
+                    voice: String(videoData.dubbing || ''),
+                    time: time,
+                    duration: Math.max(0, Number(video.duration || 0)),
+                    updated_at: Number(watched.updated_at || watched.date || 0)
+                });
+            });
+            return importRemoteEntries(entries);
+        }
+
+        function pullRemoteProgress(limit) {
+            if (!window.LampaYaniAuth || !LampaYaniAuth.token() || !window.LampaYaniApi || !LampaYaniApi.watchHistory) {
+                return Promise.resolve({imported: 0});
+            }
+            return window.LampaYaniApi.watchHistory(limit || 100, 0).then(function (payload) {
+                var Home = window.LampaYaniHomeSections;
+                var remote = Home && Home.normalizeRemoteHistory ? Home.normalizeRemoteHistory(payload) : [];
+                return importRemoteEntries(remote);
+            });
         }
 
         function autoProgressSyncEnabled() {
@@ -154,24 +209,32 @@
                 if (window.Lampa && window.Lampa.Noty) window.Lampa.Noty.show(t('login_required'));
                 return;
             }
-            var history = playbackHistory();
-            var videos = Object.keys(history).map(function (id) {
-                var item = history[id] || {};
-                if (!item.video_id) return null;
-                return {
-                    video_id: Number(item.video_id),
-                    time: Number(item.time || 0),
-                    date: Math.floor(Number(item.updated_at || Date.now()) / 1000)
-                };
-            }).filter(function (item) { return item && item.video_id; });
-            if (!videos.length) {
-                if (window.Lampa && window.Lampa.Noty) window.Lampa.Noty.show(t('history_empty'));
-                return;
-            }
             if (window.Lampa && window.Lampa.Loading && window.Lampa.Loading.start) window.Lampa.Loading.start();
-            window.LampaYaniApi.syncVideoWatches(videos).then(function () {
-                if (window.Lampa && window.Lampa.Loading && window.Lampa.Loading.stop) window.Lampa.Loading.stop();
-                if (window.Lampa && window.Lampa.Noty) window.Lampa.Noty.show(t('sync_history_ok'));
+            pullRemoteProgress(100).catch(function (error) {
+                console.warn('[YummyAnime] Remote history pull failed', error);
+                return {imported: 0};
+            }).then(function (pulled) {
+                var history = playbackHistory();
+                var videos = Object.keys(history).map(function (id) {
+                    var item = history[id] || {};
+                    if (!item.video_id) return null;
+                    return {
+                        video_id: Number(item.video_id),
+                        time: Number(item.time || 0),
+                        date: Math.floor(Number(item.updated_at || Date.now()) / 1000)
+                    };
+                }).filter(function (item) { return item && item.video_id; });
+                if (!videos.length) {
+                    if (window.Lampa && window.Lampa.Loading && window.Lampa.Loading.stop) window.Lampa.Loading.stop();
+                    if (window.Lampa && window.Lampa.Noty) {
+                        window.Lampa.Noty.show(pulled && pulled.imported ? t('sync_history_ok') : t('history_empty'));
+                    }
+                    return;
+                }
+                return window.LampaYaniApi.syncVideoWatches(videos).then(function () {
+                    if (window.Lampa && window.Lampa.Loading && window.Lampa.Loading.stop) window.Lampa.Loading.stop();
+                    if (window.Lampa && window.Lampa.Noty) window.Lampa.Noty.show(t('sync_history_ok'));
+                });
             }).catch(function (error) {
                 if (window.Lampa && window.Lampa.Loading && window.Lampa.Loading.stop) window.Lampa.Loading.stop();
                 console.error('[YummyAnime] History sync failed', error);
@@ -215,6 +278,9 @@
             playbackHistory: playbackHistory,
             getPlayback: getPlayback,
             rememberPlayback: rememberPlayback,
+            importRemoteEntries: importRemoteEntries,
+            importVideosProgress: importVideosProgress,
+            pullRemoteProgress: pullRemoteProgress,
             autoProgressSyncEnabled: autoProgressSyncEnabled,
             syncServerProgress: syncServerProgress,
             renderHistoryProgress: renderHistoryProgress,

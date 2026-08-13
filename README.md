@@ -2,7 +2,7 @@
 
 Extension for Lampa powered by the YummyAnime (Yani) API.
 
-Current version: `0.41.44`
+Current version: `0.41.45`
 
 See the [changelog](CHANGELOG.md) for release history.
 

@@ -145,6 +145,9 @@
     var playbackHistory = playbackHistoryApi.playbackHistory;
     var getPlayback = playbackHistoryApi.getPlayback;
     var rememberPlayback = playbackHistoryApi.rememberPlayback;
+    var importRemoteEntries = playbackHistoryApi.importRemoteEntries;
+    var importVideosProgress = playbackHistoryApi.importVideosProgress;
+    var pullRemoteProgress = playbackHistoryApi.pullRemoteProgress;
     var autoProgressSyncEnabled = playbackHistoryApi.autoProgressSyncEnabled;
     var syncServerProgress = playbackHistoryApi.syncServerProgress;
     var renderHistoryProgress = playbackHistoryApi.renderHistoryProgress;
@@ -1270,6 +1273,8 @@
 
             function applyPlaybackSnapshot(remoteEntries, excludedAnimeIds) {
                 if (destroyed) return;
+                if (remoteEntries && remoteEntries.length) importRemoteEntries(remoteEntries);
+                localHistory = playbackHistory();
                 var merged = LampaYaniHomeSections.mergeHistory(localHistory, remoteEntries || []);
                 continuing = LampaYaniHomeSections.continueWatchingEntries(merged, excludedAnimeIds || {});
                 renderLibraryStrip(LampaYaniHomeInsights.libraryPreview(continuing, 3));
@@ -1707,6 +1712,7 @@
             authorized: function () { return Boolean(LampaYaniAuth.token()); },
             fetchRemote: LampaYaniApi.watchHistory,
             fetchExcluded: loadContinueWatchingExclusions,
+            importRemote: importRemoteEntries,
             historyCardRender: bindHistoryCardRender
         });
     }
@@ -1978,7 +1984,8 @@
         return LampaYaniAuthPage.create(object, {
             t: t,
             input: showYummyInput,
-            goBack: goBack
+            goBack: goBack,
+            onAuthorized: function () { pullRemoteProgress(100).catch(function () {}); }
         });
     }
 
@@ -2475,7 +2482,8 @@
             movePageDown: movePageDown,
             goBack: goBack,
             cleanCommentText: cleanCommentText,
-            loadVideos: function (id, options) { return videoData.list(id, options); }
+            loadVideos: function (id, options) { return videoData.list(id, options); },
+            importVideosProgress: importVideosProgress
         });
     }
 

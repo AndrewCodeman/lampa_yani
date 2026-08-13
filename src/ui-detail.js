@@ -219,7 +219,10 @@
                     return Object.prototype.toString.call(videos) === '[object Array]' ? videos : [];
                 });
             };
-            return load(data.yani_id, {signal: videosAbort && videosAbort.signal});
+            return load(data.yani_id, {signal: videosAbort && videosAbort.signal}).then(function (videos) {
+                if (deps.importVideosProgress) deps.importVideosProgress(data, videos);
+                return videos;
+            });
         }
 
         comp.create = function () {

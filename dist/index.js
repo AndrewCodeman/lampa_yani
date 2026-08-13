@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.41.44',
+        version: '0.41.45',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -136,11 +136,11 @@ function pluginYummyAnime() {
     messages.ru.notifications_yesterday = 'Вчера';
     messages.ru.notifications_earlier = 'Ранее';
     messages.ru.sync_history = 'Синхронизировать просмотр';
-    messages.ru.sync_history_description = 'Отправить локальную историю в аккаунт YummyAnime';
+    messages.ru.sync_history_description = 'Подтянуть прогресс из аккаунта YummyAnime и отправить локальную историю';
     messages.ru.sync_history_ok = 'История просмотра синхронизирована';
     messages.ru.sync_history_error = 'Не удалось синхронизировать историю';
     messages.ru.auto_sync_progress = 'Автосинхронизация прогресса';
-    messages.ru.auto_sync_progress_description = 'Автоматически сохранять в аккаунте YummyAnime прогресс внутреннего плеера Lampa. При отключении доступна ручная синхронизация на странице аккаунта';
+    messages.ru.auto_sync_progress_description = 'Автоматически сохранять в аккаунте YummyAnime прогресс внутреннего плеера Lampa и подтягивать серверный прогресс на главный экран, в историю и карточку тайтла. При отключении доступна ручная синхронизация на странице аккаунта';
     messages.ru.user_lists = 'Мои списки';
     messages.ru.more = 'Ещё';
     messages.ru.user_lists_description = 'Списки вашего аккаунта YummyAnime';
@@ -229,11 +229,11 @@ function pluginYummyAnime() {
     messages.en.notifications_yesterday = 'Yesterday';
     messages.en.notifications_earlier = 'Earlier';
     messages.en.sync_history = 'Sync watch history';
-    messages.en.sync_history_description = 'Send local history to your YummyAnime account';
+    messages.en.sync_history_description = 'Pull watch progress from your YummyAnime account and send local history back';
     messages.en.sync_history_ok = 'Watch history synchronized';
     messages.en.sync_history_error = 'Failed to synchronize history';
     messages.en.auto_sync_progress = 'Automatic progress sync';
-    messages.en.auto_sync_progress_description = 'Automatically save internal Lampa player progress to the YummyAnime account. When disabled, manual sync is available on the account page';
+    messages.en.auto_sync_progress_description = 'Automatically save internal Lampa player progress to the YummyAnime account and pull server progress onto the home screen, history and title card. When disabled, manual sync is available on the account page';
     messages.en.user_lists = 'My Lists';
     messages.en.more = 'More';
     messages.en.user_lists_description = 'Lists from your YummyAnime account';
@@ -658,11 +658,11 @@ function pluginYummyAnime() {
     messages.uk.notifications_yesterday = 'Учора';
     messages.uk.notifications_earlier = 'Раніше';
     messages.uk.sync_history = 'Синхронізувати перегляд';
-    messages.uk.sync_history_description = 'Надіслати локальну історію до облікового запису YummyAnime';
+    messages.uk.sync_history_description = 'Підтягнути прогрес з облікового запису YummyAnime і надіслати локальну історію';
     messages.uk.sync_history_ok = 'Історію перегляду синхронізовано';
     messages.uk.sync_history_error = 'Не вдалося синхронізувати історію';
     messages.uk.auto_sync_progress = 'Автосинхронізація прогресу';
-    messages.uk.auto_sync_progress_description = 'Автоматично зберігати в обліковому записі YummyAnime прогрес внутрішнього плеєра Lampa. Після вимкнення доступна ручна синхронізація на сторінці облікового запису';
+    messages.uk.auto_sync_progress_description = 'Автоматично зберігати в обліковому записі YummyAnime прогрес внутрішнього плеєра Lampa і підтягувати серверний прогрес на головний екран, в історію та картку тайтла. Після вимкнення доступна ручна синхронізація на сторінці облікового запису';
     messages.uk.user_lists = 'Мої списки';
     messages.uk.more = 'Ще';
     messages.uk.user_lists_description = 'Списки вашого облікового запису YummyAnime';
@@ -5747,9 +5747,64 @@ function pluginYummyAnime() {
                 return Number(history[b].updated_at || 0) - Number(history[a].updated_at || 0);
             });
             ids.slice(100).forEach(function (id) { delete history[id]; });
+            persistHistory(history);
+            return saved;
+        }
+
+        function persistHistory(history) {
+            if (!window.Lampa || !window.Lampa.Storage) return;
+            var ids = Object.keys(history).sort(function (a, b) {
+                return Number(history[b].updated_at || 0) - Number(history[a].updated_at || 0);
+            });
+            ids.slice(100).forEach(function (id) { delete history[id]; });
             window.Lampa.Storage.set('yani_playback_history', JSON.stringify(history));
             invalidatePlaybackHistoryCache();
-            return saved;
+        }
+
+        function importRemoteEntries(remoteEntries) {
+            var Home = window.LampaYaniHomeSections;
+            if (!Home || !Home.importRemoteIntoLocal) return {imported: 0, history: playbackHistory()};
+            var result = Home.importRemoteIntoLocal(playbackHistory(), remoteEntries);
+            if (result.imported) persistHistory(result.history);
+            return result;
+        }
+
+        function importVideosProgress(card, videos) {
+            if (!card || !card.yani_id) return {imported: 0};
+            var entries = [];
+            (videos || []).forEach(function (video) {
+                var watched = video && video.watched;
+                if (!watched || typeof watched !== 'object') return;
+                var time = Number(watched.end_time || watched.time || 0);
+                if (!(time > 0) && !watched.completed && !watched.finished) return;
+                var videoData = window.LampaYaniUiUtils && window.LampaYaniUiUtils.videoData
+                    ? window.LampaYaniUiUtils.videoData(video)
+                    : {};
+                entries.push({
+                    anime_id: card.yani_id,
+                    video_id: video.video_id || video.id || '',
+                    number: String(video.number || video.index || ''),
+                    title: card.title || '',
+                    poster: card.poster || card.img || '',
+                    player: String(videoData.player || ''),
+                    voice: String(videoData.dubbing || ''),
+                    time: time,
+                    duration: Math.max(0, Number(video.duration || 0)),
+                    updated_at: Number(watched.updated_at || watched.date || 0)
+                });
+            });
+            return importRemoteEntries(entries);
+        }
+
+        function pullRemoteProgress(limit) {
+            if (!window.LampaYaniAuth || !LampaYaniAuth.token() || !window.LampaYaniApi || !LampaYaniApi.watchHistory) {
+                return Promise.resolve({imported: 0});
+            }
+            return window.LampaYaniApi.watchHistory(limit || 100, 0).then(function (payload) {
+                var Home = window.LampaYaniHomeSections;
+                var remote = Home && Home.normalizeRemoteHistory ? Home.normalizeRemoteHistory(payload) : [];
+                return importRemoteEntries(remote);
+            });
         }
 
         function autoProgressSyncEnabled() {
@@ -5821,24 +5876,32 @@ function pluginYummyAnime() {
                 if (window.Lampa && window.Lampa.Noty) window.Lampa.Noty.show(t('login_required'));
                 return;
             }
-            var history = playbackHistory();
-            var videos = Object.keys(history).map(function (id) {
-                var item = history[id] || {};
-                if (!item.video_id) return null;
-                return {
-                    video_id: Number(item.video_id),
-                    time: Number(item.time || 0),
-                    date: Math.floor(Number(item.updated_at || Date.now()) / 1000)
-                };
-            }).filter(function (item) { return item && item.video_id; });
-            if (!videos.length) {
-                if (window.Lampa && window.Lampa.Noty) window.Lampa.Noty.show(t('history_empty'));
-                return;
-            }
             if (window.Lampa && window.Lampa.Loading && window.Lampa.Loading.start) window.Lampa.Loading.start();
-            window.LampaYaniApi.syncVideoWatches(videos).then(function () {
-                if (window.Lampa && window.Lampa.Loading && window.Lampa.Loading.stop) window.Lampa.Loading.stop();
-                if (window.Lampa && window.Lampa.Noty) window.Lampa.Noty.show(t('sync_history_ok'));
+            pullRemoteProgress(100).catch(function (error) {
+                console.warn('[YummyAnime] Remote history pull failed', error);
+                return {imported: 0};
+            }).then(function (pulled) {
+                var history = playbackHistory();
+                var videos = Object.keys(history).map(function (id) {
+                    var item = history[id] || {};
+                    if (!item.video_id) return null;
+                    return {
+                        video_id: Number(item.video_id),
+                        time: Number(item.time || 0),
+                        date: Math.floor(Number(item.updated_at || Date.now()) / 1000)
+                    };
+                }).filter(function (item) { return item && item.video_id; });
+                if (!videos.length) {
+                    if (window.Lampa && window.Lampa.Loading && window.Lampa.Loading.stop) window.Lampa.Loading.stop();
+                    if (window.Lampa && window.Lampa.Noty) {
+                        window.Lampa.Noty.show(pulled && pulled.imported ? t('sync_history_ok') : t('history_empty'));
+                    }
+                    return;
+                }
+                return window.LampaYaniApi.syncVideoWatches(videos).then(function () {
+                    if (window.Lampa && window.Lampa.Loading && window.Lampa.Loading.stop) window.Lampa.Loading.stop();
+                    if (window.Lampa && window.Lampa.Noty) window.Lampa.Noty.show(t('sync_history_ok'));
+                });
             }).catch(function (error) {
                 if (window.Lampa && window.Lampa.Loading && window.Lampa.Loading.stop) window.Lampa.Loading.stop();
                 console.error('[YummyAnime] History sync failed', error);
@@ -5882,6 +5945,9 @@ function pluginYummyAnime() {
             playbackHistory: playbackHistory,
             getPlayback: getPlayback,
             rememberPlayback: rememberPlayback,
+            importRemoteEntries: importRemoteEntries,
+            importVideosProgress: importVideosProgress,
+            pullRemoteProgress: pullRemoteProgress,
             autoProgressSyncEnabled: autoProgressSyncEnabled,
             syncServerProgress: syncServerProgress,
             renderHistoryProgress: renderHistoryProgress,
@@ -7706,7 +7772,7 @@ function pluginYummyAnime() {
         function submit() {
             if (!login) return Lampa.Noty.show(deps.t('email_required')); if (!password) return Lampa.Noty.show(deps.t('password_required'));
             Lampa.Loading && Lampa.Loading.start && Lampa.Loading.start();
-            LampaYaniAuth.login(login, password).then(function () { return LampaYaniApi.profile().then(function (payload) { var profile = payload && payload.response ? payload.response : payload, current = LampaYaniAuth.get(); LampaYaniAuth.save({token: current.token, login: current.login, display_name: profile && (profile.nickname || profile.name) || current.login}); }).catch(function () {}); }).then(function () { password = ''; Lampa.Noty.show(deps.t('login_ok')); deps.goBack(); }).catch(function (error) { console.error('[YummyAnime Auth]', error); Lampa.Noty.show(deps.t('login_error')); }).then(function () { Lampa.Loading && Lampa.Loading.stop && Lampa.Loading.stop(); });
+            LampaYaniAuth.login(login, password).then(function () { return LampaYaniApi.profile().then(function (payload) { var profile = payload && payload.response ? payload.response : payload, current = LampaYaniAuth.get(); LampaYaniAuth.save({token: current.token, login: current.login, display_name: profile && (profile.nickname || profile.name) || current.login}); }).catch(function () {}); }).then(function () { password = ''; Lampa.Noty.show(deps.t('login_ok')); if (deps.onAuthorized) deps.onAuthorized(); deps.goBack(); }).catch(function (error) { console.error('[YummyAnime Auth]', error); Lampa.Noty.show(deps.t('login_error')); }).then(function () { Lampa.Loading && Lampa.Loading.stop && Lampa.Loading.stop(); });
         }
         function refresh() { LampaYaniAuth.refresh().then(function () { Lampa.Noty.show(deps.t('token_refreshed')); render(); }).catch(function () { Lampa.Noty.show(deps.t('token_refresh_error')); }); }
         function logout() { LampaYaniAuth.logout().then(function () { Lampa.Noty.show(deps.t('logged_out')); render(); }).catch(function () { Lampa.Noty.show(deps.t('token_removed')); render(); }); }
@@ -8526,21 +8592,23 @@ function pluginYummyAnime() {
         return historyPayloadItems(payload).map(function (item) {
             item = item || {};
             var screenshot = item.screenshot || {};
-            var animeId = item.anime_id || item.animeId || item.id;
+            var anime = item.anime && typeof item.anime === 'object' ? item.anime : {};
+            var watched = item.watched && typeof item.watched === 'object' ? item.watched : {};
+            var animeId = item.anime_id || item.animeId || anime.anime_id || anime.id;
             if (!animeId) return null;
             return {
                 anime_id: animeId,
-                video_id: item.video_id || item.videoId || '',
-                number: String(item.episode || screenshot.episode || item.number || ''),
+                video_id: item.video_id || item.videoId || item.video && item.video.id || '',
+                number: String(item.episode || screenshot.episode || item.number || watched.episode || ''),
                 episode_title: item.ep_title || item.episode_title || screenshot.title || '',
-                title: item.title || item.anime_title || '',
-                poster: historyPoster(item.poster) || historyPoster(screenshot.poster) || historyPoster(screenshot),
+                title: item.title || item.anime_title || anime.title || '',
+                poster: historyPoster(item.poster) || historyPoster(screenshot.poster) || historyPoster(anime.poster) || historyPoster(screenshot),
                 screenshot: historyScreenshot(item.screenshot_url || screenshot),
                 player: String(item.player_title || item.player || ''),
                 voice: String(item.dub_title || item.dubbing || ''),
-                time: Math.max(0, Number(item.end_time || item.time || 0)),
-                duration: Math.max(0, Number(item.duration || 0)),
-                updated_at: historyTimestamp(item.date || item.updated_at || item.created_at),
+                time: Math.max(0, Number(item.end_time || item.time || watched.end_time || watched.time || item.current_time || 0)),
+                duration: Math.max(0, Number(item.duration || watched.duration || 0)),
+                updated_at: historyTimestamp(item.date || item.updated_at || item.created_at || watched.updated_at || watched.date),
                 remote: true
             };
         }).filter(Boolean);
@@ -8625,6 +8693,61 @@ function pluginYummyAnime() {
         });
     }
 
+    function hasClockTimestamp(value) {
+        return Number(value || 0) >= 1000000000;
+    }
+
+    function shouldReplaceLocal(current, entry) {
+        if (!current) return true;
+        var remoteAt = Number(entry && entry.updated_at || 0);
+        var localAt = Number(current.updated_at || 0);
+        if (hasClockTimestamp(remoteAt) && hasClockTimestamp(localAt)) {
+            if (remoteAt > localAt) return true;
+            return remoteAt === localAt && Number(entry.time || 0) > Number(current.time || 0);
+        }
+        var remoteEpisode = Number(entry && entry.number || 0);
+        var localEpisode = Number(current.number || 0);
+        if (remoteEpisode > localEpisode) return true;
+        return remoteEpisode === localEpisode && Number(entry && entry.time || 0) > Number(current.time || 0);
+    }
+
+    function importRemoteIntoLocal(localSaved, remoteEntries) {
+        var history = {};
+        Object.keys(localSaved || {}).forEach(function (id) { history[id] = localSaved[id]; });
+        var latest = {};
+        (remoteEntries || []).forEach(function (entry) {
+            var id = String(entry && entry.anime_id || '');
+            if (!id) return;
+            if (!latest[id] || Number(entry.updated_at || 0) > Number(latest[id].updated_at || 0)) latest[id] = entry;
+        });
+        var imported = 0;
+        Object.keys(latest).forEach(function (id) {
+            var entry = latest[id];
+            var current = history[id];
+            if (!shouldReplaceLocal(current, entry)) return;
+            history[id] = {
+                number: String(entry.number || current && current.number || ''),
+                video_id: entry.video_id || current && current.video_id || '',
+                time: Number(entry.time || 0),
+                duration: Math.max(0, Number(entry.duration || current && current.duration || 0)),
+                player: String(entry.player || current && current.player || '').toLowerCase(),
+                voice: String(entry.voice || current && current.voice || ''),
+                episode_url: current && current.episode_url || '',
+                title: entry.title || current && current.title || '',
+                poster: entry.poster || current && current.poster || '',
+                card: current && current.card || {
+                    title: entry.title || '',
+                    poster: entry.poster || '',
+                    anime_id: entry.anime_id
+                },
+                updated_at: Number(entry.updated_at || Date.now()),
+                remote: true
+            };
+            imported += 1;
+        });
+        return {history: history, imported: imported};
+    }
+
     function attachHistoryEntry(card, entry) {
         card.yani_id = card.yani_id || Number(entry.anime_id) || entry.anime_id;
         card.yani_resume = {
@@ -8700,7 +8823,8 @@ function pluginYummyAnime() {
             Promise.all([remote, exclusions]).then(function (result) {
                 var page = result[0];
                 hasMore = !continueMode && deps.authorized() && !page.failed && page.count >= limit;
-                var entries = mergeHistory(local, page.entries);
+                if (page.entries && page.entries.length && deps.importRemote) deps.importRemote(page.entries);
+                var entries = mergeHistory(deps.history() || local, page.entries);
                 if (continueMode) entries = continueWatchingEntries(entries, result[1]);
                 return cardsFor(uniqueEntries(entries));
             }).then(function (cards) {
@@ -8721,6 +8845,7 @@ function pluginYummyAnime() {
             }
             loadRemotePage().then(function (page) {
                 hasMore = page.count >= limit;
+                if (page.entries && page.entries.length && deps.importRemote) deps.importRemote(page.entries);
                 return cardsFor(uniqueEntries(page.entries));
             }).then(function (cards) {
                 resolve({
@@ -8748,7 +8873,9 @@ function pluginYummyAnime() {
         mergeHistory: mergeHistory,
         historyEntryKey: historyEntryKey,
         isContinueEntry: isContinueEntry,
-        continueWatchingEntries: continueWatchingEntries
+        continueWatchingEntries: continueWatchingEntries,
+        importRemoteIntoLocal: importRemoteIntoLocal,
+        shouldReplaceLocal: shouldReplaceLocal
     };
 }(window));
 
@@ -10105,7 +10232,10 @@ function pluginYummyAnime() {
                     return Object.prototype.toString.call(videos) === '[object Array]' ? videos : [];
                 });
             };
-            return load(data.yani_id, {signal: videosAbort && videosAbort.signal});
+            return load(data.yani_id, {signal: videosAbort && videosAbort.signal}).then(function (videos) {
+                if (deps.importVideosProgress) deps.importVideosProgress(data, videos);
+                return videos;
+            });
         }
 
         comp.create = function () {
@@ -10817,6 +10947,9 @@ function pluginYummyAnime() {
     var playbackHistory = playbackHistoryApi.playbackHistory;
     var getPlayback = playbackHistoryApi.getPlayback;
     var rememberPlayback = playbackHistoryApi.rememberPlayback;
+    var importRemoteEntries = playbackHistoryApi.importRemoteEntries;
+    var importVideosProgress = playbackHistoryApi.importVideosProgress;
+    var pullRemoteProgress = playbackHistoryApi.pullRemoteProgress;
     var autoProgressSyncEnabled = playbackHistoryApi.autoProgressSyncEnabled;
     var syncServerProgress = playbackHistoryApi.syncServerProgress;
     var renderHistoryProgress = playbackHistoryApi.renderHistoryProgress;
@@ -11942,6 +12075,8 @@ function pluginYummyAnime() {
 
             function applyPlaybackSnapshot(remoteEntries, excludedAnimeIds) {
                 if (destroyed) return;
+                if (remoteEntries && remoteEntries.length) importRemoteEntries(remoteEntries);
+                localHistory = playbackHistory();
                 var merged = LampaYaniHomeSections.mergeHistory(localHistory, remoteEntries || []);
                 continuing = LampaYaniHomeSections.continueWatchingEntries(merged, excludedAnimeIds || {});
                 renderLibraryStrip(LampaYaniHomeInsights.libraryPreview(continuing, 3));
@@ -12379,6 +12514,7 @@ function pluginYummyAnime() {
             authorized: function () { return Boolean(LampaYaniAuth.token()); },
             fetchRemote: LampaYaniApi.watchHistory,
             fetchExcluded: loadContinueWatchingExclusions,
+            importRemote: importRemoteEntries,
             historyCardRender: bindHistoryCardRender
         });
     }
@@ -12650,7 +12786,8 @@ function pluginYummyAnime() {
         return LampaYaniAuthPage.create(object, {
             t: t,
             input: showYummyInput,
-            goBack: goBack
+            goBack: goBack,
+            onAuthorized: function () { pullRemoteProgress(100).catch(function () {}); }
         });
     }
 
@@ -13147,7 +13284,8 @@ function pluginYummyAnime() {
             movePageDown: movePageDown,
             goBack: goBack,
             cleanCommentText: cleanCommentText,
-            loadVideos: function (id, options) { return videoData.list(id, options); }
+            loadVideos: function (id, options) { return videoData.list(id, options); },
+            importVideosProgress: importVideosProgress
         });
     }
 

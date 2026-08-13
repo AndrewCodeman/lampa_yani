@@ -31,21 +31,23 @@
         return historyPayloadItems(payload).map(function (item) {
             item = item || {};
             var screenshot = item.screenshot || {};
-            var animeId = item.anime_id || item.animeId || item.id;
+            var anime = item.anime && typeof item.anime === 'object' ? item.anime : {};
+            var watched = item.watched && typeof item.watched === 'object' ? item.watched : {};
+            var animeId = item.anime_id || item.animeId || anime.anime_id || anime.id;
             if (!animeId) return null;
             return {
                 anime_id: animeId,
-                video_id: item.video_id || item.videoId || '',
-                number: String(item.episode || screenshot.episode || item.number || ''),
+                video_id: item.video_id || item.videoId || item.video && item.video.id || '',
+                number: String(item.episode || screenshot.episode || item.number || watched.episode || ''),
                 episode_title: item.ep_title || item.episode_title || screenshot.title || '',
-                title: item.title || item.anime_title || '',
-                poster: historyPoster(item.poster) || historyPoster(screenshot.poster) || historyPoster(screenshot),
+                title: item.title || item.anime_title || anime.title || '',
+                poster: historyPoster(item.poster) || historyPoster(screenshot.poster) || historyPoster(anime.poster) || historyPoster(screenshot),
                 screenshot: historyScreenshot(item.screenshot_url || screenshot),
                 player: String(item.player_title || item.player || ''),
                 voice: String(item.dub_title || item.dubbing || ''),
-                time: Math.max(0, Number(item.end_time || item.time || 0)),
-                duration: Math.max(0, Number(item.duration || 0)),
-                updated_at: historyTimestamp(item.date || item.updated_at || item.created_at),
+                time: Math.max(0, Number(item.end_time || item.time || watched.end_time || watched.time || item.current_time || 0)),
+                duration: Math.max(0, Number(item.duration || watched.duration || 0)),
+                updated_at: historyTimestamp(item.date || item.updated_at || item.created_at || watched.updated_at || watched.date),
                 remote: true
             };
         }).filter(Boolean);
@@ -130,6 +132,61 @@
         });
     }
 
+    function hasClockTimestamp(value) {
+        return Number(value || 0) >= 1000000000;
+    }
+
+    function shouldReplaceLocal(current, entry) {
+        if (!current) return true;
+        var remoteAt = Number(entry && entry.updated_at || 0);
+        var localAt = Number(current.updated_at || 0);
+        if (hasClockTimestamp(remoteAt) && hasClockTimestamp(localAt)) {
+            if (remoteAt > localAt) return true;
+            return remoteAt === localAt && Number(entry.time || 0) > Number(current.time || 0);
+        }
+        var remoteEpisode = Number(entry && entry.number || 0);
+        var localEpisode = Number(current.number || 0);
+        if (remoteEpisode > localEpisode) return true;
+        return remoteEpisode === localEpisode && Number(entry && entry.time || 0) > Number(current.time || 0);
+    }
+
+    function importRemoteIntoLocal(localSaved, remoteEntries) {
+        var history = {};
+        Object.keys(localSaved || {}).forEach(function (id) { history[id] = localSaved[id]; });
+        var latest = {};
+        (remoteEntries || []).forEach(function (entry) {
+            var id = String(entry && entry.anime_id || '');
+            if (!id) return;
+            if (!latest[id] || Number(entry.updated_at || 0) > Number(latest[id].updated_at || 0)) latest[id] = entry;
+        });
+        var imported = 0;
+        Object.keys(latest).forEach(function (id) {
+            var entry = latest[id];
+            var current = history[id];
+            if (!shouldReplaceLocal(current, entry)) return;
+            history[id] = {
+                number: String(entry.number || current && current.number || ''),
+                video_id: entry.video_id || current && current.video_id || '',
+                time: Number(entry.time || 0),
+                duration: Math.max(0, Number(entry.duration || current && current.duration || 0)),
+                player: String(entry.player || current && current.player || '').toLowerCase(),
+                voice: String(entry.voice || current && current.voice || ''),
+                episode_url: current && current.episode_url || '',
+                title: entry.title || current && current.title || '',
+                poster: entry.poster || current && current.poster || '',
+                card: current && current.card || {
+                    title: entry.title || '',
+                    poster: entry.poster || '',
+                    anime_id: entry.anime_id
+                },
+                updated_at: Number(entry.updated_at || Date.now()),
+                remote: true
+            };
+            imported += 1;
+        });
+        return {history: history, imported: imported};
+    }
+
     function attachHistoryEntry(card, entry) {
         card.yani_id = card.yani_id || Number(entry.anime_id) || entry.anime_id;
         card.yani_resume = {
@@ -205,7 +262,8 @@
             Promise.all([remote, exclusions]).then(function (result) {
                 var page = result[0];
                 hasMore = !continueMode && deps.authorized() && !page.failed && page.count >= limit;
-                var entries = mergeHistory(local, page.entries);
+                if (page.entries && page.entries.length && deps.importRemote) deps.importRemote(page.entries);
+                var entries = mergeHistory(deps.history() || local, page.entries);
                 if (continueMode) entries = continueWatchingEntries(entries, result[1]);
                 return cardsFor(uniqueEntries(entries));
             }).then(function (cards) {
@@ -226,6 +284,7 @@
             }
             loadRemotePage().then(function (page) {
                 hasMore = page.count >= limit;
+                if (page.entries && page.entries.length && deps.importRemote) deps.importRemote(page.entries);
                 return cardsFor(uniqueEntries(page.entries));
             }).then(function (cards) {
                 resolve({
@@ -253,6 +312,8 @@
         mergeHistory: mergeHistory,
         historyEntryKey: historyEntryKey,
         isContinueEntry: isContinueEntry,
-        continueWatchingEntries: continueWatchingEntries
+        continueWatchingEntries: continueWatchingEntries,
+        importRemoteIntoLocal: importRemoteIntoLocal,
+        shouldReplaceLocal: shouldReplaceLocal
     };
 }(window));

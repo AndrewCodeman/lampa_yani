@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.45 — 2026-08-13
+
+- Pull YummyAnime watch progress into local history so title cards, resume and Continue Watching use the account, not only Lampa playback.
+
 ## 0.41.44 — 2026-08-13
 
 - Keep a permanent test install URL at dist/index.js, without a version query that pins Lampa to an old build.

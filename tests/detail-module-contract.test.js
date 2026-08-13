@@ -15,5 +15,7 @@ assert.match(detail, /function createDetailTranslations\(\)/);
 assert.match(detail, /function createDetailListPanel\(cardData\)/);
 assert.match(detail, /function createDetailRatingAction\(cardData\)/);
 assert.match(detail, /window\.LampaYaniDetail\s*=\s*\{create: create\}/);
+assert.match(detail, /deps\.importVideosProgress\(data, videos\)/);
+assert.match(ui, /importVideosProgress: importVideosProgress/);
 
 console.log('detail module contract checks passed');

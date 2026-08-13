@@ -19,6 +19,10 @@ assert.match(source, /hover:enter\.yaniHistory click\.yaniHistory/);
 assert.match(source, /yani-card-history-progress/);
 assert.match(source, /yani_playback_history/);
 assert.match(source, /syncVideoWatches\(videos\)/);
+assert.match(source, /function importRemoteEntries/);
+assert.match(source, /function pullRemoteProgress/);
+assert.match(source, /watchHistory\(limit \|\| 100, 0\)/);
+assert.match(ui, /onAuthorized: function \(\) \{ pullRemoteProgress/);
 
 const storage = {};
 const context = {
@@ -79,5 +83,20 @@ assert.strictEqual(saved.video_id, 99);
 assert.strictEqual(saved.time, 100);
 assert.strictEqual(api.getPlayback(42).player, 'kodik');
 assert.ok(!api.autoProgressSyncEnabled());
+
+vm.runInNewContext(fs.readFileSync('src/ui-home-sections.js', 'utf8'), context);
+const imported = api.importRemoteEntries([{
+    anime_id: 77,
+    video_id: 7701,
+    number: '5',
+    time: 240,
+    duration: 1400,
+    title: 'Remote title',
+    poster: 'r.jpg',
+    updated_at: Date.now()
+}]);
+assert.strictEqual(imported.imported, 1);
+assert.strictEqual(api.getPlayback(77).time, 240);
+assert.strictEqual(api.getPlayback(77).number, '5');
 
 console.log('playback history module contract checks passed');

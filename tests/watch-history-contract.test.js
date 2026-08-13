@@ -29,6 +29,11 @@ assert.match(ui, /function applyPlaybackSnapshot\(remoteEntries, excludedAnimeId
 assert.match(ui, /LampaYaniApi\.watchHistory\(30, 0, control\)\.then\(LampaYaniHomeSections\.normalizeRemoteHistory\)/);
 assert.match(ui, /readHomePlaybackSnapshot\(playbackUserKey\)/);
 assert.match(ui, /cacheHomePlaybackSnapshot\(playbackUserKey, result\[0\], result\[1\]\)/);
+assert.match(ui, /importRemoteEntries\(remoteEntries\)/);
+assert.match(ui, /importRemote: importRemoteEntries/);
+assert.match(historySource, /function pullRemoteProgress/);
+assert.match(historySource, /function importVideosProgress/);
+assert.match(sectionsSource, /function importRemoteIntoLocal/);
 assert.match(ui, /homePlaybackCacheLifetime = 300000/);
 assert.match(ui, /if \(cached\.fresh\) return cached\.ids/, 'fresh exclusions should avoid reloading the complete user library');
 assert.match(ui, /\[2, 3\]\.forEach\(function \(listId\)/, 'completed and dropped lists must be excluded');
@@ -58,6 +63,28 @@ assert.strictEqual(remote[0].number, '7');
 assert.strictEqual(remote[0].time, 333);
 assert.strictEqual(remote[0].updated_at, 1720000000000);
 assert.strictEqual(remote[0].poster, 'https://img.example/poster.jpg');
+
+const nested = history.normalizeRemoteHistory({response: [{
+    anime: {id: 55, title: 'Nested'},
+    video: {id: 5501},
+    watched: {end_time: 210, duration: 1400, date: 1720000100},
+    episode: 4
+}]});
+assert.strictEqual(nested[0].anime_id, 55);
+assert.strictEqual(nested[0].video_id, 5501);
+assert.strictEqual(nested[0].time, 210);
+assert.strictEqual(nested[0].number, '4');
+
+const imported = history.importRemoteIntoLocal({
+    42: {video_id: 4207, number: '7', time: 120, updated_at: 1710000000000, title: 'Stored'}
+}, remote);
+assert.strictEqual(imported.imported, 1);
+assert.strictEqual(imported.history[42].time, 333, 'newer remote progress must be written into local storage');
+assert.strictEqual(imported.history[42].title, 'Example');
+const kept = history.importRemoteIntoLocal(imported.history, [{
+    anime_id: 42, video_id: 4207, number: '7', time: 10, updated_at: 1700000000000
+}]);
+assert.strictEqual(kept.imported, 0, 'older remote progress must not overwrite newer local progress');
 
 const merged = history.mergeHistory({
     42: {
