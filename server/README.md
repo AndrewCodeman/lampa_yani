@@ -1,5 +1,9 @@
 # Yani resolver
 
+> The parent plugin repository is no longer maintained.
+> The official YummyAnime Lampa extension lives at
+> https://github.com/yummyanime/yummy-lampa-plugin
+
 Self-hosted service that turns an Alloha player page into a plain HLS URL that
 Lampa's internal player, or any external media player, can open.
 

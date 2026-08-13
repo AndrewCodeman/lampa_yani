@@ -1,5 +1,7 @@
 # Changelog
 
+This repository is no longer maintained. Further releases are published in the official extension: https://github.com/yummyanime/yummy-lampa-plugin
+
 ## 0.41.46 — 2026-08-13
 
 - Show unread notifications on the home tile even when the counts API returns 0, by checking the notification list and keeping the cache in sync.

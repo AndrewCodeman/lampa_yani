@@ -1,5 +1,11 @@
 # Lampa Yani — Documentation
 
+> **This repository is no longer maintained.**
+> Development continues as the official YummyAnime Lampa extension:
+> **https://github.com/yummyanime/yummy-lampa-plugin**
+>
+> Install and update the plugin from that repository. The documentation below describes the last version published here and is kept as an archive.
+
 A new Lampa extension powered by the official YummyAnime (Yani) API.
 
 ## MVP features
@@ -45,15 +51,17 @@ A new Lampa extension powered by the official YummyAnime (Yani) API.
 2. The extension uses the built-in public application key for YummyAnime for Lampa by default.
 3. If necessary, open `Settings → YummyAnime → Public application key` to set another public key. Leave the field empty to restore the default key. Never enter a private application key there.
 
-Install the bundled file from GitHub Pages. There are two URLs:
+Install the official build. There are two URLs:
 
-Production — a verified release. The URL stays the same; a serious bug is rolled back by promoting an earlier git tag.
+Production — a verified release from the official repository.
 
-`https://andrewcodeman.github.io/lampa_yani/stable/index.js`
+`https://yummyanime.github.io/yummy-lampa-plugin/stable/index.js`
 
-Test — the latest `main` build, including changes that are not a production release yet. The URL stays the same.
+Test — the latest official `main` build.
 
-`https://andrewcodeman.github.io/lampa_yani/dist/index.js`
+`https://yummyanime.github.io/yummy-lampa-plugin/dist/index.js`
+
+The install URLs of this repository are no longer supported.
 
 Verified versions are tagged `vX.Y.Z`. Release and rollback:
 
