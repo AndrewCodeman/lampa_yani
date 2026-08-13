@@ -1355,10 +1355,15 @@
                 refreshPriority();
             }
             if (notificationCache.available) renderNotifications(notificationCache.count);
-            if (LampaYaniAuth.token() && homeButtons.notifications && !notificationCache.fresh) scheduleHomeTask(function () {
+            if (LampaYaniAuth.token() && homeButtons.notifications && (!notificationCache.fresh || notificationCache.count === 0)) scheduleHomeTask(function () {
                 LampaYaniApi.notificationCounts(homeRequestControl()).then(function (payload) {
-                    if (destroyed) return;
                     var count = LampaYaniHomeInsights.notificationCount(payload);
+                    if (count > 0) return count;
+                    return LampaYaniApi.notifications(30, 0).then(function (list) {
+                        return LampaYaniHomeInsights.resolveNotificationCount(payload, list);
+                    }).catch(function () { return count; });
+                }).then(function (count) {
+                    if (destroyed) return;
                     cacheHomeNotificationCount(notificationUserKey, count);
                     renderNotifications(count);
                 }).catch(function (error) {
@@ -2067,6 +2072,10 @@
             markRead: LampaYaniApi.markNotificationRead,
             markAllRead: LampaYaniApi.markAllNotificationsRead,
             deleteAll: LampaYaniApi.deleteAllNotifications,
+            onUnreadCount: function (count) {
+                var account = LampaYaniAuth.get();
+                cacheHomeNotificationCount(account && (account.user_id || account.login) || '', count);
+            },
             goBack: goBack
         });
     }

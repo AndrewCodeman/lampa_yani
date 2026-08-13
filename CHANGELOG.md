@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.41.46 — 2026-08-13
+
+- Show unread notifications on the home tile even when the counts API returns 0, by checking the notification list and keeping the cache in sync.
+
 ## 0.41.45 — 2026-08-13
 
 - Pull YummyAnime watch progress into local history so title cards, resume and Continue Watching use the account, not only Lampa playback.

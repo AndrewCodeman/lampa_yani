@@ -297,20 +297,58 @@
         });
     }
 
+    function unreadNumber(value) {
+        if (value == null || value === '') return null;
+        if (typeof value === 'number' && isFinite(value)) return Math.max(0, value);
+        if (typeof value === 'string' && isFinite(Number(value))) return Math.max(0, Number(value));
+        if (typeof value !== 'object') return null;
+        var keys = ['unread_count', 'unread', 'unviewed', 'not_viewed', 'new_count', 'new'];
+        for (var index = 0; index < keys.length; index++) {
+            if (!Object.prototype.hasOwnProperty.call(value, keys[index])) continue;
+            var nested = unreadNumber(value[keys[index]]);
+            if (nested !== null) return nested;
+        }
+        if (Object.prototype.hasOwnProperty.call(value, 'count')) return unreadNumber(value.count);
+        return null;
+    }
+
     function notificationCount(payload) {
         var value = response(payload);
-        if (!value || typeof value !== 'object') return Math.max(0, Number(value) || 0);
-        var nested = value.notifications && typeof value.notifications === 'object' ? value.notifications : {};
-        var explicit = value.unread_count;
-        if (explicit === undefined) explicit = value.unread;
-        if (explicit === undefined) explicit = value.count;
-        if (explicit === undefined) explicit = nested.unread_count;
-        if (explicit === undefined) explicit = nested.unread;
-        if (explicit === undefined) explicit = nested.count;
-        if (explicit !== undefined) return Math.max(0, Number(explicit) || 0);
+        if (value == null || value === '') return 0;
+        if (typeof value !== 'object') return Math.max(0, Number(value) || 0);
+        var preferred = [value.unread_count, value.unread, value.unviewed, value.not_viewed, value.new_count];
+        for (var index = 0; index < preferred.length; index++) {
+            var parsed = unreadNumber(preferred[index]);
+            if (parsed !== null) return parsed;
+        }
+        if (value.notifications && !Array.isArray(value.notifications)) {
+            var nested = unreadNumber(value.notifications);
+            if (nested !== null) return nested;
+        }
+        var grouped = unreadNumber(value.counts);
+        if (grouped !== null) return grouped;
+        var fromList = unreadFromNotifications(payload);
+        if (fromList > 0) return fromList;
+        var total = unreadNumber(value.count);
+        if (total !== null) return total;
         return Object.keys(value).reduce(function (sum, key) {
             return sum + (typeof value[key] === 'number' ? Math.max(0, value[key]) : 0);
         }, 0);
+    }
+
+    function unreadFromNotifications(payload) {
+        var value = payload && payload.response !== undefined ? payload.response : payload;
+        var items = Array.isArray(value) ? value : value && (value.notifications || value.items || value.data) || [];
+        if (!Array.isArray(items)) return 0;
+        return items.filter(function (item) {
+            return Boolean(item) && typeof item === 'object' && !(item.viewed || item.read);
+        }).length;
+    }
+
+    function resolveNotificationCount(countsPayload, listPayload) {
+        var count = notificationCount(countsPayload);
+        if (count > 0 || listPayload === undefined) return count;
+        return Math.max(count, unreadFromNotifications(listPayload));
     }
 
     function dashboardPriority(options) {
@@ -401,6 +439,8 @@
         personalInsight: personalInsight,
         libraryPreview: libraryPreview,
         notificationCount: notificationCount,
+        unreadFromNotifications: unreadFromNotifications,
+        resolveNotificationCount: resolveNotificationCount,
         dashboardPriority: dashboardPriority,
         dashboardInitialFocus: dashboardInitialFocus,
         mergeDashboardSnapshot: mergeDashboardSnapshot,

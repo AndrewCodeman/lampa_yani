@@ -28,7 +28,7 @@ function pluginYummyAnime() {
 
     window.LampaYani = window.LampaYani || {};
     window.LampaYani.Config = window.LampaYaniConfig = {
-        version: '0.41.45',
+        version: '0.41.46',
         apiBase: 'https://api.yani.tv',
         statusUrl: 'https://andrewcodeman.github.io/lampa_yani/status/status.json',
         applicationHeader: defaultApplicationToken, // Backward-compatible default public token.
@@ -7504,8 +7504,9 @@ function pluginYummyAnime() {
         }
 
         function updateSummary() {
-            if (!summary) return;
             var count = unreadCount();
+            if (deps.onUnreadCount) deps.onUnreadCount(count);
+            if (!summary) return;
             summary.toggleClass('has-unread', count > 0);
             summary.find('strong').text(String(count));
             summary.find('span').text(deps.t(count ? 'notification_unread_count' : 'notifications_all_read'));
@@ -9178,20 +9179,58 @@ function pluginYummyAnime() {
         });
     }
 
+    function unreadNumber(value) {
+        if (value == null || value === '') return null;
+        if (typeof value === 'number' && isFinite(value)) return Math.max(0, value);
+        if (typeof value === 'string' && isFinite(Number(value))) return Math.max(0, Number(value));
+        if (typeof value !== 'object') return null;
+        var keys = ['unread_count', 'unread', 'unviewed', 'not_viewed', 'new_count', 'new'];
+        for (var index = 0; index < keys.length; index++) {
+            if (!Object.prototype.hasOwnProperty.call(value, keys[index])) continue;
+            var nested = unreadNumber(value[keys[index]]);
+            if (nested !== null) return nested;
+        }
+        if (Object.prototype.hasOwnProperty.call(value, 'count')) return unreadNumber(value.count);
+        return null;
+    }
+
     function notificationCount(payload) {
         var value = response(payload);
-        if (!value || typeof value !== 'object') return Math.max(0, Number(value) || 0);
-        var nested = value.notifications && typeof value.notifications === 'object' ? value.notifications : {};
-        var explicit = value.unread_count;
-        if (explicit === undefined) explicit = value.unread;
-        if (explicit === undefined) explicit = value.count;
-        if (explicit === undefined) explicit = nested.unread_count;
-        if (explicit === undefined) explicit = nested.unread;
-        if (explicit === undefined) explicit = nested.count;
-        if (explicit !== undefined) return Math.max(0, Number(explicit) || 0);
+        if (value == null || value === '') return 0;
+        if (typeof value !== 'object') return Math.max(0, Number(value) || 0);
+        var preferred = [value.unread_count, value.unread, value.unviewed, value.not_viewed, value.new_count];
+        for (var index = 0; index < preferred.length; index++) {
+            var parsed = unreadNumber(preferred[index]);
+            if (parsed !== null) return parsed;
+        }
+        if (value.notifications && !Array.isArray(value.notifications)) {
+            var nested = unreadNumber(value.notifications);
+            if (nested !== null) return nested;
+        }
+        var grouped = unreadNumber(value.counts);
+        if (grouped !== null) return grouped;
+        var fromList = unreadFromNotifications(payload);
+        if (fromList > 0) return fromList;
+        var total = unreadNumber(value.count);
+        if (total !== null) return total;
         return Object.keys(value).reduce(function (sum, key) {
             return sum + (typeof value[key] === 'number' ? Math.max(0, value[key]) : 0);
         }, 0);
+    }
+
+    function unreadFromNotifications(payload) {
+        var value = payload && payload.response !== undefined ? payload.response : payload;
+        var items = Array.isArray(value) ? value : value && (value.notifications || value.items || value.data) || [];
+        if (!Array.isArray(items)) return 0;
+        return items.filter(function (item) {
+            return Boolean(item) && typeof item === 'object' && !(item.viewed || item.read);
+        }).length;
+    }
+
+    function resolveNotificationCount(countsPayload, listPayload) {
+        var count = notificationCount(countsPayload);
+        if (count > 0 || listPayload === undefined) return count;
+        return Math.max(count, unreadFromNotifications(listPayload));
     }
 
     function dashboardPriority(options) {
@@ -9282,6 +9321,8 @@ function pluginYummyAnime() {
         personalInsight: personalInsight,
         libraryPreview: libraryPreview,
         notificationCount: notificationCount,
+        unreadFromNotifications: unreadFromNotifications,
+        resolveNotificationCount: resolveNotificationCount,
         dashboardPriority: dashboardPriority,
         dashboardInitialFocus: dashboardInitialFocus,
         mergeDashboardSnapshot: mergeDashboardSnapshot,
@@ -12157,10 +12198,15 @@ function pluginYummyAnime() {
                 refreshPriority();
             }
             if (notificationCache.available) renderNotifications(notificationCache.count);
-            if (LampaYaniAuth.token() && homeButtons.notifications && !notificationCache.fresh) scheduleHomeTask(function () {
+            if (LampaYaniAuth.token() && homeButtons.notifications && (!notificationCache.fresh || notificationCache.count === 0)) scheduleHomeTask(function () {
                 LampaYaniApi.notificationCounts(homeRequestControl()).then(function (payload) {
-                    if (destroyed) return;
                     var count = LampaYaniHomeInsights.notificationCount(payload);
+                    if (count > 0) return count;
+                    return LampaYaniApi.notifications(30, 0).then(function (list) {
+                        return LampaYaniHomeInsights.resolveNotificationCount(payload, list);
+                    }).catch(function () { return count; });
+                }).then(function (count) {
+                    if (destroyed) return;
                     cacheHomeNotificationCount(notificationUserKey, count);
                     renderNotifications(count);
                 }).catch(function (error) {
@@ -12869,6 +12915,10 @@ function pluginYummyAnime() {
             markRead: LampaYaniApi.markNotificationRead,
             markAllRead: LampaYaniApi.markAllNotificationsRead,
             deleteAll: LampaYaniApi.deleteAllNotifications,
+            onUnreadCount: function (count) {
+                var account = LampaYaniAuth.get();
+                cacheHomeNotificationCount(account && (account.user_id || account.login) || '', count);
+            },
             goBack: goBack
         });
     }

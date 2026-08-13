@@ -133,8 +133,9 @@
         }
 
         function updateSummary() {
-            if (!summary) return;
             var count = unreadCount();
+            if (deps.onUnreadCount) deps.onUnreadCount(count);
+            if (!summary) return;
             summary.toggleClass('has-unread', count > 0);
             summary.find('strong').text(String(count));
             summary.find('span').text(deps.t(count ? 'notification_unread_count' : 'notifications_all_read'));
